@@ -14,8 +14,8 @@ import sitemap from '@astrojs/sitemap';
 // src/lib/url.ts's withBase() to pick this up automatically. Once a custom
 // domain is added, set `site` to that domain and `base` back to '/'.
 export default defineConfig({
-  site: 'https://example.com',
-  base: '/',
+  site: 'https://lukeburgett0603.github.io',
+  base: '/freedom-counseling-services-site',
   trailingSlash: 'never',
   integrations: [
     sitemap({
