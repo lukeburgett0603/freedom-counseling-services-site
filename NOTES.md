@@ -5,6 +5,22 @@ that don't belong in the shared template. Never synced in either
 direction — see `CLAUDE.md`'s "Where client-specific decisions get
 written down" note.
 
+## Site structure scaffolded (2026-09-03)
+
+24 page rows created in Supabase, all `status = 'placeholder'` (not
+live), plus the `business` row. Structure: Home, About, Services
+(→ 8 Service Hub pages), Counselors (→ 5 Counselor Profiles), Service
+Areas (→ Louisville + Southern Indiana), Blog, Contact, Privacy Policy,
+Terms of Service. Every Service Hub page's `focus_keyword` and
+`category` are set per the resolved keyword table below; every
+Counselor Profile's `credentials` is set from the real Wix site.
+`author_name`/`credentials`/`date_modified` (the Reviewed-by byline)
+were deliberately left null on all 8 Service Hub pages — that's a
+content-authoring decision (who actually reviewed each page), not a
+structural one, and belongs in the next phase, not this one. Blog posts
+not yet scaffolded — need their full real content pulled from the Wix
+site first, not just the titles/summaries already gathered.
+
 ## Business facts
 
 - **Real domain: `freedomcounselingservices.org`** (plural "services") —
