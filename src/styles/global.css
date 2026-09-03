@@ -1,0 +1,60 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+ * Design tokens — placeholder defaults. frontend-site-builder-supabase
+ * overwrites these per client once a design direction is approved (see
+ * references/design-direction.md), rather than hardcoding colors in
+ * individual components. Keep every component reading from these tokens
+ * (bg-brand-primary, text-brand-ink, font-heading, etc.) so a rebrand is a
+ * one-file change.
+ */
+@theme {
+  --color-brand-primary: #1d4ed8;
+  --color-brand-secondary: #0f172a;
+  --color-brand-accent: #f97316;
+  --color-brand-neutral: #f8fafc;
+  --color-brand-ink: #0f172a;
+  /* A second, quieter background for alternating section rhythm (Testimonial,
+     and anywhere else that shouldn't sit on the same neutral as Hero/Section) —
+     without this, every section defaults to the same flat neutral background
+     and the page reads as one undifferentiated block. Defaults to the neutral
+     tone itself so a client who hasn't picked a real accent tint doesn't get
+     an arbitrary color; frontend-site-builder-supabase sets a real value once
+     a design direction is approved. */
+  --color-brand-tint: #f8fafc;
+
+  --font-heading: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-brand-neutral);
+  color: var(--color-brand-ink);
+  font-family: var(--font-body);
+}
+
+/* Numbered lists (the StoryBrand "Plan" 3-step lists especially) get an
+   accent-colored marker instead of default browser numbering — a cheap,
+   generic way to make the accent color do real visual work on every page
+   that has one, not just wherever a component happens to reference it. */
+.prose ol > li::marker {
+  color: var(--color-brand-accent);
+  font-weight: 700;
+}
+
+/* Match the heavier, tighter heading treatment used everywhere else on the
+   site — Tailwind Typography's defaults are noticeably lighter/looser than
+   the rest of the type system otherwise. */
+.prose h2,
+.prose h3 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* A TableOfContents.astro link jumps straight to `#<id>`, which by default
+   lands the heading flush against the very top edge of the viewport — this
+   gives it breathing room above instead. H3, not H2 — see lib/markdown.ts. */
+.prose h3 {
+  scroll-margin-top: 6rem;
+}

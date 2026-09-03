@@ -1,0 +1,24 @@
+---
+// Rendered only when a genuine client-supplied quote exists (never
+// invented — see supabase/migrations/0001_init.sql). This is a visual
+// trust signal only; per schema-markup.md it must never be turned into
+// Review/AggregateRating JSON-LD unless backed by a real third-party
+// review data source (Google Business Profile sync, etc.).
+interface Props {
+  quote: string;
+  author: string;
+  role?: string | null;
+}
+
+const { quote, author, role } = Astro.props;
+---
+
+<section class="bg-brand-tint py-14">
+  <blockquote class="mx-auto max-w-2xl px-6 text-center">
+    <span class="font-[family-name:var(--font-heading)] text-5xl font-extrabold leading-none text-brand-accent" aria-hidden="true">&ldquo;</span>
+    <p class="mt-2 font-[family-name:var(--font-heading)] text-xl font-medium text-brand-ink">{quote}</p>
+    <footer class="mt-4 text-sm font-semibold text-brand-primary">
+      {author}{role && <span class="font-normal text-slate-600">, {role}</span>}
+    </footer>
+  </blockquote>
+</section>

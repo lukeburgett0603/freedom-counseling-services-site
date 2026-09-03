@@ -1,0 +1,18 @@
+# Per-function overrides to the Edge Functions gateway's verify_jwt
+# default (true for every function unless listed here — never disable it
+# broadly, only for a specific function that genuinely needs to be
+# reachable with no session at all).
+[functions.unsubscribe-lead]
+verify_jwt = false
+
+# send-nurture-emails is called by a Supabase Cron job (Dashboard →
+# Integrations → Cron), not from the browser — pg_cron/pg_net has no
+# straightforward way to mint a real Supabase-signed JWT, and the
+# gateway's verify_jwt would reject the function's own NURTURE_CRON_SECRET
+# bearer token before the function's internal check ever ran (that
+# secret is a random value this project controls, not a Supabase-issued
+# JWT). The function's own check is the real protection here — see its
+# top-of-file comment for why it doesn't just compare against
+# SUPABASE_SERVICE_ROLE_KEY instead.
+[functions.send-nurture-emails]
+verify_jwt = false

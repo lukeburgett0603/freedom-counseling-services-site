@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import CTA from '../components/CTA.astro';
+import LeadGenerator from '../components/LeadGenerator.astro';
+import LeadMagnet from '../components/LeadMagnet.astro';
+import { renderCopy } from '../lib/markdown';
+import type { Page, Business } from '../lib/pages';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+}
+
+const { page, allPages, business } = Astro.props;
+---
+
+<BaseLayout page={page} allPages={allPages} business={business}>
+  <Hero
+    h1={page.h1 ?? page.title}
+    imageUrl={page.images.hero?.url}
+    imageAlt={page.images.hero?.alt}
+    imageCreditName={page.images.hero?.creditName}
+    imageCreditUrl={page.images.hero?.creditUrl}
+    compact
+  />
+  <Section>
+    <Fragment set:html={renderCopy(page.copy)} />
+  </Section>
+  <CTA heading={page.cta_heading ?? 'Get to know how we can help'} buttonText={page.cta_button_text ?? 'Contact Us'} />
+  <LeadMagnet pageId={page.id} />
+  <LeadGenerator
+    slug={page.slug}
+    collectWebsiteUrl={business.collect_website_in_leads}
+    responseTimeNote={business.lead_response_time_note}
+  />
+</BaseLayout>
