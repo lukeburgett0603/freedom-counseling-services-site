@@ -23,7 +23,9 @@ only coverage (no physical office there) rather than inventing a local
 presence. Real, well-known Southern Indiana cities (New Albany,
 Jeffersonville, Clarksville) are named as genuine geography, not
 fabricated landmarks — no specific claim beyond "these are the real
-towns across the river" is made about them.
+towns across the river" is made about them. **Reworked shortly after
+first publish** — see below — to make the Kentucky-based framing even
+more explicit and to anchor the page on real keyword data.
 
 **Real template gap found and fixed while starting this page**:
 `ServiceArea.astro` had no way to render `page.testimonial_quote`/
@@ -51,6 +53,43 @@ site, not a named individual) — stored as `testimonial_author: "A
 Freedom Counseling Services Client"`, `testimonial_role: null`. Per
 `CLAUDE.md`'s standing rule, this is rendered visibly but never fed
 into `Review`/`AggregateRating` schema.
+
+**Southern Indiana page reworked (2026-09-03), on explicit client
+feedback**: the first draft read as if implying an Indiana presence
+strongly enough that the client (who is also literally the practice's
+real office location — Middletown, KY) flagged it directly: "the
+Freedom office is located in Middletown, KY so it's not actually
+located in Southern Indiana." Rewrote to lead every section with the
+Louisville/Middletown-based framing explicit, added a dedicated closing
+section explaining upfront why there's no Indiana office, and swapped
+the vague `"telehealth counseling southern indiana"` focus_keyword for
+the real, previously-researched `therapist new albany indiana`
+(160/mo, KD 24 — see the resolved keyword table below) once double-
+checked live via Mangools rather than trusted from memory.
+
+**Real, re-verified finding**: `kwfinder_get_keyword_details` returned
+no `search_volume` field at all for several of these hyper-local
+phrases (`therapist new albany indiana`, `southern indiana therapist`)
+— only `kwfinder_search_related_keywords` seeded on the *exact* phrase
+surfaced the real number. Don't trust an empty/missing volume field
+from `get_keyword_details` alone as proof a phrase has no volume for
+small-town-level queries — cross-check with `search_related_keywords`
+before concluding a term is unmeasurable. Jeffersonville and
+Clarksville genuinely have no measurable volume either way (both tools
+agree on that) — they're named in the page as real, accurate service
+geography per the client's ask, but `therapist new albany indiana` is
+the only one with real ranking data behind it, matching what the
+already-resolved keyword table below already found.
+
+**Also caught and fixed while re-verifying**: the Louisville page had
+drifted from this same resolved table — it used `"counseling
+louisville ky"` instead of the already-decided `"counselor louisville
+ky"` (410/mo, deliberately distinct from the Homepage's `"therapist
+louisville ky"` to avoid cannibalizing that stronger term — see the
+cannibalization note below). Corrected `h1`/`meta_title`/
+`focus_keyword` to match; the body copy already used "counselor"
+naturally throughout, so no copy rewrite was needed there, just the
+metadata.
 
 **Services Overview build note**: publishing this page (short intro
 copy + CTA, no manually-curated list) was the last step to make the 8
