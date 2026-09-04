@@ -213,6 +213,19 @@ invited, so a clean rename, not a breaking change) since it now covers
 telehealth and modalities too, not just status. A linked counselor is
 now redirected straight there the moment they log in.
 
+**Blog cards now show image/author/date/read-time (done, live,
+2026-09-04)**: real bug, not a content gap — all 10 real posts already
+had a hero image on file via the admin's existing Unsplash picker, but
+neither the blog index nor a hub page's "Related articles" section ever
+rendered it, the author's headshot, the publish date, or a read-time
+estimate. See CLAUDE.md's real-bugs list for the full writeup (new
+shared `BlogPostCard.astro`, `getAuthorHeadshot()`, `estimateReadingTime
+()`). No content changes needed on this site — purely a template-level
+rendering fix, verified live against the real 10 posts (including that
+Tony/Sophie/Staci/Rhonda's real headshots resolve correctly via their
+Counselor Profile pages, and that the article page's own Unsplash
+attribution still renders correctly, unaffected by the card-level fix).
+
 ## Content build progress (2026-09-03)
 
 **Live (`status: content-complete`)**: Home, About, Services Overview,
