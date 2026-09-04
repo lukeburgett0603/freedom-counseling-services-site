@@ -3,6 +3,9 @@ dist/
 .astro/
 .env
 .DS_Store
+# Real client asset originals, dropped locally for upload to Supabase
+# Storage — never committed, the storage bucket is the source of truth.
+counselor-photos/
 # Local state from `supabase db push --project-ref ...` / `supabase link` —
 # ties this checkout to whichever client project was last pushed to
 # on this machine. Never commit a specific client's project ref here.
