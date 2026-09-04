@@ -2,29 +2,38 @@
 @plugin "@tailwindcss/typography";
 
 /*
- * Design tokens — placeholder defaults. frontend-site-builder-supabase
- * overwrites these per client once a design direction is approved (see
- * references/design-direction.md), rather than hardcoding colors in
- * individual components. Keep every component reading from these tokens
- * (bg-brand-primary, text-brand-ink, font-heading, etc.) so a rebrand is a
- * one-file change.
+ * Design tokens — real brand, per the approved Visual Design Brief
+ * (freedom-counseling-services-visual-design-brief.md, 2026-09-04),
+ * "Grounded Sanctuary" system adapted to Freedom's actual logo colors.
+ * Keep every component reading from these tokens (bg-brand-primary,
+ * text-brand-ink, font-heading, etc.) so a future revision is a one-file
+ * change.
  */
 @theme {
-  --color-brand-primary: #1d4ed8;
-  --color-brand-secondary: #0f172a;
-  --color-brand-accent: #f97316;
-  --color-brand-neutral: #f8fafc;
-  --color-brand-ink: #0f172a;
-  /* A second, quieter background for alternating section rhythm (Testimonial,
-     and anywhere else that shouldn't sit on the same neutral as Hero/Section) —
-     without this, every section defaults to the same flat neutral background
-     and the page reads as one undifferentiated block. Defaults to the neutral
-     tone itself so a client who hasn't picked a real accent tint doesn't get
-     an arbitrary color; frontend-site-builder-supabase sets a real value once
-     a design direction is approved. */
-  --color-brand-tint: #f8fafc;
+  /* Real maroon, sampled directly from the logo file (matches
+     business.brand_colors[0]) — the site's one true accent/CTA color. */
+  --color-brand-primary: #7b2714;
+  /* New — a deep warm ink, not literally either brand color, but the
+     structural dark neutral the system needs for the footer/nav band and
+     body text (neither the maroon nor the gold is dark/neutral enough for
+     that role on its own — see the brief's §2 color-system table). */
+  --color-brand-secondary: #2b211c;
+  --color-brand-accent: #7b2714;
+  /* New — warm cream, the dominant (~60%) background. Replaces the old
+     cool slate-50 placeholder. */
+  --color-brand-neutral: #faf6f0;
+  /* Real gold/tan, also sampled directly from the logo file (the
+     "COUNSELING SERVICES" wordmark color) — not previously captured in
+     business.brand_colors. Used as the light alternating-band color
+     (cream <-> gold section rhythm) since it isn't dark enough to host
+     light text the way a true "secondary" band color would need to. */
+  --color-brand-tint: #d3b894;
+  --color-brand-ink: #2b211c;
 
-  --font-heading: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Real brand fonts (business.brand_fonts) — loaded via Google Fonts in
+     BaseLayout.astro's <head>; these fallback stacks only matter before
+     that request resolves or if it fails. */
+  --font-heading: "Fraunces", ui-serif, Georgia, serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -32,6 +41,27 @@ body {
   background-color: var(--color-brand-neutral);
   color: var(--color-brand-ink);
   font-family: var(--font-body);
+}
+
+/* Every component across this site sets font-extrabold (800) directly on
+   its heading-font elements — tuned for the old placeholder sans-serif
+   look. Fraunces (the real brand heading font, see the theme tokens above)
+   is meant to stay soft per the approved Visual Design Brief's type system
+   (weights 400/500, "a warm serif with gentle, rounded terminals" — an
+   800 weight fights that and reads heavy/blocky on this typeface). Rather
+   than hand-editing font-extrabold -> font-medium across every component
+   file individually (a real, live risk of missing one or introducing a
+   typo), this single unlayered rule overrides it everywhere at once —
+   same mechanism the .prose h2/h3 rule below already relies on: plain CSS
+   outside any @layer block beats Tailwind's own utility-layer classes
+   regardless of selector specificity, per the CSS cascade layers spec.
+   Also turns on Fraunces's optical-size axis so the browser picks the
+   right cut per rendered size (soft/text-like small, more contrast at
+   display sizes) — what "soft/optical-size variant" means in practice. */
+[class*="font-[family-name:var(--font-heading)]"] {
+  font-weight: 500;
+  letter-spacing: normal;
+  font-optical-sizing: auto;
 }
 
 /* Numbered lists (the StoryBrand "Plan" 3-step lists especially) get an
@@ -43,13 +73,15 @@ body {
   font-weight: 700;
 }
 
-/* Match the heavier, tighter heading treatment used everywhere else on the
-   site — Tailwind Typography's defaults are noticeably lighter/looser than
-   the rest of the type system otherwise. */
+/* Match the heading treatment used everywhere else on the site — Tailwind
+   Typography's defaults are noticeably lighter/looser than the rest of the
+   type system otherwise. Weight 500, not 800 — see the heading-weight rule
+   above; body copy's own H2/H3s get the same soft Fraunces treatment as
+   every other heading on the site, not a heavier one. */
 .prose h2,
 .prose h3 {
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-weight: 500;
+  letter-spacing: normal;
 }
 
 /* A TableOfContents.astro link jumps straight to `#<id>`, which by default
