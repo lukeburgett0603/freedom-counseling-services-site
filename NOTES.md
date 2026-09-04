@@ -226,6 +226,43 @@ Tony/Sophie/Staci/Rhonda's real headshots resolve correctly via their
 Counselor Profile pages, and that the article page's own Unsplash
 attribution still renders correctly, unaffected by the card-level fix).
 
+**Hero overlay style built + verified, not yet applied to the live
+homepage (2026-09-04)**: client asked for a second Hero layout option —
+full-bleed background image with a color/opacity overlay, H1/subhead on
+top, and the appointment form as a frosted-glass card beside it — from a
+reference screenshot. Built as a real per-page `hero_style` field
+(`admin/content.astro` → Page copy → Hero image), available on any page
+except Counselor Profile pages (which don't use `Hero.astro`). See
+CLAUDE.md's "Hero overlay style" section for the full technical writeup.
+
+Verified end-to-end live on the real homepage through the actual admin
+UI (temporarily flipped `content_permission_level` to `'full'` to test
+the tier-gated controls, using a disposable owner login) — picked the
+overlay layout, confirmed the color/opacity controls appeared, saved,
+and confirmed the live homepage rendered exactly as expected: full-bleed
+photo, dark 50% tint, white heading, and the full appointment form
+(name/email/phone/counselor-select/message) as a genuinely translucent,
+blurred card (confirmed via computed styles, not just visually — the
+particular photo's plain sky background made the blur subtle to the
+eye, but the effect is real). Reverted the homepage back to
+`hero_style: 'default'` afterward (same image, same everything) —
+**this was a capability check, not a decision to actually switch the
+live homepage's design**. Whether to actually turn this on for the
+homepage (and picking a real overlay color, since `#1f2937` at 50% is
+just the technical default) is the client's own call, not made here.
+
+Also caught and fixed two real gaps while building this, both now fixed
+template-wide: `admin/content.astro`'s hero image field had no Unsplash
+search (upload-only, unlike `admin/blog.astro`) and silently dropped
+Unsplash attribution on save if one had been selected — the second one
+means any hero image previously set through *this* admin screen
+(as opposed to seeded directly via SQL) may be missing its credit even
+if it was originally an Unsplash photo. Freedom's homepage's own hero
+image, sourced via Unsplash, has no `creditName`/`creditUrl` on file for
+exactly this reason — pre-existing, not something this pass changed,
+worth a real credit backfill (a `curl` update once the photographer is
+identified) but not done here since it's outside what was asked.
+
 ## Content build progress (2026-09-03)
 
 **Live (`status: content-complete`)**: Home, About, Services Overview,
