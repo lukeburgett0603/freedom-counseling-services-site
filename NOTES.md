@@ -5,6 +5,79 @@ that don't belong in the shared template. Never synced in either
 direction — see `CLAUDE.md`'s "Where client-specific decisions get
 written down" note.
 
+## Visual redesign (2026-09-04)
+
+Client created a new standalone Claude skill, `counseling-website-designer`
+(installed at `~/.claude/skills/counseling-website-designer/`), specifically
+to produce a Visual Design Brief for this kind of client — a real,
+complete skill with 8 reference files, not a stub. Followed its redesign-
+mode workflow: content/functional inventory first, then the brief itself.
+Full brief lives at `freedom-counseling-services-visual-design-brief.md`
+(repo root) — **approved by the client 2026-09-04**, implementation
+proceeding phase by phase with a visual check-in at each milestone rather
+than one big unreviewed sweep.
+
+**Headline finding from the brief, worth repeating here**: the real,
+already-approved brand (`business.brand_colors` `#7B2714`,
+`business.brand_fonts` Fraunces/Inter, uploaded logo) had been sitting in
+Supabase since the logo was uploaded but was **never actually wired into
+`global.css`** — the live site was still running the generic template
+placeholder tokens (blue `#1d4ed8`, orange `#f97316`, Inter-only with no
+real Google Fonts `<link>` anywhere). Also found by pulling the actual
+logo file directly rather than trusting the one recorded color: a
+**second real brand color** (`#D3B894`, warm gold, used for "COUNSELING
+SERVICES" in the wordmark) that was never captured in `brand_colors`, and
+that the logo's pictorial mark is a real **open padlock** forming the "O"
+in FREEDOM — its shackle is an arch shape, which is why the brief's
+motif work leans on an arch rather than inventing an unrelated one.
+
+**Phase 1 — brand wiring (done, live)**: real design tokens (maroon
+`#7B2714`, new deep ink `#2B211C`, new warm cream `#FAF6F0`, real gold
+`#D3B894`) in `global.css`; real Fraunces + Inter loaded via Google Fonts
+in `BaseLayout.astro`; every component's heading-font elements brought
+down from the placeholder's `font-extrabold` (800) to the brief's
+specified 400/500 weight via one global CSS rule (`[class*="font-
+[family-name:var(--font-heading)]"]`) rather than hand-editing ~20 files;
+the real logo image (with the padlock mark) now rendered in the header
+via a new opt-in `business.logo_in_header` flag (see `CLAUDE.md` —
+defaults false everywhere, only true for this client, specifically so it
+doesn't silently change CMC's header just because CMC also has a real
+`logo_url` set).
+
+**Phase 2 — wall-of-text pass, Group A (done, live)**: client flagged,
+after seeing Phase 1 live, that the long-form pages still read as dense
+even with the new brand applied. Brainstormed real options against the
+skill's own technique references rather than just extending the original
+brief's narrower Service-Hub/Counselor-Profile scope. Group A (the
+free/mechanical fixes) shipped first:
+- **`Section.astro`'s `.prose` div, and `ServiceHub.astro`/
+  `ContentPillar.astro`'s TOC-adjacent article, both had `max-w-none`
+  actively removing Tailwind Typography's own 65ch default line-length
+  cap** — every page's body copy was stretching to the full container
+  width (up to ~94 characters/line in Section.astro's case), which is
+  itself a real contributor to a "wall of text" feel independent of how
+  the content is organized. Removed everywhere it appeared on a
+  plain-prose block (confirmed no card grid ever sits in one of these
+  slots first).
+- **`ServiceArea.astro` never rendered `PlanSteps`/`FAQ`** — same bug
+  class as `CounselorProfile.astro` before it (see below). Louisville's
+  and Southern Indiana's real "how counseling with us works" 4-step
+  lists and real FAQs were flat markdown despite the exact components
+  that would card-ify them already existing and already being used
+  elsewhere on the site. Migrated both pages' step/FAQ content out of
+  `copy` into `plan_steps`/`faqs` — text itself unchanged, just moved
+  into the structured fields, same as every other such migration on
+  this site. FAQ heading is derived from `area_served_name` ("Common
+  questions from Louisville clients") rather than a generic label.
+
+**Still pending, client's own next call**: Group B (a new reusable
+card-grid component for the "why choose us"/"what this can help with"
+bolded-list pattern, appearing on Home, About, and every Service Hub
+page) and Group C (mid-copy pull-quotes, a second image partway down
+long pages, the cream/gold section-band rhythm applied beyond Service
+Hub, a section-intro eyebrow label) — proposed but not yet started,
+pending the client's prioritization.
+
 ## Content build progress (2026-09-03)
 
 **Live (`status: content-complete`)**: Home, About, Services Overview,
