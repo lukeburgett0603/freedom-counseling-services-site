@@ -70,13 +70,56 @@ free/mechanical fixes) shipped first:
   this site. FAQ heading is derived from `area_served_name` ("Common
   questions from Louisville clients") rather than a generic label.
 
-**Still pending, client's own next call**: Group B (a new reusable
-card-grid component for the "why choose us"/"what this can help with"
-bolded-list pattern, appearing on Home, About, and every Service Hub
-page) and Group C (mid-copy pull-quotes, a second image partway down
-long pages, the cream/gold section-band rhythm applied beyond Service
-Hub, a section-intro eyebrow label) — proposed but not yet started,
-pending the client's prioritization.
+**Phase 2 — wall-of-text pass, Group B (done, live)**: client asked
+whether Counselor Profile pages' "what to expect in your first session"
+numbered list should use the new Group B grid too — the right call
+turned out to be **no**: that content is a genuine sequence (step 1,
+step 2, step 3...), and a numbered badge on a truly unordered list (like
+"what this counseling can help with") would be honest, but the reverse
+— treating an ordered process as an unordered grid — would misrepresent
+the content's actual shape. Two separate pieces of work followed from
+that distinction:
+- **`CounselorProfile.astro` wired to `PlanSteps`/`FAQ`** (same
+  already-existing components used elsewhere, same bug class as
+  `ServiceArea.astro`'s fix in Group A) — each counselor's real numbered
+  "first session" list and real FAQ migrated out of `copy` into
+  `plan_steps`/`faqs`. All 5 counselors done in one pass (Tony, Rhonda,
+  Staci, Sophie, Luke) for consistency, not just Luke.
+- **New `FeatureGrid.astro` component + `pages.concerns` column**
+  (`0027_concerns.sql`) for the genuinely unordered pattern —
+  deliberately a new column, not a reuse of `plan_steps`'s shape,
+  specifically so `PlanSteps.astro`'s numbered badge never ends up on
+  content that isn't actually sequential. Wired into `Homepage.astro`
+  ("Why families choose us" — generic heading, since this is shared
+  template code, not this client's specific business name) and
+  `ServiceHub.astro` ("What this can help with", applied uniformly
+  across all 8 pages rather than keeping each page's more specific
+  original heading — the specific service is already named in the H1
+  right above it). Migrated: Home's 4-item "why families choose"
+  list, and all 8 Service Hub pages' 6-item "what this can help with"
+  lists — real content moved verbatim into `concerns`, not rewritten.
+  A trailing connective paragraph that followed the list on some pages
+  (e.g. anxiety-depression's real bolded `focus_keyword` sentence) was
+  preserved in `copy`, only the bolded list items themselves were
+  extracted.
+- **Migration was scripted, not done by hand** — a small Node script
+  located each page's real "### <heading>" list-section boundary and
+  extracted every consecutive `**title.** description` block
+  immediately following it, stopping at the first non-bolded paragraph
+  or the next heading — safer than manually retyping 9 pages' worth of
+  real content and risking a transcription drift from what's actually
+  live.
+- **Real `copy` word counts dropped noticeably** (e.g. Home from ~320
+  to 210, most counselor bios to ~240-250) since this content moved
+  into a separate structured field rather than being deleted — the
+  page's total real visible content is materially the same, just no
+  longer counted in the flowing-prose number. Not a content-quality
+  regression, just a different place for real content to live.
+
+**Still pending, client's own next call**: Group C (mid-copy
+pull-quotes, a second image partway down long pages, the cream/gold
+section-band rhythm applied beyond Service Area/Service Hub, a
+section-intro eyebrow label) — proposed but not yet started.
 
 ## Content build progress (2026-09-03)
 
