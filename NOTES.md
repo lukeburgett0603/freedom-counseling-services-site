@@ -10,8 +10,9 @@ written down" note.
 **Live (`status: content-complete`)**: Home, About, Services Overview,
 all 8 Service Hub pages (Individual, Couples & Marriage, Family,
 Child & Teen, Christian/Faith-Based, Grief, Anxiety & Depression,
-Trauma & EMDR), Counselors Overview, and 4 of 5 Counselor Profile pages
-(Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman).
+Trauma & EMDR), Counselors Overview, 4 of 5 Counselor Profile pages
+(Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman), Blog Index, and
+all 10 real Blog Posts.
 
 **Services Overview build note**: publishing this page (short intro
 copy + CTA, no manually-curated list) was the last step to make the 8
@@ -59,9 +60,47 @@ Next" and a real lead magnet title under its download form — useful
 for porting blog posts with the right hub cross-links, and for scoping
 each hub's own lead magnet later.
 
-**Not yet gathered**: the 6 remaining real blog posts' full article text
-(only titles/summaries known so far); Southern Indiana service area
-content (doesn't exist on the old site — has to be written new).
+**Not yet gathered**: Southern Indiana service area content (doesn't
+exist on the old site — has to be written new).
+
+**Blog posts published (2026-09-03)**: all 10 real posts ported from
+`https://freedom-co-bba0e1ef-luke5391.wix-site-host.com/blog/...` —
+title, full body copy, real author, and real `date_published` for
+every one. Each post's "Read Next"/lead-magnet footer material was
+dropped (handled dynamically by `BlogPost.astro`/`LeadMagnet.astro`,
+not part of the ported copy). `category` was set to match each hub
+page's `category` field exactly (`Couples & Marriage Counseling`,
+`Child & Teen Counseling`, `Anxiety & Depression Counseling`, `Grief
+Counseling`, `Trauma & EMDR Counseling`, `Christian / Faith-Based
+Counseling` — 2 posts each in 5 of the 6 categories, 0 posts yet in
+`Individual Counseling`/`Family Counseling`, matching the real site).
+Hero images sourced and verified the same way as the Service Hub
+batch — one candidate was rejected here too for inconsistent/
+mismatched metadata (title said "man," tags said "woman," scene
+unclear), not just misleading content, another real reason to always
+read the full listing before using an Unsplash photo, not just the
+filename-derived title.
+
+**Real bug found and fixed while starting this batch, before writing
+any post content**: `BlogPost.astro`'s "back to hub" link and
+`schema.ts`'s Article/BlogPosting schema dispatch both only matched
+`page_type === 'Content Pillar'` — since every one of this site's
+category-owning pages is `Service Hub`, every post would have linked
+back to nothing and none of the 8 hub pages would have gotten
+Article/BlogPosting schema at all. Fixed in the template repo first,
+then synced to this repo and CMC's (CMC doesn't use Service Hub today,
+but keeping template code in sync everywhere is the standing
+discipline) — see `CLAUDE.md`'s real-bugs list for the full writeup.
+Also caught and backfilled a second, unrelated gap while syncing: CMC's
+`BaseLayout.astro` was missing a `hasBlog` fix (BlogPosting vs. Article
+schema type) that the template already had — a stale sync gap from
+before this session, not something this batch introduced.
+
+**Blog Index build note**: same nav-visibility gotcha as Services/
+Counselors Overview — the page itself needed `h1`/`meta_description`/
+`copy` and `content-complete` status before the featured post, category
+pills, and post grid (all fully dynamic off `page_type = 'Blog Post'`,
+no manual list) would render at all.
 
 **Counselor headshots (2026-09-03)**: all 5 real photos (Tony Gore,
 Rhonda Gore, Staci Harrub, Luke Burgett, Sophie Bowman) supplied by the
