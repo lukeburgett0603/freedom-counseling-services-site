@@ -5,6 +5,55 @@ that don't belong in the shared template. Never synced in either
 direction — see `CLAUDE.md`'s "Where client-specific decisions get
 written down" note.
 
+## Content build progress (2026-09-03)
+
+**Live (`status: content-complete`)**: Home, About.
+
+**Real source content gathered, not yet written/published**: all 8
+Service Hub pages (Individual, Couples & Marriage, Family, Child & Teen,
+Christian/Faith-Based, Grief, Anxiety & Depression, Trauma & EMDR) —
+full real copy read directly from the Wix site for every one, including
+each page's real "Reviewed by" byline:
+- Individual Counseling — Staci Harrub, LPCA (EMDR Trained)
+- Couples & Marriage Counseling — Tony Gore, LCSW (Owner/Director)
+- Family Counseling — Rhonda Gore, MFT (Life Coach)
+- Child & Teen Counseling — Sophie Bowman (Student Counselor — note:
+  the About page's team section called her "Student Intern"; this
+  service page's byline says "Student Counselor" — reconcile which is
+  current before publishing her counselor profile)
+- Christian/Faith-Based Counseling — Tony Gore, LCSW (Owner/Director)
+- Grief Counseling — Staci Harrub, LPCA (EMDR Trained)
+- Anxiety & Depression Counseling — Rhonda Gore, MFT (Life Coach)
+- Trauma & EMDR Counseling — Staci Harrub, LPCA (EMDR Trained)
+
+Each real page also names 1-2 real existing blog posts under "Read
+Next" and a real lead magnet title under its download form — useful
+for porting blog posts with the right hub cross-links, and for scoping
+each hub's own lead magnet later.
+
+**Not yet gathered**: full content for Rhonda Gore, Staci Harrub, and
+Sophie Bowman's own counselor profile pages (only Tony Gore's was read
+in full); the 6 remaining real blog posts' full article text (only
+titles/summaries known so far); Southern Indiana service area content
+(doesn't exist on the old site — has to be written new).
+
+**Homepage build notes**: focus keyword `therapist louisville ky`
+worked in naturally (2 uses) while keeping "counselor"/"counseling"
+as the dominant brand language elsewhere, per the resolved keyword
+table. Testimonial uses a real, publicly-attributed Google review
+(Jessica Maza — she posted under her own name, so this isn't the
+anonymized-testimonial case). Hero image sourced directly from
+unsplash.com (a father lifting his son, by Kelli McClintock) rather
+than through the search-unsplash Edge Function, since
+`UNSPLASH_ACCESS_KEY` was never set as a secret on this project — still
+open, see below.
+
+**About build notes**: condensed the real team roster (now redundant
+with the live `/counselors` page) into a link instead of repeating it;
+kept the Superbill/insurance note and the "who we serve" list, both
+real and specific. Hero image sourced the same manual way (a cozy
+two-chair counseling room, by Leuchtturm Entertainment).
+
 ## Site structure scaffolded (2026-09-03)
 
 24 page rows created in Supabase, all `status = 'placeholder'` (not
@@ -222,6 +271,15 @@ existing blog posts as-is, keep the category structure.
   generic "Counselor").
 - 301 redirect mapping from the current Squarespace URL structure before
   the domain swap.
+- `UNSPLASH_ACCESS_KEY` was never set as an Edge Function secret on this
+  project (README.md's setup step is optional and was deferred) — the
+  Lead Magnets admin screen's live Unsplash search won't work until it
+  is. Hero images have been sourced manually from unsplash.com instead
+  in the meantime, which works fine for now but is slower.
+- Sophie Bowman's real title needs confirming — "Student Intern" on the
+  About page's team section vs. "Student Counselor" on the Child & Teen
+  Counseling page's byline. Same person, inconsistent title on their own
+  old site.
 
 **Resolved (2026-09-03)**: therapist-vs-counselor is decided per page
 (see the keyword table above); the hub/pillar pages use a new, distinct
