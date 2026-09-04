@@ -12,8 +12,20 @@ all 8 Service Hub pages (Individual, Couples & Marriage, Family,
 Child & Teen, Christian/Faith-Based, Grief, Anxiety & Depression,
 Trauma & EMDR), Counselors Overview, 4 of 5 Counselor Profile pages
 (Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman), Blog Index, all
-10 real Blog Posts, Service Areas Overview, and both Service Area pages
-(Louisville, Southern Indiana).
+10 real Blog Posts, Service Areas Overview, both Service Area pages
+(Louisville, Southern Indiana), and Contact.
+
+**Contact page built (2026-09-03)**: real copy ported from the Wix
+source's `/contact` page — the empathetic intro, "Ways to reach
+us"/"What happens after you reach out" sections, and, critically, the
+**988 Suicide & Crisis Lifeline disclosure** (real safety content, not
+decorative — kept verbatim in tone and made an explicit closing note
+in `copy`). Business phone/email/address render automatically from the
+`business` table (already correct — `lead_response_time_note` already
+matched the real site's own "follow up within one business day" text
+from an earlier phase). Not a keyword-optimization target per
+`CLAUDE.md` — no `focus_keyword` set, kept to 183 words (within the
+150-350 Contact range), h1 taken directly from the real source page.
 
 **Service Area pages built (2026-09-03)**: Louisville's real copy
 (office details, "how it works" 4-step list, real client testimonial)
