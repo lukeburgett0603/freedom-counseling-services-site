@@ -91,6 +91,51 @@ body {
   scroll-margin-top: 6rem;
 }
 
+/* The Visual Design Brief's signature motif — an open arch, echoing the
+   real logo's open-padlock shackle (see the brief's headline finding) —
+   instantiated as the "section intro" recurrence point: a small marker
+   above every major in-copy section heading, the same repeating cue on
+   every long-form page. Pure CSS border + border-radius, not an SVG/
+   data-URI asset, per the performance-guardrails reference's "motif crop
+   shapes should be CSS on a normal source, never a separate asset"
+   guidance applied to a decorative shape too. `copy` almost never uses a
+   real `##` H2 (the "ON THIS PAGE" TOC headers all render as H3 — see
+   lib/markdown.ts), so H3 is where this actually needs to show up; H2 is
+   covered too in case a future page ever uses one. */
+.prose h2::before,
+.prose h3::before {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 16px;
+  margin-bottom: 0.75rem;
+  border: 3px solid var(--color-brand-primary);
+  border-bottom: none;
+  border-radius: 14px 14px 0 0;
+}
+
+/* A real pull-quote treatment for `.prose blockquote` — every counselor
+   bio's personal quote, and any future mid-copy pull-quote lifted from a
+   page's own real body text, both use this. Removes Tailwind Typography's
+   default left-border-and-indent treatment (reads as a minor aside, not
+   the visual break a pull-quote is meant to be) in favor of a larger,
+   unhurried Fraunces setting closer to what a real magazine pull-quote
+   looks like — no separate decorative quote-mark glyph added here, since
+   every quote on this site already writes its own literal "..." in the
+   markdown (the established convention — see the quote-mark-doubling fix
+   above); adding another mark on top would just be redundant. */
+.prose blockquote {
+  border-left: none;
+  margin: 2.5rem 0;
+  padding: 0 1.5rem;
+  font-family: var(--font-heading);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 1.375rem;
+  line-height: 1.5;
+  color: var(--color-brand-ink);
+}
+
 /* Tailwind Typography adds its own decorative smart quotes around a
    blockquote's first/last paragraph by default (`content: open-quote` /
    `close-quote`) — real, live bug found on every counselor bio's pull-quote,

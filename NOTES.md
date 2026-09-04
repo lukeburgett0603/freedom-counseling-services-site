@@ -116,10 +116,36 @@ that distinction:
   longer counted in the flowing-prose number. Not a content-quality
   regression, just a different place for real content to live.
 
-**Still pending, client's own next call**: Group C (mid-copy
-pull-quotes, a second image partway down long pages, the cream/gold
-section-band rhythm applied beyond Service Area/Service Hub, a
-section-intro eyebrow label) — proposed but not yet started.
+**Phase 2 — wall-of-text pass, Group C (done, live)**: two pieces from
+the original brainstorm.
+- **Arch-icon section marker** — a small open-arch shape (pure CSS
+  border + border-radius, no SVG/data-URI asset) rendered above every
+  in-copy `##`/`###` heading via `.prose h2::before, h3::before` in
+  `global.css`, echoing the real logo's open-padlock shackle per the
+  brief's own visual-rhyming table. Replaces an earlier "section-intro
+  eyebrow label" idea floated during brainstorming — that's actually a
+  Quiet Editorial technique (a different, unchosen design system), not
+  Grounded Sanctuary's; caught before implementing.
+- **Pull-quote styling + real content** — `.prose blockquote` restyled
+  as a real magazine-style pull quote (larger Fraunces serif, no left
+  border, generous margin) instead of Tailwind Typography's default
+  minor-aside indent; also turned off the plugin's own auto-quote-mark
+  `::before`/`::after` (was doubling up against every quote's own
+  literal `"..."` in the markdown — the established convention here).
+  One real, already-existing sentence per Service Hub page (all 8) was
+  duplicated as a `> "..."` blockquote and inserted right before that
+  page's "Why..." validation section (the same early structural point
+  on every page) — a real editorial pull-quote (the sentence stays in
+  its original spot too), not new copy.
+
+**Still pending, client's own next call**: a second image partway down
+long pages, and the cream/gold section-band rhythm applied beyond
+Service Area/Service Hub — both proposed during Group C brainstorming
+but not yet started. For the second image specifically: the likely
+approach is reusing each Service Hub page's already-uploaded reviewing
+counselor's headshot (matched via `page.author_name` against Counselor
+Profile pages) rather than sourcing new stock photos, but this hasn't
+been scoped or confirmed with the client yet.
 
 ## Content build progress (2026-09-03)
 
