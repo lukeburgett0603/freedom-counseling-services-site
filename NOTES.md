@@ -7,9 +7,20 @@ written down" note.
 
 ## Content build progress (2026-09-03)
 
-**Live (`status: content-complete`)**: Home, About, and all 8 Service
-Hub pages (Individual, Couples & Marriage, Family, Child & Teen,
-Christian/Faith-Based, Grief, Anxiety & Depression, Trauma & EMDR).
+**Live (`status: content-complete`)**: Home, About, Services Overview,
+and all 8 Service Hub pages (Individual, Couples & Marriage, Family,
+Child & Teen, Christian/Faith-Based, Grief, Anxiety & Depression,
+Trauma & EMDR).
+
+**Services Overview build note**: publishing this page (short intro
+copy + CTA, no manually-curated list) was the last step to make the 8
+hub pages actually reachable — `getAllPages()` only fetches
+`content-complete` rows, so until this page itself was published, the
+Services nav dropdown didn't render at all even though every hub page
+underneath it was already live. Worth remembering for Counselors
+Overview and Service Areas Overview too: those grids will stay
+invisible in nav until their own overview page is published, even
+after the pages that populate their grids are done.
 
 **Service Hub build notes**: each page's real copy, "Reviewed by"
 byline, 4 plan_steps, and 6 FAQs were ported from the real Wix source
