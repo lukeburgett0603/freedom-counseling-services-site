@@ -65,6 +65,27 @@ in full); the 6 remaining real blog posts' full article text (only
 titles/summaries known so far); Southern Indiana service area content
 (doesn't exist on the old site — has to be written new).
 
+**Counselor headshots (2026-09-03)**: all 5 real photos (Tony Gore,
+Rhonda Gore, Staci Harrub, Luke Burgett, Sophie Bowman) supplied by the
+client, uploaded to Supabase Storage (`site-images/counselors/`), and
+wired into each Counselor Profile page's `images.headshot`. Luke's and
+Sophie's originals were oversized (2.1-2.4MB) — resized to 900px wide
+via `sharp` (already a project dependency, no new install needed) before
+upload; the other three were already reasonably sized. **Sophie
+Bowman's photo is a graduation cap-and-gown shot, not a traditional
+headshot** — flagged to the client before using it; explicit call:
+use it as-is. All 5 Counselor Profile pages are still `status:
+placeholder` — headshots are in, but the real bio copy (from the Wix
+site, same porting process as the Service Hub pages) hasn't been
+written yet, so none of these pages are live.
+
+**Unsplash API key configured (2026-09-03)**: `UNSPLASH_ACCESS_KEY` set
+as an Edge Function secret for this project — was previously missing
+(flagged above). Tested live end-to-end via a disposable admin session
+calling `search-unsplash` directly (20 real results returned), not just
+confirmed as set. Live Unsplash search now works in this site's admin
+image pickers (blog posts, lead magnets).
+
 **Homepage build notes**: focus keyword `therapist louisville ky`
 worked in naturally (2 uses) while keeping "counselor"/"counseling"
 as the dominant brand language elsewhere, per the resolved keyword
