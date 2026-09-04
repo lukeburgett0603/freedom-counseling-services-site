@@ -10,7 +10,7 @@ import { withBase } from '../lib/url';
 
 interface Props {
   title: string;
-  current: 'leads' | 'crm' | 'blog' | 'content' | 'lead-magnets' | 'team' | 'suggestions';
+  current: 'leads' | 'crm' | 'blog' | 'content' | 'lead-magnets' | 'team' | 'suggestions' | 'availability';
 }
 
 const { title, current } = Astro.props;
@@ -33,6 +33,7 @@ const navItems = [
   { key: 'lead-magnets', label: 'Lead magnets', href: withBase('/admin/lead-magnets') },
   { key: 'suggestions', label: 'Suggestions', href: withBase('/admin/suggestions') },
   { key: 'team', label: 'Team', href: withBase('/admin/team') },
+  { key: 'availability', label: 'Counselor status', href: withBase('/admin/availability') },
 ] as const;
 ---
 
