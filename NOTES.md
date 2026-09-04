@@ -10,11 +10,65 @@ written down" note.
 **Live (`status: content-complete`)**: Home, About, Services Overview,
 all 8 Service Hub pages (Individual, Couples & Marriage, Family,
 Child & Teen, Christian/Faith-Based, Grief, Anxiety & Depression,
-Trauma & EMDR), Counselors Overview, 4 of 5 Counselor Profile pages
-(Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman), Blog Index, all
-10 real Blog Posts, Service Areas Overview, both Service Area pages
-(Louisville, Southern Indiana), Contact, Privacy Policy, and Terms of
-Service.
+Trauma & EMDR), Counselors Overview, **all 5 of 5** Counselor Profile
+pages (Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman, Luke
+Burgett), Blog Index, all 10 real Blog Posts, Service Areas Overview,
+both Service Area pages (Louisville, Southern Indiana), Contact,
+Privacy Policy, and Terms of Service. **Every planned page for this
+site is now built.**
+
+**Luke Burgett's counselor profile published (2026-09-04)**, from a
+real, full BrandScript the client provided directly (`Counselor
+Brandscripts/Luke Burgett Counselor BrandScript.md`, not ported from
+the Wix source like the other 4 — Luke's page was always "coming soon"
+there, see the earlier note above). Explicit client instruction: use
+the BrandScript as a guide, don't contradict its substance, but polish
+the copywriting rather than transcribing it verbatim — the source
+document is a full internal StoryBrand planning doc (13 sections, much
+more clinical-jargon-dense and repetitive across sections than a
+finished client-facing bio), not client-ready copy on its own.
+- **Condensed to match the established Counselor Profile shape** used
+  for the other 4 (specialties list, pull-quote, "Who X works with,"
+  "X's approach," a 4-step "what to expect" list, FAQ folded into copy
+  — same reasoning as before: `CounselorProfile.astro` renders neither
+  `PlanSteps` nor a structured FAQ block). Landed at 639 words, a bit
+  over the 300-600 Counselor Profile range in `page-types.md` — accepted
+  as justified rather than cut further, since Luke's real substance
+  (two locations, several distinct clinical modalities, an explicit
+  faith-integration nuance, and a sensitive competency disclosure about
+  working with suicidal ideation) is genuinely broader than what the
+  other 4 bios needed to cover, not padding.
+- **The pull-quote was synthesized from the BrandScript's own recurring
+  language** ("client-paced," "does not force clients to process
+  things before they are ready") rather than lifted verbatim — the
+  source document has no first-person quote in Luke's own voice the way
+  the other counselors' real Wix pages did. Worth flagging to Luke:
+  confirm he's comfortable with the exact wording, since it's a
+  synthesized approximation of his own voice, not something he
+  literally said.
+- **Verified via Mangools before picking `focus_keyword`**: none of the
+  BrandScript's own suggested keywords (`men's counseling louisville
+  ky`, `ocd counseling louisville ky`, `anxiety counseling for men
+  louisville ky`) showed any measurable search volume — same
+  no-volume-at-this-specificity pattern already documented for the
+  other counselor profile pages above. Used the same personal
+  name+credential+city shape as the other 4 (`luke burgett lpca
+  louisville ky`) instead of forcing one of the BrandScript's
+  higher-intent-sounding phrases that the data doesn't actually
+  support.
+- **Kept the BrandScript's own suggested primary CTA verbatim**
+  (`cta_button_text: "Schedule With Luke"`, `page_title`/
+  `meta_description` adapted closely from its SEO Notes section) since
+  that was an explicit, deliberate choice in the source document, not
+  something to "improve" away — the other 4 counselors use a generic
+  "Start Counseling" CTA, Luke's is the one page that intentionally
+  breaks from that.
+- **Did not use the BrandScript's suggested URL slug**
+  (`/luke-burgett-counselor-louisville-ky`) — the real, already-live
+  slug is `luke-burgett`, matching the other 4 counselors' naming
+  pattern and already referenced by the Counselors Overview grid;
+  changing it would have been a structural decision beyond "polish the
+  copywriting," not something implied by the client's actual request.
 
 **Privacy Policy + Terms of Service written new (2026-09-04)** — the
 client confirmed Freedom has no existing versions of either (nothing on
@@ -263,13 +317,14 @@ double-checked against the practice's actual real supervision structure
 before this page is treated as final, since it's a genuine licensure
 disclosure matter, not just marketing copy.
 
-**Luke Burgett's own profile deliberately held back** — the source
-site's real `/counselors` page itself lists his entry as "Counselor
-profile coming soon," so this isn't inventing a gap, it's porting one
-that already exists. Waiting on a real brandscript from Luke before
-writing his page; his headshot is already uploaded and wired in
-(`images.headshot`), so publishing his page later only needs `copy`/
-`credentials`/`status` — no image work left to do.
+**Luke Burgett's own profile was deliberately held back at this point**
+— the source site's real `/counselors` page itself lists his entry as
+"Counselor profile coming soon," so this wasn't inventing a gap, it was
+porting one that already existed. Waited on a real BrandScript from
+Luke before writing his page; his headshot was already uploaded and
+wired in (`images.headshot`) at this point. **Resolved 2026-09-04** —
+see the BrandScript-sourced entry further up this file; all 5
+counselor profiles are now live.
 
 **Counselors Overview build note**: same nav-visibility gotcha as
 Services Overview — publishing this page (short intro + CTA, no
