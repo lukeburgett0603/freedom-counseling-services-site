@@ -11,8 +11,46 @@ written down" note.
 all 8 Service Hub pages (Individual, Couples & Marriage, Family,
 Child & Teen, Christian/Faith-Based, Grief, Anxiety & Depression,
 Trauma & EMDR), Counselors Overview, 4 of 5 Counselor Profile pages
-(Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman), Blog Index, and
-all 10 real Blog Posts.
+(Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman), Blog Index, all
+10 real Blog Posts, Service Areas Overview, and both Service Area pages
+(Louisville, Southern Indiana).
+
+**Service Area pages built (2026-09-03)**: Louisville's real copy
+(office details, "how it works" 4-step list, real client testimonial)
+ported from the Wix source's `/location` page. Southern Indiana has no
+old-site equivalent — written new, honestly framed around telehealth-
+only coverage (no physical office there) rather than inventing a local
+presence. Real, well-known Southern Indiana cities (New Albany,
+Jeffersonville, Clarksville) are named as genuine geography, not
+fabricated landmarks — no specific claim beyond "these are the real
+towns across the river" is made about them.
+
+**Real template gap found and fixed while starting this page**:
+`ServiceArea.astro` had no way to render `page.testimonial_quote`/
+`testimonial_author`/`testimonial_role` at all, even though
+`CLAUDE.md`'s own Service Area word-count guidance explicitly calls
+for "local proof/testimonials" as expected content — the columns
+already existed and `Homepage.astro` already rendered them via the
+shared `Testimonial` component, `ServiceArea.astro` just never wired
+it in. Fixed in the template repo, synced to this repo and CMC's
+(CMC has no live Service Area pages yet, so no rebuild was needed
+there — the fix just sits ready for whenever one exists).
+
+**Word count note**: both pages ended up at ~700-725 words, short of
+`CLAUDE.md`'s 800-1,500 Service Area range even after genuinely
+expanding both with real content (who we see, first-visit logistics,
+insurance/fees, a short local FAQ) rather than padding — a therapy
+practice's location page just doesn't have as much genuinely unique
+local material available as, say, a home-services business's would.
+Chose real, non-repetitive substance over hitting the number exactly,
+per `CLAUDE.md`'s own "don't pad to hit a number" rule.
+
+**The real client testimonial used on Louisville's page is
+anonymized** (`"— A Freedom Counseling Services client"` on the old
+site, not a named individual) — stored as `testimonial_author: "A
+Freedom Counseling Services Client"`, `testimonial_role: null`. Per
+`CLAUDE.md`'s standing rule, this is rendered visibly but never fed
+into `Review`/`AggregateRating` schema.
 
 **Services Overview build note**: publishing this page (short intro
 copy + CTA, no manually-curated list) was the last step to make the 8
