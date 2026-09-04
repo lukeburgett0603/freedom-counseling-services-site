@@ -7,13 +7,20 @@ written down" note.
 
 ## Content build progress (2026-09-03)
 
-**Live (`status: content-complete`)**: Home, About.
+**Live (`status: content-complete`)**: Home, About, and all 8 Service
+Hub pages (Individual, Couples & Marriage, Family, Child & Teen,
+Christian/Faith-Based, Grief, Anxiety & Depression, Trauma & EMDR).
 
-**Real source content gathered, not yet written/published**: all 8
-Service Hub pages (Individual, Couples & Marriage, Family, Child & Teen,
-Christian/Faith-Based, Grief, Anxiety & Depression, Trauma & EMDR) —
-full real copy read directly from the Wix site for every one, including
-each page's real "Reviewed by" byline:
+**Service Hub build notes**: each page's real copy, "Reviewed by"
+byline, 4 plan_steps, and 6 FAQs were ported from the real Wix source
+(`https://freedom-co-bba0e1ef-luke5391.wix-site-host.com/services/...`)
+and adapted into the schema — the numbered "how it works" box became
+`plan_steps`, the "ON THIS PAGE" TOC headers became literal H3s in
+`copy` (auto-extracted by `extractTableOfContents`), and the FAQ
+accordion questions (visible) got genuinely-written answers grounded in
+each page's real body content, since the old site's accordion answers
+weren't extractable from collapsed markup. The resolved `focus_keyword`
+was worked in naturally (bolded once) in every page. Real bylines:
 - Individual Counseling — Staci Harrub, LPCA (EMDR Trained)
 - Couples & Marriage Counseling — Tony Gore, LCSW (Owner/Director)
 - Family Counseling — Rhonda Gore, MFT (Life Coach)
@@ -26,7 +33,17 @@ each page's real "Reviewed by" byline:
 - Anxiety & Depression Counseling — Rhonda Gore, MFT (Life Coach)
 - Trauma & EMDR Counseling — Staci Harrub, LPCA (EMDR Trained)
 
-Each real page also names 1-2 real existing blog posts under "Read
+All 8 hero images were sourced by browsing unsplash.com directly (no
+`search-unsplash` Edge Function — see below) and verifying each photo's
+real title, full description, license, and photographer name/username
+from its own permalink before use — never from a truncated username or
+title alone. This caught two wrong photographer-name guesses (corrected
+before publishing) and one genuinely misleading photo (titled "Mother
+comforts upset child on the sofa," but its real description described a
+punishment/discipline scene — rejected in favor of a verified,
+appropriate replacement for Child & Teen's hero).
+
+Each real Wix page also names 1-2 real existing blog posts under "Read
 Next" and a real lead magnet title under its download form — useful
 for porting blog posts with the right hub cross-links, and for scoping
 each hub's own lead magnet later.
@@ -74,8 +91,17 @@ site first, not just the titles/summaries already gathered.
 
 - **Real domain: `freedomcounselingservices.org`** (plural "services") —
   the client initially gave `freedomcounselingservice.org` (singular),
-  confirmed a typo. Currently live on Squarespace; will be migrated to
-  point at this new site once it's ready.
+  confirmed a typo. The domain currently resolves to a sparse Squarespace
+  site (About/Our Counselors/Services and Fees/Location/Schedule only —
+  no individual service pages or blog); it will be migrated to point at
+  this new site once it's ready.
+- **The actual site being ported/rebuilt is a separate, richer Wix site
+  the client maintains**, not the live Squarespace domain above:
+  `https://freedom-co-bba0e1ef-luke5391.wix-site-host.com/`. This is
+  where every Service Hub page's real copy, bylines, FAQs, plan steps,
+  and blog post titles/summaries were sourced from — go back to this URL
+  (not the `.org` domain) for any future content-porting work (blog
+  posts, counselor profiles, Service Areas, etc.).
 - Address: 800 Lily Creek Rd Unit 202, Louisville, KY 40243. Phone:
   (502) 523-2970. Office near Southeast Christian Church, off
   Blankenbaker Parkway, behind Heine Brothers Coffee.
