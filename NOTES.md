@@ -13,7 +13,39 @@ Child & Teen, Christian/Faith-Based, Grief, Anxiety & Depression,
 Trauma & EMDR), Counselors Overview, 4 of 5 Counselor Profile pages
 (Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman), Blog Index, all
 10 real Blog Posts, Service Areas Overview, both Service Area pages
-(Louisville, Southern Indiana), and Contact.
+(Louisville, Southern Indiana), Contact, Privacy Policy, and Terms of
+Service.
+
+**Privacy Policy + Terms of Service written new (2026-09-04)** — the
+client confirmed Freedom has no existing versions of either (nothing on
+the Wix source to port), and explicitly asked for a best-effort draft
+they'll come back and edit, not a finished/reviewed legal document.
+**Flagged clearly to the client in chat, and worth re-flagging any time
+these pages come up again: this is AI-drafted boilerplate, not
+attorney-reviewed legal advice** — normal for a first draft, but a real
+mental-health practice should have actual counsel review both before
+treating them as final, especially given HIPAA/confidentiality
+considerations specific to this industry.
+- **Privacy Policy explicitly separates *website* data (form
+  submissions, stored via Supabase, covered by this policy) from
+  *clinical* data (governed by a separate HIPAA Notice of Privacy
+  Practices given to actual clients at intake, not by this page)** —
+  conflating the two would misrepresent how a licensed clinical
+  practice's real patient-record obligations work. Also honest about
+  current reality rather than generic boilerplate: states the Site does
+  not currently use analytics/tracking cookies, since (per this
+  template's own Admin CMS section in `CLAUDE.md`) it genuinely has
+  none — a copy-pasted policy would have claimed cookie usage that
+  isn't real.
+- **Terms of Service includes the same 988 Suicide & Crisis Lifeline
+  disclosure as the Contact page** — genuinely relevant here too (an
+  explicit "this Site is not for emergencies" section), not just
+  duplicated for its own sake.
+- Both pages are `page_type = 'Other'` (rendered by `Other.astro` — h1
+  + copy only, no lead generator, matching the "None" tier in
+  `page-types.md`) and were **not** treated as keyword-optimization
+  targets, per `CLAUDE.md`'s explicit rule for legal/utility pages — no
+  `focus_keyword` set on either.
 
 **Contact page built (2026-09-03)**: real copy ported from the Wix
 source's `/contact` page — the empathetic intro, "Ways to reach
