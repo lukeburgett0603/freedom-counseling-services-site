@@ -17,6 +17,18 @@ both Service Area pages (Louisville, Southern Indiana), Contact,
 Privacy Policy, and Terms of Service. **Every planned page for this
 site is now built.**
 
+**Real template bug found while verifying Luke's page live, affecting
+all 5 counselor pull-quotes (2026-09-04)**: Tailwind Typography's
+`.prose` class auto-adds decorative smart quotes around a blockquote's
+first/last paragraph, doubling up with the literal `"..."` every
+counselor bio's pull-quote already writes — every one of Tony, Rhonda,
+Staci, Sophie, and Luke's pages was rendering `""...""` instead of
+`"..."`, live, since the day each was published. Fixed globally in the
+template's `global.css` (not per-page copy), synced to this repo and
+CMC's — see `CLAUDE.md`'s real-bugs list for the full writeup. Worth a
+visual re-check of all 5 counselor pages after this rebuild to confirm
+the doubled quotes are actually gone.
+
 **Luke Burgett's counselor profile published (2026-09-04)**, from a
 real, full BrandScript the client provided directly (`Counselor
 Brandscripts/Luke Burgett Counselor BrandScript.md`, not ported from
