@@ -140,12 +140,46 @@ the original brainstorm.
 
 **Still pending, client's own next call**: a second image partway down
 long pages, and the cream/gold section-band rhythm applied beyond
-Service Area/Service Hub — both proposed during Group C brainstorming
-but not yet started. For the second image specifically: the likely
-approach is reusing each Service Hub page's already-uploaded reviewing
-counselor's headshot (matched via `page.author_name` against Counselor
-Profile pages) rather than sourcing new stock photos, but this hasn't
-been scoped or confirmed with the client yet.
+Service Area/Service Hub — both proposed during Group C brainstorming;
+the second image was explicitly deferred (client said skip it for now,
+2026-09-04). The cream/gold band rhythm remains unstarted and unscoped.
+
+**Counselor Profile header card (done, live, 2026-09-04)**: client asked
+for a card-style header (headshot/name/credentials/who-they-help/
+availability pill), clickable specialty pills, and a more prominent
+personal quote on all 5 counselor pages — see CLAUDE.md's "Counselor
+Profile header card" section for the full technical writeup (new
+`FeatureGrid`-sibling components, `pages.specialties`/
+`availability_status` columns, self-service status editing). Real
+content migrated for all 5 counselors: `hero_subhead` (the "who they
+help" sentence), `testimonial_quote`/`testimonial_author` (the personal
+quote, stripped of its literal `"..."` marks since the new
+`CounselorQuote.astro` supplies its own decorative quote glyph), and
+`specialties` (parsed from the old `**Specialties:** A, B, C` line into
+`{label, page_slug}` pairs) — all removed from `copy` to avoid double-
+rendering. Specialty-to-Service-Hub-page mapping (client-approved):
+EMDR & Trauma → trauma-emdr-counseling; Grief & Life Transitions →
+grief-counseling; Couples & Family/Couples & Marriage Counseling →
+couples-marriage-counseling; Family Counseling → family-counseling;
+Anxiety/Anxiety & Shame/Anxiety & Self-Esteem/Depression →
+anxiety-depression-counseling; Teen & Adolescent/Children's/Teens &
+Young Adults/Teen & Boys' Counseling → child-teen-counseling; Christian
+Counseling/Identity & Faith → christian-counseling; Men's Counseling,
+Perfectionism, Identity, Women's Counseling, and OCD & Intrusive
+Thoughts have no matching hub page and render as plain (non-clickable)
+pills. (One correction from my own initial draft table: "Depression"
+was mistakenly left unmatched at first — obviously belongs on
+anxiety-depression-counseling, fixed before migrating.)
+
+Availability status is deliberately left unset (no pill) for all 5
+counselors at launch, per the client's explicit call — each counselor
+sets their own via a new self-service admin flow (`admin/availability
+.astro`), not pre-filled by the agency. **Real staff logins for the 5
+counselors, linked to their own profile page, have not been created
+yet** — that's the client/owner's own next step via Team → Invite
+(role "Staff", "Link to counselor page" set to that counselor), not
+something done automatically as part of this build (inviting real
+people needs the client's own go-ahead, not an agency default).
 
 ## Content build progress (2026-09-03)
 
