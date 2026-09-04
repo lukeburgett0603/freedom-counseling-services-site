@@ -47,7 +47,7 @@ const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbChain, siteUrl);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 
-    <meta property="og:type" content={page.page_type === 'Content Pillar' ? 'article' : 'website'} />
+    <meta property="og:type" content={page.page_type === 'Content Pillar' || page.page_type === 'Service Hub' || page.page_type === 'Blog Post' ? 'article' : 'website'} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
