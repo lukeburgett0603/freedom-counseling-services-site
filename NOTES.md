@@ -173,13 +173,45 @@ anxiety-depression-counseling, fixed before migrating.)
 
 Availability status is deliberately left unset (no pill) for all 5
 counselors at launch, per the client's explicit call — each counselor
-sets their own via a new self-service admin flow (`admin/availability
-.astro`), not pre-filled by the agency. **Real staff logins for the 5
+sets their own via a new self-service admin flow (`admin/counselor-
+settings.astro`, renamed same day from `admin/availability.astro` — see
+below), not pre-filled by the agency. **Real staff logins for the 5
 counselors, linked to their own profile page, have not been created
 yet** — that's the client/owner's own next step via Team → Invite
 (role "Staff", "Link to counselor page" set to that counselor), not
 something done automatically as part of this build (inviting real
 people needs the client's own go-ahead, not an agency default).
+
+**Counselor Profile header card v2 (done, live, 2026-09-04)**: client
+feedback after seeing v1 live, working from a reference screenshot of a
+comparable real counseling-site card — wider card spanning the page's
+content width (was capped narrower), bigger circular headshot with the
+availability pill now overlaid on the photo itself (was inline next to
+credentials), specialty pills moved inside the card (were their own
+section below the quote), a new self-service "Telehealth available"
+pill, an in-card "Start Counseling" CTA that jumps to the lead form, and
+a new "Training & Modalities" section (its own H2, below the quote) —
+self-service tags a counselor manages themselves. See CLAUDE.md's
+(revised) "Counselor Profile header card" section for the full
+technical writeup.
+
+Real data: pulled "EMDR Trained"/"ACT Trained" out of Staci's and Luke's
+`credentials` field (now just "LPCA" for both) into `modalities: ["EMDR"]`
+/ `["ACT"]` respectively — the literal scope of what was asked. Tony's
+"Owner/Director", Rhonda's "Life Coach", and Sophie's "Student Counselor"
+stayed in `credentials` as-is (roles/titles, not clinical modalities).
+Tony, Rhonda, and Sophie's `modalities` are deliberately left empty
+rather than guessed from their bio text — each can add their own via
+Counselor settings once they have a login; not a data gap, a scope call
+worth revisiting if the client would rather backfill from bio text
+directly. `telehealth_available` defaults `false` for all 5, same
+never-invent discipline as `availability_status`.
+
+The self-service page was also renamed `admin/availability.astro` →
+`admin/counselor-settings.astro` (before any real counselor had been
+invited, so a clean rename, not a breaking change) since it now covers
+telehealth and modalities too, not just status. A linked counselor is
+now redirected straight there the moment they log in.
 
 ## Content build progress (2026-09-03)
 
