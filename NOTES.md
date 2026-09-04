@@ -8,9 +8,10 @@ written down" note.
 ## Content build progress (2026-09-03)
 
 **Live (`status: content-complete`)**: Home, About, Services Overview,
-and all 8 Service Hub pages (Individual, Couples & Marriage, Family,
+all 8 Service Hub pages (Individual, Couples & Marriage, Family,
 Child & Teen, Christian/Faith-Based, Grief, Anxiety & Depression,
-Trauma & EMDR).
+Trauma & EMDR), Counselors Overview, and 4 of 5 Counselor Profile pages
+(Tony Gore, Rhonda Gore, Staci Harrub, Sophie Bowman).
 
 **Services Overview build note**: publishing this page (short intro
 copy + CTA, no manually-curated list) was the last step to make the 8
@@ -35,10 +36,9 @@ was worked in naturally (bolded once) in every page. Real bylines:
 - Individual Counseling — Staci Harrub, LPCA (EMDR Trained)
 - Couples & Marriage Counseling — Tony Gore, LCSW (Owner/Director)
 - Family Counseling — Rhonda Gore, MFT (Life Coach)
-- Child & Teen Counseling — Sophie Bowman (Student Counselor — note:
-  the About page's team section called her "Student Intern"; this
-  service page's byline says "Student Counselor" — reconcile which is
-  current before publishing her counselor profile)
+- Child & Teen Counseling — Sophie Bowman (Student Counselor — resolved:
+  her own Counselor Profile page confirms "Student Counselor" is
+  current, see below)
 - Christian/Faith-Based Counseling — Tony Gore, LCSW (Owner/Director)
 - Grief Counseling — Staci Harrub, LPCA (EMDR Trained)
 - Anxiety & Depression Counseling — Rhonda Gore, MFT (Life Coach)
@@ -59,11 +59,9 @@ Next" and a real lead magnet title under its download form — useful
 for porting blog posts with the right hub cross-links, and for scoping
 each hub's own lead magnet later.
 
-**Not yet gathered**: full content for Rhonda Gore, Staci Harrub, and
-Sophie Bowman's own counselor profile pages (only Tony Gore's was read
-in full); the 6 remaining real blog posts' full article text (only
-titles/summaries known so far); Southern Indiana service area content
-(doesn't exist on the old site — has to be written new).
+**Not yet gathered**: the 6 remaining real blog posts' full article text
+(only titles/summaries known so far); Southern Indiana service area
+content (doesn't exist on the old site — has to be written new).
 
 **Counselor headshots (2026-09-03)**: all 5 real photos (Tony Gore,
 Rhonda Gore, Staci Harrub, Luke Burgett, Sophie Bowman) supplied by the
@@ -74,10 +72,53 @@ via `sharp` (already a project dependency, no new install needed) before
 upload; the other three were already reasonably sized. **Sophie
 Bowman's photo is a graduation cap-and-gown shot, not a traditional
 headshot** — flagged to the client before using it; explicit call:
-use it as-is. All 5 Counselor Profile pages are still `status:
-placeholder` — headshots are in, but the real bio copy (from the Wix
-site, same porting process as the Service Hub pages) hasn't been
-written yet, so none of these pages are live.
+use it as-is.
+
+**Counselor bios published (2026-09-03)**: Tony, Rhonda, Staci, and
+Sophie's full profile copy ported from each counselor's own real page at
+`https://freedom-co-bba0e1ef-luke5391.wix-site-host.com/counselors/...`
+— intro, specialties list, pull-quote, "Who X works with," "X's
+approach," the 5-step "What to expect in your first session" list, and
+the FAQ questions (with genuinely-written answers grounded in each
+page's real body content, same reason as the Service Hub FAQs — the old
+site's accordion answers weren't extractable from collapsed markup).
+**`CounselorProfile.astro` doesn't render a FAQ or PlanSteps component**
+(unlike Service Hub/Content Pillar) — so the FAQ content was folded
+directly into `copy` as bolded-question paragraphs rather than written
+to the structured `faqs` column, specifically to avoid generating
+invisible `FAQPage` JSON-LD schema for content nobody can see (the same
+class of bug flagged in `CLAUDE.md`'s real-bugs list) — check this same
+thing before populating `faqs` or `plan_steps` on any other page type.
+`credentials` was also normalized across all 4 to match the comma-
+separated format already used in the Service Hub bylines (e.g. "MFT,
+Life Coach" instead of the originally-scaffolded "Life Coach (MFT
+trained)"). **Sophie Bowman's title is confirmed "Student Counselor"**
+— her own real profile page uses this (resolving the earlier "Student
+Intern" vs. "Student Counselor" flag in favor of the more specific,
+authoritative source); her FAQ answer to "Are you a licensed counselor?"
+states she's completing her clinical training under the practice's
+licensed counseling staff's supervision — this specific supervision
+language wasn't stated verbatim on the source site and should be
+double-checked against the practice's actual real supervision structure
+before this page is treated as final, since it's a genuine licensure
+disclosure matter, not just marketing copy.
+
+**Luke Burgett's own profile deliberately held back** — the source
+site's real `/counselors` page itself lists his entry as "Counselor
+profile coming soon," so this isn't inventing a gap, it's porting one
+that already exists. Waiting on a real brandscript from Luke before
+writing his page; his headshot is already uploaded and wired in
+(`images.headshot`), so publishing his page later only needs `copy`/
+`credentials`/`status` — no image work left to do.
+
+**Counselors Overview build note**: same nav-visibility gotcha as
+Services Overview — publishing this page (short intro + CTA, no
+manually-curated list) was necessary for the 4 live Counselor Profile
+pages to actually show up in the Counselors nav dropdown/grid. Luke's
+still-placeholder page correctly does not appear in the grid — no code
+change needed, since it's already filtered by `getAllPages()`'s
+content-complete-only fetch, the same self-maintaining behavior as every
+other dynamic grid on this site.
 
 **Unsplash API key configured (2026-09-03)**: `UNSPLASH_ACCESS_KEY` set
 as an Edge Function secret for this project — was previously missing
