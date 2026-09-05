@@ -913,3 +913,51 @@ existing blog posts as-is, keep the category structure.
 `Service Hub` page type rather than reusing `Content Pillar`;
 `PlanSteps` support was added directly to the new `ServiceHub.astro`
 template. All three were open questions as of the last note, now closed.
+
+## Site-wide writing-voice pass (2026-09-05)
+
+Rewrote real copy across all 26 keyword-bearing pages (Homepage, all 8
+Service Hub pages, both Service Area pages, all 5 Counselor Profiles, all
+10 Blog Posts) plus About/Contact/Services, to remove the specific AI-
+writing tics flagged on the growth-audit document that day — see
+CLAUDE.md's own memory notes for the full list (the negation-then-
+affirmation sentence structure was the worst offender by far, plus
+"honest," "gap," "quietly," "real" as filler, em-dash overuse, "actually"/
+"genuinely" filler, and a couple of structural habits). This was a voice
+pass only, not a content or SEO pass.
+
+**Hard constraint honored throughout**: never touched `h1`,
+`meta_description`, or `focus_keyword` on any page, and never altered any
+`**bolded**` first-use keyword phrase in `copy` (verified byte-for-byte
+identical, per page, before writing anything). Confirmed via script that
+no page's core topical keyword-word count (e.g. "grief"/"counselors" for
+the Grief Counseling page) went down, and that no page's `copy` word
+count moved by more than ~5% either direction. Site-wide em dash count
+went from 283 to 129 — cut by more than half without eliminating them
+entirely.
+
+**Real, unexpected finding while setting this up**: the site's actual
+exact-match focus_keyword phrase (e.g. `grief counselors louisville ky`)
+does not appear verbatim anywhere on most pages, including the H1 —
+natural writing uses connector words and punctuation Google's own local-
+keyword strings strip out ("Grief Counseling **in** Louisville**,** KY").
+The real keyword signal lives in the H1/meta_description (natural
+phrasing that contains the same words) plus heavy natural repetition of
+the *topical* term in body copy (e.g. "grief" appeared 41 times in that
+page's copy, "Louisville" 0 times in the body — only in H1/meta). Worth
+remembering for any future keyword-preservation check on this site: don't
+grep for the literal focus_keyword string, check topical-word density and
+leave H1/meta_description as the source of truth for the literal phrase.
+
+**Process**: fetched every page's full content once via the anon key (no
+write needed for that), split the work across 5 parallel subagents (one
+per Service Hub sub-batch, one for the 5 Counselor Profiles, one for all
+10 Blog Posts, one for Homepage+Service Areas) with an explicit list of
+forbidden fields and required-intact bolded phrases per page, verified
+every agent's output myself with a script before touching the database
+(never trusted a "programmatically verified" self-report without
+independent re-checking), applied via one disposable `agency`-role
+Supabase session used for the whole pass rather than one per page,
+triggered a rebuild, spot-checked two live pages, then deleted the
+disposable session (verified its identity via SELECT before deleting,
+per the standing pattern).
