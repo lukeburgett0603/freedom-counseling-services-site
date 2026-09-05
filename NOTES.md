@@ -263,6 +263,49 @@ exactly this reason — pre-existing, not something this pass changed,
 worth a real credit backfill (a `curl` update once the photographer is
 identified) but not done here since it's outside what was asked.
 
+**Client independently turned the overlay Hero style on for the live
+homepage (found 2026-09-05), superseding the "reverted, not a decision"
+note above.** Between sessions, the client used the live admin panel
+themselves to set the homepage's `hero_style` to `'overlay'` and picked a
+new hero image — a different, real Unsplash photo (family of three
+walking together, photographer Eli Phillips) than the one referenced
+above, with `creditName`/`creditUrl` correctly persisted this time
+(confirms the credit-persistence fix from the paragraph above works in
+production, not just in the disposable-login test). Whether to keep the
+overlay style live is still the client's own call — noting this here
+only so a future session doesn't assume the design is still `'default'`
+based on the note above.
+
+**Hero image focal point added (2026-09-05)**: client reported the
+homepage's hero photo was cropped with the subject (the family) too low
+in frame — the bottom of the image was clipped while the top wasn't.
+Diagnosed as the photo's own composition (subject sits in the lower
+portion of the frame) combined with a plain centered `object-fit: cover`
+crop, which centers on the *frame*, not the *subject*. Generalized into a
+new per-page `hero_image_focal_y` field (`'top' | 'center' | 'bottom'`,
+defaults to `'center'`) rather than a one-off content fix — see
+CLAUDE.md's "Hero image focal point" section for the technical writeup.
+Set to `'top'` on the live homepage (keeps the top of the frame, where
+this photo's subject actually is, visible — crops from the bottom
+instead). Caught and corrected a mistake mid-fix: first set it to
+`'bottom'` based on an earlier, different hero photo (father carrying his
+son on his shoulders, subject low in frame) without realizing the
+client's own overlay-style switch above had already replaced it with this
+new photo, whose subject is in the *upper* portion of the frame instead —
+corrected to `'top'` once the actual current photo was inspected
+directly, not assumed from memory.
+
+While verifying this live, found and fixed a real, unrelated rendering
+bug that had been silently live since the blog-card work: `OptimizedImage
+.astro`'s wrapper `<div>` had no height, so `object-cover` on the image
+inside it had nothing to actually crop against, and every full-bleed/
+sized image using it (this hero, plus blog-card thumbnails and author
+avatars) was rendering at its natural aspect ratio instead of being
+cropped to fill its container — see CLAUDE.md's real-bugs list for the
+technical detail. Fixed template-wide; this is what made the `'bottom'`
+vs `'top'` correction above initially look like it had no visible effect
+at all (the image wasn't being cropped either way until this fix landed).
+
 ## Content build progress (2026-09-03)
 
 **Live (`status: content-complete`)**: Home, About, Services Overview,
