@@ -7,11 +7,13 @@ color/type tokens, and the arch motif were implemented — see the commit
 logo"). Updated in place per the skill's own rule, not replaced — the
 original's real findings are preserved below, not discarded.
 
-**Status: the 2026-09-07 additions are draft, pending approval.**
-Everything under "§0 (2026-09-04, implemented)" through §7 is the
-original, already-approved and already-built system. Section §8 onward is
-this revision's new material from a live-site audit + your direct
-feedback — that part needs sign-off before implementation.
+**Status: the 2026-09-07 revision is approved and implemented.** Everything
+under "§0 (2026-09-04, implemented)" through §7 is the original,
+already-approved and already-built system. §8 onward is this revision's
+material from a live-site audit + your direct feedback — approved in full
+("Yes, proceed with all 8") and built the same day; see each item's own
+"Done" note under "Recommended structural changes" below for what changed
+and where.
 
 ---
 
@@ -285,8 +287,28 @@ work proceeds on the remaining 7.
 
 From the original brief, still outstanding:
 1. Arch-crop CSS treatment for hero/scene photos and counselor headshots.
-2. Arch-shaped divider between major section-color transitions.
-3. A small footer arch watermark.
+   **Done.** Two plain hook classes (`hero-photo-crop`, `avatar-crop`)
+   added alongside the existing `rounded-xl`/`rounded-full` classes in
+   `Hero.astro`'s default layout, `CounselorProfile.astro`'s header card,
+   and `CounselorsOverview.astro`'s grid — template-level, no default rule
+   there, so every other client keeps today's plain shapes. Freedom's own
+   `global.css` defines the actual arch: a shallow, wide dome (`border-
+   radius: 50% 50% 0 0 / 12% 12% 0 0`) for landscape hero/scene photos, a
+   full semicircle (`50% 50% 0 0`) for square counselor headshots — pure
+   CSS, no clip-path/SVG/image asset. Verified live on Luke Burgett's
+   profile page (headshot) and the Individual Counseling page (hero photo).
+2. Arch-shaped divider between major section-color transitions. **Done** —
+   the one real instance of two full-bleed bands sitting directly adjacent
+   is `CTA.astro` (maroon) immediately followed by `LeadMagnet.astro`
+   (ink). Targeted via an adjacent-sibling CSS selector on their own
+   existing color utility classes (`section.bg-brand-primary + section
+   .bg-brand-secondary`) in Freedom's `global.css` — no template change
+   needed. Renders as a small gold-outlined archway notch straddling the
+   seam. Verified live on the Homepage.
+3. A small footer arch watermark. **Done** — a large, low-opacity
+   (`opacity: 0.12`) open-arch outline in the footer's bottom-right
+   corner, targeted via `footer.bg-brand-secondary::after` in Freedom's
+   `global.css`. Verified live.
 
 New from this revision:
 4. ~~Restrict the arc motif back to H2 only~~ — **implemented differently
@@ -302,8 +324,14 @@ New from this revision:
    wired into every template rendering a StoryBrand field, not just
    Homepage.
 7. Keep overlay hero reserved for Homepage/About; refine the default hero
-   instead of extending overlay everywhere.
+   instead of extending overlay everywhere. **Done** — confirmed directly
+   against live Supabase data that `hero_style = 'overlay'` is already set
+   on exactly two pages (`home`, `about`) and nowhere else, so no code
+   change was needed on the "don't extend it" half. The "refine the
+   default hero" half is the arch photo-crop from item 1 above, applied to
+   `Hero.astro`'s default (non-overlay) layout specifically.
 
-Remaining: 1, 2, 3, 7. Items 4-6 done as of this pass (2026-09-07);
-the two bug fixes in §8 were done earlier and didn't need separate
-sign-off.
+All 8 items from the original consolidated list are now done as of this
+pass (2026-09-07). The two bug fixes in §8 were done earlier in this same
+pass and didn't need separate sign-off, being bugs rather than design
+decisions.

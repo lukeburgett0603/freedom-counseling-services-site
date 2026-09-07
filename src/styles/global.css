@@ -148,3 +148,87 @@ body {
 .prose blockquote p:last-of-type::after {
   content: none;
 }
+
+/*
+ * Arch photo-crop — the Visual Design Brief's motif applied to real
+ * photography, not just the small decorative marker above. `.hero-photo-
+ * crop` and `.avatar-crop` are plain hook classes with no default rule in
+ * the template (Hero.astro/CounselorProfile.astro/CounselorsOverview.astro
+ * just apply `rounded-xl`/`rounded-full` alongside them for every client
+ * with no photo-crop motif) — defined here instead, so only Freedom's
+ * pages get the arch, the same per-client-divergence pattern as the color/
+ * font tokens above. Pure CSS border-radius, no clip-path/SVG/image asset,
+ * per the performance-guardrails reference's "motif crop shapes should be
+ * CSS on a normal source" rule.
+ *
+ * The percentage form (not a fixed px radius) is what makes this scale
+ * sensibly across very different image shapes: a landscape hero photo
+ * gets a shallow, wide dome (12% of height) — a true semicircle would look
+ * absurd stretched across a wide image — while a square counselor
+ * headshot gets a full semicircle dome (50%), which is what actually
+ * reads as a real arch/doorway shape rather than just rounded corners.
+ */
+.hero-photo-crop {
+  border-radius: 50% 50% 0 0 / 12% 12% 0 0;
+}
+
+.avatar-crop {
+  border-radius: 50% 50% 0 0;
+}
+
+/*
+ * Arch-shaped divider marking the one place two full-bleed bands sit
+ * directly adjacent — CTA.astro (bg-brand-primary, maroon) immediately
+ * followed by LeadMagnet.astro (bg-brand-secondary, ink), on every
+ * template that renders both. Targets the two components' own existing
+ * color utility classes via an adjacent-sibling selector rather than a
+ * new prop on either — this is the one transition on the site shaped
+ * this way, and both classes already exist for their color, so no
+ * template change was needed for a Freedom-only decorative flourish.
+ * Reads as a small doorway/keyhole notch cut into the top of the ink
+ * band, echoing the logo's open-padlock shackle at seam-marker scale
+ * instead of the small section-intro scale above.
+ */
+section.bg-brand-primary + section.bg-brand-secondary {
+  position: relative;
+}
+
+section.bg-brand-primary + section.bg-brand-secondary::before {
+  content: "";
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 32px;
+  border: 3px solid var(--color-brand-tint);
+  border-bottom: none;
+  border-radius: 28px 28px 0 0;
+  background-color: var(--color-brand-secondary);
+  z-index: 1;
+}
+
+/*
+ * A small, quiet footer watermark — the same open-arch outline, large and
+ * low-opacity, tucked into the corner rather than competing with the
+ * footer's actual content. `overflow: hidden` keeps it from ever creating
+ * horizontal scroll on a narrow viewport.
+ */
+footer.bg-brand-secondary {
+  position: relative;
+  overflow: hidden;
+}
+
+footer.bg-brand-secondary::after {
+  content: "";
+  position: absolute;
+  right: -24px;
+  bottom: -24px;
+  width: 160px;
+  height: 92px;
+  border: 6px solid var(--color-brand-tint);
+  border-bottom: none;
+  border-radius: 80px 80px 0 0;
+  opacity: 0.12;
+  pointer-events: none;
+}
