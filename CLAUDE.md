@@ -1410,6 +1410,31 @@ services (Website Design, SEO) are.
   explicitly per client at Phase 1 (site-structure-planner-supabase),
   not by default.
 
+## Real webfont loading is data-driven, not a per-client file edit (`business.google_fonts_url`, synced from the template 2026-09-07)
+
+`BaseLayout.astro` used to have no webfont loading at all in the shared
+template — this repo (and, independently, Counselor Marketing Co.'s own)
+had each hand-written the same `<link rel="preconnect">`/font `<link>`
+pair straight into its own copy of `BaseLayout.astro` to load its real
+brand fonts, on a file that's otherwise meant to be identical across
+every site.
+
+- **`business.google_fonts_url`** (nullable `text`,
+  `0033_google_fonts_url.sql`) now holds the exact Google Fonts CSS2 URL
+  — set on this site's row to
+  `https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700;800;900&display=swap`,
+  the same URL this repo's `BaseLayout.astro` used to hardcode.
+  `BaseLayout.astro` itself was replaced with the template's version
+  (verified byte-identical via `diff`) — it now renders the font tags
+  itself whenever this column is set, so this file needs zero per-client
+  changes and can't drift on this axis again.
+- This repo's `OptimizedImage.astro` already matched the template's
+  fixed version (it was created from a template snapshot after that fix
+  landed) — no change needed here, unlike Counselor Marketing Co.'s repo,
+  which was still on the pre-fix version. Worth an occasional `diff -rq`
+  of this repo's `src/` against the template's to confirm that stays
+  true as both repos keep evolving independently.
+
 ## Generating a logo from a CSS wordmark
 
 If a client's brand is wordmark-only (explicitly no pictorial icon mark)
