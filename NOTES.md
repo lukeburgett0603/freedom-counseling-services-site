@@ -907,6 +907,31 @@ existing blog posts as-is, keep the category structure.
   About page's team section vs. "Student Counselor" on the Child & Teen
   Counseling page's byline. Same person, inconsistent title on their own
   old site.
+- **Nurture emails are built but not sending yet — waiting on Tony
+  Gore's go-ahead (2026-09-06).** The lead magnet ("5 Things to Know
+  Before Your First Counseling Session") is live, real-tested (a real
+  submission correctly downloaded the PDF and created a `leads` row with
+  `lead_magnet_id` set, `sequence_next_step: 1`), and all 4 nurture
+  email steps have real content in `lead_magnet_sequence_steps`. What's
+  missing is the sending infrastructure: no Resend account/subdomain
+  verified yet, no `NURTURE_CRON_SECRET`/`NURTURE_RESEND_API_KEY`/
+  `NURTURE_SENDER_EMAIL` secrets set, no Supabase Cron job configured.
+  Luke is deliberately holding off on the Resend/DNS setup specifically
+  until Tony (the practice owner) signs off, since it touches the real
+  `freedomcounselingservices.org` domain's DNS — this does **not**
+  require the Squarespace-to-GitHub-Pages domain migration to happen
+  first (a subdomain used only for email sending, e.g.
+  `updates.freedomcounselingservices.org`, doesn't touch whatever DNS
+  records currently serve the root domain's web traffic). Once
+  permission is granted: verify the Resend subdomain, set the 3 secrets,
+  configure the Cron job. The existing test lead needs no resubmission —
+  it'll pick up automatically once sending is live.
+- **Two of the 4 nurture email steps were edited after being drafted
+  and now contain writing-voice tics that were deliberately removed
+  elsewhere** (see `feedback_writing_voice_ai_tics.md` in session
+  memory) — step 3 has "Honestly, that happens sometimes," step 4 has
+  "a few real tools." Minor, not urgent, but worth a cleanup pass next
+  time that content is touched.
 
 **Resolved (2026-09-03)**: therapist-vs-counselor is decided per page
 (see the keyword table above); the hub/pillar pages use a new, distinct
