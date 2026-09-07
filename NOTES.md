@@ -5,6 +5,33 @@ that don't belong in the shared template. Never synced in either
 direction — see `CLAUDE.md`'s "Where client-specific decisions get
 written down" note.
 
+## StoryBrand section split — content migration (2026-09-07)
+
+The template-wide "StoryBrand section-by-section copy editing" feature
+(see the template repo's `CLAUDE.md` for the full feature) needed every
+existing `Homepage`/`Counselor Profile` page's `copy` split by hand into
+the 5 new `storybrand_*` columns — this site has 6 such pages (Home + 5
+counselor bios), 0 `Service Page` rows. Each bio's existing 3-paragraph
+structure ("Who X works with" / "X's approach" / "Getting started with
+X") mapped cleanly: `storybrand_problem` ← who-they-help paragraph,
+`storybrand_guide_empathy` ← approach paragraph, `storybrand_pitch` ←
+getting-started paragraph. **`storybrand_success`/`storybrand_failure`
+were left blank on all 5 bios** — none of the original bios had a
+distinct success-vision or stakes-of-inaction paragraph, and nothing was
+invented to fill them. The Homepage's existing "Waiting rarely makes it
+easier..." closing paragraph mapped to `storybrand_failure` (it already
+paired stakes-of-waiting with a soft close, matching that field's
+intended role). `copy` was set to `null` on all 6 pages once split —
+migrated via a disposable agency Supabase session, verified via a direct
+REST read afterward, session deleted after.
+
+**Real opportunity, not a defect**: since Success/Failure are genuinely
+empty on every counselor bio, a future content pass adding a short,
+honest "what changes for you" (Success) and "what it costs to keep
+waiting" (Failure) line to each bio would round out the StoryBrand arc
+these pages are now structured to carry — flagged here rather than
+invented during the migration itself.
+
 ## Visual redesign (2026-09-04)
 
 Client created a new standalone Claude skill, `counseling-website-designer`
