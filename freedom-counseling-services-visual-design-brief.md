@@ -195,15 +195,41 @@ testimonial to an inset card (light gold tint, not full-bleed), reserving
 genuine full-bleed treatment for the CTA and lead magnet only, the two
 moments per page that should actually carry that much weight.
 
-## 10. Arc motif — restore the original scope, don't invent a new one
+## 10. Arc motif — the real fix isn't a CSS selector change
 
 Per your direct feedback that the arc reads as redundant on lighter pages:
-this is the original spec reasserting itself, not a new restriction.
-**Recommended, pending approval**: restrict `.prose h3::before` back to
-`.prose h2::before` only, exactly as §3 originally specified — H3-level
-sub-headings (like "Find Peace," "Gain Clarity," "Move Toward Hope" inside
-one StoryBrand section) shouldn't each get their own arch; only genuine
-major H2 section openings should.
+this section's original recommendation ("restrict `.prose h3::before` back
+to `.prose h2::before` only") turned out to be wrong once checked against
+real content, not just against the original brief's own written spec —
+**revised before implementation, not applied as originally written**.
+
+Checked directly against the live Supabase data: every Service Hub page's
+`copy` field (the site's real long-form content — "When you're carrying it
+alone," "What it feels like from the inside," etc.) uses **only** `###`
+(H3) for its 8 real section headings — zero `##`/H2s anywhere. `lib/
+markdown.ts`'s own comment already documented this convention (a single
+`##` "opening hook" with no TOC entry, `###` for every actual section).
+Restricting the arc to H2-only as literally proposed would have removed it
+from every genuine section heading on every long-form page site-wide —
+a much larger and clearly unintended regression, not the fix you asked for.
+
+The redundancy you flagged is specific to one narrow pattern: a short,
+inline 3-4 item benefit list (Homepage's "Find Peace / Gain Clarity / Move
+Toward Hope," each its own one-line H3 immediately following the real
+section's own H2 — "A Healthier Way Forward Is Possible" — confirmed by
+reading the actual stored markdown). **Implemented instead**: a new
+`extractShortBenefitList()` helper (`lib/markdown.ts`) detects exactly
+this shape — a short run of 3-4 "H3 + one short paragraph" pairs — and
+pulls it out of flowing prose into a real `FeatureGrid` card grid (see §11
+below), the same way `plan_steps`/`faqs`/`concerns` already get pulled out
+of prose elsewhere on this site. Once that content is a card grid instead
+of `.prose` markup, the arc-motif selector no longer touches it at all —
+solving the actual complaint without touching `global.css`'s H2/H3
+selector, which stays exactly as it was so every real section heading on
+every long-form page keeps its arc. Wired into every template that renders
+a StoryBrand field (`Homepage.astro`, `ServicePage.astro`,
+`CounselorProfile.astro`) via a new `StoryBrandSection.astro` wrapper
+component, template-level since none of this is Freedom-specific.
 
 ## 11. The three-item benefit lists need a real card treatment
 
@@ -213,9 +239,20 @@ section) is structurally identical to "Why families choose us"
 statements — but currently renders as three plain stacked paragraphs
 instead of cards. Same underlying issue as §5/§6.2's Service Hub finding:
 content that should get `FeatureGrid`'s card treatment is still sitting in
-flowing prose. **Recommended, pending approval**: apply the same card
-pattern here, and anywhere a similar short list appears inside a
-`storybrand_success`/`storybrand_pitch` field.
+flowing prose.
+
+**Done (2026-09-07)**: `lib/markdown.ts`'s `extractShortBenefitList()`
+detects a run of 3-4 "H3 + short paragraph" pairs inside any markdown
+field and splits the field into (real prose before) + (a `FeatureGrid`
+card grid) + (real prose after) — conservative by design, so a long-form
+`copy` field with 8 real H3 sections (none of them short one-liners) never
+triggers it and renders exactly as before. `StoryBrandSection.astro`
+wraps this so every template rendering a StoryBrand field gets it for
+free: `Homepage.astro`, `ServicePage.astro`, `CounselorProfile.astro`.
+`FeatureGrid.astro`'s `heading` prop was made optional for this — the
+extracted card grid sits right under its own section's real heading
+(already rendered as part of the "before" prose), so a second heading
+here would duplicate it.
 
 ## 12. Hero style: three inconsistent treatments across the site
 
@@ -252,13 +289,21 @@ From the original brief, still outstanding:
 3. A small footer arch watermark.
 
 New from this revision:
-4. Restrict the arc motif back to H2 only (restoring the original scope).
+4. ~~Restrict the arc motif back to H2 only~~ — **implemented differently
+   than proposed, see §10**: the redundancy is fixed by extracting the
+   short benefit-list pattern into real cards, not by changing the CSS
+   selector (which would have stripped the arc from every real section
+   heading site-wide). Functionally done.
 5. Constrain the testimonial to an inset card instead of full-bleed,
-   restoring the original "one high-contrast band per page" rule.
+   restoring the original "one high-contrast band per page" rule. **Done.**
 6. Apply `FeatureGrid`'s card treatment to the Homepage Success section's
-   3-item list (and any similar list inside a StoryBrand field).
+   3-item list (and any similar list inside a StoryBrand field). **Done**
+   — generalized via `StoryBrandSection.astro` + `extractShortBenefitList()`,
+   wired into every template rendering a StoryBrand field, not just
+   Homepage.
 7. Keep overlay hero reserved for Homepage/About; refine the default hero
    instead of extending overlay everywhere.
 
-Nothing above is implemented yet except the two bug fixes in §8, which
-were bugs, not design decisions, and didn't need separate sign-off.
+Remaining: 1, 2, 3, 7. Items 4-6 done as of this pass (2026-09-07);
+the two bug fixes in §8 were done earlier and didn't need separate
+sign-off.
