@@ -233,6 +233,21 @@ body {
  * photo. `bg-brand-secondary` stays on the <section> itself as a no-JS
  * fallback (no image_url) and to keep the CTA-to-LeadMagnet arch-notch
  * seam selector below matching.
+ *
+ * Real bug fixed here (2026-09-09): the photo layer used to live on this
+ * same element's `::before`, but `section.bg-brand-primary +
+ * section.bg-brand-secondary::before` (the arch-notch seam divider two
+ * rules down) targets that exact same pseudo-element with higher
+ * specificity (two classes + two type selectors vs. one class here) —
+ * on any page where LeadMagnet directly follows the maroon CTA band
+ * (every template that renders both), that rule's `top`/`left`/`width`/
+ * `height` silently won, squeezing the full-bleed photo into the
+ * notch's tiny 56×32px arch box instead of covering the section, with
+ * the section's own solid ink fallback showing everywhere else. Fixed
+ * by moving the ink wash + photo onto `::after` as two stacked
+ * background layers (gradient wash painted over the photo in one
+ * `background-image` list) — `::before` stays untouched and free for
+ * the arch-notch rule alone, on this class and any future one.
  */
 .lmv2-photo {
   position: relative;
@@ -240,22 +255,15 @@ body {
   background-color: var(--color-brand-secondary);
 }
 
-.lmv2-photo::before {
-  content: "";
-  position: absolute;
-  inset: -20px;
-  background-image: var(--lm-photo-url, none);
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.6) saturate(1.1);
-  z-index: 0;
-}
-
 .lmv2-photo::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(43, 33, 28, 0.35);
+  background-image: linear-gradient(rgba(43, 33, 28, 0.35), rgba(43, 33, 28, 0.35)), var(--lm-photo-url, none);
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  filter: brightness(0.6) saturate(1.1);
   z-index: 0;
 }
 
