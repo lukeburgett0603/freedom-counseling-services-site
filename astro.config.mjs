@@ -13,10 +13,31 @@ import sitemap from '@astrojs/sitemap';
 // to `/<repo-name>` — every internal link already goes through
 // src/lib/url.ts's withBase() to pick this up automatically. Once a custom
 // domain is added, set `site` to that domain and `base` back to '/'.
+//
+// Freedom Counseling Services' real, already-indexed domain
+// (freedomcounselingservices.org, DA 15, already ranking #4 for "christian
+// counseling louisville ky") replaced the github.io placeholder 2026-09-09,
+// migrating off the client's old Squarespace site. `redirects` below covers
+// every old Squarespace URL that doesn't share this site's slug — GitHub
+// Pages can't serve real server-side 301s (pure static hosting), so these
+// render as Astro's static meta-refresh + JS redirect pages instead. If the
+// domain is later put behind Cloudflare, add true 301 Redirect Rules there
+// for the same paths (stronger ranking-equity signal); until then these are
+// what protect the existing ranking from a hard 404 after cutover.
 export default defineConfig({
-  site: 'https://lukeburgett0603.github.io',
-  base: '/freedom-counseling-services-site',
+  site: 'https://freedomcounselingservices.org',
+  base: '/',
   trailingSlash: 'never',
+  redirects: {
+    '/home': '/',
+    '/our-counselors': '/counselors',
+    '/services-and-fees': '/services',
+    '/schedule-an-appointment': '/contact',
+    '/appointment-inquiry': '/contact',
+    '/location': '/contact',
+    '/careers': '/contact',
+    '/read-me-five': '/',
+  },
   integrations: [
     sitemap({
       // /admin/* is the internal, auth-gated admin area — never
