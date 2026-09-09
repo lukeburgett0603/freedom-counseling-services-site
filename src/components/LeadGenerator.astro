@@ -62,30 +62,19 @@ const {
   defaultCounselorId,
 } = Astro.props;
 
-const Wrapper = embedded ? 'div' : 'section';
 ---
 
-<Wrapper
-  id={embedded ? undefined : 'lead-generator'}
-  class:list={[
-    embedded
-      ? [
-          'rounded-lg p-6',
-          // The frosted card's background is `.lead-card-frosted`
-          // (global.css) — a soft top-to-bottom fade picked via
-          // Impeccable Live, replacing a flat bg-white/90 wash.
-          frosted ? 'lead-card-frosted border border-white/50 shadow-lg backdrop-blur-lg' : 'border border-black/5 bg-white shadow-md',
-        ]
-      : 'bg-white py-14',
-  ]}
->
-  <div class:list={[embedded ? '' : 'mx-auto max-w-xl px-6']}>
-    <h2
-      class:list={[
-        'mb-4 text-center font-[family-name:var(--font-heading)] font-extrabold tracking-tight text-brand-ink',
-        embedded ? 'text-lg' : 'mb-6 text-2xl',
-      ]}
-    >
+{embedded ? (
+  <div
+    class:list={[
+      'rounded-lg p-6',
+      // The frosted card's background is `.lead-card-frosted`
+      // (global.css) — a soft top-to-bottom fade picked via
+      // Impeccable Live, replacing a flat bg-white/90 wash.
+      frosted ? 'lead-card-frosted border border-white/50 shadow-lg backdrop-blur-lg' : 'border border-black/5 bg-white shadow-md',
+    ]}
+  >
+    <h2 class="mb-4 text-center font-[family-name:var(--font-heading)] font-extrabold tracking-tight text-brand-ink text-lg">
       {heading}
     </h2>
     <form
@@ -93,13 +82,6 @@ const Wrapper = embedded ? 'div' : 'section';
       data-source-page={slug}
       data-collect-website={collectWebsiteUrl ? 'true' : 'false'}
     >
-      {/* Labels are real, visible text — not just placeholders, which
-          disappear the moment a field is filled or autofilled. Each
-          input is nested inside its <label> (implicit association)
-          rather than paired via id/for, since this component can render
-          more than once per page and a hand-picked id would collide
-          across instances — same reasoning this project already applies
-          to the form's own .lead-form class wiring below. */}
       <label class="block text-sm font-medium text-slate-700">
         Name
         <input
@@ -174,16 +156,69 @@ const Wrapper = embedded ? 'div' : 'section';
       >
         {submitText}
       </button>
-      {/* mx-auto max-w-xs: this small caption text sits inside the full
-          max-w-xl form width in the bottom, non-embedded layout — at
-          text-xs that stretches to ~88 characters/line with no cap of
-          its own. Narrowing just this paragraph keeps it readable as a
-          caption without touching the form's own field width. */}
       {responseTimeNote && <p class="mx-auto max-w-xs text-center text-xs text-slate-500">{responseTimeNote}</p>}
       <p class="lead-form-status text-center text-sm" role="status"></p>
     </form>
   </div>
-</Wrapper>
+) : (
+  <section id="lead-generator" class="lead-generator-band py-16">
+    <div class="mx-auto max-w-xl px-6">
+      <div class="lead-generator-card rounded-lg border border-black/5 bg-white p-8 shadow-md">
+        <h2 class="mb-6 text-center font-[family-name:var(--font-heading)] font-extrabold tracking-tight text-brand-ink text-2xl">
+          {heading}
+        </h2>
+        <form
+          class="lead-form space-y-3"
+          data-source-page={slug}
+          data-collect-website={collectWebsiteUrl ? 'true' : 'false'}
+        >
+          <label class="block text-sm font-medium text-slate-700">
+            Name
+            <input name="name" type="text" placeholder="Jane Smith" required class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5" />
+          </label>
+          <label class="block text-sm font-medium text-slate-700">
+            Email
+            <input name="email" type="email" placeholder="jane@example.com" required class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5" />
+          </label>
+          {!compact && (
+            <label class="block text-sm font-medium text-slate-700">
+              Phone <span class="font-normal text-slate-400">(optional)</span>
+              <input name="phone" type="tel" placeholder="(555) 123-4567" class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5" />
+            </label>
+          )}
+          {collectWebsiteUrl && (
+            <label class="block text-sm font-medium text-slate-700">
+              Current website <span class="font-normal text-slate-400">(optional — skip if you don't have one yet)</span>
+              <input name="existing_website_url" type="url" placeholder="https://" class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5" />
+            </label>
+          )}
+          {collectCounselorPreference && counselors.length > 0 && (
+            <label class="block text-sm font-medium text-slate-700">
+              Select a Counselor
+              <select name="preferred_counselor_page_id" class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5 text-slate-700">
+                <option value="" selected={!defaultCounselorId}>Help me choose</option>
+                {counselors.map((counselor) => (
+                  <option value={counselor.id} selected={counselor.id === defaultCounselorId}>{counselor.title}</option>
+                ))}
+              </select>
+            </label>
+          )}
+          {!compact && (
+            <label class="block text-sm font-medium text-slate-700">
+              How can we help?
+              <textarea name="message" placeholder="Tell us a little about what's going on..." rows="4" class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5"></textarea>
+            </label>
+          )}
+          <button type="submit" class="w-full rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md">
+            {submitText}
+          </button>
+          {responseTimeNote && <p class="mx-auto max-w-xs text-center text-xs text-slate-500">{responseTimeNote}</p>}
+          <p class="lead-form-status text-center text-sm" role="status"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+)}
 
 <script>
   // A direct REST call instead of importing @supabase/supabase-js here:

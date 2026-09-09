@@ -22,14 +22,29 @@ const { quote, author, role } = Astro.props;
   section-wide background, freeing genuine full-bleed treatment for the
   one or two moments per page that should actually carry that weight.
 */}
+
 <section class="py-14">
-  <div class="mx-auto max-w-2xl px-6">
-    <blockquote class="rounded-lg border border-black/5 bg-brand-tint/40 p-8 text-center shadow-sm sm:p-10">
-      <span class="font-[family-name:var(--font-heading)] text-5xl font-extrabold leading-none text-brand-accent" aria-hidden="true">&ldquo;</span>
-      <p class="mt-2 font-[family-name:var(--font-heading)] text-xl font-medium text-brand-ink">{quote}</p>
+  <div class="mx-auto grid max-w-5xl items-center gap-10 px-6 md:grid-cols-2">
+    <div>
+      <h2 class="font-[family-name:var(--font-heading)] text-3xl font-medium text-brand-ink">
+        Real stories from real clients.
+      </h2>
+      <div class="mt-4 flex max-w-md items-start gap-3">
+        <span class="mt-2 h-px w-8 shrink-0 bg-brand-tint" aria-hidden="true"></span>
+        <p class="text-base text-slate-600">
+          Here's what others have to say about Freedom Counseling Services.
+        </p>
+      </div>
+    </div>
+
+    <blockquote class="rounded-lg border border-black/5 bg-brand-tint/40 p-8 shadow-sm">
+      <span class="font-[family-name:var(--font-heading)] text-4xl font-extrabold leading-none text-brand-accent" aria-hidden="true">&ldquo;</span>
+      <p class="mt-2 font-[family-name:var(--font-heading)] text-lg font-medium text-brand-ink">{quote}</p>
       <footer class="mt-4 text-sm font-semibold text-brand-primary">
         {author}{role && <span class="font-normal text-slate-600">, {role}</span>}
       </footer>
     </blockquote>
+
   </div>
 </section>
+

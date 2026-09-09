@@ -19,37 +19,37 @@ const magnet = await getLeadMagnetForPage(pageId);
 
 {
   magnet && (
-    <section class="bg-brand-secondary py-14">
-      <div class="mx-auto max-w-5xl overflow-hidden rounded-2xl bg-brand-ink shadow-lg">
+    <section
+      class="lmv2-photo relative overflow-hidden bg-brand-secondary py-14"
+      style={magnet.image_url ? `--lm-photo-url: url(${magnet.image_url});` : undefined}
+    >
+      <div class="relative z-10 mx-auto max-w-5xl overflow-hidden rounded-2xl shadow-lg">
         <div class="grid gap-0 md:grid-cols-2">
-          <div class="p-8 md:p-10">
-            <h2 class="mb-4 font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-white md:text-3xl">
+          <div class="lmv2-panel p-8 md:p-10">
+            <h2 class="mb-4 font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-brand-ink md:text-3xl">
               {magnet.title}
             </h2>
-            <p class="mb-6 text-slate-200">{magnet.description}</p>
+            <p class="mb-6 text-brand-ink/80">{magnet.description}</p>
 
             <form class="lead-magnet-form space-y-3" data-magnet-id={magnet.id} data-file-url={magnet.file_url} data-file-name={magnet.file_name}>
-              {/* Visible labels, not placeholder-only — see LeadGenerator.astro
-                  for the same fix and why (placeholder text disappears the
-                  moment a field is filled). */}
-              <label class="block text-sm font-medium text-slate-200">
+              <label class="block text-sm font-medium text-brand-ink/90">
                 Name
                 <input
                   name="name"
                   type="text"
                   placeholder="Jane Smith"
                   required
-                  class="mt-1 w-full rounded-md border border-white/20 bg-white/95 px-4 py-2.5 text-brand-ink placeholder:text-slate-500"
+                  class="mt-1 w-full rounded-md border border-brand-ink/20 bg-white px-4 py-2.5 text-brand-ink placeholder:text-slate-500"
                 />
               </label>
-              <label class="block text-sm font-medium text-slate-200">
+              <label class="block text-sm font-medium text-brand-ink/90">
                 Email
                 <input
                   name="email"
                   type="email"
                   placeholder="jane@example.com"
                   required
-                  class="mt-1 w-full rounded-md border border-white/20 bg-white/95 px-4 py-2.5 text-brand-ink placeholder:text-slate-500"
+                  class="mt-1 w-full rounded-md border border-brand-ink/20 bg-white px-4 py-2.5 text-brand-ink placeholder:text-slate-500"
                 />
               </label>
               <button
@@ -58,14 +58,14 @@ const magnet = await getLeadMagnetForPage(pageId);
               >
                 Send Me the Guide
               </button>
-              <p class="lead-magnet-status text-center text-sm text-slate-300" role="status"></p>
-              <p class="text-center text-xs text-slate-400">
+              <p class="lead-magnet-status text-center text-sm text-brand-ink/70" role="status"></p>
+              <p class="text-center text-xs text-brand-ink/60">
                 You'll also get a few related emails to help you get the most from this guide — unsubscribe anytime.
               </p>
             </form>
 
             <div class="lead-magnet-success hidden">
-              <p class="mb-3 text-slate-200">Thanks! Your download is ready.</p>
+              <p class="mb-3 text-brand-ink/80">Thanks! Your download is ready.</p>
               <a
                 href={magnet.file_url}
                 download={magnet.file_name}
@@ -75,7 +75,7 @@ const magnet = await getLeadMagnetForPage(pageId);
               </a>
             </div>
 
-            <p class="mt-3 text-xs text-slate-400">Your privacy is important to us.</p>
+            <p class="mt-3 text-xs text-brand-ink/60">Your privacy is important to us.</p>
           </div>
 
           {magnet.image_url && (

@@ -77,11 +77,22 @@ body {
    Typography's defaults are noticeably lighter/looser than the rest of the
    type system otherwise. Weight 500, not 800 — see the heading-weight rule
    above; body copy's own H2/H3s get the same soft Fraunces treatment as
-   every other heading on the site, not a heavier one. */
+   every other heading on the site, not a heavier one.
+
+   Real bug fixed here: this rule set weight/tracking but never set
+   font-family, so Typography's default (inherit the surrounding body
+   font) left every markdown-rendered H2/H3 — page copy, blog posts, any
+   long-form `.prose` content — rendering in Inter while every hand-coded
+   component heading (FAQ, CTA, PlanSteps, FeatureGrid, etc.) used
+   Fraunces via `font-[family-name:var(--font-heading)]`. Found via
+   Impeccable Live steer (2026-09-09): "many h2 headers use the Inter
+   font creating inconsistency." */
 .prose h2,
 .prose h3 {
+  font-family: var(--font-heading);
   font-weight: 500;
   letter-spacing: normal;
+  font-optical-sizing: auto;
 }
 
 /* A TableOfContents.astro link jumps straight to `#<id>`, which by default
@@ -194,6 +205,63 @@ body {
  */
 .lead-card-frosted {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%);
+}
+
+/*
+ * The standalone (non-embedded) LeadGenerator's own band — picked via
+ * Impeccable Live (2026-09-09): a subtle warm-gold wash behind the form's
+ * white card, instead of the card sitting flush on plain white with no
+ * separation from its own section. Gives the site's key conversion action
+ * real visual presence without competing with the LeadMagnet/CTA bands'
+ * heavier full-saturation treatment.
+ */
+.lead-generator-band {
+  background-color: rgba(211, 184, 148, 0.22);
+}
+
+.lead-generator-card {
+  border-radius: 12px;
+}
+
+/*
+ * LeadMagnet's outer band — picked via Impeccable Live (2026-09-09,
+ * superseding an earlier blurred-photo-behind-solid-ink-card pass from
+ * the same day): the guide's own photo stays crisp (not blurred) behind
+ * a moderate ink wash, and the copy/form half becomes a warm gold-tinted
+ * glass panel instead of solid ink — the gold reads as its own surface,
+ * not just an accent, while the photo half stays a clear, unobscured
+ * photo. `bg-brand-secondary` stays on the <section> itself as a no-JS
+ * fallback (no image_url) and to keep the CTA-to-LeadMagnet arch-notch
+ * seam selector below matching.
+ */
+.lmv2-photo {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-brand-secondary);
+}
+
+.lmv2-photo::before {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  background-image: var(--lm-photo-url, none);
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.6) saturate(1.1);
+  z-index: 0;
+}
+
+.lmv2-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(43, 33, 28, 0.35);
+  z-index: 0;
+}
+
+.lmv2-panel {
+  position: relative;
+  background: rgba(211, 184, 148, 0.92);
 }
 
 /*
