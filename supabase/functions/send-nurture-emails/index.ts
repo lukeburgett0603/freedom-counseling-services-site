@@ -63,6 +63,31 @@ function renderEmailBody(markdown: string): string {
     .join('\n');
 }
 
+// The lead's own `name` field is whatever they typed into the lead-magnet
+// form (see LeadMagnet.astro) — a full name in the common case, but never
+// validated to be one, so this takes just the first whitespace-separated
+// token rather than assuming a "first last" shape. Falls back to "there"
+// (matching a normal "Hi there," greeting) when name is missing/blank,
+// since a step's subject/body can legitimately reference {{first_name}}
+// and every lead row that reaches this function already required a name
+// on submission — this fallback is a belt-and-suspenders case, not the
+// expected path.
+function firstNameOf(name: string | null): string {
+  const first = name?.trim().split(/\s+/)[0];
+  return first || 'there';
+}
+
+// Merge tags a step's subject/body can reference — admin-authored via the
+// same rich-text editor as the rest of the sequence, so this substitution
+// has to run on the raw markdown/plain text before renderEmailBody() (and
+// before the subject is used as-is), not on the rendered HTML. {{name}}
+// intentionally isn't offered here — a full name reads oddly mid-sentence
+// ("Hi Jane Smith,") in a way a first name doesn't; add it later only if
+// a real request for it shows up.
+function applyMergeTags(text: string, firstName: string): string {
+  return text.replace(/\{\{\s*first_name\s*\}\}/gi, firstName);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
@@ -103,7 +128,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: leads, error: leadsError } = await supabase
     .from('leads')
-    .select('id, email, lead_magnet_id, created_at, sequence_next_step')
+    .select('id, name, email, lead_magnet_id, created_at, sequence_next_step')
     .not('lead_magnet_id', 'is', null)
     .is('sequence_unsubscribed_at', null)
     .lte('sequence_next_step', SEQUENCE_SCHEDULE_DAYS.length);
@@ -145,11 +170,12 @@ Deno.serve(async (req: Request) => {
       continue;
     }
 
+    const firstName = firstNameOf(lead.name);
     const unsubscribeUrl = `${supabaseUrl}/functions/v1/unsubscribe-lead?lead=${lead.id}`;
     const crisisLine = showCrisisResources
       ? '<p style="font-size:12px;color:#888;">If you are in a mental health crisis, call or text 988 to reach the Suicide &amp; Crisis Lifeline, available 24/7.</p>\n'
       : '';
-    const html = `${renderEmailBody(step.body)}
+    const html = `${renderEmailBody(applyMergeTags(step.body, firstName))}
 <hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">
 ${crisisLine}<p style="font-size:12px;color:#888;">
   ${mailingAddress ? mailingAddress + '<br>' : ''}
@@ -162,7 +188,7 @@ ${crisisLine}<p style="font-size:12px;color:#888;">
       body: JSON.stringify({
         from: fromHeader,
         to: lead.email,
-        subject: step.subject,
+        subject: applyMergeTags(step.subject, firstName),
         html,
         // One-click unsubscribe via headers (RFC 8058), not just the body
         // link above — Gmail/Yahoo's bulk-sender requirements specifically
