@@ -1,0 +1,11 @@
+-- Cloudflare Web Analytics beacon token — the public, client-side script
+-- token from Cloudflare's Web Analytics setup (dashboard: Analytics & Logs
+-- -> Web Analytics -> Add a site), not a secret (it's embedded directly in
+-- every page's public HTML, same trust level as a Google Analytics
+-- measurement ID). Nullable: a client with no analytics tool configured
+-- just gets no beacon script rendered, same as google_fonts_url's "unset
+-- means skip it" pattern above. The account-level API token used to read
+-- stats back out (Tier 2 of the admin Leads and analytics dashboard) is a
+-- real secret and lives as a Supabase Edge Function secret
+-- (CLOUDFLARE_ANALYTICS_API_TOKEN / CLOUDFLARE_ACCOUNT_ID), never here.
+alter table business add column cloudflare_beacon_token text;

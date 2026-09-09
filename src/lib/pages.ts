@@ -170,6 +170,10 @@ export interface Business {
   // <link rel="stylesheet"> when set, null falls back to the OS system
   // font. See 0033_google_fonts_url.sql.
   google_fonts_url: string | null;
+  // Cloudflare Web Analytics beacon token — public/client-side, not a
+  // secret. BaseLayout.astro renders the beacon script when set, renders
+  // nothing when null. See 0035_cloudflare_analytics_token.sql.
+  cloudflare_beacon_token: string | null;
   design_inspiration_urls: string[];
   brand_assets_status: 'provided' | 'not-provided';
   founding_year: number | null;

@@ -74,6 +74,20 @@ const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbChain, siteUrl);
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
     <SchemaScript schemas={[...pageSchemas, breadcrumbSchema]} />
+
+    {business.cloudflare_beacon_token && (
+      // Cloudflare Web Analytics — cookieless, privacy-respecting page-view
+      // tracking (no visitor-level tracking, per Cloudflare's own product
+      // description). Feeds the admin Leads and analytics dashboard's
+      // traffic section. The token itself is public/client-side, not a
+      // secret — same trust level as a GA measurement ID. See
+      // 0035_cloudflare_analytics_token.sql.
+      <script
+        type="module"
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token": "${business.cloudflare_beacon_token}"}`}
+      />
+    )}
   </head>
   <body class="pb-14 md:pb-0">
     <Header
