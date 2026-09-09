@@ -546,15 +546,48 @@ touching the client's real login — then delete both the test leads and
 the temp user afterward. Never leave test data in a client's live
 `leads` table, and never log in as the client to test something.
 
-**Planned, not yet built — add when there's a reason to (a second client,
-or a client asking for more):**
-
-- **Tier 2 — traffic (visitors, pageviews, top pages).** Needs an
-  analytics tool wired in (the site currently has none) — something
-  lightweight and privacy-respecting like Plausible or Cloudflare Web
-  Analytics, not GA4's weight/complexity for a small local-business site.
-  Pairs with lead volume to tell the real story: top-of-funnel traffic
-  next to bottom-of-funnel conversions.
+**Tier 2 — traffic (built 2026-09-09, first on Freedom Counseling
+Services).** Cloudflare Web Analytics, not Plausible or GA4 — cookieless,
+free, and (the real reason it won over Plausible) doesn't need the domain
+to be a Cloudflare zone, so it works alongside a domain whose DNS stays
+at the registrar. Two halves:
+- **The beacon script** (`BaseLayout.astro`, gated on the new nullable
+  `business.cloudflare_beacon_token`) is public/client-side — same trust
+  level as a GA measurement ID, not a secret. Set once per client via
+  Cloudflare dashboard → Analytics & Logs → Web Analytics → Add a site
+  (no zone/DNS change needed) → paste the token it gives you into this
+  column. Null means no beacon renders, same "unset means skip it"
+  pattern as `google_fonts_url`.
+- **Reading the stats back out needed a new Edge Function**
+  (`get-traffic-stats`) — the account-level Cloudflare API token
+  (`CLOUDFLARE_ANALYTICS_API_TOKEN`, scoped to **only** Account
+  Analytics: Read, plus `CLOUDFLARE_ACCOUNT_ID`) is a real secret and
+  can't reach the browser, same shape of problem `publish-site` already
+  solved for the GitHub token. Gated to owner/agency via the same
+  `admin_users` role check `publish-site`'s `invite` action uses,
+  matching `admin/leads.astro`'s own `{ ownerOnly: true }` page-level
+  gate — a staff login shouldn't be able to call this directly just
+  because the UI hides the button. Queries Cloudflare's GraphQL
+  Analytics API (`rumPageloadEventsAdaptiveGroups`, filtered by
+  `date_geq`/`date_leq`, `requestPath` as the top-pages dimension) —
+  every field name here was confirmed against the live schema with a
+  real test query before being relied on, not assumed from
+  documentation. Renders as a new section on `admin/leads.astro` (stat
+  cards, a 30-day daily bar chart, top pages) sitting above the existing
+  lead stats — hidden entirely, not shown empty, on any site where
+  analytics isn't configured or the call fails, same graceful-degrade
+  discipline as the Guide-downloads widget on that same page.
+- **The Cloudflare dashboard's own "Get started with Web Analytics"
+  wizard silently failed to advance past step 1 on a real attempt** —
+  clicking Done did nothing, no error shown. A page refresh and retrying
+  the exact same steps worked the second time; never identified a root
+  cause, so treat this as "sometimes just retry" rather than a settled
+  bug pattern worth working around specially.
+- **Verification pattern**: same throwaway-owner-login pattern as the
+  rest of this dashboard — created via the Admin API, used to get a real
+  access token, confirmed both a real successful call against live
+  Cloudflare data and the auth/role rejection paths (no header, anon key
+  as bearer), then deleted immediately after.
 - **Tier 3 — search rankings/impressions (Google Search Console data).**
   The most convincing "your SEO is working" evidence, but the most work:
   needs Search Console API access per client (OAuth/service account), and
