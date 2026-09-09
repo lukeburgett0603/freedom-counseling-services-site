@@ -159,7 +159,22 @@ ${crisisLine}<p style="font-size:12px;color:#888;">
     const sendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: fromHeader, to: lead.email, subject: step.subject, html }),
+      body: JSON.stringify({
+        from: fromHeader,
+        to: lead.email,
+        subject: step.subject,
+        html,
+        // One-click unsubscribe via headers (RFC 8058), not just the body
+        // link above — Gmail/Yahoo's bulk-sender requirements specifically
+        // check for this, and its absence is a real negative signal that
+        // pushes a legitimate sequence toward the Promotions tab or spam,
+        // separate from the CAN-SPAM-required body link (which stays, for
+        // recipients whose client doesn't support the header).
+        headers: {
+          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
+      }),
     });
 
     if (!sendRes.ok) {
