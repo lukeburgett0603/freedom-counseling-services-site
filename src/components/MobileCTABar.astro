@@ -20,8 +20,32 @@ const { telephone, ctaText = 'Get a Quote', ctaHref = '#lead-generator' } = Astr
     >
       Call Now
     </a>
-    <a href={ctaHref} class="flex-1 bg-brand-accent py-3 text-center font-semibold text-white">
+    <a href={ctaHref} class="mobile-cta-bar-link flex-1 bg-brand-accent py-3 text-center font-semibold text-white">
       {ctaText}
     </a>
   </div>
 )}
+
+<script>
+  // ctaHref defaults to '#lead-generator', an id only the bottom,
+  // non-embedded LeadGenerator carries — on a page whose Hero also
+  // embeds its own compact form (the overlay Hero style's frosted
+  // card), tapping this while that form is already on-screen used to
+  // teleport the visitor past it to a second, near-identical form far
+  // below. Instead: when more than one .lead-form exists on the page,
+  // scroll to whichever one is nearest the current viewport rather than
+  // always jumping to the anchor target. A page with only one form (the
+  // common case) falls through to normal anchor behavior unchanged.
+  document.querySelectorAll<HTMLAnchorElement>('.mobile-cta-bar-link').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const forms = Array.from(document.querySelectorAll<HTMLElement>('.lead-form'));
+      if (forms.length <= 1) return;
+
+      const nearest = forms.reduce((closest, form) =>
+        Math.abs(form.getBoundingClientRect().top) < Math.abs(closest.getBoundingClientRect().top) ? form : closest
+      );
+      event.preventDefault();
+      nearest.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+</script>

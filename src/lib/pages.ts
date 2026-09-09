@@ -200,6 +200,12 @@ export interface Business {
   // locked-with-a-suggestion — see 0011_content_permission_and_suggestions.sql
   // and CLAUDE.md's Admin CMS content-permission-tier section.
   content_permission_level: 'restricted' | 'full';
+  // Gates the 988 Suicide & Crisis Lifeline line in the nurture-email
+  // footer (send-nurture-emails) and, site-wide, in Footer.astro. Defaults
+  // true — see 0032_crisis_resource_line.sql and CLAUDE.md's "Nurture
+  // email crisis-resource line" section for why a non-counseling client
+  // like Counselor Marketing Co. must override this to false explicitly.
+  show_crisis_resources: boolean;
 }
 
 // Only content-complete pages are ever rendered — a page left at

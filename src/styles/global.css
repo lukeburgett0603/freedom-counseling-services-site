@@ -177,6 +177,26 @@ body {
 }
 
 /*
+ * Overlay Hero's text/form column gap — picked via Impeccable Live
+ * (2026-09-09): a touch more breathing room than the default 40px
+ * (`gap-10`) utility between the headline column and the frosted-glass
+ * form card.
+ */
+.hero-overlay-grid {
+  gap: 3rem;
+}
+
+/*
+ * LeadGenerator's frosted card background — picked via Impeccable Live
+ * (2026-09-09): a soft top-to-bottom fade (bright near the top, settling
+ * to translucent) instead of a flat white wash, so the card reads a touch
+ * more atmospheric sitting on top of the Hero overlay's photo.
+ */
+.lead-card-frosted {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%);
+}
+
+/*
  * Arch-shaped divider marking the one place two full-bleed bands sit
  * directly adjacent — CTA.astro (bg-brand-primary, maroon) immediately
  * followed by LeadMagnet.astro (bg-brand-secondary, ink), on every

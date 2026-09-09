@@ -80,16 +80,22 @@ const showAside = isOverlay ? Astro.slots.has('aside') : !imageUrl && Astro.slot
         creditUrl={imageCreditUrl}
       />
     </div>
-    <div class="absolute inset-0" style={`background-color: ${safeOverlayColor}; opacity: ${safeOverlayOpacity};`}></div>
-    <div class="relative mx-auto flex max-w-6xl flex-col items-start gap-10 px-6 md:flex-row">
+    {/* pointer-events-none: this tint sits after the image wrapper in DOM
+        order with no explicit z-index, so it paints over everything in
+        that wrapper — including OptimizedImage's Unsplash attribution
+        link. Without this, the link is visually dimmed AND unclickable,
+        breaking Unsplash's required-attribution terms on every overlay
+        hero with a real photo credit. */}
+    <div
+      class="pointer-events-none absolute inset-0"
+      style={`background: linear-gradient(to right, ${safeOverlayColor} 0%, ${safeOverlayColor} 35%, transparent 85%); opacity: ${safeOverlayOpacity};`}
+    ></div>
+    <div class="hero-overlay-grid relative mx-auto grid max-w-6xl grid-cols-1 items-center px-6 md:grid-cols-2">
       <div class="flex-1">
         <h1 class:list={['font-[family-name:var(--font-heading)] font-extrabold tracking-tight text-white', compact ? 'text-3xl' : 'text-4xl md:text-5xl']}>
           {h1}
         </h1>
         {subhead && <p class="mt-4 text-lg text-white/90">{subhead}</p>}
-        {/* No CTA button here when a form is already visible beside it —
-            same "don't compete with the visible form" rule as the
-            default layout below; the form itself is the CTA. */}
         {ctaText && !showAside && (
           <a
             href={ctaHref}
@@ -101,7 +107,7 @@ const showAside = isOverlay ? Astro.slots.has('aside') : !imageUrl && Astro.slot
         <slot />
       </div>
       {showAside && (
-        <div class="w-full flex-1 md:max-w-sm">
+        <div class="w-full">
           <slot name="aside" />
         </div>
       )}

@@ -150,6 +150,31 @@ export function extractShortBenefitList(markdown: string | null): SplitStoryBran
     bestLength = runLength;
   }
 
+  // A field that closes with exactly one more short heading+paragraph pair
+  // right after a full 3-item run — nothing else after it — reads as an
+  // orphaned closing thought sitting beside a visibly empty 4th grid slot
+  // (FeatureGrid lays its `benefits` out in a grid sized to fit up to
+  // four). Genuinely different from the "long-form page with H3 sections
+  // throughout" case this function otherwise guards against: it only
+  // fires when the trailing pair is the LAST content in the field, so it
+  // can't misfire partway through a real multi-section page. Unlike the
+  // run above, the trailing heading's depth isn't checked — a closing
+  // beat is often written as the field's own top-level H2, not an H3 like
+  // the three cards before it.
+  if (bestLength === 3) {
+    const trailingIndex = bestStart + bestLength * 2;
+    const trailingHeading = tokens[trailingIndex];
+    const trailingBody = tokens[trailingIndex + 1];
+    const isTrailingPair =
+      trailingHeading?.type === 'heading' &&
+      trailingBody?.type === 'paragraph' &&
+      (trailingBody as Tokens.Paragraph).text.length <= SHORT_LIST_MAX_ITEMS_LENGTH &&
+      trailingIndex + 2 >= tokens.length;
+    if (isTrailingPair) {
+      bestLength = 4;
+    }
+  }
+
   if (bestLength < SHORT_LIST_MIN_ITEMS || bestLength > SHORT_LIST_MAX_ITEMS) {
     return { beforeHtml: renderCopy(markdown), benefits: [], afterHtml: '' };
   }

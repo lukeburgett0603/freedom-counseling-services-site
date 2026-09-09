@@ -77,7 +77,10 @@ const isOverlayHero = page.hero_style === 'overlay' && !!page.images.hero;
     </Section>
   )}
   {page.storybrand_guide_empathy && (
-    <Section>
+    // tint: a subtle gold wash to tell this section apart from the
+    // Problem section right above it — back-to-back plain-cream Sections
+    // with no visual break read as one continuous wall of text.
+    <Section tint>
       <Fragment set:html={renderCopy(page.storybrand_guide_empathy)} />
     </Section>
   )}

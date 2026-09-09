@@ -18,6 +18,16 @@ const footerLinks = navPages
 function hrefFor(page: Page): string {
   return withBase(page.page_type === 'Homepage' ? '/' : `/${page.slug}`);
 }
+
+// Built as one string, not `{street_address}, {locality} {region} {zip}` —
+// three consecutive expression-space-expression pairs in the markup
+// silently lost their in-between spaces at compile time (confirmed live:
+// rendered as "LouisvilleKY40243"), while the first comma-space pair
+// didn't. One combined expression sidesteps whatever in Astro's compiler
+// causes that, rather than chasing it space by space.
+const fullAddress = business.street_address
+  ? `${business.street_address}, ${business.address_locality} ${business.address_region} ${business.postal_code}`
+  : null;
 ---
 
 <footer class="border-t border-slate-200 bg-brand-secondary text-slate-200">
@@ -41,16 +51,14 @@ function hrefFor(page: Page): string {
             </a>
           </p>
         )}
-        {business.street_address && (
+        {fullAddress && (
           <p class="text-sm">
             {business.google_maps_url ? (
               <a href={business.google_maps_url} target="_blank" rel="noopener" class="hover:text-white">
-                {business.street_address}, {business.address_locality} {business.address_region} {business.postal_code}
+                {fullAddress}
               </a>
             ) : (
-              <>
-                {business.street_address}, {business.address_locality} {business.address_region} {business.postal_code}
-              </>
+              fullAddress
             )}
           </p>
         )}
@@ -69,6 +77,13 @@ function hrefFor(page: Page): string {
         </nav>
       )}
     </div>
+    {business.show_crisis_resources && (
+      <p class="mt-8 border-t border-white/10 pt-6 text-center text-sm text-slate-200">
+        If you are in a mental health crisis, call or text{' '}
+        <a href="tel:988" class="font-semibold text-white hover:underline">988</a>
+        {' '}to reach the Suicide &amp; Crisis Lifeline, available 24/7.
+      </p>
+    )}
     <p class="mt-8 text-xs text-slate-400">
       &copy; {new Date().getFullYear()} {business.legal_name ?? business.display_name}. All rights reserved.
       {' · '}

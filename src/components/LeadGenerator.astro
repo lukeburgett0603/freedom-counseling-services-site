@@ -71,7 +71,10 @@ const Wrapper = embedded ? 'div' : 'section';
     embedded
       ? [
           'rounded-lg p-6',
-          frosted ? 'border border-white/30 bg-white/70 shadow-lg backdrop-blur-md' : 'border border-black/5 bg-white shadow-md',
+          // The frosted card's background is `.lead-card-frosted`
+          // (global.css) — a soft top-to-bottom fade picked via
+          // Impeccable Live, replacing a flat bg-white/90 wash.
+          frosted ? 'lead-card-frosted border border-white/50 shadow-lg backdrop-blur-lg' : 'border border-black/5 bg-white shadow-md',
         ]
       : 'bg-white py-14',
   ]}
@@ -90,56 +93,80 @@ const Wrapper = embedded ? 'div' : 'section';
       data-source-page={slug}
       data-collect-website={collectWebsiteUrl ? 'true' : 'false'}
     >
-      <input
-        name="name"
-        type="text"
-        placeholder="Name"
-        required
-        class="w-full rounded-md border border-slate-300 px-4 py-2"
-      />
-      <input
-        name="email"
-        type="email"
-        placeholder="Email"
-        required
-        class="w-full rounded-md border border-slate-300 px-4 py-2"
-      />
-      {!compact && (
+      {/* Labels are real, visible text — not just placeholders, which
+          disappear the moment a field is filled or autofilled. Each
+          input is nested inside its <label> (implicit association)
+          rather than paired via id/for, since this component can render
+          more than once per page and a hand-picked id would collide
+          across instances — same reasoning this project already applies
+          to the form's own .lead-form class wiring below. */}
+      <label class="block text-sm font-medium text-slate-700">
+        Name
         <input
-          name="phone"
-          type="tel"
-          placeholder="Phone (optional)"
-          class="w-full rounded-md border border-slate-300 px-4 py-2"
+          name="name"
+          type="text"
+          placeholder="Jane Smith"
+          required
+          class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5"
         />
+      </label>
+      <label class="block text-sm font-medium text-slate-700">
+        Email
+        <input
+          name="email"
+          type="email"
+          placeholder="jane@example.com"
+          required
+          class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5"
+        />
+      </label>
+      {!compact && (
+        <label class="block text-sm font-medium text-slate-700">
+          Phone <span class="font-normal text-slate-400">(optional)</span>
+          <input
+            name="phone"
+            type="tel"
+            placeholder="(555) 123-4567"
+            class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5"
+          />
+        </label>
       )}
       {collectWebsiteUrl && (
-        <input
-          name="existing_website_url"
-          type="url"
-          placeholder="Current website (optional — skip if you don't have one yet)"
-          class="w-full rounded-md border border-slate-300 px-4 py-2"
-        />
+        <label class="block text-sm font-medium text-slate-700">
+          Current website <span class="font-normal text-slate-400">(optional — skip if you don't have one yet)</span>
+          <input
+            name="existing_website_url"
+            type="url"
+            placeholder="https://"
+            class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5"
+          />
+        </label>
       )}
       {collectCounselorPreference && counselors.length > 0 && (
-        <select
-          name="preferred_counselor_page_id"
-          aria-label="Select a Counselor"
-          class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-700"
-        >
-          <option value="" selected={!defaultCounselorId}>Help me choose</option>
-          {counselors.map((counselor) => (
-            <option value={counselor.id} selected={counselor.id === defaultCounselorId}>
-              {counselor.title}
-            </option>
-          ))}
-        </select>
+        <label class="block text-sm font-medium text-slate-700">
+          Select a Counselor
+          <select
+            name="preferred_counselor_page_id"
+            class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5 text-slate-700"
+          >
+            <option value="" selected={!defaultCounselorId}>Help me choose</option>
+            {counselors.map((counselor) => (
+              <option value={counselor.id} selected={counselor.id === defaultCounselorId}>
+                {counselor.title}
+              </option>
+            ))}
+          </select>
+        </label>
       )}
       {!compact && (
-        <textarea
-          name="message"
-          placeholder="How can we help?"
-          rows="4"
-          class="w-full rounded-md border border-slate-300 px-4 py-2"></textarea>
+        <label class="block text-sm font-medium text-slate-700">
+          How can we help?
+          <textarea
+            name="message"
+            placeholder="Tell us a little about what's going on..."
+            rows="4"
+            class="mt-1 w-full rounded-md border border-slate-300 px-4 py-2.5"></textarea>
+        </label>
       )}
       <button
         type="submit"
@@ -147,7 +174,12 @@ const Wrapper = embedded ? 'div' : 'section';
       >
         {submitText}
       </button>
-      {responseTimeNote && <p class="text-center text-xs text-slate-500">{responseTimeNote}</p>}
+      {/* mx-auto max-w-xs: this small caption text sits inside the full
+          max-w-xl form width in the bottom, non-embedded layout — at
+          text-xs that stretches to ~88 characters/line with no cap of
+          its own. Narrowing just this paragraph keeps it readable as a
+          caption without touching the form's own field width. */}
+      {responseTimeNote && <p class="mx-auto max-w-xs text-center text-xs text-slate-500">{responseTimeNote}</p>}
       <p class="lead-form-status text-center text-sm" role="status"></p>
     </form>
   </div>
@@ -167,10 +199,16 @@ const Wrapper = embedded ? 'div' : 'section';
 
   document.querySelectorAll<HTMLFormElement>('.lead-form').forEach((form) => {
     const status = form.querySelector<HTMLElement>('.lead-form-status');
+    const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!status) return;
+      // Disable during send so a rapid double-tap (a real risk on mobile,
+      // where "did that work?" often means tapping again) can't create
+      // duplicate leads rows — re-enabled in both the success and error
+      // paths below, never left stuck disabled.
+      if (submitButton) submitButton.disabled = true;
       const formData = new FormData(form);
       status.textContent = 'Sending...';
 
@@ -202,7 +240,13 @@ const Wrapper = embedded ? 'div' : 'section';
       status.textContent = response.ok
         ? 'Thanks! We’ll be in touch soon.'
         : 'Something went wrong — please try again.';
-      if (response.ok) form.reset();
+      if (response.ok) {
+        form.reset();
+      } else if (submitButton) {
+        // Only re-enable on failure — a successful submit's form is done,
+        // and leaving it enabled invites a second, redundant lead row.
+        submitButton.disabled = false;
+      }
     });
   });
 </script>

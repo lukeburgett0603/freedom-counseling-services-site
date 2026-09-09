@@ -29,20 +29,29 @@ const magnet = await getLeadMagnetForPage(pageId);
             <p class="mb-6 text-slate-200">{magnet.description}</p>
 
             <form class="lead-magnet-form space-y-3" data-magnet-id={magnet.id} data-file-url={magnet.file_url} data-file-name={magnet.file_name}>
-              <input
-                name="name"
-                type="text"
-                placeholder="Name"
-                required
-                class="w-full rounded-md border border-white/20 bg-white/95 px-4 py-2.5 text-brand-ink placeholder:text-slate-500"
-              />
-              <input
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-                required
-                class="w-full rounded-md border border-white/20 bg-white/95 px-4 py-2.5 text-brand-ink placeholder:text-slate-500"
-              />
+              {/* Visible labels, not placeholder-only — see LeadGenerator.astro
+                  for the same fix and why (placeholder text disappears the
+                  moment a field is filled). */}
+              <label class="block text-sm font-medium text-slate-200">
+                Name
+                <input
+                  name="name"
+                  type="text"
+                  placeholder="Jane Smith"
+                  required
+                  class="mt-1 w-full rounded-md border border-white/20 bg-white/95 px-4 py-2.5 text-brand-ink placeholder:text-slate-500"
+                />
+              </label>
+              <label class="block text-sm font-medium text-slate-200">
+                Email
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="jane@example.com"
+                  required
+                  class="mt-1 w-full rounded-md border border-white/20 bg-white/95 px-4 py-2.5 text-brand-ink placeholder:text-slate-500"
+                />
+              </label>
               <button
                 type="submit"
                 class="w-full rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
@@ -101,10 +110,14 @@ const magnet = await getLeadMagnetForPage(pageId);
   document.querySelectorAll<HTMLFormElement>('.lead-magnet-form').forEach((form) => {
     const status = form.querySelector<HTMLElement>('.lead-magnet-status');
     const successView = form.parentElement?.querySelector<HTMLElement>('.lead-magnet-success');
+    const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!status) return;
+      // Same double-submit guard as LeadGenerator.astro — re-enabled only
+      // on failure; a success swaps in the success view instead.
+      if (submitButton) submitButton.disabled = true;
       const formData = new FormData(form);
       status.textContent = 'Sending...';
 
@@ -129,6 +142,7 @@ const magnet = await getLeadMagnetForPage(pageId);
         successView?.classList.remove('hidden');
       } else {
         status.textContent = 'Something went wrong — please try again.';
+        if (submitButton) submitButton.disabled = false;
       }
     });
   });
