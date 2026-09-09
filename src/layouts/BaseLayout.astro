@@ -83,6 +83,7 @@ const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbChain, siteUrl);
       // secret — same trust level as a GA measurement ID. See
       // 0035_cloudflare_analytics_token.sql.
       <script
+        is:inline
         type="module"
         src="https://static.cloudflareinsights.com/beacon.min.js"
         data-cf-beacon={`{"token": "${business.cloudflare_beacon_token}"}`}
