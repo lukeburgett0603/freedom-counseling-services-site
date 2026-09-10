@@ -463,7 +463,10 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     concerns: { title: string; description: string }[];
     cta_heading: string | null;
     cta_button_text: string | null;
-    images: { hero?: { url: string; alt: string; creditName?: string; creditUrl?: string } } | null;
+    images: {
+      hero?: { url: string; alt: string; creditName?: string; creditUrl?: string };
+      headshot?: { url: string; alt: string; creditName?: string; creditUrl?: string };
+    } | null;
     author_name: string | null;
     credentials: string | null;
     date_modified: string | null;
@@ -633,6 +636,19 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
 
   const ALWAYS_LOCKED_FIELDS = ['h1', 'meta_description', 'focus_keyword'];
 
+  // Counselor Profile pages don't render Hero.astro at all — they have
+  // their own header card (CounselorProfile.astro) that reads
+  // images.headshot specifically, not images.hero. This admin field is
+  // the only place a Counselor Profile's own photo gets uploaded, so it
+  // has to read/write the same key the template actually looks at, or an
+  // upload silently never renders. Found live: Luke Burgett's headshot
+  // was uploaded here, saved under images.hero (the key every other page
+  // type actually uses), and never appeared on his page because
+  // CounselorProfile.astro only ever reads images.headshot.
+  function imageKeyFor(pageType: string | undefined): 'headshot' | 'hero' {
+    return pageType === 'Counselor Profile' ? 'headshot' : 'hero';
+  }
+
   function isFullTier(): boolean {
     return business?.content_permission_level === 'full';
   }
@@ -676,10 +692,10 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
         return selectedContentPage.storybrand_success ?? '';
       case 'storybrand_failure':
         return selectedContentPage.storybrand_failure ?? '';
-      case 'images':
-        return selectedContentPage.images?.hero
-          ? `${selectedContentPage.images.hero.url} (alt: ${selectedContentPage.images.hero.alt})`
-          : '(no image set)';
+      case 'images': {
+        const img = selectedContentPage.images?.[imageKeyFor(selectedContentPage.page_type)];
+        return img ? `${img.url} (alt: ${img.alt})` : '(no image set)';
+      }
       default:
         return '';
     }
@@ -805,10 +821,11 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       selectedContentPage.storybrand_failure
     );
 
-    uploadedImageUrl = selectedContentPage.images?.hero?.url ?? null;
-    uploadedImageCreditName = selectedContentPage.images?.hero?.creditName ?? null;
-    uploadedImageCreditUrl = selectedContentPage.images?.hero?.creditUrl ?? null;
-    contentImageAlt.value = selectedContentPage.images?.hero?.alt ?? '';
+    const currentImage = selectedContentPage.images?.[imageKeyFor(selectedContentPage.page_type)];
+    uploadedImageUrl = currentImage?.url ?? null;
+    uploadedImageCreditName = currentImage?.creditName ?? null;
+    uploadedImageCreditUrl = currentImage?.creditUrl ?? null;
+    contentImageAlt.value = currentImage?.alt ?? '';
     contentImageStatus.textContent = uploadedImageUrl ? 'Current image on file — choose a new one to replace it.' : '';
     if (uploadedImageUrl) {
       contentImagePreview.src = uploadedImageUrl;
@@ -818,7 +835,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       contentImagePreview.classList.add('hidden');
     }
     document.querySelector('[data-field="images"] [data-locked-value]')!.textContent = uploadedImageUrl
-      ? `Current image: ${selectedContentPage.images?.hero?.alt}`
+      ? `Current image: ${currentImage?.alt}`
       : 'No image set.';
 
     // Hero.astro isn't used at all on a Counselor Profile page (it has
@@ -948,7 +965,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     if (canEditField('images')) {
       payload.images = uploadedImageUrl
         ? {
-            hero: {
+            [imageKeyFor(selectedContentPage.page_type)]: {
               url: uploadedImageUrl,
               alt: contentImageAlt.value.trim(),
               ...(uploadedImageCreditName && uploadedImageCreditUrl
