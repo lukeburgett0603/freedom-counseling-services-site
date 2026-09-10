@@ -331,6 +331,26 @@ before touching the related code on a future client site.
   login form itself (previously the agency had to manually trigger a
   reset via script) — same `redirectTo` pattern, so it was the natural
   place to fix this properly rather than as a one-off patch.
+- **Staff invite emails were sending successfully but the "Accept the
+  invite" link landed on the homepage instead of the account-setup page
+  (reported by the client, 2026-09-10).** The app's own `redirectTo`
+  code was already correct (see the fix directly above) — the real
+  cause was this project's Supabase Auth "Redirect URLs" allow list
+  (`uri_allow_list`) sitting completely empty, so every `redirectTo`
+  ever passed was silently rejected and replaced with the bare
+  `site_url` (`https://www.freedomcounselingservices.org`, no path).
+  Almost certainly dated back to initial project setup, not the later
+  custom-domain migration — `uri_allow_list` isn't part of the Postgres
+  schema at all, so nothing about that migration would have touched it
+  either way. Fixed via the Management API: `PATCH /v1/projects/{ref}
+  /config/auth {"uri_allow_list": "https://www.freedomcounselingservices
+  .org/**"}`. Verified for real, not just by reading the config back —
+  generated a throwaway invite link via `/auth/v1/admin/generate_link`
+  and `curl`'d it directly, confirming the redirect landed on
+  `/admin/leads` with a working `access_token`/`type=invite` fragment
+  — then deleted the test user. See `frontend-site-builder-supabase`'s
+  `supabase-technical-setup.md` for the generalized version of this fix
+  — every client project needs this checked, not just this one.
 - **`ContentPillar.astro` never rendered the `FAQ` component**, even
   though `schema.ts` appends `FAQPage` JSON-LD schema for *any* page with
   a non-empty `faqs` array, independent of `page_type` (`if
