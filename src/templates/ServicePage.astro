@@ -45,8 +45,8 @@ const counselors = getCounselorOptions(allPages);
       <Fragment set:html={renderCopy(page.storybrand_guide_empathy)} />
     </Section>
   )}
-  <CollapsibleSection markdown={page.storybrand_pitch} />
   <PlanSteps steps={page.plan_steps} />
+  <CollapsibleSection markdown={page.storybrand_pitch} />
   <StoryBrandSection markdown={page.storybrand_success} />
   {page.storybrand_failure && (
     <Section>
