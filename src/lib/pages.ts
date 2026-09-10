@@ -144,6 +144,30 @@ export interface Page {
   // availability_status/telehealth_available/modalities - never
   // defaulted/guessed. See 0037_counselor_license_number.sql.
   license_number: string | null;
+  // Only meaningful on a 'Counselor Profile' page - a counselor's own
+  // free-text degree/institution line (e.g. "M.A. Clinical Mental Health
+  // Counseling, Colorado Christian University"), shown near credentials
+  // when set. Self-service on admin/counselor-settings.astro, same
+  // never-defaulted/guessed discipline as license_number. See
+  // 0038_counselor_education_and_title.sql.
+  education: string | null;
+  // Only meaningful on a 'Counselor Profile' page - the spelled-out form
+  // of the short `credentials` abbreviation (e.g. "Licensed Professional
+  // Counselor Associate" for "LPCA"). Deliberately free text rather than
+  // an abbreviation->title lookup table - `credentials` is itself
+  // freeform (see Tony Gore's "LCSW, Owner/Director"), so a reliable
+  // lookup isn't possible, and a plain field generalizes to any future
+  // client's own licensing scheme with no code change. Self-service on
+  // admin/counselor-settings.astro. See 0038_counselor_education_and_title.sql.
+  professional_title: string | null;
+  // Only meaningful on a 'Counselor Profile' page - an optional
+  // persuasive tagline rendered as the literal <h1> instead of the
+  // counselor's own name (page.title stays visible elsewhere in the
+  // header card either way). Null falls back to page.title, so every
+  // existing Counselor Profile renders unchanged until a client opts in.
+  // Edited on admin/content/page-copy.astro, tier-gated like
+  // hero_subhead. See 0039_hero_headline.sql.
+  hero_headline: string | null;
   // Which Hero.astro layout this page uses. 'default' (today's
   // side-by-side image/aside) is the default for every page on every
   // client site; 'overlay' is opt-in per page - a full-bleed background
@@ -212,6 +236,12 @@ export interface Business {
   // has no one to select. See 0023_counselor_preference.sql and
   // getCounselorOptions() below.
   collect_counselor_preference: boolean;
+  // Shows a "Preferred Session Format" (In-Person / Telehealth) radio
+  // group on every LeadGenerator — same opt-in pattern as
+  // collect_counselor_preference, since a fully-telehealth or
+  // fully-in-person client has nothing to ask. See
+  // 0040_session_format_preference.sql.
+  collect_session_format_preference: boolean;
   // A link to the business's EHR client portal (SimplePractice,
   // TherapyNotes, etc.) for existing clients — see 0009_client_portal_url.sql.
   client_portal_url: string | null;

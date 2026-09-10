@@ -1965,6 +1965,50 @@ Freedom's real site).
   empty-state conditionals still render nothing rather than a broken
   empty grid — not just eyeballing the one counselor with full data.
 
+## Counselor Profile: tagline H1, education/title fields, phone/session-format, clinical-cards restyle (built 2026-09-10)
+
+Built from a client-supplied Stitch (Google's AI design tool) mockup of
+the Counselor Profile page, reviewed field-by-field against the real
+data model before building — see `local-business-site-template`'s
+CLAUDE.md for the full technical writeup (this entry covers what's
+specific to Freedom's real data). Migrations: `0038_counselor_education
+_and_title.sql`, `0039_hero_headline.sql`, `0040_session_format
+_preference.sql` (template's own copies are `0037`/`0038`/`0039` —
+numbering has diverged by one since `0035_cloudflare_analytics_token
+.sql`).
+
+- **New self-service fields** (`education`, `professional_title` on
+  `admin/counselor-settings.astro`; `hero_headline` tagline on
+  `admin/content/page-copy.astro`) are all left blank for every real
+  counselor — none were auto-populated from existing copy.
+- **`business.collect_session_format_preference` set to `true`** —
+  Freedom explicitly wants the In-Person/Telehealth radio on every lead
+  form, unlike the template's own default-off. `business.street_address`
+  and `business.telephone` are both real and set, so the new
+  `InPersonPill` and the header card's phone-call link both render live.
+- **A real data finding, not auto-fixed**: Freedom's own live `pages`
+  rows already contain a "Middletown, KY" location reference in six
+  places (Service Areas, Contact, both service-area pages, About, and
+  Luke Burgett's own `storybrand_problem`) — predates this session.
+  Luke Burgett's real `storybrand_guide_empathy` also already contains
+  the unverified claim "Master's in Clinical Mental Health Counseling
+  from Colorado Christian University." Both facts explain why the
+  client-supplied Stitch mockup that prompted this whole pass contained
+  the identical phrasing — it was almost certainly built from this
+  site's real content, not hallucinated. Neither was touched by this
+  pass; the new `education` field was deliberately left blank rather
+  than auto-populated from that unverified existing text. Flagged to
+  the client directly — resolve as its own follow-up, not bundled into
+  this feature work.
+- **Verification pattern**: same as the template — `astro check`
+  (0 errors), a real `npm run build` against this site's live Supabase
+  project, migrations applied directly via the Management API, and a
+  direct read of the built `dist/` HTML for Luke Burgett (full data)
+  and Tony Gore (no license/telehealth/education/title set) confirming
+  the new identity-column layout, the phone link, the in-person pill,
+  and the 2-column clinical cards all render correctly — including the
+  empty-state case where a field genuinely has nothing to show.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a

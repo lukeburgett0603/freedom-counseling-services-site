@@ -58,6 +58,28 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
         </div>
 
         <div>
+          <label class="mb-1 block text-sm font-semibold text-slate-700">Professional title</label>
+          <input
+            id="professional-title-input"
+            type="text"
+            placeholder="e.g. Licensed Professional Counselor Associate"
+            class="w-full rounded-md border border-slate-300 px-4 py-2"
+          />
+          <p class="mt-1 text-xs text-slate-500">Optional — the spelled-out form of your credentials, shown near your name. Leave blank to hide it.</p>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-slate-700">Education</label>
+          <input
+            id="education-input"
+            type="text"
+            placeholder="e.g. M.A. Clinical Mental Health Counseling, Colorado Christian University"
+            class="w-full rounded-md border border-slate-300 px-4 py-2"
+          />
+          <p class="mt-1 text-xs text-slate-500">Optional — your degree and school, shown near your credentials. Leave blank to hide it.</p>
+        </div>
+
+        <div>
           <label class="mb-1 block text-sm font-semibold text-slate-700">Training &amp; modalities</label>
           <input
             id="modality-search"
@@ -120,6 +142,8 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     availability_status: 'accepting' | 'almost_full' | 'not_accepting' | null;
     telehealth_available: boolean;
     license_number: string | null;
+    professional_title: string | null;
+    education: string | null;
     modalities: string[];
   };
 
@@ -130,6 +154,8 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
   const settingsPageName = document.getElementById('settings-page-name')!;
   const telehealthCheckbox = document.getElementById('telehealth-checkbox') as HTMLInputElement;
   const licenseInput = document.getElementById('license-input') as HTMLInputElement;
+  const professionalTitleInput = document.getElementById('professional-title-input') as HTMLInputElement;
+  const educationInput = document.getElementById('education-input') as HTMLInputElement;
   const modalitySearch = document.getElementById('modality-search') as HTMLInputElement;
   const modalityNoResults = document.getElementById('modality-no-results')!;
   const customModalityChips = document.getElementById('custom-modality-chips')!;
@@ -226,6 +252,8 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     });
     telehealthCheckbox.checked = selectedPage.telehealth_available;
     licenseInput.value = selectedPage.license_number ?? '';
+    professionalTitleInput.value = selectedPage.professional_title ?? '';
+    educationInput.value = selectedPage.education ?? '';
 
     const stored = selectedPage.modalities ?? [];
     modalityCheckboxes.forEach((cb) => {
@@ -258,6 +286,8 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
       availability_status: checked?.value ?? null,
       telehealth_available: telehealthCheckbox.checked,
       license_number: licenseInput.value.trim() || null,
+      professional_title: professionalTitleInput.value.trim() || null,
+      education: educationInput.value.trim() || null,
       modalities,
     };
     const { error } = await supabase.from('pages').update(payload).eq('id', selectedPage.id);
@@ -279,7 +309,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     if (adminUser.role === 'owner' || adminUser.role === 'agency') {
       const { data } = await supabase
         .from('pages')
-        .select('id, title, availability_status, telehealth_available, license_number, modalities')
+        .select('id, title, availability_status, telehealth_available, license_number, professional_title, education, modalities')
         .eq('page_type', 'Counselor Profile')
         .order('title');
       counselorPages = (data ?? []) as CounselorPage[];
@@ -298,7 +328,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     }
     const { data } = await supabase
       .from('pages')
-      .select('id, title, availability_status, telehealth_available, license_number, modalities')
+      .select('id, title, availability_status, telehealth_available, license_number, professional_title, education, modalities')
       .eq('id', adminUser.linked_counselor_page_id)
       .maybeSingle();
     if (!data) {

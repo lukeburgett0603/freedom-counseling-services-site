@@ -28,45 +28,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   </div>
 
   <!--
-    Tier 2 of the "Client dashboard" backlog (CLAUDE.md) — top-of-funnel
-    traffic sitting next to the lead stats above, sourced from Cloudflare
-    Web Analytics via the get-traffic-stats Edge Function (the API token
-    is a real secret, so this can't be a client-side query the way the
-    lead stats above are). Hidden entirely — not shown empty — on any
-    site where analytics isn't configured or the call fails, same
-    graceful-degrade pattern as the Guide downloads widget below.
-  -->
-  <div id="traffic-widget" class="mb-8 hidden">
-    <div class="mb-8 grid gap-4 sm:grid-cols-3">
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pageviews this month</p>
-        <p id="traffic-pageviews" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p id="traffic-pageviews-change" class="mt-1 text-xs"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Visits this month</p>
-        <p id="traffic-visits" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p id="traffic-visits-change" class="mt-1 text-xs"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Last month</p>
-        <p id="traffic-last-month" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p class="mt-1 text-xs text-slate-400">pageviews</p>
-      </div>
-    </div>
-
-    <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">Pageviews per day (last 30 days)</p>
-      <div id="traffic-chart" class="flex h-32 gap-1"></div>
-    </div>
-
-    <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Top pages (last 30 days)</p>
-      <div id="traffic-top-pages" class="space-y-2 text-sm"></div>
-    </div>
-  </div>
-
-  <!--
     Deliberately separate from the "Total leads" stats above, not a 4th
     column in that grid — someone downloading a free guide is a much
     earlier-funnel signal than someone asking to be matched with a
@@ -119,6 +80,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <th class="px-4 py-3 font-semibold">Message</th>
           <th class="px-4 py-3 font-semibold">From page</th>
           <th class="px-4 py-3 font-semibold">Counselor</th>
+          <th class="px-4 py-3 font-semibold">Format</th>
           <th class="px-4 py-3 font-semibold">Status</th>
         </tr>
       </thead>
@@ -151,7 +113,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     source_page: string | null;
     status: string | null;
     preferred_counselor_page_id: string | null;
+    preferred_session_format: string | null;
     lead_magnet_id: string | null;
+  };
+
+  const SESSION_FORMAT_LABELS: Record<string, string> = {
+    in_person: 'In-Person',
+    telehealth: 'Telehealth',
   };
 
   // Populated in loadLeads() from a live query, not hardcoded — a
@@ -298,84 +266,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
   }
 
-  type TrafficStats = {
-    thisMonth: { pageviews: number; visits: number };
-    lastMonth: { pageviews: number; visits: number };
-    byDay: { date: string; pageviews: number; visits: number }[];
-    topPages: { path: string; pageviews: number }[];
-  };
-
-  function renderChangeLabel(el: HTMLElement, current: number, previous: number) {
-    if (previous > 0) {
-      const pct = Math.round(((current - previous) / previous) * 100);
-      el.textContent = `${pct > 0 ? '+' : ''}${pct}% vs last month`;
-      el.className = 'mt-1 text-xs ' + (pct >= 0 ? 'text-emerald-600' : 'text-red-500');
-    } else if (current > 0) {
-      el.textContent = 'No data last month';
-      el.className = 'mt-1 text-xs text-slate-500';
-    } else {
-      el.textContent = '';
-    }
-  }
-
-  async function loadTraffic() {
-    const widget = document.getElementById('traffic-widget')!;
-    const { data, error } = await supabase.functions.invoke<TrafficStats>('get-traffic-stats');
-    // Hidden, not an error message shown in-page — a site without
-    // Cloudflare configured (or a transient API failure) shouldn't make
-    // this admin dashboard look broken; the lead stats above are the
-    // page's real job either way.
-    if (error || !data) {
-      widget.classList.add('hidden');
-      return;
-    }
-    widget.classList.remove('hidden');
-
-    document.getElementById('traffic-pageviews')!.textContent = data.thisMonth.pageviews.toLocaleString();
-    document.getElementById('traffic-visits')!.textContent = data.thisMonth.visits.toLocaleString();
-    document.getElementById('traffic-last-month')!.textContent = data.lastMonth.pageviews.toLocaleString();
-    renderChangeLabel(
-      document.getElementById('traffic-pageviews-change')!,
-      data.thisMonth.pageviews,
-      data.lastMonth.pageviews
-    );
-    renderChangeLabel(document.getElementById('traffic-visits-change')!, data.thisMonth.visits, data.lastMonth.visits);
-
-    const maxDayCount = Math.max(1, ...data.byDay.map((d) => d.pageviews));
-    const chartEl = document.getElementById('traffic-chart')!;
-    chartEl.innerHTML = data.byDay
-      .map((d) => {
-        const heightPct = Math.max(Math.round((d.pageviews / maxDayCount) * 100), d.pageviews > 0 ? 4 : 2);
-        const label = d.date
-          ? new Date(d.date + 'T00:00:00Z').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-          : '';
-        return `
-      <div class="flex flex-1 flex-col items-center justify-end gap-1" title="${d.pageviews} pageview${d.pageviews === 1 ? '' : 's'} — ${label}">
-        <div class="w-full rounded-t bg-brand-tint" style="height: ${heightPct}%"></div>
-      </div>`;
-      })
-      .join('');
-
-    const topPagesEl = document.getElementById('traffic-top-pages')!;
-    if (data.topPages.length === 0) {
-      topPagesEl.innerHTML = '<p class="text-slate-500">No pageviews yet.</p>';
-    } else {
-      const maxPageCount = data.topPages[0].pageviews;
-      topPagesEl.innerHTML = data.topPages
-        .map(
-          (p) => `
-      <div class="flex items-center gap-3">
-        <span class="w-48 shrink-0 truncate text-slate-700">${escapeHtml(p.path)}</span>
-        <div class="h-2 flex-1 rounded-full bg-slate-100">
-          <div class="h-2 rounded-full bg-brand-tint" style="width: ${Math.round((p.pageviews / maxPageCount) * 100)}%"></div>
-        </div>
-        <span class="w-10 shrink-0 text-right font-semibold text-brand-ink">${p.pageviews}</span>
-      </div>`
-        )
-        .join('');
-    }
-  }
-
   // Event delegation on the table body, not a per-row listener — rows are
   // re-rendered wholesale on every loadLeads(), so a listener attached to
   // individual <select> elements would need re-binding every time anyway.
@@ -419,14 +309,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="px-4 py-3 max-w-xs truncate" title="${escapeHtml(lead.message ?? '')}">${escapeHtml(lead.message ?? '')}</td>
         <td class="px-4 py-3">${escapeHtml(lead.source_page ?? '')}</td>
         <td class="px-4 py-3">${lead.preferred_counselor_page_id ? escapeHtml(counselorNames.get(lead.preferred_counselor_page_id) ?? 'Unknown') : ''}</td>
+        <td class="px-4 py-3">${lead.preferred_session_format ? escapeHtml(SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format) : ''}</td>
         <td class="px-4 py-3">${renderStatusSelect(lead.id, lead.status)}</td>
       </tr>`
       )
       .join('');
   }
 
-  initAdminAuth(async () => {
-    await loadLeads();
-    await loadTraffic();
-  }, { allowedRoles: ['owner', 'agency'] });
+  initAdminAuth(loadLeads, { allowedRoles: ['owner', 'agency'] });
 </script>

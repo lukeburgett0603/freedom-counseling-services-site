@@ -27,6 +27,21 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
           />
           <LockedField fieldKey="focus_keyword" label="Focus keyword" inputId="content-focus-keyword" />
 
+          <div id="content-hero-headline-wrap" class="hidden" data-field="hero_headline">
+            <label class="mb-1 block text-sm font-semibold text-slate-700">Headline (H1)</label>
+            <input id="content-hero-headline" type="text" class="editable-view w-full rounded-md border border-slate-300 px-4 py-2" />
+            <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
+            <p class="mt-1 text-xs text-slate-500">
+              A persuasive tagline shown as the main heading on your page (e.g. "Helping boys and men reclaim peace,
+              clarity, and purpose."). Your name still shows separately in the header card either way. Leave blank
+              to show your name as the heading instead.
+            </p>
+            <p class="tier-note mt-1 text-xs text-slate-500">
+              Included as an agency-managed field on your plan — suggest a change below.
+            </p>
+            <SuggestEdit fieldLabel="Headline (H1)" />
+          </div>
+
           <div data-field="hero_subhead">
             <label class="mb-1 block text-sm font-semibold text-slate-700">Hero subheading</label>
             <input id="content-hero-subhead" type="text" class="editable-view w-full rounded-md border border-slate-300 px-4 py-2" />
@@ -451,6 +466,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     meta_description: string | null;
     focus_keyword: string | null;
     hero_subhead: string | null;
+    hero_headline: string | null;
     copy: string | null;
     storybrand_problem: string | null;
     storybrand_guide_empathy: string | null;
@@ -482,6 +498,12 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   // have drifted from the actual code on at least one of these). Keep this
   // in sync if a future template starts or stops reading one of these
   // fields.
+  // Only Counselor Profile has a name (page.title) that can stand in for
+  // the heading when this is unset — every other page type's H1 already
+  // falls back to page.title in a way that reads correctly on its own
+  // (a business name, a service name), so this field is scoped narrowly
+  // rather than offered everywhere STORYBRAND_SPLIT_PAGE_TYPES covers.
+  const HERO_HEADLINE_PAGE_TYPES = ['Counselor Profile'];
   const PLAN_STEPS_PAGE_TYPES = ['Counselor Profile', 'Homepage', 'Service Area', 'Service Hub', 'Service Page'];
   const FAQS_PAGE_TYPES = ['Content Pillar', 'Counselor Profile', 'Service Area', 'Service Hub', 'Service Page'];
   const CONCERNS_PAGE_TYPES = ['Homepage', 'Service Hub'];
@@ -541,6 +563,8 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const contentMetaDescription = document.getElementById('content-meta-description') as HTMLTextAreaElement;
   const contentFocusKeyword = document.getElementById('content-focus-keyword') as HTMLInputElement;
   const contentHeroSubhead = document.getElementById('content-hero-subhead') as HTMLInputElement;
+  const contentHeroHeadlineWrap = document.getElementById('content-hero-headline-wrap')!;
+  const contentHeroHeadline = document.getElementById('content-hero-headline') as HTMLInputElement;
   const contentStorybrandPitchLabel = document.getElementById('content-storybrand-pitch-label') as HTMLInputElement;
   const copyEditor = initRichTextEditor('content-copy-editor');
   const contentPlainCopyWrap = document.getElementById('content-plain-copy-wrap')!;
@@ -678,6 +702,8 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
         return selectedContentPage.focus_keyword ?? '';
       case 'hero_subhead':
         return selectedContentPage.hero_subhead ?? '';
+      case 'hero_headline':
+        return selectedContentPage.hero_headline ?? '';
       case 'copy':
         return selectedContentPage.copy ?? '';
       case 'storybrand_problem':
@@ -786,6 +812,11 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentHeroSubhead.value = selectedContentPage.hero_subhead ?? '';
     document.querySelector('[data-field="hero_subhead"] [data-locked-value]')!.textContent =
       selectedContentPage.hero_subhead ?? '(not set)';
+
+    contentHeroHeadlineWrap.classList.toggle('hidden', !HERO_HEADLINE_PAGE_TYPES.includes(selectedContentPage.page_type));
+    contentHeroHeadline.value = selectedContentPage.hero_headline ?? '';
+    document.querySelector('[data-field="hero_headline"] [data-locked-value]')!.textContent =
+      selectedContentPage.hero_headline ?? '(not set — showing your name instead)';
 
     copyEditor.setMarkdown(selectedContentPage.copy);
     document.querySelector('[data-field="copy"] [data-locked-value-html]')!.innerHTML = renderCopy(selectedContentPage.copy);
@@ -950,6 +981,9 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     if (canEditField('meta_description')) payload.meta_description = contentMetaDescription.value.trim() || null;
     if (canEditField('focus_keyword')) payload.focus_keyword = contentFocusKeyword.value.trim() || null;
     if (canEditField('hero_subhead')) payload.hero_subhead = contentHeroSubhead.value.trim() || null;
+    if (HERO_HEADLINE_PAGE_TYPES.includes(selectedContentPage.page_type) && canEditField('hero_headline')) {
+      payload.hero_headline = contentHeroHeadline.value.trim() || null;
+    }
     if (STORYBRAND_SPLIT_PAGE_TYPES.includes(selectedContentPage.page_type as never)) {
       if (canEditField('storybrand_problem')) payload.storybrand_problem = storybrandProblemEditor.getMarkdown();
       if (canEditField('storybrand_guide_empathy'))
@@ -1083,6 +1117,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     meta_description: 'Meta description',
     focus_keyword: 'Focus keyword',
     hero_subhead: 'Hero subheading',
+    hero_headline: 'Headline (H1)',
     copy: 'Page copy',
     storybrand_problem: 'The Problem',
     storybrand_guide_empathy: 'We Understand',
