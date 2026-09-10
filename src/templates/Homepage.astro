@@ -90,7 +90,7 @@ const isOverlayHero = page.hero_style === 'overlay' && !!page.images.hero;
     <Testimonial quote={page.testimonial_quote} author={page.testimonial_author} role={page.testimonial_role} />
   )}
   <PlanSteps steps={page.plan_steps} />
-  <CollapsibleSection markdown={page.storybrand_pitch} />
+  <CollapsibleSection markdown={page.storybrand_pitch} triggerText={page.storybrand_pitch_label} />
   <StoryBrandSection markdown={page.storybrand_success} />
   {page.storybrand_failure && (
     <Section>

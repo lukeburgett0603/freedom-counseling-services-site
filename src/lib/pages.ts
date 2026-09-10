@@ -67,6 +67,11 @@ export interface Page {
   storybrand_problem: string | null;
   storybrand_guide_empathy: string | null;
   storybrand_pitch: string | null;
+  // Admin-editable text for the CollapsibleSection trigger that wraps
+  // storybrand_pitch on Homepage/Service Page/Counselor Profile — null
+  // falls back to CollapsibleSection.astro's own default ("Learn more
+  // about our approach"). See 0036_storybrand_pitch_label.sql.
+  storybrand_pitch_label: string | null;
   storybrand_success: string | null;
   storybrand_failure: string | null;
   credentials: string | null;

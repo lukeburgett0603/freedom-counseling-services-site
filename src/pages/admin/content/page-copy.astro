@@ -119,6 +119,25 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <SuggestEdit fieldLabel="The Full Picture" />
             </div>
 
+            <div data-field="storybrand_pitch_label">
+              <label class="mb-1 block text-sm font-semibold text-slate-700">"The Full Picture" link text</label>
+              <input
+                id="content-storybrand-pitch-label"
+                type="text"
+                placeholder="Learn more about our approach"
+                class="editable-view w-full rounded-md border border-slate-300 px-4 py-2"
+              />
+              <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
+              <p class="mt-1 text-xs text-slate-500">
+                Shown as a heading visitors click to expand "The Full Picture" above. Leave blank to use the default,
+                "Learn more about our approach."
+              </p>
+              <p class="tier-note mt-1 text-xs text-slate-500">
+                Included as an agency-managed field on your plan — suggest a change below.
+              </p>
+              <SuggestEdit fieldLabel="&quot;The Full Picture&quot; link text" />
+            </div>
+
             <div data-field="storybrand_success">
               <label class="mb-1 block text-sm font-semibold text-slate-700">What's Possible</label>
               <div class="editable-view">
@@ -436,6 +455,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     storybrand_problem: string | null;
     storybrand_guide_empathy: string | null;
     storybrand_pitch: string | null;
+    storybrand_pitch_label: string | null;
     storybrand_success: string | null;
     storybrand_failure: string | null;
     plan_steps: { title: string; description: string }[];
@@ -518,6 +538,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const contentMetaDescription = document.getElementById('content-meta-description') as HTMLTextAreaElement;
   const contentFocusKeyword = document.getElementById('content-focus-keyword') as HTMLInputElement;
   const contentHeroSubhead = document.getElementById('content-hero-subhead') as HTMLInputElement;
+  const contentStorybrandPitchLabel = document.getElementById('content-storybrand-pitch-label') as HTMLInputElement;
   const copyEditor = initRichTextEditor('content-copy-editor');
   const contentPlainCopyWrap = document.getElementById('content-plain-copy-wrap')!;
   const contentStorybrandFields = document.getElementById('content-storybrand-fields')!;
@@ -649,6 +670,8 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
         return selectedContentPage.storybrand_guide_empathy ?? '';
       case 'storybrand_pitch':
         return selectedContentPage.storybrand_pitch ?? '';
+      case 'storybrand_pitch_label':
+        return selectedContentPage.storybrand_pitch_label ?? '';
       case 'storybrand_success':
         return selectedContentPage.storybrand_success ?? '';
       case 'storybrand_failure':
@@ -770,6 +793,9 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     document.querySelector('[data-field="storybrand_pitch"] [data-locked-value-html]')!.innerHTML = renderCopy(
       selectedContentPage.storybrand_pitch
     );
+    contentStorybrandPitchLabel.value = selectedContentPage.storybrand_pitch_label ?? '';
+    document.querySelector('[data-field="storybrand_pitch_label"] [data-locked-value]')!.textContent =
+      selectedContentPage.storybrand_pitch_label ?? '(using default: "Learn more about our approach")';
     storybrandSuccessEditor.setMarkdown(selectedContentPage.storybrand_success);
     document.querySelector('[data-field="storybrand_success"] [data-locked-value-html]')!.innerHTML = renderCopy(
       selectedContentPage.storybrand_success
@@ -912,6 +938,8 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       if (canEditField('storybrand_guide_empathy'))
         payload.storybrand_guide_empathy = storybrandGuideEmpathyEditor.getMarkdown();
       if (canEditField('storybrand_pitch')) payload.storybrand_pitch = storybrandPitchEditor.getMarkdown();
+      if (canEditField('storybrand_pitch_label'))
+        payload.storybrand_pitch_label = contentStorybrandPitchLabel.value.trim() || null;
       if (canEditField('storybrand_success')) payload.storybrand_success = storybrandSuccessEditor.getMarkdown();
       if (canEditField('storybrand_failure')) payload.storybrand_failure = storybrandFailureEditor.getMarkdown();
     } else if (canEditField('copy')) {
@@ -1042,6 +1070,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     storybrand_problem: 'The Problem',
     storybrand_guide_empathy: 'We Understand',
     storybrand_pitch: 'The Full Picture',
+    storybrand_pitch_label: '"The Full Picture" link text',
     storybrand_success: "What's Possible",
     storybrand_failure: "Why It's Worth Acting Now",
     images: 'Hero image',
