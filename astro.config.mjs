@@ -17,15 +17,25 @@ import sitemap from '@astrojs/sitemap';
 // Freedom Counseling Services' real, already-indexed domain
 // (freedomcounselingservices.org, DA 15, already ranking #4 for "christian
 // counseling louisville ky") replaced the github.io placeholder 2026-09-09,
-// migrating off the client's old Squarespace site. `redirects` below covers
-// every old Squarespace URL that doesn't share this site's slug — GitHub
-// Pages can't serve real server-side 301s (pure static hosting), so these
-// render as Astro's static meta-refresh + JS redirect pages instead. If the
-// domain is later put behind Cloudflare, add true 301 Redirect Rules there
-// for the same paths (stronger ranking-equity signal); until then these are
-// what protect the existing ranking from a hard 404 after cutover.
+// migrating off the client's old Squarespace site. `site` is the **www**
+// subdomain specifically, not the bare apex — every URL in the old
+// Squarespace site's own sitemap.xml was under `www.`, so matching that
+// exactly (rather than switching canonical forms on top of the whole
+// platform migration) is what actually protects the existing ranking.
+// GitHub Pages' `cname` setting (repo Settings → Pages) is set to the same
+// www value — that's what makes GitHub issue the real cert for `www` and
+// auto-redirect the bare apex to it with a true 301, not something this
+// file controls.
+//
+// `redirects` below covers every old Squarespace URL that doesn't share
+// this site's slug — GitHub Pages can't serve real server-side 301s (pure
+// static hosting), so these render as Astro's static meta-refresh + JS
+// redirect pages instead. If the domain is later put behind Cloudflare,
+// add true 301 Redirect Rules there for the same paths (stronger
+// ranking-equity signal); until then these are what protect the existing
+// ranking from a hard 404 after cutover.
 export default defineConfig({
-  site: 'https://freedomcounselingservices.org',
+  site: 'https://www.freedomcounselingservices.org',
   base: '/',
   trailingSlash: 'never',
   redirects: {
