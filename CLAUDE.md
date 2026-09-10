@@ -508,6 +508,25 @@ before touching the related code on a future client site.
   afterward, not just "looks right." Worth an occasional `diff -rq` of a
   client repo's `src/` against the template's to catch this class of
   drift rather than waiting to notice it live.
+- **`admin/content/page-copy.astro`'s single image field always
+  read/wrote `images.hero`, but `CounselorProfile.astro` never renders
+  `Hero.astro` at all — it has its own header card that reads
+  `images.headshot` specifically.** A counselor's own headshot uploaded
+  through this admin screen silently saved to a key the template never
+  looks at, so the photo uploaded successfully but never rendered — no
+  error anywhere in the flow. Found live: Luke Burgett's headshot was
+  uploaded exactly this way; the other 4 counselors' headshots were all
+  correctly under `images.headshot` only because they were seeded
+  directly during the original site build, never through this admin
+  screen. A nearby comment already knew Counselor Profile pages don't
+  use `Hero.astro` (it hides the hero-*style* controls for that reason)
+  but never extended that awareness to the image *key* itself — a close
+  miss worth remembering: fixing one symptom of "this template doesn't
+  apply to this page type" doesn't mean every related spot got fixed
+  too. Fixed with `imageKeyFor(pageType)` (`'headshot'` for Counselor
+  Profile, `'hero'` otherwise), used consistently everywhere this field
+  is read or written — the load logic, `getCurrentValueText`, and the
+  save payload all called it independently before.
 
 ## Client dashboard (`/admin/leads` login)
 
