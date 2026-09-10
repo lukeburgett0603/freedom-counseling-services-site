@@ -1,0 +1,35 @@
+---
+// A collapsed-by-default disclosure for a StoryBrand copy field that
+// doesn't need to be read by every visitor up front — e.g. the Pitch
+// beat's deeper "how this actually works" explanation. Same native,
+// zero-JS <details>/<summary> accordion pattern FAQ.astro already uses
+// (the `group`/`group-open:` Tailwind utilities drive the chevron
+// rotation), not a new interaction model — and, like FAQ.astro, styled
+// entirely from this project's own brand tokens (font-heading, brand
+// tokens) rather than hardcoded colors, so it reads correctly on any
+// client site's palette without per-client changes. Renders nothing when
+// markdown is empty, same never-show-an-empty-shell discipline as every
+// other optional StoryBrand section.
+import { renderCopy } from '../lib/markdown';
+
+interface Props {
+  markdown: string | null;
+  triggerText?: string;
+}
+
+const { markdown, triggerText = 'Learn more about our approach' } = Astro.props;
+---
+
+{markdown && (
+  <section class="py-8">
+    <div class="mx-auto max-w-3xl px-6">
+      <details class="group">
+        <summary class="flex cursor-pointer list-none items-center justify-center gap-2 text-center font-[family-name:var(--font-heading)] font-semibold text-brand-primary marker:content-none hover:underline">
+          {triggerText}
+          <span aria-hidden="true" class="shrink-0 text-base leading-none transition-transform duration-200 group-open:rotate-180">&darr;</span>
+        </summary>
+        <div class="prose mx-auto mt-6" set:html={renderCopy(markdown)} />
+      </details>
+    </div>
+  </section>
+)}
