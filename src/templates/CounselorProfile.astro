@@ -4,6 +4,7 @@ import Section from '../components/Section.astro';
 import StoryBrandSection from '../components/StoryBrandSection.astro';
 import CollapsibleSection from '../components/CollapsibleSection.astro';
 import StatusPill from '../components/StatusPill.astro';
+import TelehealthPill from '../components/TelehealthPill.astro';
 import SpecialtyPills from '../components/SpecialtyPills.astro';
 import CounselorQuote from '../components/CounselorQuote.astro';
 import Modalities from '../components/Modalities.astro';
@@ -61,12 +62,11 @@ const counselors = getCounselorOptions(allPages);
           {page.h1 ?? page.title}
         </h1>
         {page.credentials && <p class="mt-1 text-brand-primary">{page.credentials}</p>}
+        {page.license_number && <p class="mt-0.5 text-sm text-slate-500">License #{page.license_number}</p>}
 
         {page.telehealth_available && (
           <div class="mt-3 flex justify-center sm:justify-start">
-            <span class="rounded-full bg-brand-tint/40 px-4 py-1.5 text-sm font-semibold text-brand-ink">
-              Telehealth available
-            </span>
+            <TelehealthPill telehealthAvailable={page.telehealth_available} />
           </div>
         )}
 
@@ -75,6 +75,12 @@ const counselors = getCounselorOptions(allPages);
         {page.specialties.length > 0 && (
           <div class="mt-4">
             <SpecialtyPills specialties={page.specialties} />
+          </div>
+        )}
+
+        {page.modalities.length > 0 && (
+          <div class="mt-4">
+            <Modalities modalities={page.modalities} />
           </div>
         )}
 
@@ -90,7 +96,6 @@ const counselors = getCounselorOptions(allPages);
     </div>
   </section>
   <CounselorQuote quote={page.testimonial_quote} author={page.testimonial_author} />
-  <Modalities modalities={page.modalities} />
   {page.storybrand_problem && (
     <Section>
       <Fragment set:html={renderCopy(page.storybrand_problem)} />

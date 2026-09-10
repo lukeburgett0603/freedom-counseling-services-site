@@ -1,0 +1,19 @@
+---
+// A counselor's telehealth-availability badge (page.telehealth_available)
+// — extracted once a second call site (CounselorsOverview.astro) needed
+// the identical pill CounselorProfile.astro's header card already had,
+// same reuse discipline as this project's other small shared pills
+// (StatusPill.astro). Renders nothing when false — never defaulted/
+// guessed, see 0029_counselor_card_v2.sql.
+interface Props {
+  telehealthAvailable: boolean;
+}
+
+const { telehealthAvailable } = Astro.props;
+---
+
+{telehealthAvailable && (
+  <span class="rounded-full bg-brand-tint/40 px-4 py-1.5 text-sm font-semibold text-brand-ink">
+    Telehealth available
+  </span>
+)}

@@ -1865,6 +1865,71 @@ comparable real counseling-site card.
   Any future nav item that depends on more than just role needs the same
   shape, not a second hard-coded role map.
 
+## Modality picker + license number (built 2026-09-10)
+
+Two changes to counselor self-service, both requested together: a real
+modality-selection tool replacing the old comma-separated text field,
+plus a new self-service `license_number` field — and `Modalities.astro`
+moved from its own standalone section below the personal quote into the
+header card itself, in its own labeled block right after
+`SpecialtyPills`. Template-wide change, built in `local-business-site-
+template` first then synced here — Freedom's migration is
+`0037_counselor_license_number.sql` (the template's own copy is `0036`;
+see the numbering-divergence note at the top of this file's migrations
+history).
+
+- **Editing location was deliberately NOT moved off `admin/counselor-
+  settings.astro`**, even though the first pass at this request
+  considered relocating it into the per-page content editor
+  (`admin/content/page-copy.astro`). Explicit client feedback after
+  weighing the tradeoff: that editor is owner/agency-only today, and
+  moving modalities there would have meant either building out RLS/UI
+  access for a linked counselor to reach their own page in a screen that
+  otherwise doesn't allow it, or losing counselor self-service entirely.
+  Keeping everything on Counselor settings preserves the existing "each
+  counselor edits only their own page, via the linked-counselor RLS
+  carve-out; owner/agency get a page picker across everyone" model
+  without touching it — only what's *inside* that screen changed.
+- **`lib/modalities.ts`'s `MODALITY_OPTIONS`** is a real, standard list
+  (~40 entries) of recognized psychotherapy modalities/theoretical
+  orientations — sourced from established clinical terminology, not
+  invented. Values are stored and displayed exactly as written (they're
+  public tags on a counselor's page) — common abbreviations where one is
+  genuinely standard (EMDR, CBT, DBT, ACT, IFS — chosen specifically
+  because Freedom's real counselors already had these exact strings
+  entered as free text before this picker existed) and full names
+  otherwise. Verified live against Freedom's real counselor data: Luke
+  Burgett's existing `["ACT", "CBT", "IFS", "Schema Therapy"]` and Staci
+  Harrub's `["EMDR"]` both came back fully pre-checked with zero leftover
+  "custom" chips once the picker replaced the old text field — no data
+  migration needed, `pages.modalities` stayed the same plain `string[]`
+  column throughout.
+- **`license_number`** (nullable text) is never defaulted/guessed, same
+  as every other field in this family — every real Freedom counselor's
+  row was left `null` here (no license numbers were on file to migrate
+  in), shown as `"License #<value>"` right under credentials in the
+  header card and on the Counselors Overview grid only once a counselor
+  actually sets one via Counselor settings.
+- **Counselors Overview (`/counselors/`) now surfaces every Counselor
+  settings field, not just credentials/excerpt** — license number, the
+  availability-status pill, the telehealth pill, and modality tags all
+  render on each card, using the exact same components as the
+  counselor's own profile page. Confirmed live in the built `dist/`
+  output: only Luke Burgett (the one counselor with `availability_status`/
+  `telehealth_available` actually set) shows those pills on his card;
+  the other four show neither, matching their real, unset data rather
+  than a guessed default.
+- **Verification pattern**: typechecked (`astro check`, 0 errors) and
+  built clean against this site's real Supabase project (not just the
+  template). The migration was applied directly via the Management API
+  (service_role key never touched a repo file). The admin picker was
+  exercised live in a real browser against a temporary throwaway
+  owner-role Auth user (created via `/auth/v1/admin/users`, deleted
+  after) — confirmed the search filter, the "Other" custom-entry
+  round-trip through Save into the real `pages.modalities` column, then
+  reverted the test edit on Luke's real row afterward so no test data
+  was left behind.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a

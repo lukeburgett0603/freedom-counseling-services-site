@@ -130,10 +130,20 @@ export interface Page {
   telehealth_available: boolean;
   // Only meaningful on a 'Counselor Profile' page - a counselor's own
   // list of clinical training/approaches (e.g. "EMDR", "ACT"), rendered
-  // by Modalities.astro as its own H2 section below the personal quote.
-  // Plain string tags, not linked anywhere (unlike specialties) - purely
-  // self-service, see 0029_counselor_card_v2.sql.
+  // by Modalities.astro inside the header card, in its own labeled
+  // section near SpecialtyPills. Plain string tags, not linked anywhere
+  // (unlike specialties) - purely self-service, picked from
+  // lib/modalities.ts's MODALITY_OPTIONS or typed as a custom "Other"
+  // entry on admin/counselor-settings.astro, see 0029_counselor_card_v2.sql
+  // and 0037_counselor_license_number.sql.
   modalities: string[];
+  // Only meaningful on a 'Counselor Profile' page - a counselor's own
+  // professional license number (e.g. "LPCA #12345"), shown next to
+  // credentials in the header card and on the Counselors Overview grid.
+  // Self-service editable on admin/counselor-settings.astro, same as
+  // availability_status/telehealth_available/modalities - never
+  // defaulted/guessed. See 0037_counselor_license_number.sql.
+  license_number: string | null;
   // Which Hero.astro layout this page uses. 'default' (today's
   // side-by-side image/aside) is the default for every page on every
   // client site; 'overlay' is opt-in per page - a full-bleed background
