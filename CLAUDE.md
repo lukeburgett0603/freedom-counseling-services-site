@@ -1930,6 +1930,41 @@ history).
   reverted the test edit on Luke's real row afterward so no test data
   was left behind.
 
+## Counselor Profile header card restructure via `/impeccable live` (built 2026-09-10)
+
+An interactive `/impeccable live` design session against Luke Burgett's
+real profile page (`/luke-burgett`) — three rounds of AI-generated
+variants, picked and refined live in the browser, each accepted variant
+carbonized into plain Tailwind markup before moving to the next round.
+Template-wide change, synced back to `local-business-site-template` in
+the same pass (see that repo's CLAUDE.md for the full technical
+writeup — this entry covers what's specific to seeing it happen on
+Freedom's real site).
+
+- **`flex` → a two-column CSS grid** (`sm:grid-cols-[14rem_1fr]`):
+  identity column (photo, credentials, license number, telehealth pill)
+  beside a content column (name, bio, CTA, specialty/modality pills).
+- **The CTA moved from after the pills to right after the bio** — this
+  was the client's own real-time diagnosis working against the live
+  page: with the button directly under the specialties/modalities pill
+  row, it read as just another pill rather than a distinct action. The
+  pills row is now visually secondary (`opacity-[0.82]`, under its own
+  divider) below the CTA instead of competing with it.
+  Confirmed against `/luke-burgett` first, before syncing to any other
+  counselor page.
+- **The CTA on this one card gets its own hover treatment** — a
+  maroon-tinted lift (`hover:-translate-y-px hover:shadow-[0_6px_14px_rgba(123,39,20,0.22)]`)
+  instead of the sitewide default `hover:opacity-90` — a deliberate,
+  scoped exception for this one high-intent action; every other button
+  on the site (CTA.astro, LeadGenerator, etc.) is untouched.
+- **Verification pattern**: `astro check` (0 errors) and `npm run build`
+  against this site's real Supabase project after every carbonize step,
+  then a direct read of the built `dist/` HTML for Luke Burgett (every
+  field populated) and Tony Gore/Sophie Bowman/Rhonda Gore (no license,
+  telehealth, specialties, or modalities set at all) to confirm the
+  empty-state conditionals still render nothing rather than a broken
+  empty grid — not just eyeballing the one counselor with full data.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a
