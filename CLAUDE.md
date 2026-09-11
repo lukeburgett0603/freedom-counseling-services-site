@@ -627,6 +627,51 @@ at the registrar. Two halves:
   access token, confirmed both a real successful call against live
   Cloudflare data and the auth/role rejection paths (no header, anon key
   as bearer), then deleted immediately after.
+- **The "renders as a new section on `admin/leads.astro`" line above was
+  never actually true — the client reported the dashboard showing no
+  traffic section at all (2026-09-11), and `admin/leads.astro` genuinely
+  had zero references to `get-traffic-stats` or Cloudflare anywhere in
+  it.** The Edge Function was real, deployed (`ACTIVE`), and both secrets
+  (`CLOUDFLARE_ANALYTICS_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`) were
+  correctly set — calling it directly with a real session returned real
+  data (270 pageviews this month, real page paths) — so the entire
+  backend half of this feature worked and had simply never been wired
+  into the page that was supposed to call it. The exact "populated/built
+  but nothing renders it" shape this file already warns about elsewhere
+  (the FAQ-schema bug, the Reviewed-by byline, blog cards) — this
+  instance just happened at the Edge-Function layer instead of a
+  database column. Fixed by actually adding the section (stat cards, a
+  30-day bar chart, top pages, all above the existing lead stats) and
+  the `loadTrafficStats()` call in `admin/leads.astro`'s script — a
+  plain authenticated `fetch` to the function (apikey + the caller's own
+  session `access_token`), matching `lib/publishFunction.ts`'s
+  established pattern rather than inventing a new one. Stays hidden on
+  any failure (network error, non-2xx response, no session) exactly as
+  originally intended — never a visible error on this page.
+  **This feature is Freedom-only** (`get-traffic-stats` doesn't exist in
+  `local-business-site-template` at all — the Cloudflare account
+  ID/token are Freedom's own credentials, not portable), so this fix
+  stayed scoped to this repo; if/when a second client wants this tier,
+  bring the Edge Function *and* this admin UI wiring together, not just
+  the function.
+- **Found and fixed a second, pre-existing bug while verifying this in a
+  real browser, unrelated to the traffic section itself**: `admin
+  /leads.astro`'s leads table (10 columns) was silently blowing out the
+  entire admin page's width instead of scrolling within its own
+  `overflow-x-auto` wrapper — confirmed by hiding the new traffic
+  section and re-measuring `<main>`, which was still 1350px wide against
+  a 1024px viewport with the section hidden. Classic flexbox gotcha:
+  `<main class="flex-1 p-6">` is a flex item inside `AdminLayout.astro`'s
+  `#admin-content` flex row, and a flex item's default `min-width: auto`
+  refuses to shrink below its content's intrinsic minimum width unless
+  told otherwise. Fixed with `min-w-0` added to that one `<main>` class
+  list — a standard, safe fix (Tailwind's own recommended pattern for
+  exactly this), verified before/after via `scrollWidth` measurements in
+  the live browser, not just eyeballing it. This was pre-existing before
+  today's change (present with the traffic section hidden), not
+  something introduced by it, but every `/admin/*` page shares
+  `AdminLayout.astro`, so this fix benefits all of them, not just Leads
+  and analytics.
 - **Tier 3 — search rankings/impressions (Google Search Console data).**
   The most convincing "your SEO is working" evidence, but the most work:
   needs Search Console API access per client (OAuth/service account), and
