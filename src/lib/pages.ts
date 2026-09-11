@@ -242,6 +242,10 @@ export interface Business {
   // fully-in-person client has nothing to ask. See
   // 0040_session_format_preference.sql.
   collect_session_format_preference: boolean;
+  // Where the submit-lead Edge Function sends a real-time "someone just
+  // submitted the contact form" notification — null means no
+  // notification is sent. See 0042_lead_notification_email.sql.
+  lead_notification_email: string | null;
   // A link to the business's EHR client portal (SimplePractice,
   // TherapyNotes, etc.) for existing clients — see 0009_client_portal_url.sql.
   client_portal_url: string | null;

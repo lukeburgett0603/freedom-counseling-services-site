@@ -819,6 +819,50 @@ has served so far is a counseling practice.
   re-colored correctly, reverted it to its real value afterward) — not
   just confirming the migration itself applied cleanly.
 
+## Real-time lead notification email (built 2026-09-11)
+
+`info@freedomcounselingservices.org` (the shared inbox the practice
+already manages, a Microsoft 365 account) now gets an email the moment
+someone submits the contact/appointment form, with every field they
+submitted in the body, and **Reply-To set to the lead's own email** — so
+replying in that same Microsoft 365 mailbox goes straight to the lead.
+That reply happens entirely through Microsoft 365, outside Resend —
+confirmed this with the client directly before building.
+
+- **A new Edge Function, `submit-lead`, replaces `LeadGenerator.astro`'s
+  old direct `POST /rest/v1/leads` REST insert** — it needed to do
+  something *after* a successful insert (send an email), which a plain
+  PostgREST call can't do on its own. Public-facing, not admin-gated,
+  same as every site visitor submitting this form.
+- **`business.lead_notification_email`** (nullable text,
+  `0042_lead_notification_email.sql`) is set to
+  `info@freedomcounselingservices.org` on this site's live database —
+  the only Freedom team member with owner status whose inbox this
+  should reach, per the client's own answer.
+- **The insert is the only part that can fail the response** — the
+  notification email is best-effort, wrapped in its own `try/catch`
+  that swallows any error, so a Resend hiccup never makes a real,
+  successfully-submitted lead look failed to the visitor.
+- **Reuses the existing `NURTURE_RESEND_API_KEY`/`NURTURE_SENDER_EMAIL`
+  secrets** already configured on this project for the nurture-sequence
+  feature — no new Resend identity needed for a transactional
+  notification to the practice's own team.
+- **`LeadMagnet.astro`'s separate guide-download insert was left
+  untouched** — the client's request was specifically about the
+  appointment-request contact form, not the lower-intent guide-download
+  path (see "Contacts vs. leads" below for why those stay distinct).
+- **Verification pattern**: migration applied and the function deployed
+  directly against this project's live database (`shxtgmjbfojmwhrebjpr`),
+  then called with a throwaway `ZZTEST`-prefixed lead — confirmed the
+  insert landed correctly and the function returned `{ ok: true }` —
+  deleted afterward. `astro check` (0 errors) and a real `npm run build`
+  against this site's live Supabase project both passed, with the built
+  `dist/index.html` confirmed to call `functions/v1/submit-lead` rather
+  than the old REST endpoint. Actual email delivery to the real
+  `info@freedomcounselingservices.org` inbox still needs a live
+  confirmation from the client — the automated test only proves Resend
+  accepted the send request, not that it landed.
+
 ## Contacts vs. leads (built 2026-09-06)
 
 A lead-magnet download (`leads.lead_magnet_id` set) and a real

@@ -213,13 +213,12 @@ const Wrapper = embedded ? 'div' : 'section';
         payload.preferred_session_format = formData.get('preferred_session_format') || null;
       }
 
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-lead`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           apikey: SUPABASE_ANON_KEY,
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          Prefer: 'return=minimal',
         },
         body: JSON.stringify(payload),
       });
