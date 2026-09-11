@@ -795,6 +795,30 @@ here until "assign leads to staff" (backlogged, see below) is built.
     and called from both the row menu and the detail view — same reuse
     discipline as the status-select extraction above.
 
+## Lead status vocabulary: new/contacted/scheduled/referred/withdrawn (built 2026-09-11)
+
+Client request: `closed` was collapsing three different real outcomes
+(scheduled an appointment, referred elsewhere, decided against
+counseling) into one meaningless bucket. Replaced with `new`,
+`contacted`, `scheduled`, `referred`, `withdrawn` — "withdrawn," not
+"declined," since this describes the client's own decision to stop
+pursuing counseling, not the practice declining them. Generalized to
+`local-business-site-template` the same day (see that repo's CLAUDE.md
+for the full technical writeup) since every real client this template
+has served so far is a counseling practice.
+
+- **Migration `0041_lead_status_vocabulary.sql`** drops and re-adds
+  `leads_status_check` — a real Postgres `CHECK` constraint, not just an
+  app-code list, so an app-only change would have 400'd on every save.
+  Confirmed live before writing it that no existing lead had `status =
+  'closed'` at the time, so no data remapping was needed.
+- **Verification pattern**: `astro check` (0 errors), the migration
+  applied directly via the Management API, then a real status change
+  tested in a live browser session against a temporary owner login
+  (changed a real lead to `withdrawn`, confirmed the write succeeded and
+  re-colored correctly, reverted it to its real value afterward) — not
+  just confirming the migration itself applied cleanly.
+
 ## Contacts vs. leads (built 2026-09-06)
 
 A lead-magnet download (`leads.lead_magnet_id` set) and a real
