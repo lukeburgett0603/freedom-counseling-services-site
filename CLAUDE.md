@@ -838,7 +838,13 @@ confirmed this with the client directly before building.
   `0042_lead_notification_email.sql`) is set to
   `info@freedomcounselingservices.org` on this site's live database —
   the only Freedom team member with owner status whose inbox this
-  should reach, per the client's own answer.
+  should reach, per the client's own answer. **Editable from the admin**
+  (added 2026-09-11, after the client asked where to manage this) — "Lead
+  notification email(s)" on Website content → Business info, right below
+  Client portal URL. **Supports more than one recipient**: type any
+  number of addresses separated by commas (e.g.
+  `info@freedomcounselingservices.org, luke@freedomcounselingservices.org`)
+  and every one of them gets the notification email.
 - **The insert is the only part that can fail the response** — the
   notification email is best-effort, wrapped in its own `try/catch`
   that swallows any error, so a Resend hiccup never makes a real,
@@ -861,7 +867,14 @@ confirmed this with the client directly before building.
   than the old REST endpoint. Actual email delivery to the real
   `info@freedomcounselingservices.org` inbox still needs a live
   confirmation from the client — the automated test only proves Resend
-  accepted the send request, not that it landed.
+  accepted the send request, not that it landed. The admin field
+  (added one day later) was re-verified the same way plus a real
+  browser pass: a temporary throwaway owner login confirmed the field
+  loaded the real existing address, saved a two-address edit correctly
+  (confirmed via direct query), and a follow-up `submit-lead` call still
+  returned `{ ok: true }` with both recipients configured — then the
+  row was reverted to the real single address and the temp login/lead
+  deleted.
 
 ## Contacts vs. leads (built 2026-09-06)
 

@@ -3,10 +3,12 @@
 // on every real submission: inserting the lead is still the critical path
 // (never blocked or failed by anything below), but this also sends a
 // real-time "someone just submitted the form" notification email to
-// whichever team member business.lead_notification_email points at, with
-// Reply-To set to the lead's own submitted email — replying in their
-// normal email client (Outlook, Gmail, whatever) goes straight to the
-// lead, no CRM/Resend involvement in that reply at all.
+// whichever team member(s) business.lead_notification_email names (one
+// text field, comma-separated for more than one address — set via the
+// admin's Business info screen), with Reply-To set to the lead's own
+// submitted email — replying in their normal email client (Outlook,
+// Gmail, whatever) goes straight to the lead, no CRM/Resend involvement
+// in that reply at all.
 //
 // Auth: deliberately NOT the "verify_jwt isn't enough, check getUser()"
 // pattern every ADMIN-gated function in this project uses (publish-site,
@@ -125,7 +127,15 @@ Deno.serve(async (req: Request) => {
       .select('display_name, lead_notification_email')
       .maybeSingle();
 
-    if (resendApiKey && senderEmail && business?.lead_notification_email) {
+    // business.lead_notification_email is a single text field that can hold
+    // more than one address, comma-separated (set via the admin's Business
+    // info screen) — split it into the array Resend's `to` field expects.
+    const notificationRecipients = (business?.lead_notification_email ?? '')
+      .split(',')
+      .map((s: string) => s.trim())
+      .filter(Boolean);
+
+    if (resendApiKey && senderEmail && notificationRecipients.length > 0) {
       let counselorName: string | null = null;
       if (insertPayload.preferred_counselor_page_id) {
         const { data: counselorPage } = await supabase
@@ -169,7 +179,7 @@ Deno.serve(async (req: Request) => {
         headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: fromHeader,
-          to: business.lead_notification_email,
+          to: notificationRecipients,
           reply_to: email,
           subject: `New appointment request from ${name}`,
           html: `${rowsHtml}\n${messageHtml}\n<hr style="border:none;border-top:1px solid #ddd;margin:20px 0;">\n<p style="font-size:12px;color:#888;">Reply directly to this email to respond to ${escapeHtml(name)}.</p>`,
