@@ -18,13 +18,30 @@
 // ships (same as every other anon-key REST call this app makes), and
 // that's sufficient.
 //
+// Also the enforcement point for both of this form's spam defenses — the
+// client-side honeypot field and Turnstile widget (LeadGenerator.astro)
+// are only the UX half; a bot calling this function directly (bypassing
+// the form's JS entirely, the way any curl-based test of this function
+// already does) would sail through a client-only check. See the two
+// checks right after body validation below.
+//
 // Config (`supabase secrets set ... --project-ref <ref>`):
-//   NURTURE_RESEND_API_KEY - reused from the nurture-sequence feature
-//                            (send-nurture-emails) rather than
-//                            provisioning a second Resend key — same
-//                            verified sending domain works fine for a
-//                            transactional notification like this one.
-//   NURTURE_SENDER_EMAIL   - same reuse.
+//   NURTURE_RESEND_API_KEY          - reused from the nurture-sequence
+//                                     feature (send-nurture-emails)
+//                                     rather than provisioning a second
+//                                     Resend key — same verified sending
+//                                     domain works fine for a
+//                                     transactional notification like
+//                                     this one.
+//   NURTURE_SENDER_EMAIL            - same reuse.
+//   CLOUDFLARE_TURNSTILE_SECRET_KEY - optional; only set for a client who
+//                                     has business.cloudflare_turnstile_site_key
+//                                     configured (see 0043_turnstile_site_key.sql).
+//                                     Unset means this function skips
+//                                     Turnstile verification entirely —
+//                                     same graceful-degrade pattern as
+//                                     every other optional integration in
+//                                     this app.
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -73,6 +90,45 @@ Deno.serve(async (req: Request) => {
   const email = typeof body.email === 'string' ? body.email.trim() : '';
   if (!name || !email) {
     return jsonResponse({ error: 'Name and email are required' }, 400);
+  }
+
+  // Honeypot: a real visitor never sees or fills this field (see
+  // LeadGenerator.astro's markup comment), so any non-empty value here is
+  // an unsophisticated bot that fills in every input it finds. Reported
+  // back as a normal success — never tipping the bot off that it was
+  // caught — but the lead is never actually inserted.
+  const honeypotValue = typeof body.hp_website === 'string' ? body.hp_website.trim() : '';
+  if (honeypotValue) {
+    return jsonResponse({ ok: true });
+  }
+
+  // Turnstile: only enforced when this project has a secret key configured
+  // (i.e. the client opted in via Cloudflare's dashboard). Unlike the
+  // honeypot, a failure here is reported as a real error — a legitimate
+  // visitor who hit a network/JS hiccup benefits from knowing to retry,
+  // and a targeted bot presenting a bad/missing token isn't the kind of
+  // unsophisticated automation the honeypot's "don't tip it off" reasoning
+  // is aimed at.
+  const turnstileSecretKey = Deno.env.get('CLOUDFLARE_TURNSTILE_SECRET_KEY');
+  if (turnstileSecretKey) {
+    const turnstileToken = typeof body.turnstile_token === 'string' ? body.turnstile_token : '';
+    if (!turnstileToken) {
+      return jsonResponse({ error: 'Spam verification failed — please try again.' }, 400);
+    }
+    const remoteIp = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+    const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: turnstileSecretKey,
+        response: turnstileToken,
+        ...(remoteIp ? { remoteip: remoteIp } : {}),
+      }),
+    });
+    const verifyResult = await verifyResponse.json().catch(() => ({ success: false }));
+    if (!verifyResult.success) {
+      return jsonResponse({ error: 'Spam verification failed — please try again.' }, 400);
+    }
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

@@ -246,6 +246,10 @@ export interface Business {
   // submitted the contact form" notification — null means no
   // notification is sent. See 0042_lead_notification_email.sql.
   lead_notification_email: string | null;
+  // Cloudflare Turnstile site key (public) — renders the anti-spam widget
+  // on LeadGenerator when set; null means Turnstile is off. See
+  // 0043_turnstile_site_key.sql.
+  cloudflare_turnstile_site_key: string | null;
   // A link to the business's EHR client portal (SimplePractice,
   // TherapyNotes, etc.) for existing clients — see 0009_client_portal_url.sql.
   client_portal_url: string | null;

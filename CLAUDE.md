@@ -876,6 +876,33 @@ confirmed this with the client directly before building.
   row was reverted to the real single address and the temp login/lead
   deleted.
 
+## Contact-form spam defense: honeypot + Cloudflare Turnstile (built 2026-09-12)
+
+Client-reported scammers filling out the real contact form. Two layers —
+see `local-business-site-template`'s CLAUDE.md for the full technical
+writeup (that's where this was actually built, then synced here). This
+entry covers what's specific to this site.
+
+- **Honeypot is live now, no setup needed** — deployed and verified
+  against this project's real `submit-lead` function: a filled honeypot
+  came back `{ ok: true }` with **zero** rows landing in `leads`
+  (confirmed via a direct query), and a normal submission still inserted
+  correctly. This alone should stop the unsophisticated bots most
+  contact-form spam actually is.
+- **Cloudflare Turnstile is built but not yet turned on for this
+  site** — `business.cloudflare_turnstile_site_key` is still null
+  (`0043_turnstile_site_key.sql` applied, but nothing set), and no
+  `CLOUDFLARE_TURNSTILE_SECRET_KEY` Edge Function secret exists yet. If
+  the honeypot alone doesn't fully stop what you're seeing, turning this
+  on is a small manual step: create a Turnstile widget for
+  `freedomcounselingservices.org` in the Cloudflare dashboard (same
+  account already used for Web Analytics) → Turnstile → Add a site,
+  which gives a Site Key (paste into `business
+  .cloudflare_turnstile_site_key`) and a Secret Key (set as the
+  `CLOUDFLARE_TURNSTILE_SECRET_KEY` Edge Function secret, never a repo
+  file). Both are one-time, agency-side setup steps — no admin UI for
+  either, same as `cloudflare_beacon_token`/`google_fonts_url`.
+
 ## Contacts vs. leads (built 2026-09-06)
 
 A lead-magnet download (`leads.lead_magnet_id` set) and a real

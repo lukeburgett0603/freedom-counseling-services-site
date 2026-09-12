@@ -67,6 +67,7 @@ const isOverlayHero = page.hero_style === 'overlay' && !!page.images.hero;
         submitText={page.cta_button_text ?? 'Get Started'}
         collectWebsiteUrl={business.collect_website_in_leads}
         responseTimeNote={business.lead_response_time_note}
+        turnstileSiteKey={business.cloudflare_turnstile_site_key}
         collectCounselorPreference={business.collect_counselor_preference}
         collectSessionFormat={business.collect_session_format_preference}
         counselors={counselors}
@@ -103,6 +104,7 @@ const isOverlayHero = page.hero_style === 'overlay' && !!page.images.hero;
     submitText={page.cta_button_text ?? undefined}
     collectWebsiteUrl={business.collect_website_in_leads}
     responseTimeNote={business.lead_response_time_note}
+    turnstileSiteKey={business.cloudflare_turnstile_site_key}
     collectCounselorPreference={business.collect_counselor_preference}
     collectSessionFormat={business.collect_session_format_preference}
     counselors={counselors}
