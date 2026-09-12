@@ -876,6 +876,40 @@ confirmed this with the client directly before building.
   row was reverted to the real single address and the temp login/lead
   deleted.
 
+## HIPAA-adjacent data handling review: RLS, encryption, and the real gap (2026-09-12)
+
+Client question about HIPAA technical safeguards — see
+`local-business-site-template`'s CLAUDE.md for the full technical
+writeup (built there first, then applied here). Summary of what's
+actually true on this site as of this review:
+
+- **RLS read access was already correctly locked to owner/agency only** —
+  this part of the question was already satisfied.
+- **A real gap was found and fixed the same day**: `leads`' original
+  insert policy let anyone with the public anon key bypass the honeypot
+  and Turnstile checks built the day before, by posting directly to
+  `/rest/v1/leads` instead of through `submit-lead`. Confirmed live via
+  a direct `curl` test (it succeeded before the fix), then closed via
+  `0044_close_leads_direct_insert.sql` without breaking the CRM's
+  "+ Add lead" feature or the lead-magnet download form — both still
+  verified working afterward. All test rows deleted.
+- **Encryption at rest**: no column-level (`pgcrypto`) encryption is
+  applied to `message` or any other field — infrastructure-level disk
+  encryption is a Supabase platform default (verify directly with
+  Supabase, not just this note), but application-layer encryption of
+  the database column specifically wasn't judged worth the real
+  engineering cost here, since `submit-lead`'s own notification email
+  already sends that same field's contents in plain text to
+  `info@freedomcounselingservices.org` by design — the database column
+  isn't the only place this data already lives unencrypted.
+- **The real open question is whether Supabase and Resend have signed
+  Business Associate Agreements in place, and whether a pre-treatment
+  contact-form message legally counts as PHI for this practice** — both
+  are outside what a technical/RLS review can settle. Recommend a real
+  HIPAA risk assessment from a healthcare privacy attorney or compliance
+  consultant if this hasn't already been done for the practice as a
+  whole, not just for this website.
+
 ## Contact-form spam defense: honeypot + Cloudflare Turnstile (built 2026-09-12)
 
 Client-reported scammers filling out the real contact form. Two layers —
