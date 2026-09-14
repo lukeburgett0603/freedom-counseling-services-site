@@ -1008,11 +1008,33 @@ real example of that almost going wrong.
   rather than human, and the `hero_headline` field already exists for
   exactly this — a genuine, natural tagline that can incorporate
   differentiating language without becoming a bare keyword string.
-  Drafting real `hero_headline` taglines for each counselor is a
-  natural next step, not done in this pass.
 - **Rebuilt and redeployed** after applying all 5 (a Supabase content
   edit doesn't go live on its own) — confirmed the GitHub Pages workflow
   completed successfully.
+- **Follow-up, same day: real `hero_headline` taglines written for all
+  5**, closing the loop from the point directly above. Each one was
+  grounded in that counselor's own existing `storybrand_problem`/
+  `storybrand_guide_empathy` language, not invented — e.g. Rhonda's
+  tagline ("...Toward Truth and Healing") reuses her own words verbatim
+  from her guide-empathy section; Staci's ("A Judgment-Free Space...")
+  reuses her own described approach word for word. None of the five
+  literally repeat their new `focus_keyword` string — the tagline's job
+  is to be a genuinely compelling human sentence, the keyword field
+  already carries the literal search-facing signal on its own.
+  Final taglines:
+  - Luke Burgett — "Helping Boys & Men Break Free from Anxiety, OCD & Depression"
+  - Tony Gore — "Helping Couples, Families & Men Move Toward Stronger Relationships"
+  - Rhonda Gore — "Helping Women Move from Shame and Anxiety Toward Truth and Healing"
+  - Sophie Bowman — "Helping Kids & Teens Find Their Confidence Again"
+  - Staci Harrub — "A Judgment-Free Space to Heal from Anxiety, Grief & Perfectionism"
+  Applied via the same scoped `ALTER TABLE pages DISABLE/ENABLE TRIGGER
+  pages_enforce_content_permission` pattern as the keyword updates
+  (`hero_headline` is tier-gated, not unconditionally locked like
+  `focus_keyword`, but a raw SQL session still has no real `auth.uid()`
+  to satisfy either check) — verified the trigger was genuinely back on
+  with a real negative test afterward, rebuilt, redeployed, and
+  confirmed all 5 real `<h1>` values live via a direct `curl` against
+  each counselor's actual page, not just trusting the database write.
 
 Luke Burgett (and every other linked counselor on this site) can now
 edit their own profile page's tagline and StoryBrand paragraphs
