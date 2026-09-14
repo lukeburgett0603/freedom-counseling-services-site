@@ -38,11 +38,15 @@ const { title, current } = Astro.props;
 // "Website content" is a collapsible group rather than a single link —
 // business info/testimonials and page copy used to be three stacked
 // sections on one route, but grew enough to warrant their own pages.
-// Both children share `navKey: 'content'` (not each child's own `key`)
-// so adminAuth.ts's role-based hide/show — which only knows about the
-// single 'content' permission — keeps treating them as one unit, exactly
-// as it did when this was one nav item. `key` (distinct per child) is
-// only used here, for current-route highlighting and default-expanded.
+// Each child now carries its OWN distinct `navKey` (previously both
+// shared the parent's 'content' key, hiding/showing as one unit) —
+// split the day a linked-counselor staff login needed Page Copy access
+// to their own page without also getting Business Info, exactly the
+// "future page needs the two children gated separately" case this
+// comment used to warn about. The parent `<li>` (the toggle button
+// itself) still gates on its own 'content' key — a role needs that key
+// too, or the group header never shows regardless of which children it
+// can reach.
 const navItems = [
   { key: 'leads', label: 'Leads and analytics', href: withBase('/admin/leads') },
   { key: 'crm', label: 'Lead CRM', href: withBase('/admin/crm') },
@@ -53,13 +57,13 @@ const navItems = [
     children: [
       {
         key: 'content-business-info',
-        navKey: 'content',
+        navKey: 'content-business-info',
         label: 'Business info & testimonials',
         href: withBase('/admin/content/business-info'),
       },
       {
         key: 'content-page-copy',
-        navKey: 'content',
+        navKey: 'content-page-copy',
         label: 'Page copy',
         href: withBase('/admin/content/page-copy'),
       },

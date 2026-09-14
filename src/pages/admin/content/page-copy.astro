@@ -11,8 +11,13 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     <section>
       <h2 class="mb-1 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Page copy</h2>
       <p id="content-tier-note" class="mb-4 text-sm text-slate-600"></p>
+
+      <div id="content-not-linked-notice" class="hidden mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        Your login isn't linked to a counselor page yet — ask the site owner to link one from the Team page.
+      </div>
+
       <div class="space-y-4">
-        <div>
+        <div id="content-page-select-wrap">
           <label class="mb-1 block text-sm font-semibold text-slate-700">Page</label>
           <select id="content-page-select" class="w-full rounded-md border border-slate-300 px-4 py-2"></select>
         </div>
@@ -85,6 +90,26 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               the part that needs changing. Most pages read best when every section below has at least a short
               paragraph, but it's fine to leave one blank if it genuinely doesn't apply.
             </p>
+
+            <!--
+              Counselor-facing writing guidance — shown only for a
+              linked-counselor staff session (see isLinkedCounselorSession()
+              below), never for owner/agency, who have their own SEO
+              strategist handling this. Translates keyword-usage-rules.md's
+              guidance (no fixed repetition count, natural placement, and
+              the schema-alignment rule) into something a non-copywriter can
+              actually act on — the entity-term line is read straight from
+              getPersonEntityTerms() (src/lib/schema.ts), the same function
+              buildPersonSchema() itself uses, so this can't silently drift
+              from what the page's real schema markup says. See CLAUDE.md's
+              "getPersonEntityTerms()" section for the full reasoning.
+            -->
+            <div id="content-counselor-guidance" class="hidden space-y-2 rounded-md border border-brand-tint bg-brand-neutral p-4">
+              <h4 class="text-sm font-semibold text-brand-ink">Writing tips for your bio</h4>
+              <p id="content-counselor-keyword-tip" class="text-sm text-slate-700"></p>
+              <p id="content-counselor-entity-tip" class="text-sm text-slate-700"></p>
+              <p id="content-counselor-keyword-count" class="text-xs text-slate-500"></p>
+            </div>
 
             <div data-field="storybrand_problem">
               <label class="mb-1 block text-sm font-semibold text-slate-700">The Problem</label>
@@ -457,6 +482,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   import { triggerRebuild } from '../../../lib/publishFunction';
   import { initUnsplashSearchModal, type UnsplashPhoto } from '../../../lib/unsplashSearch';
   import { STORYBRAND_SPLIT_PAGE_TYPES } from '../../../lib/pages';
+  import { getPersonEntityTerms } from '../../../lib/schema';
 
   type ContentPage = {
     id: string;
@@ -574,6 +600,37 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const storybrandPitchEditor = initRichTextEditor('content-storybrand-pitch-editor');
   const storybrandSuccessEditor = initRichTextEditor('content-storybrand-success-editor');
   const storybrandFailureEditor = initRichTextEditor('content-storybrand-failure-editor');
+
+  // Live, non-blocking count of the focus keyword's exact-match occurrences
+  // across the 5 StoryBrand fields — informational only, never a hard gate.
+  // keyword-usage-rules.md deliberately gives no fixed repetition target
+  // ("do not chase a keyword density target"), so this shows the counselor
+  // the real, current number as they write instead of us inventing one to
+  // enforce. Only meaningful (and only wired up) for a linked-counselor
+  // session — see isLinkedCounselorSession() below.
+  const STORYBRAND_EDITORS_FOR_COUNT = [
+    storybrandProblemEditor,
+    storybrandGuideEmpathyEditor,
+    storybrandPitchEditor,
+    storybrandSuccessEditor,
+    storybrandFailureEditor,
+  ];
+  function updateKeywordCount() {
+    if (!isLinkedCounselorSession() || !selectedContentPage?.focus_keyword) {
+      contentCounselorKeywordCount.textContent = '';
+      return;
+    }
+    const keyword = selectedContentPage.focus_keyword.toLowerCase();
+    const combinedText = STORYBRAND_EDITORS_FOR_COUNT.map((e) => e.editor.textContent ?? '')
+      .join(' ')
+      .toLowerCase();
+    const count = combinedText.split(keyword).length - 1;
+    contentCounselorKeywordCount.textContent =
+      count === 0
+        ? `Your focus keyword doesn't appear yet across these sections.`
+        : `Your focus keyword appears ${count} time${count === 1 ? '' : 's'} across these sections.`;
+  }
+  STORYBRAND_EDITORS_FOR_COUNT.forEach((e) => e.editor.addEventListener('input', updateKeywordCount));
   const contentImageFile = document.getElementById('content-image-file') as HTMLInputElement;
   const contentImageAlt = document.getElementById('content-image-alt') as HTMLInputElement;
   const contentImageStatus = document.getElementById('content-image-status')!;
@@ -587,6 +644,12 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const contentHeroOverlayOpacityReadout = document.getElementById('content-hero-overlay-opacity-readout')!;
   const contentSaveButton = document.getElementById('content-save-button')!;
   const contentSaveStatus = document.getElementById('content-save-status')!;
+  const contentPageSelectWrap = document.getElementById('content-page-select-wrap')!;
+  const contentNotLinkedNotice = document.getElementById('content-not-linked-notice')!;
+  const contentCounselorGuidance = document.getElementById('content-counselor-guidance')!;
+  const contentCounselorKeywordTip = document.getElementById('content-counselor-keyword-tip')!;
+  const contentCounselorEntityTip = document.getElementById('content-counselor-entity-tip')!;
+  const contentCounselorKeywordCount = document.getElementById('content-counselor-keyword-count')!;
   const contentBylineSection = document.getElementById('content-byline-section')!;
   const contentBylineName = document.getElementById('content-byline-name') as HTMLInputElement;
   const contentBylineCredential = document.getElementById('content-byline-credential') as HTMLInputElement;
@@ -660,6 +723,26 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
 
   const ALWAYS_LOCKED_FIELDS = ['h1', 'meta_description', 'focus_keyword'];
 
+  // What a linked-counselor staff session may directly edit on their own
+  // page — must exactly match enforce_content_permission()'s linked-
+  // counselor allowlist (0045_counselor_page_copy_access.sql), or a save
+  // this UI thinks should succeed gets rejected by the trigger instead.
+  // h1/meta_description/focus_keyword stay excluded (ALWAYS_LOCKED_FIELDS
+  // already blocks them); copy/images/hero layout fields stay excluded
+  // too — Counselor Profile pages always use the StoryBrand split, never
+  // the plain `copy` field, and don't render Hero.astro at all, so those
+  // are simply irrelevant to this page type, not a trust decision.
+  const LINKED_COUNSELOR_EDITABLE_FIELDS = [
+    'hero_subhead',
+    'hero_headline',
+    'storybrand_problem',
+    'storybrand_guide_empathy',
+    'storybrand_pitch',
+    'storybrand_pitch_label',
+    'storybrand_success',
+    'storybrand_failure',
+  ];
+
   // Counselor Profile pages don't render Hero.astro at all — they have
   // their own header card (CounselorProfile.astro) that reads
   // images.headshot specifically, not images.hero. This admin field is
@@ -677,18 +760,33 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     return business?.content_permission_level === 'full';
   }
 
+  // A linked-counselor staff session is never also an owner/agency
+  // session — mirrors the exact check enforce_content_permission()'s
+  // trigger makes server-side (role = 'staff' and linked_counselor_page_id
+  // set), so the UI and the database boundary can't disagree about who
+  // this is.
+  function isLinkedCounselorSession(): boolean {
+    return currentAdminUser?.role === 'staff' && !!currentAdminUser?.linked_counselor_page_id;
+  }
+
   // Agency is exempt from the content-permission lock entirely (see the
   // enforce_content_permission trigger) — h1/meta_description/
   // focus_keyword are never owner-editable regardless of tier;
-  // hero_subhead/copy/images follow the tier.
+  // hero_subhead/copy/images follow the tier. A linked-counselor session
+  // is its own separate, narrower case: only the fields in
+  // LINKED_COUNSELOR_EDITABLE_FIELDS, full stop, regardless of the
+  // business's own content_permission_level tier — stricter than even a
+  // restricted-tier owner on every field except the ones explicitly
+  // opened up for them.
   function canEditField(fieldKey: string): boolean {
     if (currentAdminUser?.role === 'agency') return true;
+    if (isLinkedCounselorSession()) return LINKED_COUNSELOR_EDITABLE_FIELDS.includes(fieldKey);
     if (ALWAYS_LOCKED_FIELDS.includes(fieldKey)) return false;
     return isFullTier();
   }
 
   function canEditAnyField(): boolean {
-    return currentAdminUser?.role === 'agency' || isFullTier();
+    return currentAdminUser?.role === 'agency' || isFullTier() || isLinkedCounselorSession();
   }
 
   function getCurrentValueText(fieldKey: string): string {
@@ -776,6 +874,9 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   function renderTierUI() {
     if (currentAdminUser?.role === 'agency') {
       contentTierNote.textContent = 'You have full editing access to every field as the agency admin.';
+    } else if (isLinkedCounselorSession()) {
+      contentTierNote.textContent =
+        'You can edit your bio’s tagline and StoryBrand sections directly below. Your page heading, meta description, and focus keyword stay managed by your SEO strategist — suggest a change if one of those needs updating.';
     } else if (isFullTier()) {
       contentTierNote.textContent = 'Your plan includes full editing access to hero text, page copy, and images.';
     } else {
@@ -852,6 +953,20 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       selectedContentPage.storybrand_failure
     );
 
+    contentCounselorGuidance.classList.toggle('hidden', !isLinkedCounselorSession());
+    if (isLinkedCounselorSession()) {
+      const keyword = selectedContentPage.focus_keyword;
+      contentCounselorKeywordTip.textContent = keyword
+        ? `Your focus keyword: "${keyword}" — try to work this in naturally, ideally once within your first paragraph or two. It's fine if it shows up once more later if it genuinely fits — more than that starts to feel forced. Write for the person reading this, not for a search engine.`
+        : '';
+      const entityTerms = getPersonEntityTerms(selectedContentPage);
+      contentCounselorEntityTip.textContent =
+        entityTerms.length > 0
+          ? `Already on file: ${entityTerms.map((t) => `${t.label.toLowerCase()}: ${t.value}`).join(', ')} — feel free to reference this naturally in your bio.`
+          : '';
+      updateKeywordCount();
+    }
+
     const currentImage = selectedContentPage.images?.[imageKeyFor(selectedContentPage.page_type)];
     uploadedImageUrl = currentImage?.url ?? null;
     uploadedImageCreditName = currentImage?.creditName ?? null;
@@ -904,7 +1019,16 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentFaqsWrap.classList.toggle('hidden', !showFaqs);
     contentConcernsWrap.classList.toggle('hidden', !showConcerns);
     contentCtaWrap.classList.toggle('hidden', !showCta);
-    contentPageDetailsSection.classList.toggle('hidden', !(showPlanSteps || showFaqs || showConcerns || showCta));
+    // plan_steps/faqs/concerns/cta_heading/cta_button_text aren't in
+    // enforce_content_permission()'s linked-counselor allowlist — out of
+    // scope for this pass (the ask was specifically bio/StoryBrand
+    // content), so this whole section stays hidden for a linked-counselor
+    // session rather than showing controls whose Save would just get
+    // rejected by the trigger.
+    contentPageDetailsSection.classList.toggle(
+      'hidden',
+      isLinkedCounselorSession() || !(showPlanSteps || showFaqs || showConcerns || showCta)
+    );
     planStepsEditor.setItems(selectedContentPage.plan_steps.map((s) => ({ a: s.title, b: s.description })));
     faqsEditor.setItems(selectedContentPage.faqs.map((f) => ({ a: f.question, b: f.answer })));
     concernsEditor.setItems(selectedContentPage.concerns.map((c) => ({ a: c.title, b: c.description })));
@@ -1186,13 +1310,47 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   // ---------------------------------------------------------------------
   async function onAuthed(adminUser: AdminUser) {
     currentAdminUser = adminUser;
-    const [{ data: userData }, { data: businessData }, { data: pagesData }] = await Promise.all([
+    const [{ data: userData }, { data: businessData }] = await Promise.all([
       supabase.auth.getUser(),
       supabase.from('business').select('id, content_permission_level').single(),
-      supabase.from('pages').select('*').not('page_type', 'in', '("Blog Post","Blog Index")').order('title'),
     ]);
     currentUserId = userData.user?.id ?? null;
     business = businessData as Business;
+
+    // A linked-counselor staff session only ever sees their own page —
+    // no picker, and the page itself is fetched scoped to just that one
+    // row rather than the full site-wide list owner/agency get. This is
+    // UI-layer convenience, not the real boundary: enforce_content_
+    // permission() and the "linked counselor can update own page" RLS
+    // policy both hold regardless of what this screen chooses to show.
+    if (adminUser.role === 'staff') {
+      if (!adminUser.linked_counselor_page_id) {
+        contentNotLinkedNotice.classList.remove('hidden');
+        return;
+      }
+      const { data: pageData } = await supabase
+        .from('pages')
+        .select('*')
+        .eq('id', adminUser.linked_counselor_page_id)
+        .maybeSingle();
+      if (!pageData) {
+        contentNotLinkedNotice.classList.remove('hidden');
+        return;
+      }
+      pages = [pageData as ContentPage];
+      contentPageSelectWrap.classList.add('hidden');
+      contentPageSelect.innerHTML = `<option value="${pageData.id}">${escapeHtml(pageData.title)}</option>`;
+      loadContentForm();
+      wireSuggestButtons();
+      await loadYourSuggestions();
+      return;
+    }
+
+    const { data: pagesData } = await supabase
+      .from('pages')
+      .select('*')
+      .not('page_type', 'in', '("Blog Post","Blog Index")')
+      .order('title');
     pages = (pagesData ?? []) as ContentPage[];
 
     populatePagePicker(contentPageSelect);
@@ -1203,5 +1361,5 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     }
   }
 
-  initAdminAuth(onAuthed, { allowedRoles: ['owner', 'agency'] });
+  initAdminAuth(onAuthed, { allowedRoles: ['owner', 'agency', 'staff'] });
 </script>

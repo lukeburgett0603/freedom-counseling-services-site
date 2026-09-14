@@ -125,8 +125,16 @@ export function buildArticleSchema(page: Page, siteUrl: string, hasBlog: boolean
 // schema.org `Person` property it maps to, alongside a short label
 // meant for display to a non-technical reader — never invented, only
 // fields the page actually has set.
+//
+// Deliberately typed on a minimal `{ credentials }` shape rather than the
+// full `Page` type — the admin UI reader only ever has its own narrower
+// local row type in scope (it fetches a subset of columns, not every
+// `Page` field), and this function only ever touches `credentials`
+// anyway. Requiring the full `Page` type would force that caller to
+// either over-fetch columns it doesn't use or fight a type mismatch for
+// no real benefit.
 export function getPersonEntityTerms(
-  page: Page
+  page: { credentials: string | null }
 ): { label: string; value: string; schemaProperty: string }[] {
   const terms: { label: string; value: string; schemaProperty: string }[] = [];
   if (page.credentials) {

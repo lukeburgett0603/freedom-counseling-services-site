@@ -910,19 +910,49 @@ actually true on this site as of this review:
   consultant if this hasn't already been done for the practice as a
   whole, not just for this website.
 
-## `getPersonEntityTerms()` — schema/guidance shared source of truth (built 2026-09-14, not yet consumed anywhere)
+## `getPersonEntityTerms()` — schema/guidance shared source of truth (built 2026-09-14, now wired into the feature below)
 
-Same-day infrastructure piece for the still-in-design "let a counselor
-edit their own bio's StoryBrand paragraphs directly" feature — see
-`local-business-site-template`'s CLAUDE.md for the full writeup (built
-there first, synced here). `buildPersonSchema()` in `src/lib/schema.ts`
-now derives its `honorificSuffix` from this shared function instead of
-checking `page.credentials` directly — verified behavior-preserving by
-capturing Luke Burgett's real `Person` JSON-LD before and after the
-refactor and confirming it's byte-for-byte identical, then spot-checked
-Tony Gore's page too. **Not yet used by any admin screen** — the actual
-counselor-facing guidance panel that will call this function doesn't
-exist yet.
+Same-day infrastructure piece for "let a counselor edit their own bio's
+StoryBrand paragraphs directly" — see `local-business-site-template`'s
+CLAUDE.md for the full writeup (built there first, synced here).
+`buildPersonSchema()` in `src/lib/schema.ts` now derives its
+`honorificSuffix` from this shared function instead of checking
+`page.credentials` directly — verified behavior-preserving by capturing
+Luke Burgett's real `Person` JSON-LD before and after the refactor and
+confirming it's byte-for-byte identical, then spot-checked Tony Gore's
+page too.
+
+## Counselor self-service page copy (built 2026-09-14)
+
+Luke Burgett (and every other linked counselor on this site) can now
+edit their own profile page's tagline and StoryBrand paragraphs
+directly from Website content → Page copy — no suggestion queue, unlike
+a restricted-tier owner. `h1`/meta description/focus keyword stay
+exactly as locked as before. See `local-business-site-template`'s
+CLAUDE.md for the full technical writeup (built there first, then
+applied here) — this entry covers what's specific to verifying it on
+this real site.
+
+- **`0045_counselor_page_copy_access.sql`** applied directly to this
+  project's live database, extending `enforce_content_permission()`'s
+  linked-counselor allowlist with `hero_subhead`, `hero_headline`, and
+  the 5 `storybrand_*` fields (plus `storybrand_pitch_label`).
+- **Live-verified end-to-end against Luke Burgett's real page**, not a
+  synthetic test page — his exact current field values were backed up
+  first, then a throwaway linked-counselor Auth user confirmed in a
+  real browser: correct nav (Page copy visible, Business info hidden),
+  no page picker, the guidance panel showing his real focus keyword
+  (`"luke burgett lpca louisville ky"`) and real credentials (`LPCA`),
+  and a live keyword-mention counter that updated on a real edit. Then
+  went past the UI and hit the REST API directly with that session's
+  token: `hero_subhead` saved successfully; `h1` and `plan_steps` both
+  got rejected with the trigger's real exception; a PATCH aimed at a
+  different counselor's page matched zero rows via RLS. Reverted the
+  one real test edit and deleted the temp Auth user afterward — Luke's
+  real page content is unchanged. Also re-verified a throwaway owner
+  session still sees both Website Content children and the full
+  site-wide page picker, confirming this shipped as a pure addition,
+  not a regression on the access this site's real owner already has.
 
 ## Diagnosed: lead notification emails not arriving at info@ (2026-09-14)
 
