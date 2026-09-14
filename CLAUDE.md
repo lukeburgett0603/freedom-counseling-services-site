@@ -910,6 +910,66 @@ actually true on this site as of this review:
   consultant if this hasn't already been done for the practice as a
   whole, not just for this website.
 
+## Diagnosed: lead notification emails not arriving at info@ (2026-09-14)
+
+Client-reported: leads were being captured correctly (confirmed real in
+the database and the admin CRM), but the notification email to
+`info@freedomcounselingservices.org` never showed up. See
+`local-business-site-template`'s CLAUDE.md for the real code bug this
+surfaced and fixed (`submit-lead` never checked whether Resend actually
+accepted the send at all) — that fix is now live here too. But on this
+site specifically, **that bug was not the actual cause**.
+
+- **Diagnosed with real evidence, not guessing**: a temporary debug
+  build of `submit-lead` (fully removed before the final deploy) showed
+  Resend accepting the send with a real `200` and a genuine email ID
+  every time, and a follow-up call to Resend's own `GET /emails/{id}`
+  confirmed `"last_event": "sent"` with a real AWS SES `message_id`.
+  Everything under this project's control — the code, the
+  `NURTURE_RESEND_API_KEY`/`NURTURE_SENDER_EMAIL` secrets, the sender
+  domain (`hello@communications.freedomcounselingservices.org`), Resend
+  itself — is working correctly and genuinely handing the email off for
+  delivery.
+- **The real cause is almost certainly downstream, at Freedom's own mail
+  infrastructure, not this codebase.** This domain's MX records route
+  through **Proofpoint Essentials** (`mx1-us1.ppe-hosted.com` /
+  `mx2-us1.ppe-hosted.com`, confirmed via `dig`) *before* reaching the
+  actual Microsoft 365 mailbox — a spam/threat-filtering gateway sitting
+  in front of the inbox. A new, automated, transactional sender
+  (`hello@communications.freedomcounselingservices.org`, via Resend) is
+  exactly the kind of thing an aggressive spam gateway can silently
+  quarantine before it ever reaches the visible inbox *or* the Junk
+  folder — Proofpoint quarantine typically isn't visible to an end user
+  checking their own mailbox at all, only to whoever has Proofpoint
+  Essentials admin access (or via Proofpoint's own quarantine-digest
+  email, if that's enabled for this account).
+- **Three real test emails were sent and genuinely delivered by Resend
+  during this diagnosis** — subject lines `"New appointment request
+  from ZZTEST Resend Diagnostic"` / `"... Diagnostic 2"` / `"...
+  Diagnostic 3"`, sent 2026-09-14. Worth checking Proofpoint's
+  quarantine log (or asking whoever manages it) for these three exact
+  subject lines / the sender address — finding them there would confirm
+  the diagnosis directly. The three corresponding test `leads` rows
+  were deleted; the real emails already sent by Resend can't be
+  recalled, but they're harmless test content, clearly labeled ZZTEST.
+- **Not something this codebase can fix on its own** — the actual next
+  step is on the email-infrastructure side: whoever administers
+  Freedom's Proofpoint Essentials account needs to check the quarantine
+  log for these messages and, if found, add
+  `communications.freedomcounselingservices.org` (or the specific
+  `hello@` sender) to an allow/safe-senders list. If Proofpoint's log
+  shows nothing at all for these, the next place to look is Microsoft
+  365's own message trace (Exchange admin center) for the same subject
+  lines, to see whether Proofpoint passed them through cleanly and M365
+  itself is the one filtering them.
+- **A Turnstile-gated endpoint was tested live via `curl` for this
+  diagnosis** using Cloudflare's official always-pass test secret
+  (`1x0000000000000000000000000000000AA`), swapped in for
+  `CLOUDFLARE_TURNSTILE_SECRET_KEY` only for the few minutes needed to
+  run the diagnostic calls, then immediately reverted to the real
+  secret and re-confirmed real Turnstile enforcement was back
+  (a fake token was rejected again before moving on).
+
 ## Contact-form spam defense: honeypot + Cloudflare Turnstile (built 2026-09-12)
 
 Client-reported scammers filling out the real contact form. Two layers —

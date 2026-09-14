@@ -230,7 +230,7 @@ Deno.serve(async (req: Request) => {
 
       const fromHeader = business.display_name ? `${business.display_name} <${senderEmail}>` : senderEmail;
 
-      await fetch('https://api.resend.com/emails', {
+      const resendResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -241,10 +241,26 @@ Deno.serve(async (req: Request) => {
           html: `${rowsHtml}\n${messageHtml}\n<hr style="border:none;border-top:1px solid #ddd;margin:20px 0;">\n<p style="font-size:12px;color:#888;">Reply directly to this email to respond to ${escapeHtml(name)}.</p>`,
         }),
       });
+      // fetch() only rejects on a network-level failure — a non-2xx from
+      // Resend (bad key, unverified sender domain, etc.) resolves normally
+      // and was previously never inspected at all, so a rejected send was
+      // indistinguishable from a real one: the lead still saved, the
+      // visitor still saw success, and nothing anywhere recorded that the
+      // notification silently never went out. Logging (not throwing) keeps
+      // this non-blocking while making a real failure visible in the
+      // function's logs instead of invisible.
+      if (!resendResponse.ok) {
+        console.error('submit-lead: Resend rejected the notification email', {
+          status: resendResponse.status,
+          body: await resendResponse.text(),
+        });
+      }
     }
-  } catch {
+  } catch (err) {
     // Swallow — notification email is a nice-to-have, never surfaced to
     // the visitor and never allowed to make a captured lead look failed.
+    // Still logged, for the same reason as the non-2xx case above.
+    console.error('submit-lead: notification email threw', err);
   }
 
   return jsonResponse({ ok: true, id: lead.id });
