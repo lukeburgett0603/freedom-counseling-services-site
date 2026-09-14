@@ -1126,6 +1126,39 @@ site specifically, **that bug was not the actual cause**.
   secret and re-confirmed real Turnstile enforcement was back
   (a fake token was rejected again before moving on).
 
+## Lead-magnet spam defense extended to match the contact form (built 2026-09-14)
+
+Client asked to see real leads and spotted it immediately: the guide-
+download widget on the homepage (the only page here with an active lead
+magnet) had 10 obviously bot-generated submissions — random-string names
+(`WCsbVGpTNZZqHVDGrpHkqdfL`), dot-obfuscated emails
+(`ja.ck.ash.at.t.u.c.k@gmail.com`), several per day. See
+`local-business-site-template`'s CLAUDE.md for the full technical
+writeup — this entry covers what's specific to this real data.
+
+- **All 10 bot rows deleted** from this project's live `leads` table.
+  Luke's own 2 real test downloads were left untouched — confirmed the
+  distinction (bot rows all had nonsense names; Luke's had his real name
+  and a real address) before deleting anything.
+- **`LeadMagnet.astro` now goes through `submit-lead`**, same as the
+  contact form — honeypot, and the same Turnstile widget already
+  configured for this domain (no new Cloudflare setup needed, it's the
+  same site key already live on the contact form).
+- **`0046_close_lead_magnet_direct_insert.sql` applied to this
+  project's live database** — the direct-REST bypass that let the bot
+  traffic in is now closed. Confirmed live: a direct REST POST with the
+  real, now-known `lead_magnet_id` gets rejected with a genuine RLS
+  error.
+- **Verified end-to-end against this real project**: honeypot and
+  missing-Turnstile-token rejections confirmed with zero rows inserted;
+  one real full-path submission (Cloudflare's always-pass test secret,
+  temporarily swapped in and restored immediately after, same careful
+  pattern as when Turnstile was first set up) confirmed a correct insert
+  with no incorrect "New appointment request" email side effect; the
+  closed bypass reconfirmed with a real rejected REST call. All test
+  data deleted, real secret confirmed restored and enforcing before
+  moving on.
+
 ## Contact-form spam defense: honeypot + Cloudflare Turnstile (built 2026-09-12)
 
 Client-reported scammers filling out the real contact form. Two layers —

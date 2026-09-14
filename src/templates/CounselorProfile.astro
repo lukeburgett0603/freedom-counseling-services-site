@@ -164,7 +164,7 @@ const hasOffice = !!business.street_address;
   )}
   <FAQ faqs={page.faqs} />
   <CTA heading={page.cta_heading ?? `Book with ${page.title}`} buttonText={page.cta_button_text ?? undefined} />
-  <LeadMagnet pageId={page.id} />
+  <LeadMagnet pageId={page.id} turnstileSiteKey={business.cloudflare_turnstile_site_key} />
   <LeadGenerator
     slug={page.slug}
     heading={page.cta_button_text ?? undefined}

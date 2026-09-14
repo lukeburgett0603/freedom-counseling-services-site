@@ -160,6 +160,13 @@ Deno.serve(async (req: Request) => {
   if ('preferred_session_format' in body) {
     insertPayload.preferred_session_format = body.preferred_session_format || null;
   }
+  // A guide-download submission (LeadMagnet.astro) — a distinct, lower-
+  // intent signal from a real appointment request, see CLAUDE.md's
+  // "Contacts vs. leads" section. Only present when this call came from
+  // that form, never from LeadGenerator.astro's contact form.
+  if ('lead_magnet_id' in body) {
+    insertPayload.lead_magnet_id = body.lead_magnet_id || null;
+  }
 
   const { data: lead, error: insertError } = await supabase
     .from('leads')
@@ -173,8 +180,14 @@ Deno.serve(async (req: Request) => {
 
   // Everything from here down is best-effort. A failure here still
   // returns { ok: true } to the visitor — the lead is already safely in
-  // the database and visible in the admin dashboard either way.
+  // the database and visible in the admin dashboard either way. Also
+  // skipped entirely for a guide download — the notification email
+  // below is written as "New appointment request from X" and would be
+  // actively misleading for a lower-intent lead-magnet signal instead.
   try {
+    if (insertPayload.lead_magnet_id) {
+      return jsonResponse({ ok: true, id: lead.id });
+    }
     const resendApiKey = Deno.env.get('NURTURE_RESEND_API_KEY');
     const senderEmail = Deno.env.get('NURTURE_SENDER_EMAIL');
 
