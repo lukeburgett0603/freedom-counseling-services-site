@@ -910,6 +910,20 @@ actually true on this site as of this review:
   consultant if this hasn't already been done for the practice as a
   whole, not just for this website.
 
+## `getPersonEntityTerms()` — schema/guidance shared source of truth (built 2026-09-14, not yet consumed anywhere)
+
+Same-day infrastructure piece for the still-in-design "let a counselor
+edit their own bio's StoryBrand paragraphs directly" feature — see
+`local-business-site-template`'s CLAUDE.md for the full writeup (built
+there first, synced here). `buildPersonSchema()` in `src/lib/schema.ts`
+now derives its `honorificSuffix` from this shared function instead of
+checking `page.credentials` directly — verified behavior-preserving by
+capturing Luke Burgett's real `Person` JSON-LD before and after the
+refactor and confirming it's byte-for-byte identical, then spot-checked
+Tony Gore's page too. **Not yet used by any admin screen** — the actual
+counselor-facing guidance panel that will call this function doesn't
+exist yet.
+
 ## Diagnosed: lead notification emails not arriving at info@ (2026-09-14)
 
 Client-reported: leads were being captured correctly (confirmed real in

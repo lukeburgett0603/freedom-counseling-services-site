@@ -111,6 +111,30 @@ export function buildArticleSchema(page: Page, siteUrl: string, hasBlog: boolean
   return schema;
 }
 
+// The single source of truth for which real, already-declared facts
+// describe a Counselor Profile page's Person entity. Two very different
+// readers need this same list: buildPersonSchema() below (feeds Google's
+// invisible JSON-LD) and the counselor-facing writing guidance shown in
+// admin/content/page-copy.astro (feeds a human writing their own bio,
+// reminding them these are real facts worth naturally mentioning). Add a
+// fact here once and both pick it up automatically — the alternative
+// (each reader independently listing the fields it cares about) is
+// exactly the "two lists that happen to agree today, with nothing
+// stopping them from silently drifting apart tomorrow" shape this
+// project has hit before elsewhere. Each entry names the real
+// schema.org `Person` property it maps to, alongside a short label
+// meant for display to a non-technical reader — never invented, only
+// fields the page actually has set.
+export function getPersonEntityTerms(
+  page: Page
+): { label: string; value: string; schemaProperty: string }[] {
+  const terms: { label: string; value: string; schemaProperty: string }[] = [];
+  if (page.credentials) {
+    terms.push({ label: 'Credentials', value: page.credentials, schemaProperty: 'honorificSuffix' });
+  }
+  return terms;
+}
+
 export function buildPersonSchema(page: Page, siteUrl: string) {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
@@ -118,7 +142,9 @@ export function buildPersonSchema(page: Page, siteUrl: string) {
     name: page.title,
     worksFor: { '@id': businessId(siteUrl) },
   };
-  if (page.credentials) schema.honorificSuffix = page.credentials;
+  for (const term of getPersonEntityTerms(page)) {
+    schema[term.schemaProperty] = term.value;
+  }
   // See buildServiceSchema above — purpose is internal-only, never public.
   if (page.meta_description) schema.description = page.meta_description;
   if (page.images.headshot) schema.image = page.images.headshot.url;
