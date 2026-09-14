@@ -126,19 +126,43 @@ export function buildArticleSchema(page: Page, siteUrl: string, hasBlog: boolean
 // meant for display to a non-technical reader — never invented, only
 // fields the page actually has set.
 //
-// Deliberately typed on a minimal `{ credentials }` shape rather than the
-// full `Page` type — the admin UI reader only ever has its own narrower
-// local row type in scope (it fetches a subset of columns, not every
-// `Page` field), and this function only ever touches `credentials`
+// Deliberately typed on a minimal structural shape rather than the full
+// `Page` type — the admin UI reader only ever has its own narrower local
+// row type in scope (it fetches a subset of columns, not every `Page`
+// field), and this function only ever touches these specific fields
 // anyway. Requiring the full `Page` type would force that caller to
 // either over-fetch columns it doesn't use or fight a type mismatch for
 // no real benefit.
+//
+// Returns one entry per atomic real fact — including one per specialty
+// and one per modality, not a single joined string — because two
+// different things need two different shapes from the same data:
+// buildPersonSchema() needs a real string[] for `knowsAbout` (schema.org
+// expects an array, not one comma-joined value), while the admin
+// guidance panel wants to group and display them together. Keeping this
+// function's output atomic and letting each reader shape it how it
+// needs is simpler than baking one reader's formatting into the shared
+// source of truth.
 export function getPersonEntityTerms(
-  page: { credentials: string | null }
+  page: {
+    credentials: string | null;
+    professional_title?: string | null;
+    specialties?: { label: string; page_slug: string | null }[] | null;
+    modalities?: string[] | null;
+  }
 ): { label: string; value: string; schemaProperty: string }[] {
   const terms: { label: string; value: string; schemaProperty: string }[] = [];
   if (page.credentials) {
     terms.push({ label: 'Credentials', value: page.credentials, schemaProperty: 'honorificSuffix' });
+  }
+  if (page.professional_title) {
+    terms.push({ label: 'Professional title', value: page.professional_title, schemaProperty: 'jobTitle' });
+  }
+  for (const specialty of page.specialties ?? []) {
+    terms.push({ label: 'Specialty', value: specialty.label, schemaProperty: 'knowsAbout' });
+  }
+  for (const modality of page.modalities ?? []) {
+    terms.push({ label: 'Modality', value: modality, schemaProperty: 'knowsAbout' });
   }
   return terms;
 }
@@ -150,8 +174,21 @@ export function buildPersonSchema(page: Page, siteUrl: string) {
     name: page.title,
     worksFor: { '@id': businessId(siteUrl) },
   };
+  // Multiple terms can map to the same schema property (every specialty
+  // and modality maps to `knowsAbout`) — the first one sets it, a second
+  // promotes it to an array, a third+ just appends. Generic on purpose:
+  // this coalescing works for any future property that gains more than
+  // one contributing term, without needing to special-case a property
+  // name here.
   for (const term of getPersonEntityTerms(page)) {
-    schema[term.schemaProperty] = term.value;
+    const existing = schema[term.schemaProperty];
+    if (existing === undefined) {
+      schema[term.schemaProperty] = term.value;
+    } else if (Array.isArray(existing)) {
+      existing.push(term.value);
+    } else {
+      schema[term.schemaProperty] = [existing, term.value];
+    }
   }
   // See buildServiceSchema above — purpose is internal-only, never public.
   if (page.meta_description) schema.description = page.meta_description;

@@ -516,6 +516,12 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     hero_overlay_color: string;
     hero_overlay_opacity: number;
     hero_image_focal_y: 'top' | 'center' | 'bottom';
+    // Not edited on this screen (Counselor settings owns these) — fetched
+    // only so getPersonEntityTerms() can read them for the counselor-
+    // facing guidance panel below.
+    professional_title: string | null;
+    specialties: { label: string; page_slug: string | null }[];
+    modalities: string[];
   };
 
   // Which page types each "Additional page elements" field applies to —
@@ -959,11 +965,23 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       contentCounselorKeywordTip.textContent = keyword
         ? `Your focus keyword: "${keyword}" — try to work this in naturally, ideally once within your first paragraph or two. It's fine if it shows up once more later if it genuinely fits — more than that starts to feel forced. Write for the person reading this, not for a search engine.`
         : '';
+      // getPersonEntityTerms() returns one atomic entry per fact (e.g. one
+      // per specialty, one per modality) so buildPersonSchema() can build
+      // a real knowsAbout array — group them back by label here so the
+      // guidance panel reads as "specialty: Anxiety, Depression, OCD"
+      // instead of repeating "specialty:" once per value.
       const entityTerms = getPersonEntityTerms(selectedContentPage);
-      contentCounselorEntityTip.textContent =
-        entityTerms.length > 0
-          ? `Already on file: ${entityTerms.map((t) => `${t.label.toLowerCase()}: ${t.value}`).join(', ')} — feel free to reference this naturally in your bio.`
-          : '';
+      const groupedTerms = new Map<string, string[]>();
+      for (const term of entityTerms) {
+        if (!groupedTerms.has(term.label)) groupedTerms.set(term.label, []);
+        groupedTerms.get(term.label)!.push(term.value);
+      }
+      const groupedText = Array.from(groupedTerms.entries())
+        .map(([label, values]) => `${label.toLowerCase()}: ${values.join(', ')}`)
+        .join('; ');
+      contentCounselorEntityTip.textContent = groupedText
+        ? `Already on file: ${groupedText} — feel free to reference this naturally in your bio.`
+        : '';
       updateKeywordCount();
     }
 

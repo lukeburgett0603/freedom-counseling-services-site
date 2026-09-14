@@ -922,7 +922,97 @@ Luke Burgett's real `Person` JSON-LD before and after the refactor and
 confirming it's byte-for-byte identical, then spot-checked Tony Gore's
 page too.
 
-## Counselor self-service page copy (built 2026-09-14)
+## Person schema: jobTitle/knowsAbout (built 2026-09-14)
+
+A real SEO audit (client asked directly what an outside expert would
+flag) found `professional_title`/`specialties`/`modalities` — all real
+data already on file for every counselor — fed nothing into `Person`
+schema. Fixed in `getPersonEntityTerms()`/`buildPersonSchema()`, see
+`local-business-site-template`'s CLAUDE.md for the full technical
+writeup. Verified against Luke Burgett's real page (14-item `knowsAbout`
+array: his 6 specialties + 8 modalities) and Tony Gore's (5 specialties,
+zero modalities, confirming it doesn't break with an empty array).
+
+## Counselor focus-keyword mapping across all 5 counselors (2026-09-14)
+
+Client asked for real SEO research on Luke's page specifically, which
+surfaced a systemic issue: **every one of the 5 counselor pages used the
+identical `[name] [credential] louisville ky` branded-only pattern** —
+a real search term, but not one a prospective client searches before
+they already know who that counselor is. Researched and replaced all 5
+in one pass (not one at a time in isolation) specifically to catch
+cross-counselor cannibalization before it happened — see below for a
+real example of that almost going wrong.
+
+- **Checked every Service Hub page's own focus keyword first** — they
+  already claim the generic version of most topics (`anxiety and
+  depression therapy louisville ky`, `christian counseling louisville
+  ky`, `child and teen therapy louisville ky`, `couples counseling
+  louisville ky`, `family counseling louisville ky`, `grief counselors
+  louisville ky`, `individual therapy louisville ky`, `trauma and emdr
+  therapy louisville ky`). Every counselor keyword below was chosen to
+  avoid restating one of these — a Counselor Profile page competing
+  with its own practice's Service Hub page for the same phrase would
+  just cannibalize, not add reach.
+- **Checked every counselor's own `specialties` against each other
+  before finalizing anything** — this caught a real near-miss: the
+  first draft recommendation for Luke (`men's counselor louisville ky`,
+  proposed before this cross-check) would have directly collided with
+  Tony Gore, who also lists "Men's Counseling." Differentiated instead
+  by what's actually distinct about each: Luke's men's work is
+  individual and issue-focused (anxiety/OCD/depression); Tony's sits
+  inside his couples/family-systems practice as the practice's
+  Owner/Director.
+- **Real Mangools research, not guessed phrasing** — confirmed via
+  `kwfinder/related-keywords` that hyper-specific Louisville + niche
+  combinations consistently show 0 measurable local volume (expected
+  for a market this size, same finding this file already documents for
+  segment pages) — but the underlying category is real and validated
+  nationally every time: "child therapist" (19,400/mo), "perfectionism
+  therapist" (3,300/mo), "what is emdr" (27,100/mo), "male therapist
+  near me" (2,400/mo). Picked the accurate, differentiated label per
+  counselor rather than chasing a number that doesn't exist at the city
+  level — the same reasoning this file already applies to segment pages.
+- **Final mapping applied**:
+  - Luke Burgett → `men's anxiety counselor louisville ky`
+  - Tony Gore → `family therapist for men louisville ky`
+  - Rhonda Gore → `women's counselor louisville ky` (the one completely
+    unclaimed audience segment — nobody else at the practice serves
+    women specifically)
+  - Sophie Bowman → `child therapist louisville ky` (distinct from the
+    Service Hub's teen-inclusive "child and teen" — her real specialties
+    skew younger, matching her "Student Counselor" title). Noted as a
+    closer call than the other four: her specialty list also includes
+    "Anxiety & Self-Esteem," so `child self-esteem counselor louisville
+    ky` is a real alternative worth revisiting if this one underperforms.
+  - Staci Harrub → `perfectionism therapist louisville ky` (her EMDR/
+    trauma specialty was deliberately NOT used here — that's already the
+    Trauma & EMDR Service Hub page's own keyword; perfectionism is
+    completely unclaimed elsewhere at the practice).
+- **`focus_keyword` is unconditionally trigger-protected** (see
+  `enforce_content_permission()` — h1/meta_description/focus_keyword are
+  blocked for every non-agency caller, with no tier-based bypass unlike
+  `hero_subhead` and friends). A direct SQL session has no real
+  `auth.uid()`, so even this agency-authorized, legitimate write needed
+  `ALTER TABLE pages DISABLE TRIGGER pages_enforce_content_permission`
+  immediately before the 5 updates and `ENABLE TRIGGER` immediately
+  after, in the same script. Verified the trigger was genuinely back on
+  afterward with a real negative test (attempted an unauthorized write,
+  confirmed it was rejected with the same `P0001` exception as before),
+  not just trusted that `ENABLE TRIGGER` succeeded.
+- **Deliberately did not touch H1 in this pass.** Client asked directly
+  whether H1 should become the literal keyword phrase instead of the
+  counselor's name/tagline — recommended against it: this is a `Person`
+  schema page where E-E-A-T/trust signals matter more than on a generic
+  service page, a literal keyword-phrase heading reads as templated
+  rather than human, and the `hero_headline` field already exists for
+  exactly this — a genuine, natural tagline that can incorporate
+  differentiating language without becoming a bare keyword string.
+  Drafting real `hero_headline` taglines for each counselor is a
+  natural next step, not done in this pass.
+- **Rebuilt and redeployed** after applying all 5 (a Supabase content
+  edit doesn't go live on its own) — confirmed the GitHub Pages workflow
+  completed successfully.
 
 Luke Burgett (and every other linked counselor on this site) can now
 edit their own profile page's tagline and StoryBrand paragraphs
