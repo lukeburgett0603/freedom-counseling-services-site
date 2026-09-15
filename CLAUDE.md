@@ -2597,6 +2597,18 @@ with the client rather than populating everything at once.
   temporary tier-flip pattern as the prior two sections; confirmed live
   on the deployed site (copy, heading, and the image's "Photo: Vitaly
   Gariev" attribution all present).
+- **Revision, same day: the image was removed again.** Once populated
+  with real copy, the client preferred a centered layout with the 3
+  short beats shown as cards side by side rather than prose next to the
+  photo — see `local-business-site-template`'s CLAUDE.md for the full
+  technical writeup (`ValueProposition.astro` rebuilt there first, then
+  synced here). `images.valueProposition` was cleared from this site's
+  real `pages` row (`images - 'valueProposition'`, tier-flip pattern
+  again since `images` is gated too) rather than left as orphaned,
+  unused data. Verified live in a real dev-server pass: centered H2,
+  a real `sm:grid-cols-3` grid with all 3 card titles present, no
+  `<img>` in the section, and the CTA confirmed as the last child after
+  the grid (DOM-order check, not just a visual guess).
 - **Guide — Authority facts, Explanatory Paragraph, and Featured
   Services are still unpopulated** — `guide_authority_stats` and the
   `brandscript_*` fields are unset, and no Service Page has

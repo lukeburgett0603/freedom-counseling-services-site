@@ -97,11 +97,11 @@ const isOverlayHero = page.hero_style === 'overlay' && !!page.images.hero;
   {/* Value Proposition — the positive flip, repurposed from
       storybrand_pitch/storybrand_pitch_label (freed up now that
       ExplanatoryBrandscript owns the freestanding full-brandscript
-      role). Own CTA, optional supporting image. */}
+      role). Centered layout, own CTA — no image (see
+      ValueProposition.astro's own comment on why that was dropped). */}
   <ValueProposition
     heading={page.storybrand_pitch_label}
     body={page.storybrand_pitch}
-    image={page.images.valueProposition}
     ctaText={page.cta_button_text}
   />
 

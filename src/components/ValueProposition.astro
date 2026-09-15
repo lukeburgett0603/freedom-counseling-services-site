@@ -7,51 +7,63 @@
 // astro) replaced the old collapsible role. Renders nothing when
 // storybrand_pitch is empty — same never-show-an-empty-shell discipline
 // as every other optional StoryBrand section.
-import { renderCopy } from '../lib/markdown';
-import OptimizedImage from './OptimizedImage.astro';
-import type { ImageSlot } from '../lib/pages';
+//
+// Centered layout, no image — a real client working session preferred
+// this over the original image-beside-text layout once populated with
+// real content (a 3-item short list read better as 3 cards than as
+// prose next to a photo). Reuses lib/markdown.ts's
+// extractShortBenefitList() to turn 3 consecutive `### heading` +
+// paragraph pairs into real card data, the same pattern
+// StoryBrandSection.astro already uses for storybrand_success — not a
+// new detection mechanism. Falls back to plain centered prose
+// (beforeHtml/afterHtml) for any content that isn't shaped that way,
+// so this is a safe drop-in regardless of what a given client's copy
+// looks like. The 3-card grid is a local `sm:grid-cols-3` here, not
+// FeatureGrid.astro (which is hard-coded to 2 columns) — adding a
+// 3-column variant to that shared component for this one call site
+// wasn't worth the added complexity there.
+import { extractShortBenefitList } from '../lib/markdown';
 
 interface Props {
   heading?: string | null;
   body: string | null;
-  image?: ImageSlot;
   ctaText?: string | null;
 }
 
-const { heading, body, image, ctaText } = Astro.props;
+const { heading, body, ctaText } = Astro.props;
+const { beforeHtml, benefits, afterHtml } = extractShortBenefitList(body);
 ---
 
 {body && (
   <section class="py-14">
-    <div class="mx-auto flex max-w-5xl flex-col items-center gap-10 px-6 md:flex-row">
-      <div class="flex-1 text-center md:text-left">
-        {heading && (
-          <h2 class="mb-4 font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-brand-ink">
-            {heading}
-          </h2>
-        )}
-        <div class="prose mx-auto md:mx-0" set:html={renderCopy(body)} />
-        {ctaText && (
-          <a
-            href="#lead-generator"
-            class="mt-6 inline-block rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
-          >
-            {ctaText}
-          </a>
-        )}
-      </div>
-      {image && (
-        <div class="flex-1">
-          <OptimizedImage
-            src={image.url}
-            alt={image.alt}
-            class="w-full rounded-xl object-cover"
-            widths={[400, 800, 1200]}
-            sizes="(min-width: 768px) 50vw, 100vw"
-            creditName={image.creditName}
-            creditUrl={image.creditUrl}
-          />
+    <div class="mx-auto max-w-5xl px-6 text-center">
+      {heading && (
+        <h2 class="mb-4 font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-brand-ink">
+          {heading}
+        </h2>
+      )}
+      {beforeHtml && <div class="prose mx-auto" set:html={beforeHtml} />}
+
+      {benefits.length > 0 && (
+        <div class="mt-8 grid gap-6 sm:grid-cols-3">
+          {benefits.map((benefit) => (
+            <div class="rounded-lg border border-black/5 bg-white p-6 text-center shadow-md transition duration-200 hover:-translate-y-1 hover:shadow-xl">
+              <h3 class="mb-2 font-[family-name:var(--font-heading)] font-bold text-brand-ink">{benefit.title}</h3>
+              <p class="text-sm text-slate-600">{benefit.description}</p>
+            </div>
+          ))}
         </div>
+      )}
+
+      {afterHtml && <div class="prose mx-auto mt-6" set:html={afterHtml} />}
+
+      {ctaText && (
+        <a
+          href="#lead-generator"
+          class="mt-8 inline-block rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
+        >
+          {ctaText}
+        </a>
       )}
     </div>
   </section>
