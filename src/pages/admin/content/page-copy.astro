@@ -23,7 +23,19 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
         </div>
 
         <div id="content-fields" class="hidden space-y-6">
-          <LockedField fieldKey="h1" label="Page heading (H1)" inputId="content-h1" />
+          <!--
+            Hidden entirely for Counselor Profile pages — that page type
+            never reads page.h1 at all (CounselorProfile.astro's real
+            <h1> comes from hero_headline ?? title instead; see the
+            "Headline (H1)" field below). Showing a locked, empty field
+            labeled "H1" that has zero effect on the actual page was
+            real, confirmed confusion for a linked-counselor session —
+            same "hide what genuinely doesn't apply" discipline already
+            used for #content-hero-style-wrap on this page.
+          -->
+          <div id="content-h1-wrap">
+            <LockedField fieldKey="h1" label="Page heading (H1)" inputId="content-h1" />
+          </div>
           <LockedField
             fieldKey="meta_description"
             label="Meta description"
@@ -591,6 +603,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const contentTierNote = document.getElementById('content-tier-note')!;
   const contentPageSelect = document.getElementById('content-page-select') as HTMLSelectElement;
   const contentFields = document.getElementById('content-fields')!;
+  const contentH1Wrap = document.getElementById('content-h1-wrap')!;
   const contentH1 = document.getElementById('content-h1') as HTMLInputElement;
   const contentMetaDescription = document.getElementById('content-meta-description') as HTMLTextAreaElement;
   const contentFocusKeyword = document.getElementById('content-focus-keyword') as HTMLInputElement;
@@ -907,6 +920,11 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     }
     contentFields.classList.remove('hidden');
 
+    // CounselorProfile.astro never reads page.h1 — its real <h1> comes
+    // from hero_headline ?? title instead (see that field below). A
+    // locked, always-empty field labeled "H1" that has zero effect on
+    // the actual page was real, confirmed confusion, not hypothetical.
+    contentH1Wrap.classList.toggle('hidden', selectedContentPage.page_type === 'Counselor Profile');
     contentH1.value = selectedContentPage.h1 ?? '';
     document.querySelector('[data-field="h1"] [data-locked-value]')!.textContent = selectedContentPage.h1 ?? '(not set)';
     contentMetaDescription.value = selectedContentPage.meta_description ?? '';

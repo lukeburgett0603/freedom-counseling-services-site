@@ -2465,6 +2465,40 @@ numbering has diverged by one since `0035_cloudflare_analytics_token
   and the 2-column clinical cards all render correctly — including the
   empty-state case where a field genuinely has nothing to show.
 
+## Admin fix: hide the inert "Page heading (H1)" field on Counselor Profile pages (2026-09-15)
+
+Client-reported confusion, seen live in a screenshot of `admin/content
+/page-copy.astro` from a linked-counselor session: the screen shows both
+a locked "Page heading (H1)" field and, further down, an editable
+"Headline (H1)" field (`hero_headline`, added the tagline-H1 feature
+above) — two fields both labeled "H1" with no explanation of which one
+actually matters.
+
+- **The locked "Page heading (H1)" field is dead weight on this page
+  type specifically** — `CounselorProfile.astro` renders `page.h1`
+  nowhere at all; its real `<h1>` is `hero_headline ?? title`. Confirmed
+  by grepping every template: all 13 other page types genuinely use
+  `page.h1` as their real heading (via `Hero.astro`'s `h1` prop or
+  direct rendering) — Counselor Profile is the sole exception. So a
+  linked counselor was staring at a locked, permanently-empty field with
+  zero real effect, sitting right next to the field that's actually
+  their page's H1 — exactly the confusion reported.
+- **Fixed by wrapping that one `LockedField` in `#content-h1-wrap`**,
+  hidden specifically when `selectedContentPage.page_type ===
+  'Counselor Profile'` — the same pattern `#content-hero-style-wrap`
+  already uses on this same page for the identical reason (Hero.astro/
+  hero-layout controls don't apply to this page type either). Every
+  other page type keeps the field exactly as before.
+- Built and synced to `local-business-site-template` in the same pass
+  (see that repo's CLAUDE.md, appended to the "Counselor self-service
+  page copy" section).
+- **Verification pattern**: `astro check` (0 errors) against this site's
+  real Supabase project, then a real live-browser pass with a temporary
+  throwaway `owner`-role Auth user: selected Luke Burgett (Counselor
+  Profile) and confirmed the field is hidden, then selected "Christian /
+  Faith-Based Counseling" (Service Hub) and confirmed it's still shown —
+  test user deleted afterward.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a
