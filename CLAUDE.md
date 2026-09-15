@@ -2558,15 +2558,31 @@ with the client rather than populating everything at once.
   left untouched on the row — its fuller sentence-length descriptions
   are the planned seed for the Guide → Authority facts section next,
   not thrown away.
-- **Every other new field is still empty** — Stakes/Value Proposition
-  keep their pre-rebuild copy (same underlying `storybrand_problem`/
-  `storybrand_pitch` columns, just relabeled in the admin now),
-  `guide_authority_stats` and the `brandscript_*` fields are unset, and
-  no Service Page has `featured_on_homepage` set yet, so Featured
-  Services doesn't render. Counselor cards already renders (self-gates
-  on >1 Counselor Profile page, no content to write for it). None of
-  this is a bug — each section gets real content and a live check as
-  its own pass.
+- **Stakes — second section populated.** Real rewrite of
+  `storybrand_problem` (not just relabeled — the actual copy changed),
+  drafted and refined with the client over a few rounds: loss-aversion
+  language (struggles "grow heavier over time... touching more of your
+  relationships, your energy, and your peace") plus the philosophical-
+  wrongness framing the client specifically asked for ("made for
+  wholeness and peace, not the kind of pain you're experiencing
+  today"). Deliberately kept short (2 tight paragraphs) and distinct
+  from `storybrand_guide_empathy`'s own territory right below it
+  (Guide empathizes with specific feelings; Stakes names the cost of
+  inaction and the philosophical wrongness of the struggle itself).
+  Bolded "Christian therapist" on first use, matching this page's real
+  focus keyword ("therapist louisville ky") and the existing
+  keyword-placement convention in the section below it. Applied via
+  the same temporary tier-flip pattern as the Value Add strip.
+- **Value Proposition, Guide — Authority facts, Explanatory Paragraph,
+  and Featured Services are still unpopulated** — `storybrand_pitch`
+  keeps its pre-rebuild copy (same column, relabeled "Value
+  Proposition" in the admin, content not yet rewritten for its new
+  role), `guide_authority_stats` and the `brandscript_*` fields are
+  unset, and no Service Page has `featured_on_homepage` set yet, so
+  Featured Services doesn't render. Counselor cards already renders
+  (self-gates on >1 Counselor Profile page, no content to write for
+  it). Each remaining section gets its own content pass and live
+  check, same as these first two.
 
 ## Hero overlay style (built 2026-09-04)
 
