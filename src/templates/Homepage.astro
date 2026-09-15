@@ -3,10 +3,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
 import StoryBrandSection from '../components/StoryBrandSection.astro';
-import CollapsibleSection from '../components/CollapsibleSection.astro';
+import ValueAddStrip from '../components/ValueAddStrip.astro';
+import ValueProposition from '../components/ValueProposition.astro';
+import Guide from '../components/Guide.astro';
+import FeaturedServices from '../components/FeaturedServices.astro';
+import CounselorCards from '../components/CounselorCards.astro';
+import ExplanatoryBrandscript from '../components/ExplanatoryBrandscript.astro';
 import CTA from '../components/CTA.astro';
 import Testimonial from '../components/Testimonial.astro';
-import FeatureGrid from '../components/FeatureGrid.astro';
 import PlanSteps from '../components/PlanSteps.astro';
 import LeadGenerator from '../components/LeadGenerator.astro';
 import LeadMagnet from '../components/LeadMagnet.astro';
@@ -74,28 +78,72 @@ const isOverlayHero = page.hero_style === 'overlay' && !!page.images.hero;
       />
     </Fragment>
   </Hero>
+
+  {/* Value Add strip — a quick, scannable first pass at value, distinct
+      from the fuller ValueProposition section below. */}
+  <ValueAddStrip items={page.value_add_items} />
+
+  {/* Stakes — storybrand_problem, relabeled "Stakes" in the admin for
+      Homepage rows only (same column/data as Service Page/Counselor
+      Profile's "The Problem", different admin-facing label). Loss-
+      aversion/philosophical-wrongness framing per copywriter guidance,
+      positioned right after the Hero so it isn't buried. */}
   {page.storybrand_problem && (
     <Section>
       <Fragment set:html={renderCopy(page.storybrand_problem)} />
     </Section>
   )}
-  {page.storybrand_guide_empathy && (
-    <Section>
-      <Fragment set:html={renderCopy(page.storybrand_guide_empathy)} />
-    </Section>
-  )}
-  <FeatureGrid items={page.concerns} heading="Why families choose us" />
+
+  {/* Value Proposition — the positive flip, repurposed from
+      storybrand_pitch/storybrand_pitch_label (freed up now that
+      ExplanatoryBrandscript owns the freestanding full-brandscript
+      role). Own CTA, optional supporting image. */}
+  <ValueProposition
+    heading={page.storybrand_pitch_label}
+    body={page.storybrand_pitch}
+    image={page.images.valueProposition}
+    ctaText={page.cta_button_text}
+  />
+
+  {/* The Plan — unchanged rendering (H2 heading / H3 per step / optional
+      paragraph), now with its own inline CTA inside the same band. */}
+  <PlanSteps steps={page.plan_steps} ctaText={page.cta_button_text} />
+
+  {/* The Guide — empathy + scannable authority facts + own CTA, with the
+      existing optional Testimonial directly below (still independently
+      gated on having a real quote). */}
+  <Guide body={page.storybrand_guide_empathy} authorityStats={page.guide_authority_stats} ctaText={page.cta_button_text} />
   {page.testimonial_quote && page.testimonial_author && (
     <Testimonial quote={page.testimonial_quote} author={page.testimonial_author} role={page.testimonial_role} />
   )}
-  <PlanSteps steps={page.plan_steps} />
-  <CollapsibleSection markdown={page.storybrand_pitch} triggerText={page.storybrand_pitch_label} />
-  <StoryBrandSection markdown={page.storybrand_success} />
+
+  {/* Featured Services — up to 3 cards, self-maintaining. */}
+  <FeaturedServices allPages={allPages} />
+
+  {/* Counselor cards — group-practice only, self-gates on >1 Counselor
+      Profile page. */}
+  <CounselorCards allPages={allPages} />
+
+  {/* Explanatory Paragraph — the new freestanding full BrandScript,
+      collapsible, with optional video. */}
+  <ExplanatoryBrandscript
+    oneLiner={page.brandscript_one_liner}
+    teaser={page.brandscript_teaser}
+    full={page.brandscript_full}
+    videoUrl={page.brandscript_video_url}
+  />
+
+  {/* Failure (stakes reminder) — moved to just before Success, so the
+      page's final narrative beats are "what's still at risk" followed
+      immediately by "and here's what's possible instead," landing the
+      visitor in success rather than on the reminder of failure. */}
   {page.storybrand_failure && (
     <Section>
       <Fragment set:html={renderCopy(page.storybrand_failure)} />
     </Section>
   )}
+  <StoryBrandSection markdown={page.storybrand_success} />
+
   <CTA heading={page.cta_heading ?? `Ready to work with ${business.display_name}?`} buttonText={page.cta_button_text ?? undefined} />
   <LeadMagnet pageId={page.id} turnstileSiteKey={business.cloudflare_turnstile_site_key} />
   <LeadGenerator

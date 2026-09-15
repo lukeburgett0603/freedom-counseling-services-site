@@ -70,7 +70,7 @@ export interface Page {
   // Admin-editable text for the CollapsibleSection trigger that wraps
   // storybrand_pitch on Homepage/Service Page/Counselor Profile — null
   // falls back to CollapsibleSection.astro's own default ("Learn more
-  // about our approach"). See 0036_storybrand_pitch_label.sql.
+  // about our approach"). See 0035_storybrand_pitch_label.sql.
   storybrand_pitch_label: string | null;
   storybrand_success: string | null;
   storybrand_failure: string | null;
@@ -135,21 +135,21 @@ export interface Page {
   // (unlike specialties) - purely self-service, picked from
   // lib/modalities.ts's MODALITY_OPTIONS or typed as a custom "Other"
   // entry on admin/counselor-settings.astro, see 0029_counselor_card_v2.sql
-  // and 0037_counselor_license_number.sql.
+  // and 0036_counselor_license_number.sql.
   modalities: string[];
   // Only meaningful on a 'Counselor Profile' page - a counselor's own
   // professional license number (e.g. "LPCA #12345"), shown next to
   // credentials in the header card and on the Counselors Overview grid.
   // Self-service editable on admin/counselor-settings.astro, same as
   // availability_status/telehealth_available/modalities - never
-  // defaulted/guessed. See 0037_counselor_license_number.sql.
+  // defaulted/guessed. See 0036_counselor_license_number.sql.
   license_number: string | null;
   // Only meaningful on a 'Counselor Profile' page - a counselor's own
   // free-text degree/institution line (e.g. "M.A. Clinical Mental Health
   // Counseling, Colorado Christian University"), shown near credentials
   // when set. Self-service on admin/counselor-settings.astro, same
   // never-defaulted/guessed discipline as license_number. See
-  // 0038_counselor_education_and_title.sql.
+  // 0037_counselor_education_and_title.sql.
   education: string | null;
   // Only meaningful on a 'Counselor Profile' page - the spelled-out form
   // of the short `credentials` abbreviation (e.g. "Licensed Professional
@@ -158,7 +158,7 @@ export interface Page {
   // freeform (see Tony Gore's "LCSW, Owner/Director"), so a reliable
   // lookup isn't possible, and a plain field generalizes to any future
   // client's own licensing scheme with no code change. Self-service on
-  // admin/counselor-settings.astro. See 0038_counselor_education_and_title.sql.
+  // admin/counselor-settings.astro. See 0037_counselor_education_and_title.sql.
   professional_title: string | null;
   // Only meaningful on a 'Counselor Profile' page - an optional
   // persuasive tagline rendered as the literal <h1> instead of the
@@ -166,7 +166,7 @@ export interface Page {
   // header card either way). Null falls back to page.title, so every
   // existing Counselor Profile renders unchanged until a client opts in.
   // Edited on admin/content/page-copy.astro, tier-gated like
-  // hero_subhead. See 0039_hero_headline.sql.
+  // hero_subhead. See 0038_hero_headline.sql.
   hero_headline: string | null;
   // Which Hero.astro layout this page uses. 'default' (today's
   // side-by-side image/aside) is the default for every page on every
@@ -191,6 +191,42 @@ export interface Page {
   // same crop every existing page already gets. See
   // 0031_hero_image_focal_point.sql.
   hero_image_focal_y: 'top' | 'center' | 'bottom';
+  // The icon+label strip directly under the Hero (2-4 items) — only
+  // meaningful on 'Homepage'. `icon` is a key into Icon.astro's fixed
+  // set, not a free-text/URL value, so the strip stays visually
+  // consistent across every client site. See
+  // 0048_homepage_value_add_and_authority.sql.
+  value_add_items: { icon: string; label: string }[];
+  // Short scannable credibility facts in the Guide section (e.g.
+  // "Experience" / "15+ years") — only meaningful on 'Homepage'. Same
+  // {label, value}[] shape as plan_steps/faqs/concerns's
+  // {title, description}[] so the admin UI reuses the same list-editor
+  // factory. See 0048_homepage_value_add_and_authority.sql.
+  guide_authority_stats: { label: string; value: string }[];
+  // Only meaningful on a 'Service Page'/'Service Hub' row — whether
+  // this service is one of the (up to 3) cards shown in the Homepage's
+  // Featured Services section, and its display order there. The
+  // frontend filters/sorts/slices to 3 itself; more than 3 flagged
+  // rows is harmless. See 0049_featured_services.sql.
+  featured_on_homepage: boolean;
+  homepage_feature_order: number | null;
+  // The Homepage's "Explanatory Paragraph" section — a genuinely
+  // separate, freestanding full BrandScript (not one of the 5
+  // storybrand_* beats above, which stay short/scannable). one_liner
+  // is the visible H2, teaser is the always-visible short paragraph,
+  // full is the long-form text revealed by "Continue reading",
+  // video_url is an optional plain video link. All only meaningful on
+  // 'Homepage'. See 0050_explanatory_brandscript.sql.
+  brandscript_one_liner: string | null;
+  brandscript_teaser: string | null;
+  brandscript_full: string | null;
+  brandscript_video_url: string | null;
+  // Which column of the redesigned 3-column footer this page's link
+  // renders in — only meaningful when nav_placement = 'footer'. A
+  // fixed enum (not free text) so Footer.astro can render a
+  // guaranteed, predictable 3-column layout. See
+  // 0051_footer_columns_and_cta.sql.
+  footer_column: 'explore' | 'company' | 'legal' | null;
 }
 
 export interface Business {
@@ -211,7 +247,7 @@ export interface Business {
   google_fonts_url: string | null;
   // Cloudflare Web Analytics beacon token — public/client-side, not a
   // secret. BaseLayout.astro renders the beacon script when set, renders
-  // nothing when null. See 0035_cloudflare_analytics_token.sql.
+  // nothing when null. See 0043_cloudflare_analytics_token.sql.
   cloudflare_beacon_token: string | null;
   design_inspiration_urls: string[];
   brand_assets_status: 'provided' | 'not-provided';
@@ -244,15 +280,15 @@ export interface Business {
   // group on every LeadGenerator — same opt-in pattern as
   // collect_counselor_preference, since a fully-telehealth or
   // fully-in-person client has nothing to ask. See
-  // 0040_session_format_preference.sql.
+  // 0039_session_format_preference.sql.
   collect_session_format_preference: boolean;
   // Where the submit-lead Edge Function sends a real-time "someone just
   // submitted the contact form" notification — null means no
-  // notification is sent. See 0042_lead_notification_email.sql.
+  // notification is sent. See 0041_lead_notification_email.sql.
   lead_notification_email: string | null;
   // Cloudflare Turnstile site key (public) — renders the anti-spam widget
   // on LeadGenerator when set; null means Turnstile is off. See
-  // 0043_turnstile_site_key.sql.
+  // 0042_turnstile_site_key.sql.
   cloudflare_turnstile_site_key: string | null;
   // A link to the business's EHR client portal (SimplePractice,
   // TherapyNotes, etc.) for existing clients — see 0009_client_portal_url.sql.
@@ -267,6 +303,11 @@ export interface Business {
   // email crisis-resource line" section for why a non-counseling client
   // like Counselor Marketing Co. must override this to false explicitly.
   show_crisis_resources: boolean;
+  // Heading for the CTA band shown directly above the footer on every
+  // page — null falls back to a display_name-based default, same
+  // pattern as CTA.astro's own existing heading fallback. See
+  // 0051_footer_columns_and_cta.sql.
+  footer_cta_heading: string | null;
 }
 
 // Only content-complete pages are ever rendered — a page left at

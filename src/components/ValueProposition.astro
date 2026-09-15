@@ -1,0 +1,58 @@
+---
+// The positive flip right after Stakes — repurposed from the fields
+// that used to back the old collapsible "Explanatory paragraph" trigger
+// (storybrand_pitch/storybrand_pitch_label), now the visible heading +
+// body of a standalone section, on Homepage rows only. The Explanatory
+// Paragraph's own full-brandscript fields (see ExplanatoryBrandscript.
+// astro) replaced the old collapsible role. Renders nothing when
+// storybrand_pitch is empty — same never-show-an-empty-shell discipline
+// as every other optional StoryBrand section.
+import { renderCopy } from '../lib/markdown';
+import OptimizedImage from './OptimizedImage.astro';
+import type { ImageSlot } from '../lib/pages';
+
+interface Props {
+  heading?: string | null;
+  body: string | null;
+  image?: ImageSlot;
+  ctaText?: string | null;
+}
+
+const { heading, body, image, ctaText } = Astro.props;
+---
+
+{body && (
+  <section class="py-14">
+    <div class="mx-auto flex max-w-5xl flex-col items-center gap-10 px-6 md:flex-row">
+      <div class="flex-1 text-center md:text-left">
+        {heading && (
+          <h2 class="mb-4 font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-brand-ink">
+            {heading}
+          </h2>
+        )}
+        <div class="prose mx-auto md:mx-0" set:html={renderCopy(body)} />
+        {ctaText && (
+          <a
+            href="#lead-generator"
+            class="mt-6 inline-block rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
+          >
+            {ctaText}
+          </a>
+        )}
+      </div>
+      {image && (
+        <div class="flex-1">
+          <OptimizedImage
+            src={image.url}
+            alt={image.alt}
+            class="w-full rounded-xl object-cover"
+            widths={[400, 800, 1200]}
+            sizes="(min-width: 768px) 50vw, 100vw"
+            creditName={image.creditName}
+            creditUrl={image.creditUrl}
+          />
+        </div>
+      )}
+    </div>
+  </section>
+)}

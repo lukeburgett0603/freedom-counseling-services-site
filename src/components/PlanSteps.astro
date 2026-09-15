@@ -12,9 +12,15 @@ interface Props {
   steps: Step[];
   heading?: string;
   note?: string;
+  // Optional inline CTA shown directly under the step grid, inside the
+  // same band — added for the Homepage rebuild's "the Plan needs its
+  // own CTA" section. Omitted by every other existing call site, which
+  // keeps their current no-CTA appearance unchanged.
+  ctaText?: string | null;
+  ctaHref?: string;
 }
 
-const { steps, heading = 'How it works', note } = Astro.props;
+const { steps, heading = 'How it works', note, ctaText, ctaHref = '#lead-generator' } = Astro.props;
 
 // A hardcoded md:grid-cols-3 always left a 4th step stranded alone on its
 // own row — this isn't a style choice, it's a grid that never accounted
@@ -44,6 +50,16 @@ const gridColsClass = steps.length === 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'md
         ))}
       </div>
       {note && <p class="mt-6 text-center text-sm text-slate-600">{note}</p>}
+      {ctaText && (
+        <div class="mt-8 text-center">
+          <a
+            href={ctaHref}
+            class="inline-block rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
+          >
+            {ctaText}
+          </a>
+        </div>
+      )}
     </div>
   </section>
 )}

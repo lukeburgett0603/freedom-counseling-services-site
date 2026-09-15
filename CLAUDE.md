@@ -2536,6 +2536,38 @@ template`'s CLAUDE.md for the full technical writeup of the new
   this project's own copy has real, Freedom-specific merge-tag/one-click-
   unsubscribe code the template doesn't have yet.
 
+## Homepage StoryBrand rebuild applied (2026-09-15, ongoing)
+
+The template-level Homepage rebuild (see `local-business-site-
+template`'s CLAUDE.md for the full technical writeup) synced to this
+site's real repo and Supabase project. Rolling out section by section
+with the client rather than populating everything at once.
+
+- **Value Add strip — first section populated.** 4 items, seeded from
+  this site's own real "Why families choose us" cards (`pages.concerns`
+  on the Homepage row — Best-fit counselor / Faith-based counseling /
+  Trained & licensed experts / In-person or telehealth) rather than
+  invented fresh, since the new Homepage template drops the old
+  `FeatureGrid`/`concerns` rendering and those 4 value points were
+  already real and approved. Condensed to short labels + an icon each:
+  `Best-Fit Matching` (users) / `Faith-Integrated Care` (heart) /
+  `Licensed Experts` (shield-check) / `In-Person or Telehealth`
+  (calendar). Applied directly via the established `content_permission_
+  level` temporary-flip-to-`'full'` pattern (this site stays on
+  `'restricted'` day to day). The original `concerns` data itself was
+  left untouched on the row — its fuller sentence-length descriptions
+  are the planned seed for the Guide → Authority facts section next,
+  not thrown away.
+- **Every other new field is still empty** — Stakes/Value Proposition
+  keep their pre-rebuild copy (same underlying `storybrand_problem`/
+  `storybrand_pitch` columns, just relabeled in the admin now),
+  `guide_authority_stats` and the `brandscript_*` fields are unset, and
+  no Service Page has `featured_on_homepage` set yet, so Featured
+  Services doesn't render. Counselor cards already renders (self-gates
+  on >1 Counselor Profile page, no content to write for it). None of
+  this is a bug — each section gets real content and a live check as
+  its own pass.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a

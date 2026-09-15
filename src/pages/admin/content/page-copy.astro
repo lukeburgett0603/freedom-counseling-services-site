@@ -123,8 +123,37 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <p id="content-counselor-keyword-count" class="text-xs text-slate-500"></p>
             </div>
 
+            <!--
+              Homepage-only additions from the StoryBrand rebuild — see
+              CLAUDE.md's "Homepage StoryBrand rebuild" section. Hidden
+              entirely (via #content-value-add-wrap/#content-authority-
+              stats-wrap/#content-explanatory-wrap's own toggles in
+              loadContentForm()) for Service Page/Counselor Profile,
+              which don't render these sections.
+            -->
+            <div id="content-value-add-wrap" data-field="value_add_items" class="hidden space-y-2">
+              <label class="mb-1 block text-sm font-semibold text-slate-700">Value Add strip</label>
+              <p class="mb-2 text-xs text-slate-500">
+                2–4 short icon+label items shown right under the Hero (e.g. "Faith-Integrated Care," "Licensed
+                Experts"). Pick an icon and a short label for each.
+              </p>
+              <div id="content-value-add-list" class="editable-view space-y-2"></div>
+              <button
+                type="button"
+                id="content-value-add-add"
+                class="editable-view rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                + Add an item
+              </button>
+              <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
+              <p class="tier-note mt-1 text-xs text-slate-500">
+                Included as an agency-managed field on your plan — suggest a change below.
+              </p>
+              <SuggestEdit fieldLabel="Value Add strip" />
+            </div>
+
             <div data-field="storybrand_problem">
-              <label class="mb-1 block text-sm font-semibold text-slate-700">The Problem</label>
+              <label id="content-storybrand-problem-field-label" class="mb-1 block text-sm font-semibold text-slate-700">The Problem</label>
               <div class="editable-view">
                 <RichTextEditor
                   id="content-storybrand-problem-editor"
@@ -155,8 +184,29 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <SuggestEdit fieldLabel="We Understand" />
             </div>
 
+            <div id="content-authority-stats-wrap" data-field="guide_authority_stats" class="hidden space-y-2">
+              <label class="mb-1 block text-sm font-semibold text-slate-700">Guide — Authority</label>
+              <p class="mb-2 text-xs text-slate-500">
+                Short, scannable credibility facts shown next to your empathy statement (e.g. "Experience" / "15+
+                years", "Credentials" / "LPCA, LCSW"). Optional — leave empty to skip this.
+              </p>
+              <div id="content-authority-stats-list" class="editable-view space-y-2"></div>
+              <button
+                type="button"
+                id="content-authority-stats-add"
+                class="editable-view rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                + Add a fact
+              </button>
+              <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
+              <p class="tier-note mt-1 text-xs text-slate-500">
+                Included as an agency-managed field on your plan — suggest a change below.
+              </p>
+              <SuggestEdit fieldLabel="Guide — Authority" />
+            </div>
+
             <div data-field="storybrand_pitch">
-              <label class="mb-1 block text-sm font-semibold text-slate-700">The Full Picture</label>
+              <label id="content-storybrand-pitch-field-label" class="mb-1 block text-sm font-semibold text-slate-700">The Full Picture</label>
               <div class="editable-view">
                 <RichTextEditor
                   id="content-storybrand-pitch-editor"
@@ -172,7 +222,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
             </div>
 
             <div data-field="storybrand_pitch_label">
-              <label class="mb-1 block text-sm font-semibold text-slate-700">"The Full Picture" link text</label>
+              <label id="content-storybrand-pitch-label-field-label" class="mb-1 block text-sm font-semibold text-slate-700">"The Full Picture" link text</label>
               <input
                 id="content-storybrand-pitch-label"
                 type="text"
@@ -180,7 +230,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
                 class="editable-view w-full rounded-md border border-slate-300 px-4 py-2"
               />
               <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
-              <p class="mt-1 text-xs text-slate-500">
+              <p id="content-storybrand-pitch-label-help" class="mt-1 text-xs text-slate-500">
                 Shown as a heading visitors click to expand "The Full Picture" above. Leave blank to use the default,
                 "Learn more about our approach."
               </p>
@@ -220,6 +270,69 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
                 Included as an agency-managed field on your plan — suggest a change below.
               </p>
               <SuggestEdit fieldLabel="Why It's Worth Acting Now" />
+            </div>
+
+            <div id="content-explanatory-wrap" class="hidden space-y-6 border-t border-slate-200 pt-6">
+              <div>
+                <h3 class="text-sm font-semibold text-slate-700">Explanatory Paragraph</h3>
+                <p class="mt-1 text-xs text-slate-500">
+                  A genuinely separate, freestanding full BrandScript — not one of the short sections above. Visitors
+                  see a one-line heading and a short teaser; "Continue reading" expands the full text. This is where
+                  most of your SEO content lives.
+                </p>
+              </div>
+
+              <div data-field="brandscript_one_liner">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">One-liner</label>
+                <input id="content-brandscript-one-liner" type="text" class="editable-view w-full rounded-md border border-slate-300 px-4 py-2" />
+                <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
+                <p class="tier-note mt-1 text-xs text-slate-500">
+                  Included as an agency-managed field on your plan — suggest a change below.
+                </p>
+                <SuggestEdit fieldLabel="Explanatory Paragraph one-liner" />
+              </div>
+
+              <div data-field="brandscript_teaser">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Teaser</label>
+                <textarea id="content-brandscript-teaser" rows="2" class="editable-view w-full rounded-md border border-slate-300 px-4 py-2"></textarea>
+                <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
+                <p class="tier-note mt-1 text-xs text-slate-500">
+                  Included as an agency-managed field on your plan — suggest a change below.
+                </p>
+                <SuggestEdit fieldLabel="Explanatory Paragraph teaser" />
+              </div>
+
+              <div data-field="brandscript_full">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Full BrandScript</label>
+                <div class="editable-view">
+                  <RichTextEditor
+                    id="content-brandscript-full-editor"
+                    helpText="The complete, long-form BrandScript — paste the whole thing in. This is only revealed when a visitor clicks 'Continue reading,' so it's the right place for the fuller SEO-oriented version of your story."
+                  />
+                </div>
+                <div class="locked-view prose prose-sm max-w-none rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700" data-locked-value-html>
+                </div>
+                <p class="tier-note mt-1 text-xs text-slate-500">
+                  Included as an agency-managed field on your plan — suggest a change below.
+                </p>
+                <SuggestEdit fieldLabel="Full BrandScript" />
+              </div>
+
+              <div data-field="brandscript_video_url">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Video (optional)</label>
+                <input
+                  id="content-brandscript-video-url"
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  class="editable-view w-full rounded-md border border-slate-300 px-4 py-2"
+                />
+                <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
+                <p class="mt-1 text-xs text-slate-500">A YouTube or Vimeo link. Leave blank to skip the video.</p>
+                <p class="tier-note mt-1 text-xs text-slate-500">
+                  Included as an agency-managed field on your plan — suggest a change below.
+                </p>
+                <SuggestEdit fieldLabel="Explanatory Paragraph video" />
+              </div>
             </div>
           </div>
 
@@ -426,6 +539,36 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               </div>
             </div>
 
+            <div id="content-featured-wrap" class="hidden space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <input id="content-featured-checkbox" type="checkbox" class="h-4 w-4 rounded border-slate-300" />
+                Feature this service on the homepage
+              </label>
+              <p class="text-xs text-slate-500">
+                Shown as one of the Homepage's up to 3 Featured Services cards.
+              </p>
+              <div id="content-featured-order-wrap" class="hidden">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Display order</label>
+                <input
+                  id="content-featured-order"
+                  type="number"
+                  min="1"
+                  class="w-24 rounded-md border border-slate-300 px-3 py-2 text-sm"
+                />
+                <p class="mt-1 text-xs text-slate-500">Lower numbers show first. Only the first 3 (by this order) appear.</p>
+              </div>
+            </div>
+
+            <div id="content-footer-column-wrap" class="hidden">
+              <label class="mb-1 block text-sm font-semibold text-slate-700">Footer column</label>
+              <select id="content-footer-column" class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm sm:w-64">
+                <option value="explore">Explore</option>
+                <option value="company">Company</option>
+                <option value="legal">Legal</option>
+              </select>
+              <p class="mt-1 text-xs text-slate-500">Which of the footer's 3 columns this page's link shows in.</p>
+            </div>
+
             <button
               id="content-details-save-button"
               type="button"
@@ -495,11 +638,13 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   import { initUnsplashSearchModal, type UnsplashPhoto } from '../../../lib/unsplashSearch';
   import { STORYBRAND_SPLIT_PAGE_TYPES } from '../../../lib/pages';
   import { getPersonEntityTerms } from '../../../lib/schema';
+  import { VALUE_ADD_ICON_NAMES } from '../../../lib/icons';
 
   type ContentPage = {
     id: string;
     title: string;
     page_type: string;
+    nav_placement: 'primary' | 'footer' | 'utility' | 'none';
     h1: string | null;
     meta_description: string | null;
     focus_keyword: string | null;
@@ -512,6 +657,15 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     storybrand_pitch_label: string | null;
     storybrand_success: string | null;
     storybrand_failure: string | null;
+    value_add_items: { icon: string; label: string }[];
+    guide_authority_stats: { label: string; value: string }[];
+    featured_on_homepage: boolean;
+    homepage_feature_order: number | null;
+    brandscript_one_liner: string | null;
+    brandscript_teaser: string | null;
+    brandscript_full: string | null;
+    brandscript_video_url: string | null;
+    footer_column: 'explore' | 'company' | 'legal' | null;
     plan_steps: { title: string; description: string }[];
     faqs: { question: string; answer: string }[];
     concerns: { title: string; description: string }[];
@@ -551,6 +705,9 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const PLAN_STEPS_PAGE_TYPES = ['Counselor Profile', 'Homepage', 'Service Area', 'Service Hub', 'Service Page'];
   const FAQS_PAGE_TYPES = ['Content Pillar', 'Counselor Profile', 'Service Area', 'Service Hub', 'Service Page'];
   const CONCERNS_PAGE_TYPES = ['Homepage', 'Service Hub'];
+  // Which page types can be featured on the Homepage's Featured Services
+  // section — see 0049_featured_services.sql.
+  const FEATURED_SERVICE_PAGE_TYPES = ['Service Page', 'Service Hub'];
   const CTA_PAGE_TYPES = [
     'About',
     'Blog Post',
@@ -619,6 +776,35 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const storybrandPitchEditor = initRichTextEditor('content-storybrand-pitch-editor');
   const storybrandSuccessEditor = initRichTextEditor('content-storybrand-success-editor');
   const storybrandFailureEditor = initRichTextEditor('content-storybrand-failure-editor');
+
+  // Homepage-specific relabeling — same field/column as Service Page/
+  // Counselor Profile's "The Problem"/"The Full Picture", different
+  // admin-facing copy for Homepage rows only (see loadContentForm()).
+  const contentStorybrandProblemFieldLabel = document.getElementById('content-storybrand-problem-field-label')!;
+  const contentStorybrandProblemHelp = document.getElementById('content-storybrand-problem-editor-help')!;
+  const contentStorybrandPitchFieldLabel = document.getElementById('content-storybrand-pitch-field-label')!;
+  const contentStorybrandPitchHelp = document.getElementById('content-storybrand-pitch-editor-help')!;
+  const contentStorybrandPitchLabelFieldLabel = document.getElementById('content-storybrand-pitch-label-field-label')!;
+  const contentStorybrandPitchLabelHelp = document.getElementById('content-storybrand-pitch-label-help')!;
+
+  // Homepage-only new fields from the StoryBrand rebuild.
+  const contentValueAddWrap = document.getElementById('content-value-add-wrap')!;
+  const contentAuthorityStatsWrap = document.getElementById('content-authority-stats-wrap')!;
+  const contentExplanatoryWrap = document.getElementById('content-explanatory-wrap')!;
+  const contentBrandscriptOneLiner = document.getElementById('content-brandscript-one-liner') as HTMLInputElement;
+  const contentBrandscriptTeaser = document.getElementById('content-brandscript-teaser') as HTMLTextAreaElement;
+  const brandscriptFullEditor = initRichTextEditor('content-brandscript-full-editor');
+  const contentBrandscriptVideoUrl = document.getElementById('content-brandscript-video-url') as HTMLInputElement;
+
+  // Featured Services (Service Page/Service Hub rows) + footer column
+  // (any footer-placed page) — both ungated, live in the "Additional
+  // page elements" section below alongside plan_steps/faqs/concerns.
+  const contentFeaturedWrap = document.getElementById('content-featured-wrap')!;
+  const contentFeaturedCheckbox = document.getElementById('content-featured-checkbox') as HTMLInputElement;
+  const contentFeaturedOrderWrap = document.getElementById('content-featured-order-wrap')!;
+  const contentFeaturedOrder = document.getElementById('content-featured-order') as HTMLInputElement;
+  const contentFooterColumnWrap = document.getElementById('content-footer-column-wrap')!;
+  const contentFooterColumn = document.getElementById('content-footer-column') as HTMLSelectElement;
 
   // Live, non-blocking count of the focus keyword's exact-match occurrences
   // across the 5 StoryBrand fields — informational only, never a hard gate.
@@ -725,6 +911,57 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       },
     };
   }
+
+  // The Value Add strip's items don't fit createItemListEditor()'s plain
+  // text+textarea {a,b} shape — icon is a pick from a fixed set, not free
+  // text. Small variant of the same add/remove/collect pattern.
+  function createIconListEditor(containerId: string, addButtonId: string) {
+    const container = document.getElementById(containerId)!;
+    const addButton = document.getElementById(addButtonId)!;
+    const iconOptions = VALUE_ADD_ICON_NAMES.map((name) => `<option value="${name}">${name}</option>`).join('');
+
+    function addRow(icon: string = VALUE_ADD_ICON_NAMES[0], label = '') {
+      const row = document.createElement('div');
+      row.className = 'item-row flex flex-col gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center';
+      row.innerHTML = `
+        <select class="item-icon rounded-md border border-slate-300 px-3 py-2 text-sm">${iconOptions}</select>
+        <input type="text" class="item-label flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm" placeholder="Short label (e.g. &quot;Licensed Experts&quot;)" value="${escapeHtml(label)}" />
+        <button type="button" class="remove-item-button shrink-0 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">Remove</button>
+      `;
+      (row.querySelector('.item-icon') as HTMLSelectElement).value = icon;
+      row.querySelector('.remove-item-button')!.addEventListener('click', () => row.remove());
+      container.appendChild(row);
+    }
+
+    addButton.addEventListener('click', () => {
+      if (container.querySelectorAll('.item-row').length >= 4) return;
+      addRow();
+    });
+
+    return {
+      setItems(items: { icon: string; label: string }[]) {
+        container.innerHTML = '';
+        items.forEach((item) => addRow(item.icon, item.label));
+      },
+      getItems(): { icon: string; label: string }[] {
+        return Array.from(container.querySelectorAll<HTMLElement>('.item-row'))
+          .map((row) => ({
+            icon: (row.querySelector('.item-icon') as HTMLSelectElement).value,
+            label: (row.querySelector('.item-label') as HTMLInputElement).value.trim(),
+          }))
+          .filter((item) => item.label)
+          .slice(0, 4);
+      },
+    };
+  }
+
+  const valueAddEditor = createIconListEditor('content-value-add-list', 'content-value-add-add');
+  const authorityStatsEditor = createItemListEditor(
+    'content-authority-stats-list',
+    'content-authority-stats-add',
+    'Label (e.g. "Experience")',
+    'Value (e.g. "15+ years")'
+  );
 
   const planStepsEditor = createItemListEditor(
     'content-plan-steps-list',
@@ -835,6 +1072,18 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
         return selectedContentPage.storybrand_success ?? '';
       case 'storybrand_failure':
         return selectedContentPage.storybrand_failure ?? '';
+      case 'value_add_items':
+        return selectedContentPage.value_add_items.map((i) => `${i.icon}: ${i.label}`).join(', ') || '(none set)';
+      case 'guide_authority_stats':
+        return selectedContentPage.guide_authority_stats.map((s) => `${s.label}: ${s.value}`).join(', ') || '(none set)';
+      case 'brandscript_one_liner':
+        return selectedContentPage.brandscript_one_liner ?? '';
+      case 'brandscript_teaser':
+        return selectedContentPage.brandscript_teaser ?? '';
+      case 'brandscript_full':
+        return selectedContentPage.brandscript_full ?? '';
+      case 'brandscript_video_url':
+        return selectedContentPage.brandscript_video_url ?? '';
       case 'images': {
         const img = selectedContentPage.images?.[imageKeyFor(selectedContentPage.page_type)];
         return img ? `${img.url} (alt: ${img.alt})` : '(no image set)';
@@ -912,6 +1161,33 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentSaveButton.classList.toggle('hidden', !canEditAnyField());
   }
 
+  // storybrand_problem/storybrand_pitch/storybrand_pitch_label are the
+  // same columns Service Page/Counselor Profile use ("The Problem"/"The
+  // Full Picture"/its link text) — on a Homepage row specifically they
+  // mean something different now (Stakes / Value Proposition / its
+  // heading), so only the admin-facing label/help text changes per page
+  // type, never the underlying field key or stored data.
+  function applyStorybrandLabelsFor(pageType: string) {
+    const isHomepage = pageType === 'Homepage';
+    contentStorybrandProblemFieldLabel.textContent = isHomepage ? 'Stakes' : 'The Problem';
+    contentStorybrandProblemHelp.textContent = isHomepage
+      ? `StoryBrand's "Stakes" section. What does it cost your visitor to keep living with this problem? Use honest, loss-aversion language — they were made to flourish, not to keep struggling with this. Positioned right after the Hero so it isn't buried.`
+      : `StoryBrand's "Problem" section. Describe the problem your visitor is facing when they land on this page — go beyond the surface issue to how it makes them feel and why it feels unfair. The goal: a visitor reads this and thinks, "they understand exactly what I'm going through."`;
+
+    contentStorybrandPitchFieldLabel.textContent = isHomepage ? 'Value Proposition' : 'The Full Picture';
+    contentStorybrandPitchHelp.textContent = isHomepage
+      ? `The positive flip from Stakes. Benefit-focused language — what your visitor gains once they start counseling. This is a real, visible section (not collapsed) with its own heading and call-to-action.`
+      : `StoryBrand's fuller explanation. For visitors who want more detail before deciding — explain your approach and why it's the right next step. Write like you're personally reassuring someone who still has questions.`;
+
+    contentStorybrandPitchLabelFieldLabel.textContent = isHomepage
+      ? 'Value Proposition heading'
+      : '"The Full Picture" link text';
+    contentStorybrandPitchLabel.placeholder = isHomepage ? 'What You Can Expect' : 'Learn more about our approach';
+    contentStorybrandPitchLabelHelp.textContent = isHomepage
+      ? 'Shown as the visible heading above the Value Proposition section.'
+      : 'Shown as a heading visitors click to expand "The Full Picture" above. Leave blank to use the default, "Learn more about our approach."';
+  }
+
   function loadContentForm() {
     selectedContentPage = pages.find((p) => p.id === contentPageSelect.value) ?? null;
     if (!selectedContentPage) {
@@ -976,6 +1252,50 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     document.querySelector('[data-field="storybrand_failure"] [data-locked-value-html]')!.innerHTML = renderCopy(
       selectedContentPage.storybrand_failure
     );
+
+    applyStorybrandLabelsFor(selectedContentPage.page_type);
+
+    // Homepage-only fields from the StoryBrand rebuild — hidden entirely
+    // (not just left inert) for every other page type, matching this
+    // screen's existing "hide what genuinely doesn't apply" discipline
+    // (see content-h1-wrap/content-hero-style-wrap above).
+    const isHomepage = selectedContentPage.page_type === 'Homepage';
+    contentValueAddWrap.classList.toggle('hidden', !isHomepage);
+    valueAddEditor.setItems(selectedContentPage.value_add_items);
+    document.querySelector('[data-field="value_add_items"] [data-locked-value]')!.textContent =
+      selectedContentPage.value_add_items.map((i) => i.label).join(', ') || '(none set)';
+
+    contentAuthorityStatsWrap.classList.toggle('hidden', !isHomepage);
+    authorityStatsEditor.setItems(selectedContentPage.guide_authority_stats.map((s) => ({ a: s.label, b: s.value })));
+    document.querySelector('[data-field="guide_authority_stats"] [data-locked-value]')!.textContent =
+      selectedContentPage.guide_authority_stats.map((s) => `${s.label}: ${s.value}`).join(', ') || '(none set)';
+
+    contentExplanatoryWrap.classList.toggle('hidden', !isHomepage);
+    contentBrandscriptOneLiner.value = selectedContentPage.brandscript_one_liner ?? '';
+    document.querySelector('[data-field="brandscript_one_liner"] [data-locked-value]')!.textContent =
+      selectedContentPage.brandscript_one_liner ?? '(not set)';
+    contentBrandscriptTeaser.value = selectedContentPage.brandscript_teaser ?? '';
+    document.querySelector('[data-field="brandscript_teaser"] [data-locked-value]')!.textContent =
+      selectedContentPage.brandscript_teaser ?? '(not set)';
+    brandscriptFullEditor.setMarkdown(selectedContentPage.brandscript_full);
+    document.querySelector('[data-field="brandscript_full"] [data-locked-value-html]')!.innerHTML = renderCopy(
+      selectedContentPage.brandscript_full
+    );
+    contentBrandscriptVideoUrl.value = selectedContentPage.brandscript_video_url ?? '';
+    document.querySelector('[data-field="brandscript_video_url"] [data-locked-value]')!.textContent =
+      selectedContentPage.brandscript_video_url ?? '(not set)';
+
+    // Featured Services — Service Page/Service Hub rows only, ungated.
+    const showFeatured = FEATURED_SERVICE_PAGE_TYPES.includes(selectedContentPage.page_type);
+    contentFeaturedWrap.classList.toggle('hidden', !showFeatured);
+    contentFeaturedCheckbox.checked = selectedContentPage.featured_on_homepage;
+    contentFeaturedOrderWrap.classList.toggle('hidden', !selectedContentPage.featured_on_homepage);
+    contentFeaturedOrder.value = selectedContentPage.homepage_feature_order != null ? String(selectedContentPage.homepage_feature_order) : '';
+
+    // Footer column — any page currently placed in the footer, ungated.
+    const showFooterColumn = selectedContentPage.nav_placement === 'footer';
+    contentFooterColumnWrap.classList.toggle('hidden', !showFooterColumn);
+    contentFooterColumn.value = selectedContentPage.footer_column ?? 'explore';
 
     contentCounselorGuidance.classList.toggle('hidden', !isLinkedCounselorSession());
     if (isLinkedCounselorSession()) {
@@ -1063,7 +1383,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     // rejected by the trigger.
     contentPageDetailsSection.classList.toggle(
       'hidden',
-      isLinkedCounselorSession() || !(showPlanSteps || showFaqs || showConcerns || showCta)
+      isLinkedCounselorSession() || !(showPlanSteps || showFaqs || showConcerns || showCta || showFeatured || showFooterColumn)
     );
     planStepsEditor.setItems(selectedContentPage.plan_steps.map((s) => ({ a: s.title, b: s.description })));
     faqsEditor.setItems(selectedContentPage.faqs.map((f) => ({ a: f.question, b: f.answer })));
@@ -1084,6 +1404,10 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
 
   contentHeroOverlayOpacity.addEventListener('input', () => {
     contentHeroOverlayOpacityReadout.textContent = contentHeroOverlayOpacity.value;
+  });
+
+  contentFeaturedCheckbox.addEventListener('change', () => {
+    contentFeaturedOrderWrap.classList.toggle('hidden', !contentFeaturedCheckbox.checked);
   });
 
   contentImageFile.addEventListener('change', async () => {
@@ -1155,6 +1479,18 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       if (canEditField('storybrand_failure')) payload.storybrand_failure = storybrandFailureEditor.getMarkdown();
     } else if (canEditField('copy')) {
       payload.copy = copyEditor.getMarkdown();
+    }
+    // Homepage-only fields from the StoryBrand rebuild — meaningless on
+    // any other page type, so only ever sent for a Homepage row.
+    if (selectedContentPage.page_type === 'Homepage') {
+      if (canEditField('value_add_items')) payload.value_add_items = valueAddEditor.getItems();
+      if (canEditField('guide_authority_stats')) {
+        payload.guide_authority_stats = authorityStatsEditor.getItems().map((item) => ({ label: item.a, value: item.b }));
+      }
+      if (canEditField('brandscript_one_liner')) payload.brandscript_one_liner = contentBrandscriptOneLiner.value.trim() || null;
+      if (canEditField('brandscript_teaser')) payload.brandscript_teaser = contentBrandscriptTeaser.value.trim() || null;
+      if (canEditField('brandscript_full')) payload.brandscript_full = brandscriptFullEditor.getMarkdown();
+      if (canEditField('brandscript_video_url')) payload.brandscript_video_url = contentBrandscriptVideoUrl.value.trim() || null;
     }
     if (canEditField('images')) {
       payload.images = uploadedImageUrl
@@ -1250,6 +1586,15 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       payload.cta_heading = contentCtaHeading.value.trim() || null;
       payload.cta_button_text = contentCtaButtonText.value.trim() || null;
     }
+    if (FEATURED_SERVICE_PAGE_TYPES.includes(selectedContentPage.page_type)) {
+      payload.featured_on_homepage = contentFeaturedCheckbox.checked;
+      payload.homepage_feature_order = contentFeaturedCheckbox.checked && contentFeaturedOrder.value
+        ? Number(contentFeaturedOrder.value)
+        : null;
+    }
+    if (selectedContentPage.nav_placement === 'footer') {
+      payload.footer_column = contentFooterColumn.value;
+    }
 
     const { error } = await supabase.from('pages').update(payload).eq('id', selectedContentPage.id);
     if (error) {
@@ -1285,6 +1630,12 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     storybrand_pitch_label: '"The Full Picture" link text',
     storybrand_success: "What's Possible",
     storybrand_failure: "Why It's Worth Acting Now",
+    value_add_items: 'Value Add strip',
+    guide_authority_stats: 'Guide — Authority',
+    brandscript_one_liner: 'Explanatory Paragraph one-liner',
+    brandscript_teaser: 'Explanatory Paragraph teaser',
+    brandscript_full: 'Full BrandScript',
+    brandscript_video_url: 'Explanatory Paragraph video',
     images: 'Hero image',
   };
 
