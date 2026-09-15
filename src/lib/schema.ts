@@ -31,9 +31,13 @@ export function buildBusinessSchema(business: Business, siteUrl: string) {
     business.address_region ||
     business.postal_code
   ) {
+    // schema.org's PostalAddress has no separate suite/unit property —
+    // street_address_2 gets folded into streetAddress here, the same
+    // way every other renderer of this address combines the two.
+    const streetAddress = [business.street_address, business.street_address_2].filter(Boolean).join(', ');
     schema.address = {
       '@type': 'PostalAddress',
-      ...(business.street_address && { streetAddress: business.street_address }),
+      ...(streetAddress && { streetAddress }),
       ...(business.address_locality && { addressLocality: business.address_locality }),
       ...(business.address_region && { addressRegion: business.address_region }),
       ...(business.postal_code && { postalCode: business.postal_code }),

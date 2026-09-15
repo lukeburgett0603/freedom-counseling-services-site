@@ -111,10 +111,10 @@ Deno.serve(async (req: Request) => {
 
   const { data: business } = await supabase
     .from('business')
-    .select('display_name, street_address, address_locality, address_region, postal_code, show_crisis_resources')
+    .select('display_name, street_address, street_address_2, address_locality, address_region, postal_code, show_crisis_resources')
     .maybeSingle();
   const mailingAddress = business
-    ? [business.street_address, business.address_locality, business.address_region, business.postal_code]
+    ? [business.street_address, business.street_address_2, business.address_locality, business.address_region, business.postal_code]
         .filter(Boolean)
         .join(', ')
     : '';

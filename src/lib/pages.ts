@@ -220,6 +220,10 @@ export interface Business {
   telephone: string | null;
   email: string | null;
   street_address: string | null;
+  // Suite/unit, kept separate from street_address for clean data entry
+  // — see 0047_street_address_2.sql. Every renderer that displays or
+  // schemas the address joins the two back together.
+  street_address_2: string | null;
   address_locality: string | null;
   address_region: string | null;
   postal_code: string | null;

@@ -25,8 +25,9 @@ function hrefFor(page: Page): string {
 // rendered as "LouisvilleKY40243"), while the first comma-space pair
 // didn't. One combined expression sidesteps whatever in Astro's compiler
 // causes that, rather than chasing it space by space.
-const fullAddress = business.street_address
-  ? `${business.street_address}, ${business.address_locality} ${business.address_region} ${business.postal_code}`
+const streetLine = [business.street_address, business.street_address_2].filter(Boolean).join(', ');
+const fullAddress = streetLine
+  ? `${streetLine}, ${business.address_locality} ${business.address_region} ${business.postal_code}`
   : null;
 ---
 

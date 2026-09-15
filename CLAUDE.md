@@ -2499,6 +2499,43 @@ actually matters.
   Faith-Based Counseling" (Service Hub) and confirmed it's still shown —
   test user deleted afterward.
 
+## Address Line 2 / suite field + Psychology Today citation cleanup (2026-09-15)
+
+Client caught two real NAP-citation mismatches while updating Psychology
+Today: the phone number PT displayed was its own call-tracking "Protected
+Phone Number" (not the real number), and the suite format differed —
+`#202` on the site vs. "Suite 202" on PT. See `local-business-site-
+template`'s CLAUDE.md for the full technical writeup of the new
+`business.street_address_2` field (built there first, synced here).
+
+- **This site's `street_address` held `"800 Lily Creek Rd #202"`** —
+  the suite jammed into the same field with no consistent format. Split
+  via `0047_street_address_2.sql` (applied directly against this
+  project's live database via `supabase db query --linked`, after
+  `supabase db push` failed with a stale-migration-history error
+  unrelated to this change — same "raw SQL session" pattern this file
+  already uses elsewhere for agency-authorized direct writes) into
+  `street_address = "800 Lily Creek Rd"` / `street_address_2 = "Suite
+  202"` — also fixing the `#202` → `Suite 202` mismatch at the same
+  time, so both citation-matching issues found in the same review are
+  closed together.
+- **The Psychology Today Protected Phone Number issue is a business/
+  directory-settings decision, not a code fix** — recommended turning it
+  off, since the real number is already public via GBP and the website,
+  so the tracking number's only remaining function was creating the
+  exact mismatch this citation review was trying to close.
+- **Verification pattern**: `astro check` (0 errors), a real `npm run
+  build` against this site's live Supabase project confirming `/contact`,
+  the footer, and the homepage's JSON-LD `streetAddress` all recombine to
+  `"800 Lily Creek Rd, Suite 202"`, and a real browser pass with a
+  temporary throwaway owner login — the admin form correctly loaded the
+  split values into their own two fields (not the old combined string),
+  a live edit round-tripped to the database correctly, then was reverted
+  to the real value. `send-nurture-emails/index.ts`'s CAN-SPAM mailing-
+  address footer was hand-edited (not `cp`'d from the template) since
+  this project's own copy has real, Freedom-specific merge-tag/one-click-
+  unsubscribe code the template doesn't have yet.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a
