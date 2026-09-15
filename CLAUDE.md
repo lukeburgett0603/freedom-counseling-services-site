@@ -2573,16 +2573,37 @@ with the client rather than populating everything at once.
   focus keyword ("therapist louisville ky") and the existing
   keyword-placement convention in the section below it. Applied via
   the same temporary tier-flip pattern as the Value Add strip.
-- **Value Proposition, Guide — Authority facts, Explanatory Paragraph,
-  and Featured Services are still unpopulated** — `storybrand_pitch`
-  keeps its pre-rebuild copy (same column, relabeled "Value
-  Proposition" in the admin, content not yet rewritten for its new
-  role), `guide_authority_stats` and the `brandscript_*` fields are
-  unset, and no Service Page has `featured_on_homepage` set yet, so
-  Featured Services doesn't render. Counselor cards already renders
-  (self-gates on >1 Counselor Profile page, no content to write for
-  it). Each remaining section gets its own content pass and live
-  check, same as these first two.
+- **Value Proposition — third section populated.** Real rewrite, not a
+  relabel — the old `storybrand_pitch` content ("How does counseling
+  and Christian psychology work?" / "What if you don't want
+  Christianity mixed in?") was genuinely good objection-handling
+  material but didn't fit Value Proposition's new job, so it was
+  **preserved, not deleted**, as the planned seed for the upcoming
+  Explanatory Paragraph section instead. New copy: 3 short H3 beats
+  ("A Personalized Approach" / "Faith Woven In, Never Forced" / "Real
+  Tools for Everyday Life"), deliberately about *the approach* rather
+  than emotional outcomes, so it doesn't duplicate `storybrand_success`
+  ("Find Peace / Gain Clarity / Move Toward Hope") further down the
+  page. `storybrand_pitch_label` (repurposed from its old collapsible-
+  trigger role) is now the section's real visible H2: "What You Can
+  Expect". Also set `images.valueProposition` (merged into the existing
+  `images` jsonb via `||`, `hero` left untouched) — sourced live through
+  the real `search-unsplash` Edge Function (not a local `.env` key,
+  which this machine doesn't have; called the deployed function
+  directly with a throwaway admin session, same mechanism the admin UI
+  itself uses), a real download-tracking ping fired per Unsplash's API
+  guidelines, and a real specific alt description written by hand
+  rather than kept as Unsplash's generic one. Applied via the same
+  temporary tier-flip pattern as the prior two sections; confirmed live
+  on the deployed site (copy, heading, and the image's "Photo: Vitaly
+  Gariev" attribution all present).
+- **Guide — Authority facts, Explanatory Paragraph, and Featured
+  Services are still unpopulated** — `guide_authority_stats` and the
+  `brandscript_*` fields are unset, and no Service Page has
+  `featured_on_homepage` set yet, so Featured Services doesn't render.
+  Counselor cards already renders (self-gates on >1 Counselor Profile
+  page, no content to write for it). Each remaining section gets its
+  own content pass and live check, same as the first three.
 
 ## Hero overlay style (built 2026-09-04)
 
