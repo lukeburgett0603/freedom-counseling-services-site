@@ -1019,13 +1019,19 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
 
   // What a linked-counselor staff session may directly edit on their own
   // page — must exactly match enforce_content_permission()'s linked-
-  // counselor allowlist (0045_counselor_page_copy_access.sql), or a save
-  // this UI thinks should succeed gets rejected by the trigger instead.
-  // h1/meta_description/focus_keyword stay excluded (ALWAYS_LOCKED_FIELDS
-  // already blocks them); copy/images/hero layout fields stay excluded
-  // too — Counselor Profile pages always use the StoryBrand split, never
-  // the plain `copy` field, and don't render Hero.astro at all, so those
-  // are simply irrelevant to this page type, not a trust decision.
+  // counselor allowlist (0054_linked_counselor_full_page_access.sql), or
+  // a save this UI thinks should succeed gets rejected by the trigger
+  // instead. h1/meta_description/focus_keyword stay excluded
+  // (ALWAYS_LOCKED_FIELDS already blocks them) — client decision
+  // (2026-09-16): those three alone stay SEO-strategist-managed, every
+  // other real content field on the page is fully self-service. `copy`/
+  // hero-layout fields stay excluded on their own merits, not as a trust
+  // decision — Counselor Profile pages always use the StoryBrand split,
+  // never the plain `copy` field, and don't render Hero.astro at all
+  // (they have their own header card), so those are simply irrelevant to
+  // this page type. `images` IS included — it's the counselor's own
+  // headshot (see imageKeyFor()), a real, meaningful, counselor-specific
+  // field, unlike the irrelevant ones above.
   const LINKED_COUNSELOR_EDITABLE_FIELDS = [
     'hero_subhead',
     'hero_headline',
@@ -1035,6 +1041,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     'storybrand_pitch_label',
     'storybrand_success',
     'storybrand_failure',
+    'images',
   ];
 
   // Counselor Profile pages don't render Hero.astro at all — they have
@@ -1492,12 +1499,21 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentFaqsWrap.classList.toggle('hidden', !showFaqs);
     contentConcernsWrap.classList.toggle('hidden', !showConcerns);
     contentCtaWrap.classList.toggle('hidden', !showCta);
-    // plan_steps/faqs/concerns/cta_heading/cta_button_text aren't in
-    // enforce_content_permission()'s linked-counselor allowlist — out of
-    // scope for this pass (the ask was specifically bio/StoryBrand
-    // content), so this whole section stays hidden for a linked-counselor
-    // session rather than showing controls whose Save would just get
-    // rejected by the trigger.
+    // plan_steps/faqs/cta_heading/cta_subheading/cta_button_text are now
+    // in enforce_content_permission()'s linked-counselor allowlist too
+    // (0054_linked_counselor_full_page_access.sql, 2026-09-16 client
+    // decision — every real field except h1/meta_description/
+    // focus_keyword is self-service), so this section is no longer
+    // blanket-hidden for a linked-counselor session — it shows/hides
+    // purely on whether the session's own page type has anything in it,
+    // same as every other role. `concerns`/`featured_on_homepage`/
+    // `homepage_feature_order`/`footer_column` were deliberately left out
+    // of that allowlist — none of CONCERNS_PAGE_TYPES/
+    // FEATURED_SERVICE_PAGE_TYPES ever include 'Counselor Profile', and a
+    // linked-counselor session can only ever be on their own Counselor
+    // Profile page (see the "linked counselor can update own page" RLS
+    // policy), so those fields can never actually reach this session's
+    // save payload regardless.
     //
     // For Homepage, plan_steps/cta_wrap are physically relocated into the
     // narrative flow above (see applyHomepageFieldOrder()) — they don't
@@ -1507,7 +1523,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     const detailsSectionHasContent = isHomepage
       ? showFaqs || showConcerns || showFeatured || showFooterColumn
       : showPlanSteps || showFaqs || showConcerns || showCta || showFeatured || showFooterColumn;
-    contentPageDetailsSection.classList.toggle('hidden', isLinkedCounselorSession() || !detailsSectionHasContent);
+    contentPageDetailsSection.classList.toggle('hidden', !detailsSectionHasContent);
     planStepsEditor.setItems(selectedContentPage.plan_steps.map((s) => ({ a: s.title, b: s.description })));
     faqsEditor.setItems(selectedContentPage.faqs.map((f) => ({ a: f.question, b: f.answer })));
     concernsEditor.setItems(selectedContentPage.concerns.map((c) => ({ a: c.title, b: c.description })));

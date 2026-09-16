@@ -2847,6 +2847,43 @@ was silently saving real data with nowhere to show it.
   empty-state stayed clean. `astro check` clean (0 errors), real build
   output checked directly for both cases before the browser pass.
 
+## Counselors can now edit their whole page, not just their bio (2026-09-16)
+
+Client-reported: counselors looking at their own Counselor Profile page
+couldn't actually edit anything — every field showed a "Suggest an
+edit" link instead. See `local-business-site-template`'s CLAUDE.md
+("Linked counselor full page-copy access") for the full technical
+writeup (built there first, synced here). Real explicit scope from the
+client: **only `focus_keyword`, `meta_description`, and the H1 headline
+stay locked — every other field, including the Hero image/headshot and
+the Plan Steps/FAQs/CTA section, becomes fully self-service.**
+
+- Migration `0054_linked_counselor_full_page_access.sql` applied
+  directly against this project's live database via `supabase db query
+  --linked`.
+- **Live-verified against Luke Burgett's real page** using a throwaway
+  linked-staff test account (not his real login): backed up his real
+  field values first, then genuinely clicked both Save buttons (top
+  StoryBrand/hero section and the newly-unhidden "Additional page
+  elements" section) — both succeeded, confirmed via a direct query
+  the writes landed, and diffed before/after to confirm the round-trip
+  was byte-for-byte lossless (no accidental content change from
+  testing). Separately confirmed via direct REST calls that `h1`/
+  `meta_description`/`focus_keyword` are still genuinely rejected by
+  the trigger, and that a different counselor's page is still
+  unreachable via RLS. Test account deleted after.
+- **Flagged, not built in this pass** — two other things visibly
+  rendered on a Counselor Profile page that aren't yet self-service:
+  the personal quote (`testimonial_quote`/`testimonial_author`,
+  rendered by `CounselorQuote.astro`) lives on a different admin screen
+  (Business info → Testimonials, owner/agency-only, no linked-counselor
+  path today); and the clickable Specialty pills have no admin UI at
+  all on any screen — each one needs matching against a real existing
+  service page slug to link accurately, which this project has always
+  treated as an agency judgment call rather than free self-editing (see
+  CLAUDE.md's "Counselor Profile header card" section). Revisit either
+  if the client wants counselors self-servicing those too.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a
