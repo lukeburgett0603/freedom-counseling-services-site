@@ -2609,13 +2609,32 @@ with the client rather than populating everything at once.
   a real `sm:grid-cols-3` grid with all 3 card titles present, no
   `<img>` in the section, and the CTA confirmed as the last child after
   the grid (DOM-order check, not just a visual guess).
-- **Guide — Authority facts, Explanatory Paragraph, and Featured
-  Services are still unpopulated** — `guide_authority_stats` and the
-  `brandscript_*` fields are unset, and no Service Page has
-  `featured_on_homepage` set yet, so Featured Services doesn't render.
-  Counselor cards already renders (self-gates on >1 Counselor Profile
-  page, no content to write for it). Each remaining section gets its
-  own content pass and live check, same as the first three.
+- **Guide — Authority facts — fourth section populated.** 3 stats
+  (`guide_authority_stats`), each a real, verifiable fact rather than
+  guessed: "Team" / "6 Licensed Counselors" (the client confirmed a 6th
+  hire is imminent — the site says 6 ahead of that counselor's own
+  profile page existing; the Counselor cards section further down this
+  same page will show only 5 names until that page is added, a known,
+  accepted gap, not a bug), "Approach" / "9 Evidence-Based Modalities"
+  (a real count, tallied from the distinct values across all 5 live
+  Counselor Profile rows' `modalities` — not invented), "Experience" /
+  "20+ Years Serving Louisville" (the client confirmed the practice was
+  founded in 2006). Deliberately chosen to NOT restate the Value Add
+  strip's "Licensed Experts"/"Faith-Integrated Care" — team size,
+  modality range, and tenure are all real facts that weren't shown
+  anywhere else on the page yet. **Also set `business.founding_year =
+  2006`** while in there — a real fact that had been sitting unset,
+  which also now feeds `Organization` schema's `foundingDate` (verified
+  live: `"foundingDate":"2006-01-01"` in the deployed JSON-LD), a small
+  free win beyond just this section. Applied via the same tier-flip
+  pattern as the prior sections (`founding_year` itself isn't
+  trigger-gated, so that one write didn't need the flip).
+- **Explanatory Paragraph and Featured Services are still
+  unpopulated** — the `brandscript_*` fields are unset, and no Service
+  Page has `featured_on_homepage` set yet, so Featured Services doesn't
+  render. Counselor cards already renders (self-gates on >1 Counselor
+  Profile page, no content to write for it). Each remaining section
+  gets its own content pass and live check, same as the first four.
 
 ## Hero overlay style (built 2026-09-04)
 
