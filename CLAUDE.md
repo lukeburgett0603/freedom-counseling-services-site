@@ -2824,6 +2824,29 @@ what's specific to seeing it happen twice on this real post.
   save rather than reverting. `astro check` clean (0 errors). Test
   login deleted after.
 
+## Blog post Key takeaways never rendered anywhere (2026-09-16)
+
+Client-reported: filling in "Key takeaways" on a blog post (used
+already, e.g. "Repairing After a Fight" and "When Anxiety Feels Like a
+Full-Time Job" both have real entries) had no visible effect on the
+published post. See `local-business-site-template`'s CLAUDE.md ("Real
+bugs found and fixed here") for the full technical writeup — the
+`KeyTakeaways.astro` component already existed and was already
+rendered by `ContentPillar.astro`/`ServiceHub.astro`, but
+`BlogPost.astro` never imported or rendered it at all, so the field
+was silently saving real data with nowhere to show it.
+
+- Fixed by rendering `<KeyTakeaways items={page.key_takeaways} />`
+  right after the byline/category line, before the article body — a
+  scannable summary card a reader sees before deciding whether to read
+  the full post, matching the request directly.
+- **Verified live against this site's own real data**: "When Anxiety
+  Feels Like a Full-Time Job" (3 real takeaways) now shows the card
+  with all 3, screenshot-confirmed; "Grief Doesn't Follow a Schedule"
+  (no takeaways entered) renders no card at all, confirming the
+  empty-state stayed clean. `astro check` clean (0 errors), real build
+  output checked directly for both cases before the browser pass.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a
