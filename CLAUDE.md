@@ -2729,6 +2729,50 @@ query returned nothing.
   screenshot-confirmed. `astro check` clean (0 errors). Test login
   deleted after.
 
+## Blog post slug typo: stray "blog/" prefix (2026-09-16)
+
+Client-reported: `https://www.freedomcounselingservices.org
+/repairing-after-a-fight/` 404'd. Diagnosis: this one post (published
+2026-07-10) had `slug = 'blog/repairing-after-a-fight'` — a literal
+`/` baked into the slug column — while every other one of this site's
+10 real Blog Post rows has a bare slug with no prefix. The real,
+working URL was `/blog/repairing-after-a-fight/`; the client (correctly,
+by every other post's own pattern) expected `/repairing-after-a-fight/`.
+
+- **Not a code bug** — `admin/blog.astro`'s auto-slugify strips every
+  non-alphanumeric character (including `/`) before hyphenating, so it
+  could never have produced a literal slash. This had to have been
+  typed directly into the Slug field by hand when this post was
+  created — a one-off data typo, not a systemic issue. Confirmed no
+  other page's `copy`/StoryBrand fields/`internal_links` referenced the
+  bad `/repairing-after-a-fight` path anywhere, and the blog
+  index/related-posts cards already build their `href` straight from
+  `page.slug` (`BlogPostCard.astro`), so internal navigation to this
+  post was never broken — only a URL guessed/typed by pattern-matching
+  the other 9 posts would 404.
+- **Fixed the slug** (`repairing-after-a-fight`, matching convention)
+  directly on the live `pages` row — `page_type = 'Blog Post'` rows are
+  exempt from `enforce_content_permission()` entirely, so no
+  trigger-disable dance was needed for this one.
+- **Added a redirect from the old URL**, since it had been live and
+  potentially indexed for ~2 months —
+  `astro.config.mjs`'s existing `redirects` map (already used for the
+  Squarespace-migration URLs) now also covers `/blog/repairing-after-a-
+  fight` → `/repairing-after-a-fight`. Same mechanism, same caveat this
+  file already documents there: GitHub Pages can't serve a true
+  server-side 301 on pure static hosting, so this renders as Astro's
+  static meta-refresh + JS redirect page (with a `rel=canonical`
+  pointing at the new URL) — weaker than a real 301 for search-ranking
+  equity, but this post had no indexed ranking signal worth specially
+  protecting (unlike the Squarespace migration's own indexed pages), so
+  the standard mechanism was sufficient rather than needing a Cloudflare
+  Redirect Rule.
+- **Verified via a real local build**: `dist/blog/repairing-after-a-
+  fight/index.html` renders the expected meta-refresh redirect with
+  `canonical` pointing at `/repairing-after-a-fight`; `dist/repairing-
+  after-a-fight/index.html` (the real post) builds correctly at the new
+  slug. `astro check` clean (0 errors).
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a

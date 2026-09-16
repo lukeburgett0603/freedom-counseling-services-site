@@ -47,6 +47,11 @@ export default defineConfig({
     '/location': '/contact',
     '/careers': '/contact',
     '/read-me-five': '/',
+    // This one blog post's slug had a stray "blog/" prefix baked into it
+    // (every other Blog Post row is a bare slug — see CLAUDE.md's "Blog
+    // post slug typo" entry) — fixed at the data level, this redirect
+    // just protects the ~2 months this URL was already live/indexable.
+    '/blog/repairing-after-a-fight': '/repairing-after-a-fight',
   },
   integrations: [
     sitemap({
