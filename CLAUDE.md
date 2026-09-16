@@ -2635,6 +2635,27 @@ with the client rather than populating everything at once.
   render. Counselor cards already renders (self-gates on >1 Counselor
   Profile page, no content to write for it). Each remaining section
   gets its own content pass and live check, same as the first four.
+- **Structural revision + admin field reorder (2026-09-16)**, requested
+  after reviewing the admin's page-copy editing screen against the live
+  page order — see `local-business-site-template`'s CLAUDE.md for the
+  full technical writeup (built there first, synced here). On this real
+  site: **Guide now renders before the Plan** (was Plan-then-Guide);
+  **Success and Failure no longer render as their own sections** —
+  confirmed live that this site's Homepage had never had
+  `storybrand_success`/`storybrand_failure` populated in the first
+  place, so nothing was lost, only the now-dead admin fields were hidden
+  for this page type; and the closing CTA gained a real
+  **`cta_subheading`**, tested end-to-end with a throwaway edit (saved,
+  confirmed via direct query, confirmed it rendered on the live built
+  page) then left unset again since no real "why act now" reminder copy
+  has been written yet — that's still open work, not done by this pass.
+  Migration `0053_cta_subheading.sql` applied directly against this
+  project's live database via `supabase db query --linked` (the
+  established workaround here — `supabase db push` fails on this
+  project's stale migration history). The admin's Focus keyword/Meta
+  description fields now render first (before H1) for every page type
+  on this site, and Homepage's own admin field order now matches this
+  new render order exactly. `astro check` clean (0 errors).
 
 ## Hero overlay style (built 2026-09-04)
 

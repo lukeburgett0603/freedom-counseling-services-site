@@ -81,6 +81,10 @@ export interface Page {
   area_served_name: string | null;
   images: Record<string, ImageSlot>;
   cta_heading: string | null;
+  // A short paragraph shown between the CTA heading and button — same
+  // ungated category as cta_heading/cta_button_text. See
+  // 0053_cta_subheading.sql.
+  cta_subheading: string | null;
   cta_button_text: string | null;
   testimonial_quote: string | null;
   testimonial_author: string | null;

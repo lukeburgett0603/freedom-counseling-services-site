@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
-import StoryBrandSection from '../components/StoryBrandSection.astro';
 import ValueAddStrip from '../components/ValueAddStrip.astro';
 import ValueProposition from '../components/ValueProposition.astro';
 import Guide from '../components/Guide.astro';
@@ -105,17 +104,21 @@ const isOverlayHero = page.hero_style === 'overlay' && !!page.images.hero;
     ctaText={page.cta_button_text}
   />
 
-  {/* The Plan — unchanged rendering (H2 heading / H3 per step / optional
-      paragraph), now with its own inline CTA inside the same band. */}
-  <PlanSteps steps={page.plan_steps} ctaText={page.cta_button_text} />
-
   {/* The Guide — empathy + scannable authority facts + own CTA, with the
       existing optional Testimonial directly below (still independently
-      gated on having a real quote). */}
+      gated on having a real quote). Revised order (2026-09-16, client
+      request): Guide now precedes the Plan — a visitor should trust the
+      guide before being handed the plan, matching the classic StoryBrand
+      order (the original 10-section skeleton has Guide at position 4,
+      Plan at 5) rather than this rebuild's initial Plan-then-Guide draft. */}
   <Guide body={page.storybrand_guide_empathy} authorityStats={page.guide_authority_stats} ctaText={page.cta_button_text} />
   {page.testimonial_quote && page.testimonial_author && (
     <Testimonial quote={page.testimonial_quote} author={page.testimonial_author} role={page.testimonial_role} />
   )}
+
+  {/* The Plan — unchanged rendering (H2 heading / H3 per step / optional
+      paragraph), now with its own inline CTA inside the same band. */}
+  <PlanSteps steps={page.plan_steps} ctaText={page.cta_button_text} />
 
   {/* Featured Services — up to 3 cards, self-maintaining. */}
   <FeaturedServices allPages={allPages} />
@@ -133,18 +136,21 @@ const isOverlayHero = page.hero_style === 'overlay' && !!page.images.hero;
     videoUrl={page.brandscript_video_url}
   />
 
-  {/* Failure (stakes reminder) — moved to just before Success, so the
-      page's final narrative beats are "what's still at risk" followed
-      immediately by "and here's what's possible instead," landing the
-      visitor in success rather than on the reminder of failure. */}
-  {page.storybrand_failure && (
-    <Section>
-      <Fragment set:html={renderCopy(page.storybrand_failure)} />
-    </Section>
-  )}
-  <StoryBrandSection markdown={page.storybrand_success} />
-
-  <CTA heading={page.cta_heading ?? `Ready to work with ${business.display_name}?`} buttonText={page.cta_button_text ?? undefined} />
+  {/* Failure and Success no longer render as their own sections on the
+      Homepage (2026-09-16, client request) — the page now closes with
+      the Explanatory Paragraph directly into this CTA band.
+      storybrand_failure/storybrand_success stay as real columns
+      (Service Page/Counselor Profile still use them) but are hidden in
+      the admin for Homepage rows specifically, since nothing here reads
+      them anymore. The "why it's worth acting now" reminder that used
+      to live in storybrand_failure now belongs in this CTA's own
+      subheading instead — a real content task, not done automatically
+      by this rebuild. */}
+  <CTA
+    heading={page.cta_heading ?? `Ready to work with ${business.display_name}?`}
+    subheading={page.cta_subheading}
+    buttonText={page.cta_button_text ?? undefined}
+  />
   <LeadMagnet pageId={page.id} turnstileSiteKey={business.cloudflare_turnstile_site_key} />
   <LeadGenerator
     slug={page.slug}

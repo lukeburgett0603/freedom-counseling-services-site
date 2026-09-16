@@ -33,16 +33,22 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
             same "hide what genuinely doesn't apply" discipline already
             used for #content-hero-style-wrap on this page.
           -->
-          <div id="content-h1-wrap">
-            <LockedField fieldKey="h1" label="Page heading (H1)" inputId="content-h1" />
-          </div>
+          <!--
+            Keyword + meta description come first, before H1 — fixed
+            across every page type (2026-09-16, client request): these
+            are the research/metadata that should inform the H1 you
+            write, not an afterthought below it.
+          -->
+          <LockedField fieldKey="focus_keyword" label="Focus keyword" inputId="content-focus-keyword" />
           <LockedField
             fieldKey="meta_description"
             label="Meta description"
             inputId="content-meta-description"
             inputType="textarea"
           />
-          <LockedField fieldKey="focus_keyword" label="Focus keyword" inputId="content-focus-keyword" />
+          <div id="content-h1-wrap">
+            <LockedField fieldKey="h1" label="Page heading (H1)" inputId="content-h1" />
+          </div>
 
           <div id="content-hero-headline-wrap" class="hidden" data-field="hero_headline">
             <label class="mb-1 block text-sm font-semibold text-slate-700">Headline (H1)</label>
@@ -59,7 +65,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
             <SuggestEdit fieldLabel="Headline (H1)" />
           </div>
 
-          <div data-field="hero_subhead">
+          <div id="content-hero-subhead-wrap" data-field="hero_subhead">
             <label class="mb-1 block text-sm font-semibold text-slate-700">Hero subheading</label>
             <input id="content-hero-subhead" type="text" class="editable-view w-full rounded-md border border-slate-300 px-4 py-2" />
             <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
@@ -152,7 +158,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <SuggestEdit fieldLabel="Value Add strip" />
             </div>
 
-            <div data-field="storybrand_problem">
+            <div id="content-storybrand-problem-wrap" data-field="storybrand_problem">
               <label id="content-storybrand-problem-field-label" class="mb-1 block text-sm font-semibold text-slate-700">The Problem</label>
               <div class="editable-view">
                 <RichTextEditor
@@ -168,7 +174,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <SuggestEdit fieldLabel="The Problem" />
             </div>
 
-            <div data-field="storybrand_guide_empathy">
+            <div id="content-storybrand-guide-empathy-wrap" data-field="storybrand_guide_empathy">
               <label class="mb-1 block text-sm font-semibold text-slate-700">We Understand</label>
               <div class="editable-view">
                 <RichTextEditor
@@ -205,7 +211,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <SuggestEdit fieldLabel="Guide — Authority" />
             </div>
 
-            <div data-field="storybrand_pitch">
+            <div id="content-storybrand-pitch-wrap" data-field="storybrand_pitch">
               <label id="content-storybrand-pitch-field-label" class="mb-1 block text-sm font-semibold text-slate-700">The Full Picture</label>
               <div class="editable-view">
                 <RichTextEditor
@@ -221,7 +227,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <SuggestEdit fieldLabel="The Full Picture" />
             </div>
 
-            <div data-field="storybrand_pitch_label">
+            <div id="content-storybrand-pitch-label-wrap" data-field="storybrand_pitch_label">
               <label id="content-storybrand-pitch-label-field-label" class="mb-1 block text-sm font-semibold text-slate-700">"The Full Picture" link text</label>
               <input
                 id="content-storybrand-pitch-label"
@@ -240,7 +246,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <SuggestEdit fieldLabel="&quot;The Full Picture&quot; link text" />
             </div>
 
-            <div data-field="storybrand_success">
+            <div id="content-storybrand-success-wrap" data-field="storybrand_success">
               <label class="mb-1 block text-sm font-semibold text-slate-700">What's Possible</label>
               <div class="editable-view">
                 <RichTextEditor
@@ -256,7 +262,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
               <SuggestEdit fieldLabel="What's Possible" />
             </div>
 
-            <div data-field="storybrand_failure">
+            <div id="content-storybrand-failure-wrap" data-field="storybrand_failure">
               <label class="mb-1 block text-sm font-semibold text-slate-700">Why It's Worth Acting Now</label>
               <div class="editable-view">
                 <RichTextEditor
@@ -336,7 +342,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
             </div>
           </div>
 
-          <div data-field="images">
+          <div id="content-images-wrap" data-field="images">
             <label class="mb-1 block text-sm font-semibold text-slate-700">Hero image</label>
             <div class="editable-view space-y-2">
               <div class="flex flex-wrap items-center gap-2">
@@ -529,6 +535,19 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
                 />
               </div>
               <div>
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Call-to-action subheading (optional)</label>
+                <textarea
+                  id="content-cta-subheading"
+                  rows="2"
+                  placeholder="A short line reinforcing why now is worth acting on."
+                  class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm"
+                ></textarea>
+                <p class="mt-1 text-xs text-slate-500">
+                  Shown between the heading and the button — a good place to briefly reiterate why it's worth
+                  reaching out now.
+                </p>
+              </div>
+              <div>
                 <label class="mb-1 block text-sm font-semibold text-slate-700">Call-to-action button text</label>
                 <input
                   id="content-cta-button-text"
@@ -670,6 +689,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     faqs: { question: string; answer: string }[];
     concerns: { title: string; description: string }[];
     cta_heading: string | null;
+    cta_subheading: string | null;
     cta_button_text: string | null;
     images: {
       hero?: { url: string; alt: string; creditName?: string; creditUrl?: string };
@@ -704,7 +724,11 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const HERO_HEADLINE_PAGE_TYPES = ['Counselor Profile'];
   const PLAN_STEPS_PAGE_TYPES = ['Counselor Profile', 'Homepage', 'Service Area', 'Service Hub', 'Service Page'];
   const FAQS_PAGE_TYPES = ['Content Pillar', 'Counselor Profile', 'Service Area', 'Service Hub', 'Service Page'];
-  const CONCERNS_PAGE_TYPES = ['Homepage', 'Service Hub'];
+  // 'Homepage' removed 2026-09-16 — the Homepage rebuild dropped the
+  // FeatureGrid/concerns rendering entirely (superseded by the Value Add
+  // strip + Value Proposition + Guide/Authority sections), so this field
+  // was a real "editable but nothing renders it" gap until this fix.
+  const CONCERNS_PAGE_TYPES = ['Service Hub'];
   // Which page types can be featured on the Homepage's Featured Services
   // section — see 0049_featured_services.sql.
   const FEATURED_SERVICE_PAGE_TYPES = ['Service Page', 'Service Hub'];
@@ -796,6 +820,19 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const brandscriptFullEditor = initRichTextEditor('content-brandscript-full-editor');
   const contentBrandscriptVideoUrl = document.getElementById('content-brandscript-video-url') as HTMLInputElement;
 
+  // Refs needed to physically reorder fields for a Homepage row's real
+  // page order (see applyHomepageFieldOrder()/restoreDefaultFieldOrder()
+  // below) — Service Page/Counselor Profile keep the static markup order
+  // below untouched, since it already matches their own templates.
+  const contentHeroSubheadWrap = document.getElementById('content-hero-subhead-wrap')!;
+  const contentImagesWrap = document.getElementById('content-images-wrap')!;
+  const contentStorybrandProblemWrap = document.getElementById('content-storybrand-problem-wrap')!;
+  const contentStorybrandPitchLabelWrap = document.getElementById('content-storybrand-pitch-label-wrap')!;
+  const contentStorybrandPitchWrap = document.getElementById('content-storybrand-pitch-wrap')!;
+  const contentStorybrandGuideEmpathyWrap = document.getElementById('content-storybrand-guide-empathy-wrap')!;
+  const contentStorybrandSuccessWrap = document.getElementById('content-storybrand-success-wrap')!;
+  const contentStorybrandFailureWrap = document.getElementById('content-storybrand-failure-wrap')!;
+
   // Featured Services (Service Page/Service Hub rows) + footer column
   // (any footer-placed page) — both ungated, live in the "Additional
   // page elements" section below alongside plan_steps/faqs/concerns.
@@ -868,6 +905,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const contentConcernsWrap = document.getElementById('content-concerns-wrap')!;
   const contentCtaWrap = document.getElementById('content-cta-wrap')!;
   const contentCtaHeading = document.getElementById('content-cta-heading') as HTMLInputElement;
+  const contentCtaSubheading = document.getElementById('content-cta-subheading') as HTMLTextAreaElement;
   const contentCtaButtonText = document.getElementById('content-cta-button-text') as HTMLInputElement;
   const contentDetailsSaveButton = document.getElementById('content-details-save-button')!;
   const contentDetailsSaveStatus = document.getElementById('content-details-save-status')!;
@@ -1188,6 +1226,64 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       : 'Shown as a heading visitors click to expand "The Full Picture" above. Leave blank to use the default, "Learn more about our approach."';
   }
 
+  // Reorders admin fields to match the Homepage's real, rebuilt page
+  // order (2026-09-16) — Focus keyword/Meta description/H1 already sit
+  // first for every page type (fixed markup order, no reordering
+  // needed). Everything below that is Homepage-specific: Hero subhead →
+  // Hero image → Value Add strip → Stakes → Value Proposition (heading,
+  // then body) → Guide (empathy, then Authority facts) → Plan → Explanatory
+  // Paragraph → the closing CTA (heading/subheading/button). Featured
+  // Services and Counselor cards intentionally have no fields here at
+  // all — Featured Services is set on each Service Page's own edit
+  // screen, Counselor cards derives entirely from existing Counselor
+  // Profile pages. `appendChild` on an already-attached element moves it
+  // (doesn't clone), so calling it in the target sequence is enough to
+  // produce that exact order regardless of each element's current
+  // position — no separate "anchor" bookkeeping needed for the move
+  // itself, only for restoring the default order below.
+  function applyHomepageFieldOrder() {
+    const container = contentStorybrandFields;
+    container.appendChild(contentHeroSubheadWrap);
+    container.appendChild(contentImagesWrap);
+    container.appendChild(contentValueAddWrap);
+    container.appendChild(contentStorybrandProblemWrap);
+    container.appendChild(contentStorybrandPitchLabelWrap);
+    container.appendChild(contentStorybrandPitchWrap);
+    container.appendChild(contentStorybrandGuideEmpathyWrap);
+    container.appendChild(contentAuthorityStatsWrap);
+    container.appendChild(contentPlanStepsWrap);
+    container.appendChild(contentExplanatoryWrap);
+    container.appendChild(contentCtaWrap);
+    // Success/Failure are hidden (not part of Homepage's order at all —
+    // see the isHomepage toggle above), so their exact DOM position has
+    // no visual effect, but parking them at the end keeps the tree
+    // predictable rather than leaving them wherever moving everything
+    // else around happened to strand them.
+    container.appendChild(contentStorybrandSuccessWrap);
+    container.appendChild(contentStorybrandFailureWrap);
+  }
+
+  // Restores every field moved above back to its original static-markup
+  // position — used for every page type except Homepage, so Service
+  // Page/Counselor Profile's order (already correct for their own
+  // templates, untouched by this rebuild) can't end up scrambled by a
+  // prior Homepage visit in the same admin session.
+  function restoreDefaultFieldOrder() {
+    contentFields.insertBefore(contentHeroSubheadWrap, contentPlainCopyWrap);
+    contentFields.insertBefore(contentImagesWrap, contentSaveButton);
+    contentPageDetailsSection.insertBefore(contentPlanStepsWrap, contentFaqsWrap);
+    contentPageDetailsSection.insertBefore(contentCtaWrap, contentFeaturedWrap);
+    contentStorybrandFields.appendChild(contentValueAddWrap);
+    contentStorybrandFields.appendChild(contentStorybrandProblemWrap);
+    contentStorybrandFields.appendChild(contentStorybrandGuideEmpathyWrap);
+    contentStorybrandFields.appendChild(contentAuthorityStatsWrap);
+    contentStorybrandFields.appendChild(contentStorybrandPitchWrap);
+    contentStorybrandFields.appendChild(contentStorybrandPitchLabelWrap);
+    contentStorybrandFields.appendChild(contentStorybrandSuccessWrap);
+    contentStorybrandFields.appendChild(contentStorybrandFailureWrap);
+    contentStorybrandFields.appendChild(contentExplanatoryWrap);
+  }
+
   function loadContentForm() {
     selectedContentPage = pages.find((p) => p.id === contentPageSelect.value) ?? null;
     if (!selectedContentPage) {
@@ -1285,6 +1381,27 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     document.querySelector('[data-field="brandscript_video_url"] [data-locked-value]')!.textContent =
       selectedContentPage.brandscript_video_url ?? '(not set)';
 
+    // Success/Failure no longer render as their own sections on the
+    // Homepage (2026-09-16) — the page now closes with the Explanatory
+    // Paragraph straight into the CTA band, whose own subheading carries
+    // the "why it's worth acting now" reminder instead. The columns
+    // still exist (Service Page/Counselor Profile still use them), so
+    // this only hides the fields here, it doesn't touch the data.
+    contentStorybrandSuccessWrap.classList.toggle('hidden', isHomepage);
+    contentStorybrandFailureWrap.classList.toggle('hidden', isHomepage);
+
+    // Physically reorder the fields above to match Homepage's real page
+    // order — Service Page/Counselor Profile fall through to
+    // restoreDefaultFieldOrder(), which is a no-op if nothing was ever
+    // moved (e.g. this is the first page loaded this session) and a real
+    // restore if a prior Homepage selection in this same session moved
+    // anything.
+    if (isHomepage) {
+      applyHomepageFieldOrder();
+    } else {
+      restoreDefaultFieldOrder();
+    }
+
     // Featured Services — Service Page/Service Hub rows only, ungated.
     const showFeatured = FEATURED_SERVICE_PAGE_TYPES.includes(selectedContentPage.page_type);
     contentFeaturedWrap.classList.toggle('hidden', !showFeatured);
@@ -1381,14 +1498,21 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     // content), so this whole section stays hidden for a linked-counselor
     // session rather than showing controls whose Save would just get
     // rejected by the trigger.
-    contentPageDetailsSection.classList.toggle(
-      'hidden',
-      isLinkedCounselorSession() || !(showPlanSteps || showFaqs || showConcerns || showCta || showFeatured || showFooterColumn)
-    );
+    //
+    // For Homepage, plan_steps/cta_wrap are physically relocated into the
+    // narrative flow above (see applyHomepageFieldOrder()) — they don't
+    // count toward whether THIS section has anything left to show, or
+    // Homepage would display an empty "Additional page elements" shell
+    // with nothing actually in it.
+    const detailsSectionHasContent = isHomepage
+      ? showFaqs || showConcerns || showFeatured || showFooterColumn
+      : showPlanSteps || showFaqs || showConcerns || showCta || showFeatured || showFooterColumn;
+    contentPageDetailsSection.classList.toggle('hidden', isLinkedCounselorSession() || !detailsSectionHasContent);
     planStepsEditor.setItems(selectedContentPage.plan_steps.map((s) => ({ a: s.title, b: s.description })));
     faqsEditor.setItems(selectedContentPage.faqs.map((f) => ({ a: f.question, b: f.answer })));
     concernsEditor.setItems(selectedContentPage.concerns.map((c) => ({ a: c.title, b: c.description })));
     contentCtaHeading.value = selectedContentPage.cta_heading ?? '';
+    contentCtaSubheading.value = selectedContentPage.cta_subheading ?? '';
     contentCtaButtonText.value = selectedContentPage.cta_button_text ?? '';
     contentDetailsSaveStatus.textContent = '';
 
@@ -1584,6 +1708,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     }
     if (CTA_PAGE_TYPES.includes(selectedContentPage.page_type)) {
       payload.cta_heading = contentCtaHeading.value.trim() || null;
+      payload.cta_subheading = contentCtaSubheading.value.trim() || null;
       payload.cta_button_text = contentCtaButtonText.value.trim() || null;
     }
     if (FEATURED_SERVICE_PAGE_TYPES.includes(selectedContentPage.page_type)) {
