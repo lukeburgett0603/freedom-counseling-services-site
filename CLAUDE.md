@@ -2709,6 +2709,26 @@ this site just hadn't had `linked_counselor_page_id` set yet.
   (`pg_trigger.tgenabled = 'O'`), not just assumed. Test
   `admin_users` row and Auth user both deleted.
 
+## Blog category dropdown fix (2026-09-16)
+
+Client-reported: the Category field on `admin/blog.astro` wasn't
+showing any options, making it impossible to pick a category before
+publishing. See `local-business-site-template`'s CLAUDE.md ("Real bugs
+found and fixed here") for the full technical writeup — the category
+query only ever checked `page_type = 'Content Pillar'`, missing the
+same `Service Hub` carve-out `BlogPost.astro`'s hub lookup already has.
+This site's 8 category-bearing pages are **all** `Service Hub`, so the
+query returned nothing.
+
+- Fixed with `.in('page_type', ['Content Pillar', 'Service Hub'])` in
+  place of the single `.eq(...)`.
+- **Verified live**: a throwaway owner login confirmed all 8 real
+  categories (Anxiety & Depression, Child & Teen, Christian/Faith-Based,
+  Couples & Marriage, Family, Grief, Individual, Trauma & EMDR
+  Counseling) now populate the dropdown on the New Post form,
+  screenshot-confirmed. `astro check` clean (0 errors). Test login
+  deleted after.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a
