@@ -2739,17 +2739,25 @@ Client-reported: `https://www.freedomcounselingservices.org
 working URL was `/blog/repairing-after-a-fight/`; the client (correctly,
 by every other post's own pattern) expected `/repairing-after-a-fight/`.
 
-- **Not a code bug** — `admin/blog.astro`'s auto-slugify strips every
-  non-alphanumeric character (including `/`) before hyphenating, so it
-  could never have produced a literal slash. This had to have been
-  typed directly into the Slug field by hand when this post was
-  created — a one-off data typo, not a systemic issue. Confirmed no
-  other page's `copy`/StoryBrand fields/`internal_links` referenced the
-  bad `/repairing-after-a-fight` path anywhere, and the blog
+- **First-pass diagnosis was wrong, and the client hitting the same
+  404 again right after editing this exact post is what caught it** —
+  see the follow-up entry directly below. The line below was reasoned
+  from the *auto*-slugify path only (typing in the Title field); it
+  missed that `savePost()`'s own save payload had a separate, unconditional
+  `slug: \`blog/${slugify(slugField.value)}\`` template literal that
+  re-prepended `blog/` on every save regardless of what the Slug field
+  displayed. ~~Not a code bug~~ — see below, it was.
+- **Original (incomplete) reasoning, kept for the record**:
+  `admin/blog.astro`'s auto-slugify strips every non-alphanumeric
+  character (including `/`) before hyphenating, so it could never have
+  produced a literal slash *via that path*. Confirmed no other page's
+  `copy`/StoryBrand fields/`internal_links` referenced the bad
+  `/repairing-after-a-fight` path anywhere, and the blog
   index/related-posts cards already build their `href` straight from
   `page.slug` (`BlogPostCard.astro`), so internal navigation to this
   post was never broken — only a URL guessed/typed by pattern-matching
-  the other 9 posts would 404.
+  the other 9 posts would 404. All still true — just not the whole
+  story.
 - **Fixed the slug** (`repairing-after-a-fight`, matching convention)
   directly on the live `pages` row — `page_type = 'Blog Post'` rows are
   exempt from `enforce_content_permission()` entirely, so no
@@ -2772,6 +2780,49 @@ by every other post's own pattern) expected `/repairing-after-a-fight/`.
   `canonical` pointing at `/repairing-after-a-fight`; `dist/repairing-
   after-a-fight/index.html` (the real post) builds correctly at the new
   slug. `astro check` clean (0 errors).
+
+## Follow-up: the real cause was a save-time bug, and it recurred (2026-09-16, same day)
+
+Client edited "Repairing After a Fight" and saved — the page 404'd
+again immediately after. The slug fix above was real and correct, but
+incomplete: it treated the bad slug as a one-off data typo instead of
+tracing *why* saving the post through the admin would ever reproduce
+it. See `local-business-site-template`'s CLAUDE.md ("Real bugs found
+and fixed here") for the full technical writeup — this entry covers
+what's specific to seeing it happen twice on this real post.
+
+- **The actual bug**: `admin/blog.astro`'s `savePost()` had
+  `slug: \`blog/${slugify(slugField.value)}\`` — an unconditional
+  `blog/` prefix baked into **every** save, create or edit, regardless
+  of what the Slug field showed on screen. `loadPostIntoForm()` (line
+  306, still present, now a genuinely useful defensive strip rather
+  than an unexplained one) strips a leading `blog/` when *displaying*
+  a post for editing — so the field looked clean, the client changed
+  nothing about the slug, saved, and `savePost()` silently re-added the
+  prefix anyway. My first fix (directly editing the database) held
+  until the very next save through this screen, which is exactly what
+  happened.
+- **Confirmed this site's other 9 blog posts were never touched by
+  this bug** — all 9 share the identical `updated_at` timestamp from
+  the original 2026-09-05 bulk seed, meaning none of them have been
+  individually saved through `admin/blog.astro` since this line
+  existed. "Repairing After a Fight" is the only post anyone has
+  edited since, which is why it's the only one that broke — but any
+  other post would break identically the moment it's next edited,
+  until the code itself was fixed.
+- **Fixed at the source**: removed the `blog/` prefix from the save
+  payload entirely (`slug: slugify(slugField.value)`), and re-applied
+  the slug fix on the live row a second time (now genuinely durable —
+  a real edit-and-publish cycle through the admin was tested live
+  afterward and the slug held).
+- **Verified with the actual failure scenario, not just a database
+  check**: a throwaway owner login opened "Repairing After a Fight"
+  for editing, confirmed the Slug field showed the clean value, clicked
+  Publish (matching the client's real flow — not Save Draft, which
+  would have also changed the post's live status), and confirmed via a
+  direct query that the slug stayed `repairing-after-a-fight` after the
+  save rather than reverting. `astro check` clean (0 errors). Test
+  login deleted after.
 
 ## Hero overlay style (built 2026-09-04)
 
