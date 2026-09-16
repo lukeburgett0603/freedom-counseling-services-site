@@ -6,10 +6,14 @@
 // reading" reveals the full long-form text via the same native
 // <details>/<summary> pattern as CollapsibleSection.astro (real <h2>
 // nested in <summary> for the a11y/heading-outline reasons documented
-// there). Optional video — a plain URL, not an upload; recognizes a
-// YouTube/Vimeo link well enough to embed it, otherwise falls back to a
-// plain "Watch the video" link rather than guessing at an embed format.
-// Renders nothing when brandscript_one_liner is empty.
+// there). Video supports both a pasted YouTube/Vimeo link (iframe embed)
+// and a directly-uploaded file (site-videos Storage bucket, see
+// 0058_video_uploads_bucket.sql — admin's "Choose File" writes its
+// public URL into this same field) — an uploaded file is detected by
+// its extension and rendered as a native <video> player; anything else
+// that isn't YouTube/Vimeo falls back to a plain "Watch the video" link
+// rather than guessing at an embed format. Renders nothing when
+// brandscript_one_liner is empty.
 import { renderCopy } from '../lib/markdown';
 
 interface Props {
@@ -29,7 +33,16 @@ function embedUrlFor(url: string): string | null {
   return null;
 }
 
+// Matches an uploaded file's own extension (site-videos public URLs
+// always end in one) regardless of any query string — anything else
+// (a bare YouTube/Vimeo link, or some other external URL) falls through
+// to the embed/plain-link branches below instead.
+function isVideoFileUrl(url: string): boolean {
+  return /\.(mp4|webm|mov)(\?.*)?$/i.test(url);
+}
+
 const embedUrl = videoUrl ? embedUrlFor(videoUrl) : null;
+const isUploadedFile = videoUrl ? isVideoFileUrl(videoUrl) : false;
 ---
 
 {oneLiner && (
@@ -42,7 +55,11 @@ const embedUrl = videoUrl ? embedUrlFor(videoUrl) : null;
 
       {videoUrl && (
         <div class="mt-8">
-          {embedUrl ? (
+          {isUploadedFile ? (
+            <video controls preload="metadata" class="aspect-video w-full rounded-lg shadow-md">
+              <source src={videoUrl} />
+            </video>
+          ) : embedUrl ? (
             <div class="aspect-video overflow-hidden rounded-lg shadow-md">
               <iframe
                 src={embedUrl}

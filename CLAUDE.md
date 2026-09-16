@@ -2925,6 +2925,54 @@ writeup — this entry covers what's specific to this real site.
   Picture (was after Why It's Worth Acting Now). `astro check` and a
   real `npm run build` both clean.
 
+## Counselor Profile StoryBrand rebuild (2026-09-16, same day)
+
+Same-day follow-up: comparing the reordered admin screen against
+Homepage's own rebuilt structure led directly to "just rebuild
+Counselor Profile the same way." See `local-business-site-template`'s
+CLAUDE.md ("Counselor Profile StoryBrand rebuild") for the full
+technical writeup (planned via a formal Plan Mode pass, built and
+verified there first) — this entry covers what's specific to this real
+site.
+
+- Migrations `0057_counselor_profile_storybrand_fields.sql` and
+  `0058_video_uploads_bucket.sql` both applied directly against this
+  project's live database — including the first-ever
+  `file_size_limit`/`allowed_mime_types` bucket columns used in this
+  codebase, confirmed applying cleanly by reading the `site-videos`
+  bucket row back directly afterward.
+- **Real content check before removing anything**: queried all 5 real
+  counselor rows before this pass — `storybrand_success`/
+  `storybrand_failure` were null or empty string on every one, so
+  removing "What's Possible"/"Why It's Worth Acting Now" from the live
+  page lost nothing real. Every 5 counselors already had real
+  `testimonial_quote`/`testimonial_author` populated, so the new quote
+  field is exercising real production data from the moment it ships,
+  not an empty state.
+- **Video upload tested against the real Storage endpoint** (this
+  session's browser tools can't drive an actual file picker) using a
+  throwaway linked-counselor session tied to Luke Burgett's real page:
+  a real upload succeeded and its public URL was reachable; a
+  wrong-MIME-type file was rejected with a real `415`; an oversized
+  (210MB) file was rejected with a real `413` — both enforced by the
+  bucket's own constraints. A real `npm run build` confirmed the
+  uploaded file's URL renders as a genuine `<video>` element on Luke's
+  actual built page, not the plain-link fallback.
+- **The two real trigger gaps found during planning
+  (`testimonial_quote`/`testimonial_author` and the 6 Homepage-only
+  columns being silently blocked for a linked-counselor session) were
+  proven real on this exact site, not just fixed on faith** — a save
+  from a throwaway linked-counselor session genuinely succeeded
+  post-migration, confirmed via direct query against Luke's real row.
+- **Regression-checked**: confirmed the `cta_subheading` agency-lock
+  from the same-day prior pass still rejects a linked-counselor
+  session's direct PATCH after this rebuild.
+- All test data (Storage files, `admin_users` rows, Auth users)
+  deleted after; Luke Burgett's real page content confirmed
+  byte-for-byte back to its original values via a follow-up build
+  showing zero test artifacts. `astro check` and a real `npm run build`
+  against this site's live data both clean.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a

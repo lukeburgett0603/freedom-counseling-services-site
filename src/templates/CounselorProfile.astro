@@ -1,15 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
-import StoryBrandSection from '../components/StoryBrandSection.astro';
-import CollapsibleSection from '../components/CollapsibleSection.astro';
 import StatusPill from '../components/StatusPill.astro';
 import TelehealthPill from '../components/TelehealthPill.astro';
 import InPersonPill from '../components/InPersonPill.astro';
 import SpecialtyPills from '../components/SpecialtyPills.astro';
 import CounselorQuote from '../components/CounselorQuote.astro';
 import Modalities from '../components/Modalities.astro';
+import ValueAddStrip from '../components/ValueAddStrip.astro';
+import ValueProposition from '../components/ValueProposition.astro';
+import Guide from '../components/Guide.astro';
 import PlanSteps from '../components/PlanSteps.astro';
+import ExplanatoryBrandscript from '../components/ExplanatoryBrandscript.astro';
 import FAQ from '../components/FAQ.astro';
 import CTA from '../components/CTA.astro';
 import LeadGenerator from '../components/LeadGenerator.astro';
@@ -133,35 +135,63 @@ const hasOffice = !!business.street_address;
       </div>
     </div>
   </section>
+  {/* Value Add strip — a quick, scannable first pass at value, same
+      component/role Homepage uses. */}
+  <ValueAddStrip items={page.value_add_items} />
+
+  {/* The counselor's own quote — moved down from directly after the
+      header card (2026-09-16, client request) so it sits alongside the
+      rest of the new narrative arc below, and is now editable from
+      Website content → Page copy (previously Business info →
+      Testimonials only, with no linked-counselor path at all). */}
   <CounselorQuote quote={page.testimonial_quote} author={page.testimonial_author} />
-  {(page.storybrand_problem || page.storybrand_guide_empathy) && (
-    <section class="mx-auto max-w-5xl px-6 py-14">
-      <div class:list={['grid grid-cols-1 gap-6', page.storybrand_problem && page.storybrand_guide_empathy && 'lg:grid-cols-2']}>
-        {page.storybrand_problem && (
-          <div class="rounded-lg border border-black/5 bg-white p-6 shadow-sm sm:p-8">
-            <div class="prose">
-              <Fragment set:html={renderCopy(page.storybrand_problem)} />
-            </div>
-          </div>
-        )}
-        {page.storybrand_guide_empathy && (
-          <div class="rounded-lg border border-black/5 bg-white p-6 shadow-sm sm:p-8">
-            <div class="prose">
-              <Fragment set:html={renderCopy(page.storybrand_guide_empathy)} />
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
-  )}
-  <PlanSteps steps={page.plan_steps} heading="What to expect in your first session" />
-  <CollapsibleSection markdown={page.storybrand_pitch} triggerText={page.storybrand_pitch_label} />
-  <StoryBrandSection markdown={page.storybrand_success} />
-  {page.storybrand_failure && (
+
+  {/* Stakes — storybrand_problem, relabeled "Stakes" in the admin to
+      match Homepage's language for the same column. Replaces the old
+      two-card Problem/Understand div — Problem is now its own Section,
+      Understand moves into the Guide below. */}
+  {page.storybrand_problem && (
     <Section>
-      <Fragment set:html={renderCopy(page.storybrand_failure)} />
+      <Fragment set:html={renderCopy(page.storybrand_problem)} />
     </Section>
   )}
+
+  {/* Value Proposition — repurposed from storybrand_pitch/
+      storybrand_pitch_label (previously "The Full Picture"'s collapsible
+      trigger+body), the same repurposing Homepage's own rebuild already
+      did to these same two columns. Explanatory Paragraph below now owns
+      the long-form "full picture" role instead, via its own freestanding
+      fields. */}
+  <ValueProposition
+    heading={page.storybrand_pitch_label}
+    body={page.storybrand_pitch}
+    ctaText={page.cta_button_text}
+  />
+
+  {/* The Guide — empathy + scannable authority facts + own CTA, same
+      component Homepage uses (confirmed fully generic, no Homepage
+      coupling). */}
+  <Guide body={page.storybrand_guide_empathy} authorityStats={page.guide_authority_stats} ctaText={page.cta_button_text} />
+
+  <PlanSteps steps={page.plan_steps} heading="What to expect in your first session" />
+
+  {/* Explanatory Paragraph — the freestanding full BrandScript, same
+      component/fields as Homepage's own (one-liner/teaser/collapsible
+      full text/optional video — now supporting a directly-uploaded video
+      file too, see ExplanatoryBrandscript.astro). */}
+  <ExplanatoryBrandscript
+    oneLiner={page.brandscript_one_liner}
+    teaser={page.brandscript_teaser}
+    full={page.brandscript_full}
+    videoUrl={page.brandscript_video_url}
+  />
+
+  {/* Success and Failure no longer render as their own sections here
+      (2026-09-16, client request, same treatment Homepage's own rebuild
+      already got) — storybrand_success/storybrand_failure stay as real
+      columns (hidden in the admin for this page type specifically, since
+      nothing here reads them anymore) but the page now closes with
+      Explanatory Paragraph flowing into FAQs then the CTA. */}
   <FAQ faqs={page.faqs} />
   <CTA
     heading={page.cta_heading ?? `Book with ${page.title}`}
