@@ -2657,6 +2657,58 @@ with the client rather than populating everything at once.
   on this site, and Homepage's own admin field order now matches this
   new render order exactly. `astro check` clean (0 errors).
 
+## Linked existing staff logins to their own Counselor Profile page (2026-09-16)
+
+Client request: every staff team member should be able to edit blog
+posts, their own Counselor Profile page copy, and their own counselor
+settings. **Turned out to require zero code or schema changes** — the
+linked-counselor mechanism (`admin_users.linked_counselor_page_id`, the
+`"linked counselor can update own page"` RLS policy, and
+`enforce_content_permission()`'s linked-counselor carve-out) already
+covers all three asks: blog CRUD is already open to any `staff` login
+for their own posts regardless of linking (`0012_multi_user_roles.sql`),
+and the live trigger (confirmed by reading the actually-deployed
+function via `pg_get_functiondef`, not just the migration file — this
+project has a real history of migration/live drift) already lets a
+linked staff login touch `hero_subhead`/`hero_headline`/all 5
+`storybrand_*` fields (page copy) plus `availability_status`/
+`telehealth_available`/`modalities`/`license_number`/`education`/
+`professional_title` (counselor settings) on their own page only. This
+was purely a **data-linking task**: most of the real staff accounts on
+this site just hadn't had `linked_counselor_page_id` set yet.
+
+- **Checked every real `admin_users` row against the 5 real Counselor
+  Profile pages.** `luke@freedomcounselingservices.org` and
+  `sophiebfreedom@gmail.com` were already correctly linked (set up
+  during earlier work). `staci@freedomcounselingservices.org` was an
+  unambiguous match to Staci Harrub's page and had no link — linked her.
+  `tony@freedomcounselingservices.org` is `owner`, not `staff` — the
+  linked-counselor carve-out doesn't apply to (and isn't needed by) an
+  owner login, so out of scope for this request. Rhonda Gore has a real
+  Counselor Profile page but no `admin_users` login at all yet — nothing
+  to link, not an "existing team member."
+- **`kasie@freedomcounselingservices.org` (staff, invite still pending)
+  doesn't match any of the 5 counselor names/slugs** — asked the client
+  directly rather than guessing; confirmed to leave her unlinked for now.
+  She still gets the blog access every `staff` login already has by
+  default; she just has no Counselor Profile page to link to yet.
+- **Verified this was a real, working grant, not just a data write that
+  looked right** — the standard "don't touch the real client's own
+  login" pattern: a throwaway Auth user + `admin_users` row
+  (`role='staff'`, `linked_counselor_page_id` = Staci's real page id),
+  used to run 3 real REST calls against her actual live page: a
+  `hero_subhead` PATCH succeeded (200); an `h1` PATCH on the same page
+  was rejected with the trigger's real `P0001` exception; a PATCH aimed
+  at Luke Burgett's page matched zero rows via RLS. Reverted the one
+  real test edit on Staci's page via the established
+  `ALTER TABLE pages DISABLE/ENABLE TRIGGER pages_enforce_content_
+  permission` pattern (a direct `service_role` write still has no real
+  `auth.uid()`, so it needs the same trigger-bypass every other
+  agency-authorized direct SQL write in this project uses) — confirmed
+  the trigger was genuinely back on afterward
+  (`pg_trigger.tgenabled = 'O'`), not just assumed. Test
+  `admin_users` row and Auth user both deleted.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a
