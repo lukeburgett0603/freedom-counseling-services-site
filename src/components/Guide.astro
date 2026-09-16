@@ -26,8 +26,10 @@ const { body, authorityStats, ctaText } = Astro.props;
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           {authorityStats.map((stat) => (
             <div class="rounded-lg border border-black/5 bg-white px-5 py-3 shadow-sm">
-              <p class="text-xs font-semibold uppercase tracking-wide text-brand-primary">{stat.label}</p>
-              <p class="font-[family-name:var(--font-heading)] font-bold text-brand-ink">{stat.value}</p>
+              <h3 class="font-[family-name:var(--font-heading)] text-xs font-bold uppercase tracking-wide text-brand-primary">
+                {stat.label}
+              </h3>
+              <p class="text-brand-ink">{stat.value}</p>
             </div>
           ))}
         </div>
