@@ -23,7 +23,7 @@ const { body, authorityStats, ctaText } = Astro.props;
     <div class="mx-auto max-w-3xl px-6 text-center">
       <div class="prose mx-auto" set:html={renderCopy(body)} />
       {authorityStats.length > 0 && (
-        <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <div class="mt-8 grid gap-4 sm:grid-cols-3">
           {authorityStats.map((stat) => (
             <div class="rounded-lg border border-black/5 bg-white px-5 py-3 shadow-sm">
               <h3 class="font-[family-name:var(--font-heading)] text-xs font-bold uppercase tracking-wide text-brand-primary">
