@@ -2884,6 +2884,47 @@ the Plan Steps/FAQs/CTA section, becomes fully self-service.**
   CLAUDE.md's "Counselor Profile header card" section). Revisit either
   if the client wants counselors self-servicing those too.
 
+## Counselor Profile admin reorder + CTA subheading lock (2026-09-16, same day)
+
+Client asked for a table comparing Homepage's (recently reordered)
+admin screen against Counselor Profile's — surfaced two real
+mismatches (Hero image buried near the bottom, Plan Steps out of
+order) plus a real rendering gap (`cta_subheading` collected but never
+shown on the actual page). See `local-business-site-template`'s
+CLAUDE.md ("Counselor Profile admin reorder...") for the full technical
+writeup — this entry covers what's specific to this real site.
+
+- Migrations `0055_lock_cta_subheading_for_counselors.sql` and
+  `0056_linked_counselor_can_suggest_edits.sql` both applied directly
+  against this project's live database.
+- **`CounselorProfile.astro`'s CTA now renders `cta_subheading`** — it
+  never had before. Turned out to be a sitewide gap, not unique to this
+  page type: all 11 non-Homepage CTA-bearing templates were fixed in
+  the same pass (see the template writeup).
+- **`cta_subheading` is now locked for a linked-counselor session
+  specifically** (client decision) — Luke/Staci/Sophie can still edit
+  `cta_heading`/`cta_button_text` freely, but `cta_subheading` shows
+  locked with a "Suggest an edit" link, same as Focus keyword/Meta
+  description/H1.
+- **A real, previously-undiscovered bug found while verifying this on
+  this real site**: the "Suggest an edit" submission flow has never
+  actually worked for a linked-counselor session — clicking Submit
+  returned a raw RLS error. Not something today's change introduced;
+  it's been broken since the linked-counselor feature itself was
+  built, just never caught because no prior pass clicked all the way
+  through a real submission. Fixed by `0056` — verified with a real
+  throwaway linked-counselor session against Luke Burgett's real page:
+  a submission failed with the RLS error before the fix, then
+  genuinely succeeded after, confirmed via a direct query finding the
+  real row. A suggestion aimed at a different counselor's page was
+  confirmed still rejected. Test data deleted after.
+- **Verified the reorder live via direct DOM inspection** (not just a
+  screenshot): confirmed the exact target sequence — Hero image now
+  sits right after Hero subheading (was buried near "Additional page
+  elements"), Plan steps now sits between We Understand and The Full
+  Picture (was after Why It's Worth Acting Now). `astro check` and a
+  real `npm run build` both clean.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a

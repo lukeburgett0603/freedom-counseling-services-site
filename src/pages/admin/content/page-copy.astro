@@ -534,18 +534,30 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
                   class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm"
                 />
               </div>
-              <div>
+              <!--
+                Unlike cta_heading/cta_button_text (always editable, on
+                every plan, for everyone), this one field is locked
+                specifically — and only — for a linked-counselor session
+                (client decision, 2026-09-16: the agency writes this one,
+                counselors may suggest a change). See canEditField()'s
+                explicit 'cta_subheading' case and
+                0055_lock_cta_subheading_for_counselors.sql.
+              -->
+              <div data-field="cta_subheading">
                 <label class="mb-1 block text-sm font-semibold text-slate-700">Call-to-action subheading (optional)</label>
                 <textarea
                   id="content-cta-subheading"
                   rows="2"
                   placeholder="A short line reinforcing why now is worth acting on."
-                  class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm"
+                  class="editable-view w-full rounded-md border border-slate-300 px-4 py-2 text-sm"
                 ></textarea>
+                <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
                 <p class="mt-1 text-xs text-slate-500">
                   Shown between the heading and the button — a good place to briefly reiterate why it's worth
                   reaching out now.
                 </p>
+                <p class="tier-note mt-1 text-xs text-slate-500">Managed by your agency — suggest a change below.</p>
+                <SuggestEdit fieldLabel="Call-to-action subheading" />
               </div>
               <div>
                 <label class="mb-1 block text-sm font-semibold text-slate-700">Call-to-action button text</label>
@@ -1079,10 +1091,23 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   // business's own content_permission_level tier — stricter than even a
   // restricted-tier owner on every field except the ones explicitly
   // opened up for them.
+  // cta_subheading is the one exception to "ungated, safe on every
+  // plan" (cta_heading/cta_button_text's own category) — client
+  // decision (2026-09-16): the agency writes this one, so it's locked
+  // specifically for a linked-counselor session (handled by the
+  // isLinkedCounselorSession() branch below, since it's simply absent
+  // from LINKED_COUNSELOR_EDITABLE_FIELDS) but stays always-editable,
+  // regardless of content_permission_level, for every other role —
+  // checked here, before the tier fallback, so a restricted-tier owner
+  // isn't accidentally locked out of a field that was never tier-gated
+  // in the first place.
+  const UNGATED_EXCEPT_LINKED_COUNSELOR_FIELDS = ['cta_subheading'];
+
   function canEditField(fieldKey: string): boolean {
     if (currentAdminUser?.role === 'agency') return true;
     if (isLinkedCounselorSession()) return LINKED_COUNSELOR_EDITABLE_FIELDS.includes(fieldKey);
     if (ALWAYS_LOCKED_FIELDS.includes(fieldKey)) return false;
+    if (UNGATED_EXCEPT_LINKED_COUNSELOR_FIELDS.includes(fieldKey)) return true;
     return isFullTier();
   }
 
@@ -1129,6 +1154,8 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
         return selectedContentPage.brandscript_full ?? '';
       case 'brandscript_video_url':
         return selectedContentPage.brandscript_video_url ?? '';
+      case 'cta_subheading':
+        return selectedContentPage.cta_subheading ?? '';
       case 'images': {
         const img = selectedContentPage.images?.[imageKeyFor(selectedContentPage.page_type)];
         return img ? `${img.url} (alt: ${img.alt})` : '(no image set)';
@@ -1270,6 +1297,51 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     container.appendChild(contentStorybrandFailureWrap);
   }
 
+  // Reorders admin fields to match CounselorProfile.astro's real render
+  // order (2026-09-16, found while comparing this screen against
+  // Homepage's own reorder above) — two real mismatches fixed:
+  //
+  // 1. Hero image (the counselor's headshot) used to sit all the way
+  //    down near "Additional page elements," disconnected from
+  //    Headline/Hero subheading despite being part of the same header
+  //    card on the real page. Moved up to sit right after Hero
+  //    subheading, matching the subhead-then-image grouping Homepage's
+  //    own reorder already established.
+  // 2. Plan steps renders right after "We Understand" on the real page
+  //    (Problem/Understand → Plan Steps → The Full Picture → Success →
+  //    Failure) but lived in "Additional page elements," after Success/
+  //    Failure, in the default order. Moved into the StoryBrand
+  //    container between We Understand and The Full Picture.
+  //
+  // FAQs and the closing CTA both already sit at the end, after
+  // everything else, matching their real end-of-page position — left
+  // untouched. Every StoryBrand field's relative order is still fully
+  // re-specified here (not just the two that moved), for the same
+  // round-trip-robustness reason Homepage's own reorder needs it: this
+  // function has to produce the correct order regardless of whatever a
+  // prior Homepage or Service Page visit left the DOM in during the
+  // same admin session.
+  function applyCounselorProfileFieldOrder() {
+    contentFields.insertBefore(contentImagesWrap, contentStorybrandFields);
+    const container = contentStorybrandFields;
+    container.appendChild(contentStorybrandProblemWrap);
+    container.appendChild(contentStorybrandGuideEmpathyWrap);
+    container.appendChild(contentPlanStepsWrap);
+    container.appendChild(contentStorybrandPitchWrap);
+    container.appendChild(contentStorybrandPitchLabelWrap);
+    container.appendChild(contentStorybrandSuccessWrap);
+    container.appendChild(contentStorybrandFailureWrap);
+    // Value Add strip / Guide — Authority / Explanatory Paragraph are
+    // Homepage-only (hidden entirely for Counselor Profile via their own
+    // .hidden toggles in loadContentForm()) — parked at the end so a
+    // prior Homepage visit in the same session can't strand them
+    // mid-list; their exact position has no visual effect either way,
+    // same reasoning as Homepage's own Success/Failure parking above.
+    container.appendChild(contentValueAddWrap);
+    container.appendChild(contentAuthorityStatsWrap);
+    container.appendChild(contentExplanatoryWrap);
+  }
+
   // Restores every field moved above back to its original static-markup
   // position — used for every page type except Homepage, so Service
   // Page/Counselor Profile's order (already correct for their own
@@ -1397,14 +1469,18 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentStorybrandSuccessWrap.classList.toggle('hidden', isHomepage);
     contentStorybrandFailureWrap.classList.toggle('hidden', isHomepage);
 
-    // Physically reorder the fields above to match Homepage's real page
-    // order — Service Page/Counselor Profile fall through to
-    // restoreDefaultFieldOrder(), which is a no-op if nothing was ever
-    // moved (e.g. this is the first page loaded this session) and a real
-    // restore if a prior Homepage selection in this same session moved
-    // anything.
+    // Physically reorder the fields above to match each page type's own
+    // real page order — Homepage and Counselor Profile each get their
+    // own reorder function (their real render order genuinely differs
+    // from each other, not just from the default); Service Page falls
+    // through to restoreDefaultFieldOrder(), which is a no-op if nothing
+    // was ever moved (e.g. this is the first page loaded this session)
+    // and a real restore if a prior Homepage/Counselor Profile selection
+    // in this same session moved anything.
     if (isHomepage) {
       applyHomepageFieldOrder();
+    } else if (selectedContentPage.page_type === 'Counselor Profile') {
+      applyCounselorProfileFieldOrder();
     } else {
       restoreDefaultFieldOrder();
     }
@@ -1530,6 +1606,8 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentCtaHeading.value = selectedContentPage.cta_heading ?? '';
     contentCtaSubheading.value = selectedContentPage.cta_subheading ?? '';
     contentCtaButtonText.value = selectedContentPage.cta_button_text ?? '';
+    document.querySelector('[data-field="cta_subheading"] [data-locked-value]')!.textContent =
+      selectedContentPage.cta_subheading || '(not set)';
     contentDetailsSaveStatus.textContent = '';
 
     contentSaveStatus.textContent = '';
@@ -1724,7 +1802,15 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     }
     if (CTA_PAGE_TYPES.includes(selectedContentPage.page_type)) {
       payload.cta_heading = contentCtaHeading.value.trim() || null;
-      payload.cta_subheading = contentCtaSubheading.value.trim() || null;
+      // Unlike cta_heading/cta_button_text (always sent — ungated for
+      // everyone), cta_subheading is only sent when this session can
+      // actually edit it, so a locked-out linked-counselor save can't
+      // even attempt to touch it — the trigger would reject it anyway,
+      // but this keeps the UI's own behavior honest about what it's
+      // about to do.
+      if (canEditField('cta_subheading')) {
+        payload.cta_subheading = contentCtaSubheading.value.trim() || null;
+      }
       payload.cta_button_text = contentCtaButtonText.value.trim() || null;
     }
     if (FEATURED_SERVICE_PAGE_TYPES.includes(selectedContentPage.page_type)) {
