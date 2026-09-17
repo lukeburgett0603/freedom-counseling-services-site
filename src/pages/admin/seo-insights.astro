@@ -131,8 +131,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <input name="search_volume" type="number" min="0" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500">Mangools SerpWatcher tracking ID</label>
-          <input name="mangools_tracking_id" type="text" placeholder="Set once a real tracking exists in Mangools" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <label class="block text-xs font-semibold text-slate-500">Mangools tracked-keyword ID</label>
+          <input name="mangools_tracked_keyword_id" type="text" placeholder="Set once this keyword is added to the client's SerpWatcher tracking" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-500">Notes</label>
@@ -323,7 +323,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     (keywordForm.elements.namedItem('status') as HTMLSelectElement).value = tk.status;
     (keywordForm.elements.namedItem('search_volume') as HTMLInputElement).value =
       tk.search_volume != null ? String(tk.search_volume) : '';
-    (keywordForm.elements.namedItem('mangools_tracking_id') as HTMLInputElement).value = tk.mangools_tracking_id ?? '';
+    (keywordForm.elements.namedItem('mangools_tracked_keyword_id') as HTMLInputElement).value = tk.mangools_tracked_keyword_id ?? '';
     (keywordForm.elements.namedItem('notes') as HTMLTextAreaElement).value = tk.notes ?? '';
     keywordFormStatus.textContent = '';
     keywordModal.classList.remove('hidden');
@@ -352,7 +352,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       priority: formData.get('priority') as string,
       status: formData.get('status') as string,
       search_volume: searchVolumeRaw ? Number(searchVolumeRaw) : null,
-      mangools_tracking_id: (formData.get('mangools_tracking_id') as string).trim() || null,
+      mangools_tracked_keyword_id: (formData.get('mangools_tracked_keyword_id') as string).trim() || null,
       notes: (formData.get('notes') as string).trim() || null,
     };
 

@@ -11,7 +11,12 @@ export interface TargetKeyword {
   priority: 'high' | 'medium' | 'low';
   status: 'active' | 'paused' | 'achieved';
   notes: string | null;
-  mangools_tracking_id: string | null;
+  // The tracked-keyword id *within* this client's one shared SerpWatcher
+  // tracking (business.mangools_tracking_id) — not a tracking id itself.
+  // See 0060_seo_insights_mangools_ids.sql for why this was renamed from
+  // mangools_tracking_id after real Mangools API-docs research showed a
+  // tracking covers a client's whole domain, not one keyword.
+  mangools_tracked_keyword_id: string | null;
   created_at: string;
   updated_at: string;
 }

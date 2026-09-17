@@ -3417,15 +3417,52 @@ covers what's specific to this real site.
   flow, the owner's fully controls-free view, and the staff redirect
   (both on fresh login and on direct navigation to the URL) all work
   exactly as designed. All test data deleted afterward.
-- **Not yet done on this site — real follow-up work, not code**: set
-  `MANGOOLS_API_KEY`; resolve and set `business.mangools_location_id`
-  for Louisville, KY and `business.seo_competitor_domains` from this
-  project's own GBP/citation audit work; confirm the two flagged
-  Mangools endpoint-shape assumptions in `refresh-seo-rankings` against
-  a real live response; register the actual weekly Supabase Cron job;
-  and the real target-keyword curation pass itself with the client (a
-  genuine Claude+Mangools-MCP research session, creating real
-  SerpWatcher trackings per keyword).
+- **Everything above was actually finished the same day**, and doing it
+  for real immediately surfaced genuine endpoint bugs no amount of
+  reading Mangools' docs alone had caught — see
+  `local-business-site-template`'s CLAUDE.md ("Real endpoint corrections
+  found the moment this went live") for the full technical story (a
+  SerpWatcher tracking covers a whole domain, not one keyword, fixed via
+  `0060_seo_insights_mangools_ids.sql`; the gap-analysis endpoint path
+  and its response's actual field names were both wrong versus what the
+  docs said; Mangools enforces an undocumented 5-competitor-domain cap).
+  This entry covers what's specific to this real site.
+- **`MANGOOLS_API_KEY` set.** `business.mangools_location_id` resolved
+  to Mangools' real "Louisville, Kentucky, United States" city-level id
+  (`1017825`, via `mangools_search_locations` — not the "Old Louisville"
+  neighborhood-level id also returned, since Freedom serves the whole
+  metro plus Southern Indiana telehealth). `business.website_domain` set
+  to `freedomcounselingservices.org`.
+- **Real competitor domains set** (`business.seo_competitor_domains`),
+  pulled live via `siteprofiler_find_competitors`, not guessed: 12 real
+  competitors found, filtered down to genuine local counseling
+  practices (excluding `psychologytoday.com` — that's the directory
+  Freedom is itself listed on, not a rival practice) and 3 ambiguous
+  domains left out rather than assumed. Final 5 (Mangools' real cap):
+  `carmenscounseling.com`, `louisvillechristiancounseling.org`,
+  `louisvillegracepsychological.com`, `laurahopecounseling.com`,
+  `northsprings.org` (client's own addition) — `thriveworks.com` and
+  `revivecounselingwellness.com` cut using the real SiteProfiler overlap
+  scores from the original research, with the one genuine tie put back
+  to the client rather than broken arbitrarily.
+- **The weekly Cron job registered directly via SQL**
+  (`cron.schedule(...)` + `net.http_post(...)`, `pg_cron`/`pg_net` were
+  already enabled on this project from the nurture-email cron), not the
+  Supabase dashboard — every Monday 13:00 UTC, jobname
+  `refresh-seo-rankings-weekly`. Verified alongside the existing
+  `send-nurture-emails-daily` job, same `net.http_post` + `Authorization:
+  Bearer <secret>` pattern.
+- **A real end-to-end run landed real data**: 105 real
+  `keyword_gap_snapshots` rows from the 5 real competitor domains above
+  — left in place as this feature's real first data point, not deleted
+  as test data. Top result: `louisvillegracepsychological.com` ranks for
+  "cognitive behavioral therapy for anxiety" (168,000 monthly searches)
+  and "marriage counseling near me" (70,500), neither of which
+  Freedom's own site currently targets. Rank tracking itself
+  (`keyword_rank_snapshots`) is still correctly empty —
+  `business.mangools_tracking_id` isn't set yet, which only happens
+  once the real keyword-curation session creates an actual SerpWatcher
+  tracking for this client.
 
 ## Generating a logo from a CSS wordmark
 

@@ -1,13 +1,13 @@
-// Weekly SEO Insights refresh: pulls each active target keyword's
-// current Mangools SerpWatcher rank-tracking stats, plus one
-// competitor keyword-gap check per client, and snapshots both into
+// Weekly SEO Insights refresh: pulls this client's Mangools SerpWatcher
+// tracking stats (one call covers every tracked keyword at once) plus
+// one competitor keyword-gap check, and snapshots both into
 // keyword_rank_snapshots/keyword_gap_snapshots. See CLAUDE.md's "SEO
 // Insights dashboard" section for the full design reasoning — most
-// importantly, this reads Mangools SerpWatcher trackings that already
-// exist (created once, manually, during a real curation session) rather
-// than paying for a fresh point-in-time check per keyword per run, and
-// runs weekly rather than daily specifically to keep this client's
-// share of the shared Mangools quota pool low.
+// importantly, this reads a SerpWatcher tracking that already exists
+// (created once, manually, during a real curation session) rather than
+// paying for a fresh point-in-time check per keyword per run, and runs
+// weekly rather than daily specifically to keep this client's share of
+// the shared Mangools quota pool low.
 //
 // Auth: same shape as send-nurture-emails — there's no browser session
 // here, the caller is a Supabase Cron job, not a logged-in admin. A
@@ -32,13 +32,29 @@
 //
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.
 //
-// IMPORTANT — exact Mangools endpoint paths below (MANGOOLS_SERPWATCHER_
-// STATS_PATH, MANGOOLS_GAP_ANALYSIS_PATH) follow the same /v3/<product>/
-// <action> convention as the already-confirmed kwfinder/related-keywords
-// endpoint, but have not yet been confirmed against a live response —
-// verify both via a real curl call (or the connected Mangools MCP tools)
-// before relying on this in production, and adjust the response-shape
-// parsing below to match whatever comes back for real.
+// Endpoint paths/request shapes below were confirmed against Mangools'
+// real published API docs (apidocs.mangools.com) — an earlier version
+// of this function guessed wrong paths for both calls (kwfinder/
+// keyword-gap-analysis instead of the real kwfinder/gap-analysis, and a
+// per-keyword tracked-keywords/{id}/stats GET that doesn't exist at
+// all) and got a real, live 404 the first time it was actually run
+// against Freedom Counseling Services' project — see
+// 0060_seo_insights_mangools_ids.sql and CLAUDE.md for the full story.
+// The gap-analysis request body shape is confirmed against the docs and
+// works; the response shape is NOT what the docs describe, though — a
+// real live call (2026-09-17, Freedom Counseling Services, 5 real
+// competitor domains) returned `results[].keywords[]` with `kw`/`sv`
+// fields, not the docs' `results[].items[]` with `keyword`/
+// `search_volume`. The code below matches the real live shape, not the
+// docs — trust that over the docs if they ever disagree again. The
+// tracking-stats response's exact per-keyword field names (which key
+// holds the array, which key is that keyword's own tracked-keyword id,
+// which key is its current position/URL) are still a genuinely
+// unconfirmed assumption — there's no way to verify those until this
+// function runs against a client with a real
+// SerpWatcher tracking. Verify parseTrackingStatsItem() below against a
+// real response the first time this runs for a client with a real
+// mangools_tracking_id set, and fix its field access if needed.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -51,7 +67,18 @@ function jsonResponse(body: unknown, status = 200): Response {
 interface TargetKeywordRow {
   id: string;
   keyword: string;
-  mangools_tracking_id: string | null;
+  mangools_tracked_keyword_id: string | null;
+}
+
+// Best-effort extraction of one tracked keyword's current position/URL
+// from a single item in the tracking-stats response — see the
+// top-of-file note on why the exact field names are still unconfirmed.
+function parseTrackingStatsItem(item: any): { trackedKeywordId: string | null; position: number | null; url: string | null } {
+  return {
+    trackedKeywordId: item?.tracked_keyword_id ?? item?.keyword_id ?? item?.id ?? null,
+    position: item?.rank?.current ?? item?.current_rank ?? item?.position ?? null,
+    url: item?.rank?.url ?? item?.url ?? null,
+  };
 }
 
 Deno.serve(async (req: Request) => {
@@ -75,7 +102,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: business } = await supabase
     .from('business')
-    .select('mangools_location_id, seo_competitor_domains, google_maps_url')
+    .select('mangools_location_id, mangools_tracking_id, website_domain, seo_competitor_domains')
     .maybeSingle();
 
   if (!business?.mangools_location_id) {
@@ -85,86 +112,99 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ skipped: 'mangools_location_id not set on business' });
   }
 
-  const { data: targetKeywords, error: keywordsError } = await supabase
-    .from('target_keywords')
-    .select('id, keyword, mangools_tracking_id')
-    .in('status', ['active', 'achieved']);
-
-  if (keywordsError) {
-    return jsonResponse({ error: 'Could not load target keywords: ' + keywordsError.message }, 500);
-  }
-
   let ranksChecked = 0;
-  let ranksErrors: string[] = [];
+  const ranksErrors: string[] = [];
 
-  for (const tk of (targetKeywords as TargetKeywordRow[]) ?? []) {
-    if (!tk.mangools_tracking_id) {
-      // Curated but not yet given a real SerpWatcher tracking — skipped,
-      // not errored, so a partially-curated list never fails the run.
-      continue;
-    }
-
+  // One call covers every tracked keyword in this client's single
+  // shared tracking — not one call per keyword. Skipped entirely (not
+  // errored) if the tracking hasn't been created yet.
+  if (business.mangools_tracking_id) {
     try {
-      const statsRes = await fetch(
-        `${MANGOOLS_API_BASE}/serpwatcher/tracked-keywords/${tk.mangools_tracking_id}/stats`,
-        { headers: { 'x-access-token': mangoolsApiKey } }
-      );
-      if (!statsRes.ok) {
-        ranksErrors.push(`${tk.keyword}: Mangools returned ${statsRes.status}`);
-        continue;
-      }
-      const stats = await statsRes.json();
-      // Response-shape assumption, pending live confirmation — see the
-      // top-of-file note. Adjust these two field accesses once a real
-      // response is captured.
-      const position: number | null = stats?.position ?? null;
-      const rankingUrl: string | null = stats?.url ?? null;
+      const { data: targetKeywords, error: keywordsError } = await supabase
+        .from('target_keywords')
+        .select('id, keyword, mangools_tracked_keyword_id')
+        .in('status', ['active', 'achieved'])
+        .not('mangools_tracked_keyword_id', 'is', null);
 
-      const { error: insertError } = await supabase.from('keyword_rank_snapshots').insert({
-        target_keyword_id: tk.id,
-        position,
-        ranking_url: rankingUrl,
-      });
-      if (insertError) {
-        ranksErrors.push(`${tk.keyword}: ${insertError.message}`);
-        continue;
+      if (keywordsError) {
+        ranksErrors.push('Could not load target keywords: ' + keywordsError.message);
+      } else {
+        const byTrackedKeywordId = new Map<string, TargetKeywordRow>(
+          ((targetKeywords as TargetKeywordRow[]) ?? []).map((tk) => [tk.mangools_tracked_keyword_id!, tk])
+        );
+
+        const statsRes = await fetch(
+          `${MANGOOLS_API_BASE}/serpwatcher/trackings/${business.mangools_tracking_id}/stats`,
+          { method: 'POST', headers: { 'x-access-token': mangoolsApiKey, 'Content-Type': 'application/json' } }
+        );
+
+        if (!statsRes.ok) {
+          ranksErrors.push(`tracking stats: Mangools returned ${statsRes.status}`);
+        } else {
+          const stats = await statsRes.json();
+          // Field name for the per-keyword array is itself unconfirmed —
+          // see the top-of-file note. Try the most likely candidates.
+          const items: any[] = stats?.items ?? stats?.keywords ?? stats?.tracked_keywords ?? [];
+
+          for (const item of items) {
+            const parsed = parseTrackingStatsItem(item);
+            const tk = parsed.trackedKeywordId ? byTrackedKeywordId.get(String(parsed.trackedKeywordId)) : undefined;
+            if (!tk) continue;
+
+            const { error: insertError } = await supabase.from('keyword_rank_snapshots').insert({
+              target_keyword_id: tk.id,
+              position: parsed.position,
+              ranking_url: parsed.url,
+            });
+            if (insertError) {
+              ranksErrors.push(`${tk.keyword}: ${insertError.message}`);
+              continue;
+            }
+            ranksChecked++;
+          }
+        }
       }
-      ranksChecked++;
     } catch (err) {
-      ranksErrors.push(`${tk.keyword}: ${err instanceof Error ? err.message : String(err)}`);
+      ranksErrors.push(`tracking stats: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
-  // Once per client, not per-keyword — a single competitor-gap
-  // comparison against every configured competitor domain.
+  // Once per client — a single competitor-gap comparison against every
+  // configured competitor domain. Independent of rank tracking above;
+  // skipped (not errored) if this client's own domain isn't set yet.
   let gapKeywordsFound = 0;
   const competitorDomains: string[] = business.seo_competitor_domains ?? [];
 
-  if (competitorDomains.length > 0) {
+  if (business.website_domain && competitorDomains.length > 0) {
     try {
-      const gapRes = await fetch(`${MANGOOLS_API_BASE}/kwfinder/keyword-gap-analysis`, {
+      const gapRes = await fetch(`${MANGOOLS_API_BASE}/kwfinder/gap-analysis`, {
         method: 'POST',
         headers: { 'x-access-token': mangoolsApiKey, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          competitor_domains: competitorDomains,
+          domain: business.website_domain,
+          competitors: competitorDomains,
           location_id: business.mangools_location_id,
-          language_id: 1000,
         }),
       });
       if (!gapRes.ok) {
         ranksErrors.push(`gap analysis: Mangools returned ${gapRes.status}`);
       } else {
         const gapData = await gapRes.json();
-        // Response-shape assumption, pending live confirmation — see the
-        // top-of-file note.
-        const gapKeywords: { keyword: string; search_volume?: number; domain: string }[] = gapData?.keywords ?? [];
-        for (const gk of gapKeywords) {
-          const { error: gapInsertError } = await supabase.from('keyword_gap_snapshots').insert({
-            keyword: gk.keyword,
-            search_volume: gk.search_volume ?? null,
-            competitor_domain: gk.domain,
-          });
-          if (!gapInsertError) gapKeywordsFound++;
+        // Confirmed against a real live response (2026-09-17, Freedom
+        // Counseling Services) — the published docs describe this as
+        // `items` with `keyword`/`search_volume` fields, but the actual
+        // API returns `keywords` with `kw`/`sv`. Trust the live shape,
+        // not the docs, if the two ever disagree again.
+        const results: { domain: string; keywords: { kw: string; sv?: number }[] }[] = gapData?.results ?? [];
+        for (const competitorResult of results) {
+          for (const gk of competitorResult.keywords ?? []) {
+            const { error: gapInsertError } = await supabase.from('keyword_gap_snapshots').insert({
+              keyword: gk.kw,
+              search_volume: gk.sv ?? null,
+              competitor_domain: competitorResult.domain,
+            });
+            if (!gapInsertError) gapKeywordsFound++;
+          }
         }
       }
     } catch (err) {
