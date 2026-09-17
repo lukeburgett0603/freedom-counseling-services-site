@@ -2973,6 +2973,34 @@ site.
   showing zero test artifacts. `astro check` and a real `npm run build`
   against this site's live data both clean.
 
+## Removed the arch marker above H2/H3 body-copy headings (2026-09-16)
+
+Client-requested: `global.css`'s "Visual Design Brief" arch motif shows
+up at 4 distinct scales — a small marker above every `.prose h2`/`h3`
+heading, the arch photo-crop on Hero/counselor headshots
+(`.hero-photo-crop`/`.avatar-crop`), a small notch where the CTA band
+meets LeadMagnet's ink band, and a low-opacity footer watermark. The
+request was specifically about the heading marker — removed only
+`.prose h2::before, .prose h3::before` (and its own now-stale
+cross-references in two nearby comments); the photo crops, seam notch,
+and footer watermark are untouched, still real and visible.
+
+This is Freedom-specific brand CSS (the Visual Design Brief is this
+client's own design system, not shared template styling), so no
+`local-business-site-template` sync applies here — same category as
+`global.css`'s `@theme` color/font tokens already being excluded from
+template→client syncs.
+
+- **Verified live**: computed `::before` style on every real `.prose
+  h2`/`h3` on Luke Burgett's page now returns `content: none` (the
+  default — no rule applies), confirmed via direct DOM inspection, not
+  just a screenshot (this session's Browser pane screenshot capture has
+  had an unrelated blank-render glitch). Confirmed `.avatar-crop`'s own
+  border-radius is untouched (headshot still shows the arch crop) and a
+  visual screenshot of "Who Luke works with" shows the heading now
+  sitting flush with no marker above it. `astro check` (0 errors) and a
+  real `npm run build` both clean.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a
