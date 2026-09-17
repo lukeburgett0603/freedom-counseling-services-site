@@ -3001,6 +3001,30 @@ template→client syncs.
   sitting flush with no marker above it. `astro check` (0 errors) and a
   real `npm run build` both clean.
 
+## Counselor card grids: drop Modalities, add Specialties, recolor Telehealth (2026-09-17)
+
+Client-requested, built in `local-business-site-template` first (see
+that repo's CLAUDE.md for the full technical writeup) then synced here.
+Training & Modalities pills were making the homepage's "Meet Our
+Counselors" cards and the `/counselors` overview page's cards too tall
+— both now omit modalities entirely (still shown on each counselor's
+own profile page, unchanged); `/counselors`' cards additionally gained
+real Specialty pills in modalities' old spot (the client's own explicit
+ask for that page specifically). The Telehealth pill was recolored to a
+light maroon wash, clearly distinct from the tan Training &
+Modalities/In-Person pill color it used to share exactly.
+
+- **Verified live against this site's real 5 counselors**: confirmed
+  zero modalities text anywhere on Homepage's or `/counselors`' cards;
+  confirmed `/counselors` now shows each counselor's real specialty
+  pills (Tony's, Rhonda's, Staci's, Luke's, Sophie's — all real,
+  already-populated data, not a synthetic test) with zero nested `<a>`
+  tags inside any card (the real risk `linkable={false}` exists to
+  prevent, given every card here is itself one big link to the
+  counselor's profile page); confirmed Luke's own profile page still
+  shows his real modalities, untouched. `astro check` (0 errors) and a
+  real `npm run build` against live data both clean.
+
 ## Hero overlay style (built 2026-09-04)
 
 A second `Hero.astro` layout — full-bleed background image with a

@@ -2,18 +2,20 @@
 // The Homepage's "Meet the team" section — group-practice only, same
 // self-gating discipline as CounselorsOverview.astro itself (renders
 // nothing for a solo practice, no separate toggle field needed). Card
-// markup is a direct copy of CounselorsOverview.astro's own grid (kept
-// in sync by hand — both are small, stable, and changing one on
-// purpose without the other is unlikely) with one addition: a
-// "Schedule with [First Name]" CTA that pre-selects this counselor in
-// the bottom LeadGenerator's dropdown before scrolling to it, since
-// Homepage has one shared LeadGenerator instance serving every card
-// (unlike CounselorProfile.astro's own page, which can set a single
-// static defaultCounselorId server-side because the whole page belongs
-// to one counselor already).
+// markup started as a direct copy of CounselorsOverview.astro's own
+// grid, plus a "Schedule with [First Name]" CTA that pre-selects this
+// counselor in the bottom LeadGenerator's dropdown before scrolling to
+// it, since Homepage has one shared LeadGenerator instance serving
+// every card (unlike CounselorProfile.astro's own page, which can set a
+// single static defaultCounselorId server-side because the whole page
+// belongs to one counselor already). The two have since diverged on
+// purpose (2026-09-17, client request): both this card and
+// CounselorsOverview.astro's own now omit Training & Modalities
+// entirely — it's exclusive to the counselor's own profile page now —
+// and CounselorsOverview additionally shows Specialty pills, which this
+// card still doesn't (kept minimal to stay compact on the homepage).
 import StatusPill from './StatusPill.astro';
 import TelehealthPill from './TelehealthPill.astro';
-import Modalities from './Modalities.astro';
 import { withBase } from '../lib/url';
 import type { Page } from '../lib/pages';
 
@@ -60,11 +62,6 @@ function firstNameOf(title: string): string {
               </div>
             )}
             {counselor.meta_description && <p class="mt-2 text-sm text-slate-600">{counselor.meta_description}</p>}
-            {counselor.modalities.length > 0 && (
-              <div class="mt-3">
-                <Modalities modalities={counselor.modalities} centered />
-              </div>
-            )}
           </a>
           <a
             href="#lead-generator"
