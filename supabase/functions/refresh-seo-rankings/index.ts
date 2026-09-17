@@ -45,16 +45,15 @@
 // real live call (2026-09-17, Freedom Counseling Services, 5 real
 // competitor domains) returned `results[].keywords[]` with `kw`/`sv`
 // fields, not the docs' `results[].items[]` with `keyword`/
-// `search_volume`. The code below matches the real live shape, not the
-// docs — trust that over the docs if they ever disagree again. The
-// tracking-stats response's exact per-keyword field names (which key
-// holds the array, which key is that keyword's own tracked-keyword id,
-// which key is its current position/URL) are still a genuinely
-// unconfirmed assumption — there's no way to verify those until this
-// function runs against a client with a real
-// SerpWatcher tracking. Verify parseTrackingStatsItem() below against a
-// real response the first time this runs for a client with a real
-// mangools_tracking_id set, and fix its field access if needed.
+// `search_volume`. The tracking-stats response is ALSO confirmed
+// against a real live call, against a real tracking
+// (6aac3413751b76cad256399e) created for this same client: the
+// per-keyword array is `keywords[]`, each item's own tracked-keyword id
+// is `_id`, and its current position is `rank.last` — no plain
+// ranking-URL field exists at this level (see
+// parseTrackingStatsItem()'s own comment), so `ranking_url` stays null
+// for now. Trust the live shape over the docs if they ever disagree
+// again, for either endpoint.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -70,14 +69,19 @@ interface TargetKeywordRow {
   mangools_tracked_keyword_id: string | null;
 }
 
-// Best-effort extraction of one tracked keyword's current position/URL
-// from a single item in the tracking-stats response — see the
-// top-of-file note on why the exact field names are still unconfirmed.
+// Confirmed against a real live response (2026-09-17, Freedom
+// Counseling Services, tracking 6aac3413751b76cad256399e): the
+// per-keyword object's own id is `_id` (matches the tracked-keyword id
+// returned when the tracking was created), and its current position is
+// `rank.last`. There's no plain ranking-URL field visible at this level
+// — `map_pack.url` exists but is specifically for local-pack presence,
+// not the organic ranking URL, so `url` stays null here rather than
+// guessing at a field that isn't actually present.
 function parseTrackingStatsItem(item: any): { trackedKeywordId: string | null; position: number | null; url: string | null } {
   return {
-    trackedKeywordId: item?.tracked_keyword_id ?? item?.keyword_id ?? item?.id ?? null,
-    position: item?.rank?.current ?? item?.current_rank ?? item?.position ?? null,
-    url: item?.rank?.url ?? item?.url ?? null,
+    trackedKeywordId: item?._id ?? null,
+    position: item?.rank?.last ?? null,
+    url: null,
   };
 }
 
@@ -142,9 +146,9 @@ Deno.serve(async (req: Request) => {
           ranksErrors.push(`tracking stats: Mangools returned ${statsRes.status}`);
         } else {
           const stats = await statsRes.json();
-          // Field name for the per-keyword array is itself unconfirmed —
-          // see the top-of-file note. Try the most likely candidates.
-          const items: any[] = stats?.items ?? stats?.keywords ?? stats?.tracked_keywords ?? [];
+          // Confirmed against a real live response — see
+          // parseTrackingStatsItem()'s own comment above.
+          const items: any[] = stats?.keywords ?? [];
 
           for (const item of items) {
             const parsed = parseTrackingStatsItem(item);

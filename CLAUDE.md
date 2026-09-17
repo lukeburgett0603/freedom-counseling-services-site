@@ -3458,11 +3458,21 @@ covers what's specific to this real site.
   as test data. Top result: `louisvillegracepsychological.com` ranks for
   "cognitive behavioral therapy for anxiety" (168,000 monthly searches)
   and "marriage counseling near me" (70,500), neither of which
-  Freedom's own site currently targets. Rank tracking itself
-  (`keyword_rank_snapshots`) is still correctly empty —
-  `business.mangools_tracking_id` isn't set yet, which only happens
-  once the real keyword-curation session creates an actual SerpWatcher
-  tracking for this client.
+  Freedom's own site currently targets.
+- **The real keyword-curation session happened the same day** — see
+  `local-business-site-template`'s CLAUDE.md ("Keyword curation session
+  #1") for the full technical writeup. 48 real `target_keywords` rows
+  (22 of Freedom's own existing focus keywords + 26 diversified new
+  opportunities across all 5 counselors' actual specialties, not just
+  couples/marriage), one real SerpWatcher tracking created
+  (`6aac3413751b76cad256399e`, mobile platform given how many are "near
+  me" queries), all 48 wired to their real `mangools_tracked_keyword_id`
+  — confirmed zero unmapped rows via direct query. This same session is
+  also what caught the tracking-stats endpoint's real field names
+  (`stats.keywords[]`, `_id`, `rank.last`), fixed the same day.
+  `keyword_rank_snapshots` will populate once Mangools finishes its
+  first crawl of the new tracking (~20 min from creation) and the
+  weekly cron next runs.
 
 ## Generating a logo from a CSS wordmark
 
