@@ -3474,6 +3474,29 @@ covers what's specific to this real site.
   first crawl of the new tracking (~20 min from creation) and the
   weekly cron next runs.
 
+## Content Planning & Management screen (built 2026-09-17)
+
+A workflow layer on top of the SEO Insights data — see `local-
+business-site-template`'s CLAUDE.md ("Content Planning & Management
+screen") for the full design and both real bugs found (a view-
+stacking bug on role switch, and a `.closest()` selector bug in the
+staff "Save notes" handler — both fixed the same day, live-verified
+against a real database check after each fix, not just trusted from
+the UI). This entry covers what's specific to this real site.
+
+- Migration `0061_content_plan.sql` applied directly against this
+  project's live database via `supabase db query --linked`.
+- RLS verified live: 4 throwaway accounts (owner, agency, 2 staff)
+  confirmed full CRUD for owner/agency, a strictly scoped
+  status/notes-only update for an assigned staff session, and zero
+  visibility for an unrelated staff session — all test data deleted
+  after.
+- Live browser pass confirmed the real "+ Plan it" flow from SEO
+  Insights, the owner/agency board's Edit modal, and the staff
+  assignment view all work end to end against this real project,
+  including confirming the notes-save fix actually persists via a
+  direct query, not just the UI showing "Saved."
+
 ## Generating a logo from a CSS wordmark
 
 If a client's brand is wordmark-only (explicitly no pictorial icon mark)

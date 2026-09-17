@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import { withBase } from '../../lib/url';
 ---
 
 <!--
@@ -59,7 +60,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
     <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Content gap — keywords with no page yet</p>
-    <p class="mb-3 text-xs text-slate-400">Target keywords with no page currently written to target them.</p>
+    <p class="mb-3 text-xs text-slate-400">
+      Target keywords with no page currently written to target them. Click "+ Plan it" to add an idea to the
+      <a href={withBase('/admin/content-plan')} class="text-brand-primary hover:underline">Content Plan</a>.
+    </p>
     <div id="content-gap-list" class="space-y-2 text-sm"></div>
     <p id="content-gap-empty" class="hidden text-sm text-slate-500">Every target keyword has a page targeting it.</p>
   </div>
@@ -74,6 +78,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             <th class="px-4 py-3 font-semibold">Keyword</th>
             <th class="px-4 py-3 font-semibold">Search volume</th>
             <th class="px-4 py-3 font-semibold">Competitor</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="gap-table-body"></tbody>
@@ -259,6 +264,32 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     applyRoleVisibility();
   }
 
+  // "+ Plan it" button state — which target_keyword_ids and which
+  // normalized gap-keyword titles already have a content_plan_items
+  // row, so a double click shows "Planned" instead of inserting a
+  // duplicate. Populated by loadPlannedState(), refreshed after every
+  // successful insert rather than re-querying the whole table.
+  let plannedTargetKeywordIds = new Set<string>();
+  let plannedGapTitles = new Set<string>();
+
+  function planItButton(kind: 'gap' | 'competitor', opts: { targetKeywordId?: string; keyword: string; searchVolume: number | null; priority?: string; sourceNote?: string }): string {
+    const already =
+      kind === 'gap'
+        ? !!opts.targetKeywordId && plannedTargetKeywordIds.has(opts.targetKeywordId)
+        : plannedGapTitles.has(normalizeKeyword(opts.keyword));
+    if (already) {
+      return '<span class="text-xs text-slate-400">Planned</span>';
+    }
+    return `<button type="button" class="plan-it-button rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+      data-kind="${kind}"
+      data-target-keyword-id="${opts.targetKeywordId ?? ''}"
+      data-keyword="${escapeHtml(opts.keyword)}"
+      data-search-volume="${opts.searchVolume ?? ''}"
+      data-priority="${opts.priority ?? ''}"
+      data-source-note="${escapeHtml(opts.sourceNote ?? '')}"
+    >+ Plan it</button>`;
+  }
+
   function renderContentGap() {
     const missing = keywordsWithNoPage(
       targetKeywords.filter((tk) => tk.status !== 'paused'),
@@ -268,9 +299,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     contentGapList.innerHTML = missing
       .map(
         (tk) => `
-      <div class="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-3 py-2">
+      <div class="flex items-center justify-between gap-3 rounded-md border border-slate-100 bg-slate-50 px-3 py-2">
         <span class="font-medium text-brand-ink">${escapeHtml(tk.keyword)}</span>
-        <span class="text-xs capitalize text-slate-500">${escapeHtml(tk.priority)} priority</span>
+        <div class="flex items-center gap-3">
+          <span class="text-xs capitalize text-slate-500">${escapeHtml(tk.priority)} priority</span>
+          ${planItButton('gap', { targetKeywordId: tk.id, keyword: tk.keyword, searchVolume: tk.search_volume, priority: tk.priority })}
+        </div>
       </div>`
       )
       .join('');
@@ -286,10 +320,53 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="px-4 py-3">${escapeHtml(g.keyword)}</td>
         <td class="px-4 py-3">${g.search_volume != null ? g.search_volume.toLocaleString() : '—'}</td>
         <td class="px-4 py-3">${escapeHtml(g.competitor_domain)}</td>
+        <td class="px-4 py-3 text-right">${planItButton('competitor', { keyword: g.keyword, searchVolume: g.search_volume, sourceNote: `Competitor gap: ${g.competitor_domain} ranks for this` })}</td>
       </tr>`
       )
       .join('');
   }
+
+  async function loadPlannedState() {
+    const { data } = await supabase.from('content_plan_items').select('target_keyword_id, title');
+    plannedTargetKeywordIds = new Set((data ?? []).map((r) => r.target_keyword_id).filter((v): v is string => !!v));
+    plannedGapTitles = new Set((data ?? []).map((r) => normalizeKeyword(r.title as string)));
+  }
+
+  async function handlePlanItClick(button: HTMLButtonElement) {
+    const kind = button.dataset.kind as 'gap' | 'competitor';
+    const keyword = button.dataset.keyword!;
+    const targetKeywordId = button.dataset.targetKeywordId || null;
+    const searchVolume = button.dataset.searchVolume ? Number(button.dataset.searchVolume) : null;
+    const priority = button.dataset.priority || null;
+    const sourceNote = button.dataset.sourceNote || null;
+
+    button.disabled = true;
+    const { error } = await supabase.from('content_plan_items').insert({
+      title: keyword,
+      target_keyword_id: targetKeywordId,
+      search_volume: searchVolume,
+      priority,
+      source_note: sourceNote,
+    });
+    if (error) {
+      window.alert('Could not add to content plan: ' + error.message);
+      button.disabled = false;
+      return;
+    }
+    if (targetKeywordId) plannedTargetKeywordIds.add(targetKeywordId);
+    plannedGapTitles.add(normalizeKeyword(keyword));
+    if (kind === 'gap') renderContentGap();
+    else renderGapTable();
+  }
+
+  contentGapList.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('.plan-it-button');
+    if (button) handlePlanItClick(button);
+  });
+  gapTableBody.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('.plan-it-button');
+    if (button) handlePlanItClick(button);
+  });
 
   // The owner sees every section above in pure view-only form — no Add
   // button, no actions column, no row menu — not disabled controls, the
@@ -478,6 +555,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     async (adminUser) => {
       isAgency = adminUser.role === 'agency';
       await loadPages();
+      await loadPlannedState();
       await loadKeywordsAndSnapshots();
       await loadGapSnapshots();
     },
