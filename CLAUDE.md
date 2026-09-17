@@ -672,12 +672,13 @@ at the registrar. Two halves:
   something introduced by it, but every `/admin/*` page shares
   `AdminLayout.astro`, so this fix benefits all of them, not just Leads
   and analytics.
-- **Tier 3 — search rankings/impressions (Google Search Console data).**
-  The most convincing "your SEO is working" evidence, but the most work:
-  needs Search Console API access per client (OAuth/service account), and
-  a scheduled job to snapshot data (can't be queried live from the browser
-  without exposing credentials — Search Console data itself also lags a
-  few days). Treat as a premium-tier differentiator, not a v1 expectation.
+- **Tier 3 — search rankings/impressions.** Built 2026-09-17 as a
+  separate `admin/seo-insights.astro` page rather than a section on this
+  one — see the "SEO Insights dashboard" section below. Mangools-backed
+  (SerpWatcher rank tracking + keyword-gap analysis), not Google Search
+  Console — CMC already has a shared Mangools account connected via MCP
+  for research, so this reused that instead of standing up per-client
+  Search Console OAuth.
 
 ## Lead CRM (`/admin/crm`, built 2026-09-01)
 
@@ -3383,6 +3384,48 @@ up when this gets built:
 - Still open when this gets picked back up: does the proposed 4-archetype
   set actually hold up, and is tier-gating + per-page + photo-free all
   still the right call once there's a concrete UI to react to.
+
+## SEO Insights dashboard (target keywords, rank tracking, content/competitor gaps — built 2026-09-17)
+
+The Mangools-backed "Tier 3 — search rankings" dashboard tier this
+file's "Client dashboard" section already backlogged, built after CMC
+connected the Mangools MCP server. See `local-business-site-template`'s
+CLAUDE.md for the full design reasoning and technical writeup (built
+there first, synced here as the first real instance) — this entry
+covers what's specific to this real site.
+
+- **Migration `0059_seo_insights.sql`** applied directly against this
+  project's live database via `supabase db query --linked` — including
+  a real bug caught before it landed: the first draft's `unique
+  (lower(keyword))` table constraint isn't valid Postgres (a table-level
+  `unique` can't reference an expression), only caught by actually
+  running it against this live project. Fixed with a real `create
+  unique index` instead before syncing.
+- **`refresh-seo-rankings` deployed and `SEO_CRON_SECRET` set** — curl-
+  verified live: a wrong secret is rejected (401), the real one falls
+  through correctly to a graceful "Mangools is not configured" 500
+  since `MANGOOLS_API_KEY` isn't set yet.
+- **RLS verified directly via REST against this real database**: anon
+  key rejected on all 3 new tables; a throwaway owner session reads
+  everywhere but has zero write path anywhere (silent no-op on
+  `target_keywords` UPDATE/DELETE, a hard rejection on inserting a rank
+  snapshot); a throwaway agency session gets full CRUD on
+  `target_keywords`. A real browser pass (throwaway owner/agency/staff
+  logins, two seeded test keywords — one matching the real "Couples &
+  Marriage Counseling" page's `focus_keyword`, one not) confirmed the
+  content-gap list, the "page targeting it" link, the agency Add/Edit
+  flow, the owner's fully controls-free view, and the staff redirect
+  (both on fresh login and on direct navigation to the URL) all work
+  exactly as designed. All test data deleted afterward.
+- **Not yet done on this site — real follow-up work, not code**: set
+  `MANGOOLS_API_KEY`; resolve and set `business.mangools_location_id`
+  for Louisville, KY and `business.seo_competitor_domains` from this
+  project's own GBP/citation audit work; confirm the two flagged
+  Mangools endpoint-shape assumptions in `refresh-seo-rankings` against
+  a real live response; register the actual weekly Supabase Cron job;
+  and the real target-keyword curation pass itself with the client (a
+  genuine Claude+Mangools-MCP research session, creating real
+  SerpWatcher trackings per keyword).
 
 ## Generating a logo from a CSS wordmark
 

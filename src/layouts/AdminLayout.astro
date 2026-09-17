@@ -19,7 +19,8 @@ interface Props {
     | 'lead-magnets'
     | 'team'
     | 'suggestions'
-    | 'counselor-settings';
+    | 'counselor-settings'
+    | 'seo-insights';
 }
 
 const { title, current } = Astro.props;
@@ -50,6 +51,7 @@ const { title, current } = Astro.props;
 const navItems = [
   { key: 'leads', label: 'Leads and analytics', href: withBase('/admin/leads') },
   { key: 'crm', label: 'Lead CRM', href: withBase('/admin/crm') },
+  { key: 'seo-insights', label: 'SEO Insights', href: withBase('/admin/seo-insights') },
   { key: 'blog', label: 'Blog posts', href: withBase('/admin/blog') },
   {
     key: 'content',

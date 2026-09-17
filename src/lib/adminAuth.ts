@@ -32,6 +32,7 @@ const ROLE_NAV_ACCESS: Record<AdminUser['role'], string[]> = {
   owner: [
     'leads',
     'crm',
+    'seo-insights',
     'blog',
     'content',
     'content-business-info',
@@ -44,6 +45,7 @@ const ROLE_NAV_ACCESS: Record<AdminUser['role'], string[]> = {
   agency: [
     'leads',
     'crm',
+    'seo-insights',
     'blog',
     'content',
     'content-business-info',
