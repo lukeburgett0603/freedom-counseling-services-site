@@ -3551,6 +3551,35 @@ reusing rather than leaving `business.logo_url` empty:
    fixes any Open Graph preview gap on imageless pages (e.g. a homepage
    whose hero is a lead form instead of a photo).
 
+## Admin area consistency polish (2026-09-18)
+
+Template-level change (see `local-business-site-template`'s CLAUDE.md,
+"Admin area consistency polish," for the full writeup and reasoning) —
+synced here the same day. A page-level `<h1>` now renders on every
+`/admin/*` page (`AdminLayout.astro`, derived from the same `navItems`
+array that drives the sidebar, so it can never drift from the sidebar
+label); a resulting duplicate-heading regression was fixed on
+`counselor-settings.astro`, `content/page-copy.astro`, and
+`team.astro` (renamed to "Team members"); `content-plan.astro`'s
+"My content assignments" heading and `lead-magnets.astro`'s one stat
+card were brought back in line with the rest of the admin's established
+conventions (heading weight, stat-card border/shadow/label color/value
+font).
+
+- `astro check` (0 errors) and a real `npm run build` both clean.
+- Verified against this site's own real built output: read
+  `dist/admin/*/index.html` directly for all 11 real admin routes and
+  confirmed each page's own `<h1>` matches its sidebar entry exactly
+  (Leads and analytics, Lead CRM, SEO Insights, Content Plan, Blog
+  posts, Business info & testimonials, Page copy, Lead magnets,
+  Suggestions, Team, Counselor settings).
+- **The Browser pane couldn't reach this session's local dev server** —
+  `navigate`/`preview_start` both failed with a denied/failed
+  connection. Static build-output verification stood in for it here;
+  a real interactive pass (hover/focus states, the collapsible nav
+  group, responsive collapse) is still worth doing against this real
+  site once the browser tool is reachable again.
+
 ## Where the detailed rules live
 
 This file is a standards checklist and a "don't regress this" list, not
