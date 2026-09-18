@@ -180,6 +180,11 @@ import UnsplashSearchModal from '../../components/UnsplashSearchModal.astro';
   let uploadedImageCreditName: string | null = null;
   let uploadedImageCreditUrl: string | null = null;
   let currentAdminUser: AdminUser | null = null;
+  // Set only when this editing session started from a Content Plan
+  // "Draft blog post" hand-off — see applyDraftHandoffIfPresent() below.
+  // Used after a successful save to write the result back onto that
+  // content_plan_items row.
+  let currentPlanItemId: string | null = null;
 
   function canEditPost(post: BlogPost): boolean {
     return (
@@ -265,6 +270,10 @@ import UnsplashSearchModal from '../../components/UnsplashSearchModal.astro';
 
   function resetForm() {
     editingId = null;
+    // Reset here, not just at module init — otherwise a genuinely new,
+    // unrelated post started via "New post" right after a Content Plan
+    // hand-off would incorrectly stay linked to that earlier plan item.
+    currentPlanItemId = null;
     slugTouchedManually = false;
     uploadedImageUrl = null;
     uploadedImageCreditName = null;
@@ -300,6 +309,11 @@ import UnsplashSearchModal from '../../components/UnsplashSearchModal.astro';
 
   function loadPostIntoForm(post: BlogPost) {
     editingId = post.id;
+    // Reset here too — opening an unrelated post from the plain post
+    // list must not stay linked to whatever plan item was last handed
+    // off. applyDraftHandoffIfPresent() re-sets this immediately after
+    // calling this function, when that's genuinely the case.
+    currentPlanItemId = null;
     slugTouchedManually = true;
     uploadedImageUrl = post.images?.hero?.url ?? null;
     uploadedImageCreditName = post.images?.hero?.creditName ?? null;
@@ -335,6 +349,43 @@ import UnsplashSearchModal from '../../components/UnsplashSearchModal.astro';
     resetForm();
     showEdit();
   });
+
+  // Content Plan's "Draft blog post" hand-off — a same-tab, consume-once
+  // sessionStorage handshake (see admin/content-plan.astro's
+  // startBlogDraftHandoff()), not URL query params, since this never
+  // needs to be shareable/bookmarkable. If the plan item already has a
+  // real linked post (a previous hand-off), lands back on editing that
+  // same post instead of creating a duplicate.
+  function applyDraftHandoffIfPresent() {
+    const raw = sessionStorage.getItem('contentPlanDraftHandoff');
+    if (!raw) return;
+    sessionStorage.removeItem('contentPlanDraftHandoff');
+
+    let handoff: { planItemId: string; title: string; category: string | null; linkedPageId: string | null };
+    try {
+      handoff = JSON.parse(raw);
+    } catch {
+      return;
+    }
+
+    if (handoff.linkedPageId) {
+      const existing = posts.find((p) => p.id === handoff.linkedPageId);
+      if (existing) {
+        loadPostIntoForm(existing);
+        currentPlanItemId = handoff.planItemId;
+        showEdit();
+        return;
+      }
+    }
+
+    resetForm();
+    currentPlanItemId = handoff.planItemId;
+    titleField.value = handoff.title;
+    slugField.value = slugify(handoff.title);
+    slugTouchedManually = false;
+    if (handoff.category) categoryField.value = handoff.category;
+    showEdit();
+  }
 
   backButton.addEventListener('click', showList);
 
@@ -414,13 +465,13 @@ import UnsplashSearchModal from '../../components/UnsplashSearchModal.astro';
     const payload = {
       title: titleField.value.trim(),
       // No 'blog/' prefix — every blog post lives at a bare root-level
-      // URL, matching every other page type and every existing post
-      // (see CLAUDE.md's "Blog post slug typo" entry: a stray
-      // `blog/${...}` prefix here once forced every save, create or
-      // edit, to write a prefixed slug that doesn't match how
-      // BlogPostCard.astro/the sitemap/every other post actually
-      // route — silently re-breaking a post's real URL on its next
-      // edit even after the slug had been fixed directly in the DB).
+      // URL, matching every other page type (see CLAUDE.md's "Blog
+      // post slug typo" real-bugs entry: a stray `blog/${...}` prefix
+      // here once forced every save, create or edit, to write a
+      // prefixed slug that doesn't match how BlogPostCard.astro/the
+      // sitemap actually route — silently re-breaking a post's real
+      // URL on its next edit even after the slug had been fixed
+      // directly in the DB).
       slug: slugify(slugField.value),
       page_type: 'Blog Post',
       h1: titleField.value.trim(),
@@ -451,9 +502,25 @@ import UnsplashSearchModal from '../../components/UnsplashSearchModal.astro';
     // created_by is set once, at creation — never touched on an update,
     // so an owner editing a staff member's post doesn't reassign it to
     // themselves.
-    const { error } = editingId
-      ? await supabase.from('pages').update(payload).eq('id', editingId)
-      : await supabase.from('pages').insert({ ...payload, created_by: currentAdminUser?.id ?? null });
+    let error: { message: string } | null;
+    if (editingId) {
+      ({ error } = await supabase.from('pages').update(payload).eq('id', editingId));
+    } else {
+      // .select().single() to get the new row's real id back — needed
+      // both to link a Content Plan item to it (below) and, since we're
+      // already touching this exact line: setting editingId right after
+      // means clicking Publish a second time on the same freshly-created
+      // post now correctly updates it instead of silently inserting a
+      // second duplicate row (a real, separate gap this create path had
+      // before, found while adding the Content Plan link).
+      const { data, error: insertError } = await supabase
+        .from('pages')
+        .insert({ ...payload, created_by: currentAdminUser?.id ?? null })
+        .select()
+        .single();
+      error = insertError;
+      if (data) editingId = data.id;
+    }
 
     if (error) {
       formStatus.textContent = 'Could not save: ' + error.message;
@@ -461,6 +528,20 @@ import UnsplashSearchModal from '../../components/UnsplashSearchModal.astro';
       saveDraftButton.removeAttribute('disabled');
       publishButton.removeAttribute('disabled');
       return;
+    }
+
+    // Closes the loop with the Content Plan item this draft started
+    // from, if any — status mirrors the same save action just taken,
+    // and linked_page_id records the real resulting post. Staff can
+    // write both of these on their own assigned row (see
+    // enforce_content_plan_staff_update() in 0062) — this update never
+    // blocks the post save itself if it fails, since the post is
+    // already saved by this point.
+    if (currentPlanItemId) {
+      await supabase
+        .from('content_plan_items')
+        .update({ status: publish ? 'published' : 'drafted', linked_page_id: editingId })
+        .eq('id', currentPlanItemId);
     }
 
     if (publish) {
@@ -502,6 +583,7 @@ import UnsplashSearchModal from '../../components/UnsplashSearchModal.astro';
     currentAdminUser = adminUser;
     await Promise.all([loadCategories(), loadPosts()]);
     resetForm();
+    applyDraftHandoffIfPresent();
   }
 
   initAdminAuth(onAuthed);

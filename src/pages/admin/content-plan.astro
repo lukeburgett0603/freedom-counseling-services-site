@@ -41,6 +41,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <tr>
             <th class="px-4 py-3 font-semibold">Title</th>
             <th class="px-4 py-3 font-semibold">Keyword</th>
+            <th class="px-4 py-3 font-semibold">Search volume</th>
             <th class="px-4 py-3 font-semibold">Content type</th>
             <th class="px-4 py-3 font-semibold">Assigned to</th>
             <th class="px-4 py-3 font-semibold">Due date</th>
@@ -78,10 +79,21 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <h3 id="idea-modal-title" class="font-[family-name:var(--font-heading)] text-lg font-bold text-brand-ink">Add idea</h3>
         <button id="idea-modal-close-button" type="button" class="text-sm text-slate-500 hover:text-slate-800">Close</button>
       </div>
+      <button
+        id="modal-draft-blog-button"
+        type="button"
+        class="hidden mb-4 w-full rounded-md border border-brand-primary px-4 py-2 text-sm font-semibold text-brand-primary hover:bg-brand-neutral"
+      >
+        Draft blog post &rarr;
+      </button>
       <form id="idea-form" class="space-y-3">
         <div>
           <label class="block text-xs font-semibold text-slate-500">Title</label>
           <input name="title" type="text" required class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500">Keyword</label>
+          <input name="keyword" type="text" placeholder="The real keyword to work into this content" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -145,6 +157,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
 <script>
   import { supabase, initAdminAuth } from '../../lib/adminAuth';
+  import { withBase } from '../../lib/url';
 
   function escapeHtml(value: string): string {
     const div = document.createElement('div');
@@ -155,6 +168,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   interface ContentPlanItem {
     id: string;
     title: string;
+    keyword: string | null;
     target_keyword_id: string | null;
     search_volume: number | null;
     priority: 'high' | 'medium' | 'low' | null;
@@ -212,6 +226,23 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   const ideaFormStatus = document.getElementById('idea-form-status')!;
   const linkedPageSelect = ideaForm.elements.namedItem('linked_page_id') as HTMLSelectElement;
   const assignedToSelect = ideaForm.elements.namedItem('assigned_to') as HTMLSelectElement;
+  const modalDraftBlogButton = document.getElementById('modal-draft-blog-button')!;
+
+  // Same-tab, consume-once handshake with admin/blog.astro — not URL
+  // query params, since this never needs to be shareable/bookmarkable.
+  // See CLAUDE.md's "Content Planning & Management screen" section.
+  function startBlogDraftHandoff(item: ContentPlanItem) {
+    sessionStorage.setItem(
+      'contentPlanDraftHandoff',
+      JSON.stringify({
+        planItemId: item.id,
+        title: item.title,
+        category: item.category,
+        linkedPageId: item.linked_page_id,
+      })
+    );
+    window.location.href = withBase('/admin/blog');
+  }
 
   function userLabel(u: AdminUserRow): string {
     return `${u.email} (${u.role})`;
@@ -239,7 +270,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       .map(
         (item) => `
       <tr class="border-b border-slate-100 last:border-0" data-item-id="${item.id}">
-        <td class="px-4 py-3">${escapeHtml(item.title)}</td>
+        <td class="px-4 py-3">${
+          item.content_type === 'blog_post'
+            ? `<button type="button" class="draft-blog-link text-left font-semibold text-brand-primary hover:underline" data-item-id="${item.id}">${escapeHtml(item.title)}</button>`
+            : escapeHtml(item.title)
+        }</td>
+        <td class="px-4 py-3">${item.keyword ? escapeHtml(item.keyword) : '—'}</td>
         <td class="px-4 py-3">${item.search_volume != null ? `${item.search_volume.toLocaleString()}/mo` : '—'}</td>
         <td class="px-4 py-3">${CONTENT_TYPE_LABELS[item.content_type]}</td>
         <td class="px-4 py-3">${escapeHtml(assigneeLabel(item.assigned_to))}</td>
@@ -273,6 +309,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     ideaModalTitle.textContent = 'Add idea';
     ideaForm.reset();
     ideaFormStatus.textContent = '';
+    modalDraftBlogButton.classList.add('hidden');
     ideaModal.classList.remove('hidden');
     ideaModal.classList.add('flex');
   }
@@ -284,6 +321,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     ideaModalTitle.textContent = 'Edit idea';
     ideaForm.reset();
     (ideaForm.elements.namedItem('title') as HTMLInputElement).value = item.title;
+    (ideaForm.elements.namedItem('keyword') as HTMLInputElement).value = item.keyword ?? '';
     (ideaForm.elements.namedItem('content_type') as HTMLSelectElement).value = item.content_type;
     (ideaForm.elements.namedItem('status') as HTMLSelectElement).value = item.status;
     linkedPageSelect.value = item.linked_page_id ?? '';
@@ -293,9 +331,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     (ideaForm.elements.namedItem('target_question') as HTMLInputElement).value = item.target_question ?? '';
     (ideaForm.elements.namedItem('notes') as HTMLTextAreaElement).value = item.notes ?? '';
     ideaFormStatus.textContent = '';
+    // Only a blog_post idea has a real no-code creation screen to hand
+    // off to — Service Page/Who We Serve/update-existing-page ideas stay
+    // planning records, same as today.
+    modalDraftBlogButton.classList.toggle('hidden', item.content_type !== 'blog_post');
     ideaModal.classList.remove('hidden');
     ideaModal.classList.add('flex');
   }
+
+  modalDraftBlogButton.addEventListener('click', () => {
+    if (!editingItemId) return;
+    const item = items.find((i) => i.id === editingItemId);
+    if (item) startBlogDraftHandoff(item);
+  });
 
   function closeIdeaModal() {
     ideaModal.classList.add('hidden');
@@ -315,6 +363,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
     const payload = {
       title,
+      keyword: (formData.get('keyword') as string).trim() || null,
       content_type: formData.get('content_type') as string,
       status: formData.get('status') as string,
       linked_page_id: (formData.get('linked_page_id') as string) || null,
@@ -376,7 +425,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   window.addEventListener('resize', closeActionsMenu);
 
   planTableBody.addEventListener('click', (event) => {
-    const toggleButton = (event.target as HTMLElement).closest<HTMLElement>('.actions-toggle');
+    const target = event.target as HTMLElement;
+
+    const draftLink = target.closest<HTMLElement>('.draft-blog-link');
+    if (draftLink) {
+      const item = items.find((i) => i.id === draftLink.dataset.itemId);
+      if (item) startBlogDraftHandoff(item);
+      return;
+    }
+
+    const toggleButton = target.closest<HTMLElement>('.actions-toggle');
     if (!toggleButton) return;
     const itemId = toggleButton.dataset.itemId!;
     if (actionsMenuItemId === itemId && !actionsMenu.classList.contains('hidden')) {
@@ -439,7 +497,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <p class="mb-2 text-xs text-slate-500">
           ${CONTENT_TYPE_LABELS[item.content_type]}${item.due_date ? ` &middot; Due ${new Date(item.due_date + 'T00:00:00').toLocaleDateString()}` : ''}${item.search_volume != null ? ` &middot; ${item.search_volume.toLocaleString()}/mo search volume` : ''}
         </p>
+        ${item.keyword ? `<p class="mb-2 text-sm font-semibold text-brand-ink">Target keyword: <span class="font-normal">${escapeHtml(item.keyword)}</span></p>` : ''}
         ${item.target_question ? `<p class="mb-2 text-sm italic text-slate-600">Target question: "${escapeHtml(item.target_question)}"</p>` : ''}
+        ${
+          item.content_type === 'blog_post'
+            ? `<button type="button" class="draft-blog-link mb-3 rounded-md border border-brand-primary px-3 py-1.5 text-xs font-semibold text-brand-primary hover:bg-brand-neutral" data-item-id="${item.id}">Draft blog post &rarr;</button>`
+            : ''
+        }
         <label class="mb-1 block text-xs font-semibold text-slate-500">Notes</label>
         <textarea class="my-notes-field w-full rounded-md border border-slate-300 px-3 py-2 text-sm" rows="2" data-item-id="${item.id}">${escapeHtml(item.notes ?? '')}</textarea>
         <button type="button" class="my-notes-save mt-2 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" data-item-id="${item.id}">
@@ -462,7 +526,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   });
 
   myAssignmentsList.addEventListener('click', async (event) => {
-    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('.my-notes-save');
+    const target = event.target as HTMLElement;
+
+    const draftLink = target.closest<HTMLElement>('.draft-blog-link');
+    if (draftLink) {
+      const item = items.find((i) => i.id === draftLink.dataset.itemId);
+      if (item) startBlogDraftHandoff(item);
+      return;
+    }
+
+    const button = target.closest<HTMLButtonElement>('.my-notes-save');
     if (!button) return;
     const itemId = button.dataset.itemId!;
     const card = button.closest<HTMLElement>('.assignment-card')!;

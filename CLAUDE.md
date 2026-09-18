@@ -3497,6 +3497,35 @@ the UI). This entry covers what's specific to this real site.
   including confirming the notes-save fix actually persists via a
   direct query, not just the UI showing "Saved."
 
+## Content Plan: real keyword display, and a "Draft blog post" hand-off (built 2026-09-17)
+
+See `local-business-site-template`'s CLAUDE.md ("Content Plan: real
+keyword display, and a 'Draft blog post' hand-off") for the full design
+and both real bugs this pass found (the board's mislabeled Keyword
+column; `admin/blog.astro`'s insert path never returning the new row's
+id, meaning a second Publish click on a fresh post would have silently
+duplicated it). This entry covers what's specific to this real site.
+
+- Migration `0062_content_plan_keyword_and_staff_link.sql` applied
+  directly against this project's live database. The 10 real content
+  plan items already on this site were backfilled with their correct
+  keyword via a real join against `target_keywords` — needed the usual
+  `ALTER TABLE ... DISABLE/ENABLE TRIGGER` dance for a direct-SQL
+  session with no real `auth.uid()`, confirmed genuinely re-enabled
+  afterward via `pg_trigger.tgenabled`.
+- Full real browser pass against this live project, both as a throwaway
+  agency session and a throwaway staff session assigned to a separate
+  test idea — confirmed the hand-off, the closed-loop status/
+  `linked_page_id` update, and (the specific case `0062`'s trigger
+  change exists for) that a staff session's own `linked_page_id` write
+  actually succeeds.
+- One of the two test posts was genuinely published during this pass
+  (a real rebuild ran while it was briefly live) — both test posts and
+  both test `content_plan_items` rows were deleted afterward, and a
+  second real rebuild was triggered specifically to remove the
+  published test post from the live site again, confirmed via a direct
+  fetch of its real URL returning "Page Not Found."
+
 ## Generating a logo from a CSS wordmark
 
 If a client's brand is wordmark-only (explicitly no pictorial icon mark)

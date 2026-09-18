@@ -343,6 +343,7 @@ import { withBase } from '../../lib/url';
     button.disabled = true;
     const { error } = await supabase.from('content_plan_items').insert({
       title: keyword,
+      keyword,
       target_keyword_id: targetKeywordId,
       search_volume: searchVolume,
       priority,
