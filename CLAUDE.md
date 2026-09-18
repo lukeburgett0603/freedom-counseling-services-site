@@ -3610,6 +3610,45 @@ footer.
   pass against a live dev server is still owed once that's reachable
   again.
 
+## Em-dash removed from shared component chrome (2026-09-18)
+
+Template-level fix (see `local-business-site-template`'s CLAUDE.md,
+"Em-dash removed from shared component chrome," for the full writeup)
+— synced here the same day. Found by running the newly-installed
+`design-taste-frontend` skill's polish pass against Luke Burgett's real
+live page: `CounselorQuote.astro`'s attribution footer and the shared
+failed-submission error string in `LeadGenerator.astro`/
+`LeadMagnet.astro` both used a literal em-dash. Fixed to a plain hyphen
+and a two-sentence rewrite respectively.
+
+- Also fixed on this real site: **Luke Burgett's own `plan_steps` data**
+  had a real em-dash in step 4's description ("...values work, and —
+  when it fits — faith integration."), applied directly via the
+  service_role key against this project's live database and confirmed
+  via a follow-up read that the row now has zero em-dash/en-dash
+  characters anywhere. Scoped to Luke's page only, since the request
+  was to polish this one page — the other 4 counselors' own data was
+  not audited or changed in this pass.
+- `astro check` (0 errors) and a real `npm run build` both clean. The
+  built `luke-burgett/index.html` was checked byte-for-byte and confirmed
+  to have zero visible em-dashes.
+- **A real content finding surfaced by the same audit, left unchanged
+  pending an editorial decision**: see the "Luke Burgett's page: same 3
+  credential facts render twice" entry in `NOTES.md` (found during the
+  earlier `impeccable` pass the same day) — `design-taste-frontend`'s
+  own Redesign-Preserve protocol explicitly says "preserve copy voice
+  unless asked for a rewrite," so this stayed flagged rather than
+  silently resolved during a design-polish task.
+- **Deliberately not touched by this pass**: this project's own site-
+  wide, already-deliberate em-dash-reduction editorial decision
+  (documented in `NOTES.md`, "cut by more than half without eliminating
+  entirely") stays as the client's own established voice for `copy`
+  content generally. Only the specific, mechanical shared-chrome
+  instances and this one real per-page data instance were touched —
+  not a wholesale re-sweep of every counselor's stored content to hit
+  zero em-dashes site-wide, which would be a much bigger scope than
+  "polish this page."
+
 ## Where the detailed rules live
 
 This file is a standards checklist and a "don't regress this" list, not
