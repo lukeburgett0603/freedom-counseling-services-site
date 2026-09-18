@@ -198,3 +198,51 @@ export function extractShortBenefitList(markdown: string | null): SplitStoryBran
     afterHtml: afterTokens.length ? (marked.parser(afterTokens, { renderer }) as string) : '',
   };
 }
+
+const INTRO_LIST_MAX_ITEM_LENGTH = 160;
+const INTRO_LIST_MIN_ITEMS = 2;
+const INTRO_LIST_MAX_ITEMS = 6;
+
+export interface ExtractedIntroList {
+  introHtml: string;
+  items: string[];
+}
+
+// A StoryBrand copy field that closes with a short bullet/numbered list
+// (e.g. a Counselor Profile's Value Proposition ending in "3 steady
+// steps") reads badly as a markdown <ul> rendered straight into a prose
+// block — a real client caught this live (2026-09-18, Luke Burgett's
+// page, "Move Toward Peace, Resilience, and Purpose"): centering it put
+// the bullet marker far from its own text, and even left-aligned it
+// still read as an undesigned list sitting under a heading that felt
+// out of step with the left-aligned headings above and below it. This
+// pulls the trailing list out as its own data (so ValueProposition.astro
+// can give it a real two-column layout — heading/intro/CTA on the left,
+// the list as a designed checklist on the right) instead of leaving it
+// inline. Deliberately conservative, same discipline as
+// extractShortBenefitList() above: only fires when the list is the LAST
+// thing in the field (never misfires partway through a real long-form
+// page) and every item is short (a real checklist line, not a
+// multi-sentence paragraph that happens to use list markup).
+export function extractIntroList(markdown: string | null): ExtractedIntroList | null {
+  if (!markdown) return null;
+
+  const lexed = marked.lexer(markdown);
+  const tokens = lexed.filter((t) => t.type !== 'space');
+  if (tokens.length === 0) return null;
+
+  const last = tokens[tokens.length - 1];
+  if (last.type !== 'list') return null;
+
+  const listItems = (last as Tokens.List).items;
+  if (listItems.length < INTRO_LIST_MIN_ITEMS || listItems.length > INTRO_LIST_MAX_ITEMS) return null;
+  if (listItems.some((item) => item.text.length > INTRO_LIST_MAX_ITEM_LENGTH)) return null;
+
+  const introTokens = tokens.slice(0, -1) as ReturnType<typeof marked.lexer>;
+  introTokens.links = lexed.links;
+
+  return {
+    introHtml: introTokens.length ? (marked.parser(introTokens, { renderer }) as string) : '',
+    items: listItems.map((item) => marked.parseInline(item.text, { renderer }) as string),
+  };
+}

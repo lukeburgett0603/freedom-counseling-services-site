@@ -3676,6 +3676,48 @@ writeup and the convention itself) — synced here the same day.
   Marketing Co.'s repo. Out of scope for this pass — flagged in the
   template's CLAUDE.md rather than silently backported.
 
+## ValueProposition: a real two-column layout for the intro-list content shape (2026-09-18, same day)
+
+Client feedback, live, directly against this site's real page: the
+same-day alignment fix made "Move Toward Peace, Resilience, and
+Purpose" correct but still looked thin/undesigned, and the centered
+heading felt out of place next to the left-aligned headings around it.
+Template-level fix (see `local-business-site-template`'s CLAUDE.md,
+"ValueProposition: a real two-column layout...", for the full writeup)
+— synced here the same day.
+
+- Real two-column layout for this content shape: heading (now
+  left-aligned) + intro + CTA on the left, the list as designed
+  checklist cards (checkmark icon, bordered card row) on the right.
+  Collapses to one stacked column on mobile.
+- Live-verified in a real browser against this site's own local dev
+  server — desktop and mobile both confirmed clean.
+- `astro check` (0 errors) and a real `npm run build` both clean; the
+  built `luke-burgett/index.html` was checked byte-for-byte before the
+  browser pass happened at all.
+
+## `/impeccable live` on this codebase: the scaffold can resolve to the wrong file (2026-09-18)
+
+Full technical writeup in `local-business-site-template`'s CLAUDE.md
+(same section title) — found live, on this site's own real local dev
+server. Summary: selecting the "Move Toward Peace..." section and
+asking live mode to improve it returned a scaffold pointing at
+`CTA.astro` instead of the real `ValueProposition.astro` — caught
+before any write by comparing the scaffold's claimed "original"
+markup against the actually-selected element. Refused the write via
+`live-poll --reply EVENT_ID error "..."` rather than guessing. Root
+cause is architectural (this site's real content lives in Supabase,
+never in `.astro` source, so live mode's text-based file-matching is
+working half-blind here) and will likely recur on other elements —
+verify every scaffold's claimed original content against the real
+selection before writing, every time, on this site.
+
+Also resolved: earlier "the Browser pane can't reach localhost"
+failures this session were actually a 404 from a trailing-slash URL
+(`/luke-burgett/`, which Astro's dev server rejects, unlike the
+deployed static site) — not a real connectivity block. Dropping the
+trailing slash fixed it immediately.
+
 ## Where the detailed rules live
 
 This file is a standards checklist and a "don't regress this" list, not
