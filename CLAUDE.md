@@ -3580,6 +3580,36 @@ font).
   group, responsive collapse) is still worth doing against this real
   site once the browser tool is reachable again.
 
+## MobileCTABar: suppress its own CTA when a real lead form is already visible (2026-09-18)
+
+Found during an `/impeccable polish` pass against this site's real live
+homepage (`https://www.freedomcounselingservices.org/`) at mobile
+width — see `local-business-site-template`'s CLAUDE.md ("MobileCTABar:
+suppress its own CTA...") for the full technical writeup (built there
+first, synced here the same day). On mobile, the persistent bottom bar
+had no awareness of what was already on screen — its own "Start
+Counseling" link sat directly under the identical-looking real submit
+button any time a `.lead-form` was already scrolled into view, both on
+this homepage's hero form and its second, full-fields form near the
+footer.
+
+- Fixed with an `IntersectionObserver` over every `.lead-form
+  button[type="submit"]` on the page; the bar's CTA half hides while a
+  real submit button is visible, "Call Now" stays and expands to fill
+  the bar.
+- `astro check` (0 errors) and a real `npm run build` both clean.
+- Confirmed the defect live on this site's actual production URL
+  (pre-fix) at both form locations via real mobile-viewport
+  screenshots, then confirmed the fix's compiled script shipped
+  correctly by reading it out of this site's own built `dist/
+  index.html` and tracing it against the intended logic.
+- **The Browser pane could not reach this session's local dev server**
+  (`navigate`/`preview_start` failed against both `localhost:4322` and
+  `127.0.0.1:4322`, while the same tool reached this site's real
+  external production URL without issue) — a real interactive mobile
+  pass against a live dev server is still owed once that's reachable
+  again.
+
 ## Where the detailed rules live
 
 This file is a standards checklist and a "don't regress this" list, not
