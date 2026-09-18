@@ -8,10 +8,21 @@
 // storybrand_pitch is empty — same never-show-an-empty-shell discipline
 // as every other optional StoryBrand section.
 //
-// Centered layout, no image — a real client working session preferred
-// this over the original image-beside-text layout once populated with
-// real content (a 3-item short list read better as 3 cards than as
-// prose next to a photo). Reuses lib/markdown.ts's
+// No image — a real client working session preferred this over the
+// original image-beside-text layout once populated with real content
+// (a 3-item short list read better as 3 cards than as prose next to a
+// photo). Card mode (benefits.length > 0) stays centered — a centered
+// heading over a centered card grid, matching PlanSteps.astro's own
+// convention — and gets the wider max-w-5xl a 3-column grid needs. The
+// plain-prose fallback below is a different shape (a markdown block,
+// possibly including a bullet list) and follows Section.astro's own
+// "prose section" convention instead: max-w-3xl, left-aligned, no
+// centering — centering a <ul> centers each line's text while its
+// bullet marker stays pinned to the list's own left inset, which is
+// exactly the "bullet far from its own text" bug a real client caught
+// live on Luke Burgett's page (2026-09-18). See Section.astro's own
+// comment for the fuller writeup of this convention. Reuses
+// lib/markdown.ts's
 // extractShortBenefitList() to turn 3 consecutive `### heading` +
 // paragraph pairs into real card data, the same pattern
 // StoryBrandSection.astro already uses for storybrand_success — not a
@@ -36,13 +47,13 @@ const { beforeHtml, benefits, afterHtml } = extractShortBenefitList(body);
 
 {body && (
   <section class="py-14">
-    <div class="mx-auto max-w-5xl px-6 text-center">
+    <div class:list={['mx-auto px-6', benefits.length > 0 ? 'max-w-5xl text-center' : 'max-w-3xl']}>
       {heading && (
-        <h2 class="mb-4 font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-brand-ink">
+        <h2 class="mb-4 text-center font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-brand-ink">
           {heading}
         </h2>
       )}
-      {beforeHtml && <div class="prose mx-auto" set:html={beforeHtml} />}
+      {beforeHtml && <div class:list={['prose', benefits.length > 0 && 'mx-auto']} set:html={beforeHtml} />}
 
       {benefits.length > 0 && (
         <div class="mt-8 grid gap-6 sm:grid-cols-3">
@@ -55,15 +66,17 @@ const { beforeHtml, benefits, afterHtml } = extractShortBenefitList(body);
         </div>
       )}
 
-      {afterHtml && <div class="prose mx-auto mt-6" set:html={afterHtml} />}
+      {afterHtml && <div class:list={['prose mt-6', benefits.length > 0 && 'mx-auto']} set:html={afterHtml} />}
 
       {ctaText && (
-        <a
-          href="#lead-generator"
-          class="mt-8 inline-block rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
-        >
-          {ctaText}
-        </a>
+        <div class="mt-8 text-center">
+          <a
+            href="#lead-generator"
+            class="inline-block rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
+          >
+            {ctaText}
+          </a>
+        </div>
       )}
     </div>
   </section>

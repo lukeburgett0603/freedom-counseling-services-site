@@ -20,8 +20,8 @@ const { body, authorityStats, ctaText } = Astro.props;
 
 {body && (
   <section class="bg-brand-neutral py-14">
-    <div class="mx-auto max-w-3xl px-6 text-center">
-      <div class="prose mx-auto" set:html={renderCopy(body)} />
+    <div class="mx-auto max-w-3xl px-6">
+      <div class="prose" set:html={renderCopy(body)} />
       {authorityStats.length > 0 && (
         <div class="mt-8 grid gap-4 sm:grid-cols-3">
           {authorityStats.map((stat) => (
@@ -35,12 +35,14 @@ const { body, authorityStats, ctaText } = Astro.props;
         </div>
       )}
       {ctaText && (
-        <a
-          href="#lead-generator"
-          class="mt-8 inline-block rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
-        >
-          {ctaText}
-        </a>
+        <div class="mt-8 text-center">
+          <a
+            href="#lead-generator"
+            class="inline-block rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md"
+          >
+            {ctaText}
+          </a>
+        </div>
       )}
     </div>
   </section>

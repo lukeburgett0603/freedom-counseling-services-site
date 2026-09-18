@@ -3649,6 +3649,33 @@ and a two-sentence rewrite respectively.
   zero em-dashes site-wide, which would be a much bigger scope than
   "polish this page."
 
+## Body-section width/alignment convention (2026-09-18)
+
+Client-reported directly against this site's real live Luke Burgett
+page: body sections looked lopsided (inconsistent widths section to
+section), and the "Move Toward Peace, Resilience, and Purpose" section
+specifically had its 3 bullet points sitting far from their own text.
+Template-level fix (see `local-business-site-template`'s CLAUDE.md,
+"Body-section width/alignment convention," for the full root-cause
+writeup and the convention itself) — synced here the same day.
+
+- Root cause on this exact section: `ValueProposition.astro`'s
+  fallback-prose path (used because Luke's real `storybrand_pitch`
+  content is a markdown bullet list, not 3 card-shaped `###` chunks)
+  rendered inside a `text-center` ancestor — centering a `<ul>` centers
+  each line's text while the bullet marker stays pinned to the list's
+  own left inset.
+- `astro check` (0 errors) and a real `npm run build` both clean. The
+  built `luke-burgett/index.html` was checked byte-for-byte: the bullet
+  list now renders with no `text-center` upstream of it, the section
+  heading carries centering directly on itself, and the CTA sits in its
+  own explicitly-centered wrapper.
+- **A real, separate drift found while syncing, left unfixed**: this
+  site's own `Section.astro` has a `tint` prop (a gold-wash background
+  variant) that was never synced back to the template or to Counselor
+  Marketing Co.'s repo. Out of scope for this pass — flagged in the
+  template's CLAUDE.md rather than silently backported.
+
 ## Where the detailed rules live
 
 This file is a standards checklist and a "don't regress this" list, not

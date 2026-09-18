@@ -47,7 +47,7 @@ const isUploadedFile = videoUrl ? isVideoFileUrl(videoUrl) : false;
 
 {oneLiner && (
   <section class="py-14">
-    <div class="mx-auto max-w-3xl px-6 text-center">
+    <div class="mx-auto max-w-3xl px-6">
       <h2 class="font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-brand-ink">
         {oneLiner}
       </h2>
@@ -79,14 +79,14 @@ const isUploadedFile = videoUrl ? isVideoFileUrl(videoUrl) : false;
       )}
 
       {full && (
-        <details class="group mt-8 text-left">
+        <details class="group mt-8">
           <summary class="cursor-pointer list-none text-center marker:content-none hover:opacity-80">
             <span class="inline-flex items-center gap-2 font-semibold text-brand-primary">
               Continue reading
               <span aria-hidden="true" class="shrink-0 text-lg leading-none text-brand-accent transition-transform duration-200 group-open:rotate-180">&darr;</span>
             </span>
           </summary>
-          <div class="prose mx-auto mt-6" set:html={renderCopy(full)} />
+          <div class="prose mt-6" set:html={renderCopy(full)} />
         </details>
       )}
     </div>
