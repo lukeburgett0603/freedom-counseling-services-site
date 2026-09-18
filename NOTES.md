@@ -1013,3 +1013,45 @@ Supabase session used for the whole pass rather than one per page,
 triggered a rebuild, spot-checked two live pages, then deleted the
 disposable session (verified its identity via SELECT before deleting,
 per the standing pattern).
+
+## Luke Burgett's page: same 3 credential facts render twice (found 2026-09-18)
+
+Found during an `/impeccable polish` pass against the real live page
+(`https://www.freedomcounselingservices.org/luke-burgett/`) — a content/
+data finding, not a code defect, so nothing was changed.
+
+- **`page.value_add_items`** for Luke's row renders as the `ValueAddStrip`
+  right after the header card (before the pull-quote): "M.A. Clinical
+  Mental Health Counseling" / "Licensed Professional Counselor Associate"
+  / "Trained in Acceptance and Commitment Therapy".
+- **`page.guide_authority_stats`** renders further down as `Guide`'s own
+  3-card block (right after "I understand where you're at..."):
+  "EDUCATION: M.A. Clinical Mental Health Counseling | Colorado Christian
+  University" / "CREDENTIALS: Licensed Professional Counselor Associate
+  (LPCA)" / "TRAINING: Acceptance and Commitment Therapy (ACT)".
+- **These are the same three real facts, populated independently into two
+  different structured columns that two different components render at
+  two different points on the same page** — not a template bug (both
+  components work exactly as designed; this is CounselorProfile.astro's
+  intended structure, and the other 4 counselors' pages weren't checked
+  for the same overlap in this pass). Left unchanged rather than guessing
+  which of the two should say something different — this is the kind of
+  editorial call (give `value_add_items` three *different* value-adds
+  instead — e.g. something about Luke's specific approach/fit rather than
+  restating his credentials, which the Guide block already covers in
+  more detail) worth a real content pass, not a silent edit during a
+  design-polish task.
+
+## MobileCTABar fix, live-confirmed on this page (2026-09-18)
+
+The same-day `MobileCTABar.astro` fix (see `local-business-site-
+template`'s CLAUDE.md, "MobileCTABar: suppress its own CTA...") was
+verified live and interactively against this real page, closing the
+"still owed" gap that fix's own writeup flagged (verification had been
+build-output-only, since the Browser pane couldn't reach localhost that
+session). This time the Browser pane reached the real external URL
+without issue: scrolled a real mobile viewport (375px) down to this
+page's own `LeadGenerator` form, confirmed the sticky bar's "Schedule
+With Luke" half genuinely disappears the moment the form's real submit
+button enters the viewport, and "Call Now" correctly expands to fill
+the bar with no stray leftover border. No console errors.
