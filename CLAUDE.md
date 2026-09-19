@@ -3718,6 +3718,44 @@ failures this session were actually a 404 from a trailing-slash URL
 deployed static site) — not a real connectivity block. Dropping the
 trailing slash fixed it immediately.
 
+## About.astro: from one wall of text to the site's own established rhythm (2026-09-18)
+
+Template-level rebuild (see `local-business-site-template`'s CLAUDE.md,
+same section title, for the full writeup and reasoning) — synced here
+the same day. A `/redesign-existing-projects` skill audit against this
+site's real live `/about/` page found it was the plainest template on
+the whole site (one long undifferentiated prose block, no cards, no
+photos, no stat grid). Restructured into the same rhythm every other
+page already uses: alternating `Section` tint, a real `Guide`
+authority-stats moment, real counselor photos via `CounselorCards`, and
+a real `PlanSteps` grid for "how to get started" — all reusing
+components already proven elsewhere on this site.
+
+- **This site's real `copy` field for the About page** was split across
+  `copy` plus 4 of the generic `storybrand_*` columns, applied directly
+  against this project's live database via the usual `ALTER TABLE
+  DISABLE/ENABLE TRIGGER` dance for `enforce_content_permission`
+  (confirmed genuinely re-enabled afterward via `pg_trigger.tgenabled`).
+  `guide_authority_stats` (3 real facts: 20+ years, Louisville &
+  Southern Indiana coverage, in-person or telehealth) and `plan_steps`
+  (3 real steps for "how to get started," reusing the practice's own
+  real Superbill note as `PlanSteps`' `note` prop) were populated the
+  same way.
+- **A real, live bug found by accident while restructuring this
+  content**: three internal links in the original `copy` field
+  (`/counselors`, `/services`) had a literal, tripled base-path prefix
+  baked into the stored text itself and were genuinely 404ing on the
+  real live site before this pass. Fixed as part of rewriting that
+  content — confirmed live in a real browser that both links now
+  resolve correctly.
+- **Verified live in a real browser**, desktop and mobile — tint
+  rhythm, the 3 authority stats, all 5 real counselor cards with
+  working per-counselor CTAs, the 3-step plan grid with its cost note,
+  the pull-quote, and the two fixed links, all confirmed directly
+  against this site's real content and real local dev server.
+- `astro check` (0 errors) and a real `npm run build` against this
+  site's live Supabase project both clean.
+
 ## Where the detailed rules live
 
 This file is a standards checklist and a "don't regress this" list, not
