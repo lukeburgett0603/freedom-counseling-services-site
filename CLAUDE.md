@@ -3789,3 +3789,53 @@ and fixed in one pass. Treat "did I update CLAUDE.md" and "did I update
 the relevant reference file(s)" as the same checklist item, not two
 separate, easily-forgotten ones — a change that only lands in CLAUDE.md
 is only half-documented.
+
+## Google Business Profile insights — Tier 4 scaffolding built, live OAuth pending (2026-09-20)
+
+Built the schema, Edge Function, and dashboard UI for GBP Performance
+data (map/search impressions, website clicks, calls, direction requests)
+as the first real instance of the template's new "Tier 4" — see
+`local-business-site-template`'s CLAUDE.md ("Client dashboard" section)
+for the full generic design reasoning. Built there first and synced here,
+same discipline as Tier 3 (SEO Insights), deliberately not repeated
+Tier 2's mistake of building traffic analytics Freedom-only with no
+template copy.
+
+- **What's live right now**: `0063_gbp_insights.sql` applied directly to
+  this project's live database (added `business.google_business_location_id`,
+  currently `null`); `get-gbp-insights` deployed to this project's Edge
+  Functions (confirmed `ACTIVE` — a real unauthenticated call correctly
+  returns 401, and a throwaway owner-role session, created and deleted
+  via the Admin API per this file's established verification pattern,
+  correctly reaches the function's business-logic and gets the expected
+  graceful `"Google Business Profile is not configured for this site"`
+  500 rather than an auth failure or a crash); `admin/leads.astro` has a
+  new "Tier 4" section below the existing Tier 2 traffic section, same
+  hidden-until-loaded/hidden-on-any-failure discipline as Tier 2.
+- **What's NOT live yet — this is scaffolding, not a working feature
+  until the following happens**: no Google Cloud OAuth client exists
+  yet, no consent grant has been made, and none of
+  `GOOGLE_BUSINESS_CLIENT_ID`/`GOOGLE_BUSINESS_CLIENT_SECRET`/
+  `GOOGLE_BUSINESS_REFRESH_TOKEN` are set as secrets on this project —
+  the dashboard section will just stay hidden (by design) until they
+  are.
+- **Response parsing is unverified against a real Google API response**
+  — see the template CLAUDE.md's Tier 4 entry and the Edge Function's own
+  header comment. The Mangools functions in this same project needed a
+  real-call correction pass twice before their response parsing was
+  actually right (see the "SEO Insights dashboard" section below) — treat
+  this as equally likely to need the same once real data starts flowing.
+- **What's left, planned for 2026-09-21**: (1) create a Google Cloud
+  project and enable the Business Profile Performance API, (2) create an
+  OAuth 2.0 client, (3) whoever has manager access on Freedom Counseling
+  Services' real GBP listing completes the consent grant (scope
+  `https://www.googleapis.com/auth/business.manage`) to produce a real
+  refresh token, (4) look up this location's real Business Profile
+  location id (via the Business Information API or the GBP dashboard
+  itself) and set `business.google_business_location_id` via direct SQL
+  (service_role key, same pattern as `mangools_location_id`), (5) set the
+  three secrets above via `supabase secrets set --project-ref
+  shxtgmjbfojmwhrebjpr`, (6) load `/admin/leads` as owner/agency and
+  confirm the Tier 4 section actually renders real numbers — fix
+  whatever the live response shape turns out to actually be, matching
+  the Mangools precedent, before considering this done.
