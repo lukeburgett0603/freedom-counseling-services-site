@@ -74,6 +74,12 @@ export interface Page {
   storybrand_pitch_label: string | null;
   storybrand_success: string | null;
   storybrand_failure: string | null;
+  // Service Area's collapsed comprehensive-depth field (genuinely
+  // unique, location-specific content), rendered via CollapsibleSection
+  // alongside `copy`'s short visible core positioning. See
+  // 0064_service_area_local_detail.sql and page-types.md's word-count
+  // split for this page type.
+  local_area_detail: string | null;
   credentials: string | null;
   author_name: string | null;
   date_published: string | null;

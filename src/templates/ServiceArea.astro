@@ -4,6 +4,7 @@ import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
 import Testimonial from '../components/Testimonial.astro';
 import PlanSteps from '../components/PlanSteps.astro';
+import CollapsibleSection from '../components/CollapsibleSection.astro';
 import FAQ from '../components/FAQ.astro';
 import CTA from '../components/CTA.astro';
 import LeadGenerator from '../components/LeadGenerator.astro';
@@ -41,6 +42,10 @@ const counselors = getCounselorOptions(allPages);
     <Testimonial quote={page.testimonial_quote} author={page.testimonial_author} role={page.testimonial_role} />
   )}
   <PlanSteps steps={page.plan_steps} />
+  <CollapsibleSection
+    markdown={page.local_area_detail}
+    triggerText={page.area_served_name ? `More about serving ${page.area_served_name}` : undefined}
+  />
   <FAQ
     faqs={page.faqs}
     heading={page.area_served_name ? `Common questions from ${page.area_served_name} clients` : undefined}
