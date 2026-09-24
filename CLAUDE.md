@@ -3825,17 +3825,90 @@ template copy.
   real-call correction pass twice before their response parsing was
   actually right (see the "SEO Insights dashboard" section below) — treat
   this as equally likely to need the same once real data starts flowing.
-- **What's left, planned for 2026-09-21**: (1) create a Google Cloud
-  project and enable the Business Profile Performance API, (2) create an
-  OAuth 2.0 client, (3) whoever has manager access on Freedom Counseling
-  Services' real GBP listing completes the consent grant (scope
-  `https://www.googleapis.com/auth/business.manage`) to produce a real
-  refresh token, (4) look up this location's real Business Profile
-  location id (via the Business Information API or the GBP dashboard
-  itself) and set `business.google_business_location_id` via direct SQL
-  (service_role key, same pattern as `mangools_location_id`), (5) set the
-  three secrets above via `supabase secrets set --project-ref
+- **Update (2026-09-23): steps 1-3 done — Luke created the Google Cloud
+  project (no organization needed, a personal account is fine), the
+  OAuth consent screen (Google's newer "Google Auth Platform" UI —
+  Branding/Audience/Data Access/Clients tabs, not the older single-page
+  wizard), and the OAuth client; completed the consent grant himself via
+  Google's OAuth Playground (simpler than building a custom redirect
+  flow — no code needed for a one-time token). Real Client ID/Secret/
+  Refresh Token set as this project's Edge Function secrets.**
+- **Blocked, not broken: Google's Business Profile APIs require manual
+  approval before any real quota is granted — see the template CLAUDE.md
+  Tier 4 entry for the full generic writeup.** The very first real API
+  call (listing GBP accounts, needed to find the location id) came back
+  `429`, `quota_limit_value: 0` — confirmed via Google's own prereqs
+  docs this is by design, not a bug: every new Cloud project starts at 0
+  QPM for these APIs specifically, and getting real access requires
+  submitting "Application for Basic API Access" via
+  `https://support.google.com/business/contact/api_default` (project
+  number `604352951599`), from an email that's an owner/manager on
+  Freedom's actual GBP listing. Luke is submitting this next — once
+  Google approves (checkable directly via 0→300 QPM on either API's
+  quota page, no need to wait on their email), resume at the location-id
+  lookup step below.
+- **What's left, once Google approves**: (4) look up this location's
+  real Business Profile location id (via the now-approved Business
+  Information API — already have a working access-token exchange using
+  the real refresh token, tested and working) and set
+  `business.google_business_location_id` via direct SQL (service_role
+  key, same pattern as `mangools_location_id`), (5) already done — the
+  three secrets are live via `supabase secrets set --project-ref
   shxtgmjbfojmwhrebjpr`, (6) load `/admin/leads` as owner/agency and
   confirm the Tier 4 section actually renders real numbers — fix
   whatever the live response shape turns out to actually be, matching
   the Mangools precedent, before considering this done.
+- **Update (2026-09-23): first real access request was rejected by
+  Google**, even though it was submitted from the actual GBP owner's own
+  login (ruling out the most common "submitted from a manager account,
+  not owner" rejection cause documented on Google's own community
+  forums). Luke confirmed the application described the use case as
+  building an analytics dashboard — this matches a well-documented
+  rejection pattern (Google's reviewers reportedly reject anything that
+  reads like a third-party platform/data-collection use case, favoring a
+  narrow first-person "I manage my own listing and want to view its own
+  performance data" framing). Luke is resubmitting with that narrower
+  wording, naming Freedom's specific business/location directly rather
+  than describing a dashboard product. Real-world reports (Google's own
+  community threads, third-party developer write-ups) put review time
+  anywhere from 4 days to 6 weeks despite Google's stated 7-10 business
+  day window — budget real calendar time, this can't be expedited from
+  our side.
+
+## Content Plan Phase 1: board polish, keyword-aware handoff, assignment email (2026-09-23)
+
+Template-level rebuild (see `local-business-site-template`'s CLAUDE.md,
+"Content Plan Phase 1: board polish, keyword-aware handoff, assignment
+email," for the full design writeup and verification detail) — synced
+here the same day, first real instance. Requested via a long, dictated
+brainstorm that also raised a much bigger "real content calendar +
+social media" idea — explicitly split into a separate, not-yet-started
+Phase 2 rather than folded into this pass.
+
+- Board: default filter now hides `published` items (still reachable via
+  the filter dropdown, never archived/deleted); Status moved out of the
+  Edit modal onto a row-level select; Category is now a locked dropdown
+  of this site's real categories, not free text.
+- "Draft blog post" now also appears directly on the board row, and the
+  hand-off to `admin/blog.astro` carries the real target keyword +
+  target question, rendered as a persistent context panel with concrete
+  keyword-placement guidance right on the drafting screen.
+- New Edge Function `notify-content-assignment` deployed to this
+  project, reusing the existing `NURTURE_RESEND_API_KEY`/
+  `NURTURE_SENDER_EMAIL` secrets — emails an assignee the moment
+  something's genuinely newly assigned to them, with a button back to
+  their assignments view.
+- **Live-verified against this real project**: role gating (401/403/404)
+  confirmed via direct `curl` against the deployed function; a real send
+  confirmed `sent: true` once pointed at Resend's actual test address
+  (a first attempt using a fake `@example.com` recipient produced a real
+  `422` from Resend, not a bug — see the template writeup); a full
+  browser pass against this site's real local dev server confirmed the
+  filter, row status select, category dropdown, the new per-row draft
+  button, and the context panel all render correctly against real and
+  seeded test data. All test accounts/rows deleted afterward.
+- **Not synced to Counselor Marketing Co.'s repo yet** — CMC never
+  received the SEO Insights or Content Plan features in the first place
+  (its migrations stop at `0035`, this template is at `0063`), a
+  pre-existing gap unrelated to today's work. Flagged to the client
+  rather than silently backporting two entire features as a side effect.

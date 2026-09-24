@@ -17,6 +17,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <div>
         <label class="block text-xs font-semibold text-slate-500">Status</label>
         <select id="plan-filter-status" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
+          <option value="active" selected>Active (not yet published)</option>
           <option value="all">All</option>
           <option value="idea">Idea</option>
           <option value="assigned">Assigned</option>
@@ -95,26 +96,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <label class="block text-xs font-semibold text-slate-500">Keyword</label>
           <input name="keyword" type="text" placeholder="The real keyword to work into this content" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-500">Content type</label>
-            <select name="content_type" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
-              <option value="undecided" selected>Undecided</option>
-              <option value="blog_post">Blog post</option>
-              <option value="service_page">New Service Page</option>
-              <option value="who_we_serve_page">New Who We Serve page</option>
-              <option value="update_existing_page">Update existing page</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-500">Status</label>
-            <select name="status" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
-              <option value="idea" selected>Idea</option>
-              <option value="assigned">Assigned</option>
-              <option value="drafted">Drafted</option>
-              <option value="published">Published</option>
-            </select>
-          </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500">Content type</label>
+          <select name="content_type" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+            <option value="undecided" selected>Undecided</option>
+            <option value="blog_post">Blog post</option>
+            <option value="service_page">New Service Page</option>
+            <option value="who_we_serve_page">New Who We Serve page</option>
+            <option value="update_existing_page">Update existing page</option>
+          </select>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-500">Linked page (update target, or once published)</label>
@@ -125,7 +115,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-500">Category</label>
-            <input name="category" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+            <select name="category" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+              <option value="">None</option>
+            </select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500">Due date</label>
@@ -204,6 +196,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   let items: ContentPlanItem[] = [];
   let assignableUsers: AdminUserRow[] = [];
   let pages: PageRow[] = [];
+  let categories: string[] = [];
   let editingItemId: string | null = null;
   let actionsMenuItemId: string | null = null;
 
@@ -225,12 +218,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   const ideaForm = document.getElementById('idea-form') as HTMLFormElement;
   const ideaFormStatus = document.getElementById('idea-form-status')!;
   const linkedPageSelect = ideaForm.elements.namedItem('linked_page_id') as HTMLSelectElement;
+  const categorySelect = ideaForm.elements.namedItem('category') as HTMLSelectElement;
   const assignedToSelect = ideaForm.elements.namedItem('assigned_to') as HTMLSelectElement;
   const modalDraftBlogButton = document.getElementById('modal-draft-blog-button')!;
 
   // Same-tab, consume-once handshake with admin/blog.astro — not URL
   // query params, since this never needs to be shareable/bookmarkable.
-  // See CLAUDE.md's "Content Planning & Management screen" section.
+  // See CLAUDE.md's "Content Planning & Management screen" section. Carries
+  // keyword/target_question too, so the drafting screen can show a real
+  // "what this post needs to cover" panel instead of just prefilling
+  // title/category with no context about why.
   function startBlogDraftHandoff(item: ContentPlanItem) {
     sessionStorage.setItem(
       'contentPlanDraftHandoff',
@@ -239,6 +236,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         title: item.title,
         category: item.category,
         linkedPageId: item.linked_page_id,
+        keyword: item.keyword,
+        targetQuestion: item.target_question,
       })
     );
     window.location.href = withBase('/admin/blog');
@@ -259,6 +258,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   function applyStatusFilter(list: ContentPlanItem[]): ContentPlanItem[] {
     const status = statusFilter.value;
     if (status === 'all') return list;
+    // Default view: everything not yet published — a published item stays
+    // fully visible via the explicit "Published"/"All" filter options, it
+    // just stops cluttering the "still needs to be created" default view.
+    if (status === 'active') return list.filter((i) => i.status !== 'published');
     return list.filter((i) => i.status === status);
   }
 
@@ -270,17 +273,28 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       .map(
         (item) => `
       <tr class="border-b border-slate-100 last:border-0" data-item-id="${item.id}">
-        <td class="px-4 py-3">${
-          item.content_type === 'blog_post'
-            ? `<button type="button" class="draft-blog-link text-left font-semibold text-brand-primary hover:underline" data-item-id="${item.id}">${escapeHtml(item.title)}</button>`
-            : escapeHtml(item.title)
-        }</td>
+        <td class="px-4 py-3">
+          <div class="flex items-center gap-2">
+            <span>${escapeHtml(item.title)}</span>
+            ${
+              item.content_type === 'blog_post'
+                ? `<button type="button" class="draft-blog-link whitespace-nowrap rounded-md border border-brand-primary px-2 py-1 text-xs font-semibold text-brand-primary hover:bg-brand-neutral" data-item-id="${item.id}">Draft blog post &rarr;</button>`
+                : ''
+            }
+          </div>
+        </td>
         <td class="px-4 py-3">${item.keyword ? escapeHtml(item.keyword) : '—'}</td>
         <td class="px-4 py-3">${item.search_volume != null ? `${item.search_volume.toLocaleString()}/mo` : '—'}</td>
         <td class="px-4 py-3">${CONTENT_TYPE_LABELS[item.content_type]}</td>
         <td class="px-4 py-3">${escapeHtml(assigneeLabel(item.assigned_to))}</td>
         <td class="px-4 py-3 whitespace-nowrap">${item.due_date ? new Date(item.due_date + 'T00:00:00').toLocaleDateString() : '—'}</td>
-        <td class="px-4 py-3">${STATUS_LABELS[item.status]}</td>
+        <td class="px-4 py-3">
+          <select class="row-status-select rounded-md border border-slate-300 px-2 py-1 text-sm" data-item-id="${item.id}">
+            ${Object.entries(STATUS_LABELS)
+              .map(([value, label]) => `<option value="${value}" ${item.status === value ? 'selected' : ''}>${label}</option>`)
+              .join('')}
+          </select>
+        </td>
         <td class="px-4 py-3 text-right">
           <button type="button" class="actions-toggle rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50" data-item-id="${item.id}">
             Actions &#9662;
@@ -304,6 +318,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       assignableUsers.map((u) => `<option value="${u.id}">${escapeHtml(userLabel(u))}</option>`).join('');
   }
 
+  function populateCategoryPicker() {
+    categorySelect.innerHTML =
+      '<option value="">None</option>' + categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  }
+
   function openAddModal() {
     editingItemId = null;
     ideaModalTitle.textContent = 'Add idea';
@@ -323,9 +342,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     (ideaForm.elements.namedItem('title') as HTMLInputElement).value = item.title;
     (ideaForm.elements.namedItem('keyword') as HTMLInputElement).value = item.keyword ?? '';
     (ideaForm.elements.namedItem('content_type') as HTMLSelectElement).value = item.content_type;
-    (ideaForm.elements.namedItem('status') as HTMLSelectElement).value = item.status;
     linkedPageSelect.value = item.linked_page_id ?? '';
-    (ideaForm.elements.namedItem('category') as HTMLInputElement).value = item.category ?? '';
+    categorySelect.value = item.category ?? '';
     (ideaForm.elements.namedItem('due_date') as HTMLInputElement).value = item.due_date ?? '';
     assignedToSelect.value = item.assigned_to ?? '';
     (ideaForm.elements.namedItem('target_question') as HTMLInputElement).value = item.target_question ?? '';
@@ -354,6 +372,33 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   addIdeaButton.addEventListener('click', openAddModal);
   ideaModalCloseButton.addEventListener('click', closeIdeaModal);
 
+  // Best-effort — the item is already saved by the time this is called,
+  // so a failure here (e.g. email not configured for this site) never
+  // blocks or un-does the save itself. See supabase/functions/
+  // notify-content-assignment for the actual send + its own graceful
+  // "not configured" handling.
+  async function notifyAssignment(itemId: string) {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+      const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+      await fetch(`${SUPABASE_URL}/functions/v1/notify-content-assignment`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${sessionData.session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content_plan_item_id: itemId,
+          redirectTo: window.location.origin + withBase('/admin/content-plan'),
+        }),
+      });
+    } catch {
+      // Swallow — see comment above.
+    }
+  }
+
   ideaForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     ideaFormStatus.textContent = '';
@@ -361,30 +406,48 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const title = (formData.get('title') as string).trim();
     if (!title) return;
 
+    const newAssignedTo = (formData.get('assigned_to') as string) || null;
+    // Status no longer lives in this modal (moved to a row-level select on
+    // the board, matching the staff assignment card's own pattern) — never
+    // included in this payload, so saving content fields can't accidentally
+    // reset a status someone already advanced.
     const payload = {
       title,
       keyword: (formData.get('keyword') as string).trim() || null,
       content_type: formData.get('content_type') as string,
-      status: formData.get('status') as string,
       linked_page_id: (formData.get('linked_page_id') as string) || null,
-      category: (formData.get('category') as string).trim() || null,
+      category: (formData.get('category') as string) || null,
       due_date: (formData.get('due_date') as string) || null,
-      assigned_to: (formData.get('assigned_to') as string) || null,
+      assigned_to: newAssignedTo,
       target_question: (formData.get('target_question') as string).trim() || null,
       notes: (formData.get('notes') as string).trim() || null,
     };
 
+    // Only notify on a genuine new assignment — creating/editing an item
+    // that's already assigned to the same person again shouldn't re-email
+    // them every time an unrelated field changes.
+    const previousAssignedTo = editingItemId ? items.find((i) => i.id === editingItemId)?.assigned_to ?? null : null;
+    const isNewAssignment = !!newAssignedTo && newAssignedTo !== previousAssignedTo;
+
     const submitButton = ideaForm.querySelector('button[type="submit"]') as HTMLButtonElement;
     submitButton.disabled = true;
-    const { error } = editingItemId
-      ? await supabase.from('content_plan_items').update(payload).eq('id', editingItemId)
-      : await supabase.from('content_plan_items').insert(payload);
+    let savedItemId = editingItemId;
+    let error: { message: string } | null;
+    if (editingItemId) {
+      ({ error } = await supabase.from('content_plan_items').update(payload).eq('id', editingItemId));
+    } else {
+      const { data, error: insertError } = await supabase.from('content_plan_items').insert(payload).select().single();
+      error = insertError;
+      if (data) savedItemId = data.id;
+    }
     submitButton.disabled = false;
 
     if (error) {
       ideaFormStatus.textContent = 'Could not save: ' + error.message;
       return;
     }
+
+    if (isNewAssignment && savedItemId) await notifyAssignment(savedItemId);
 
     closeIdeaModal();
     await loadBoard();
@@ -442,6 +505,26 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     } else {
       openActionsMenuFor(toggleButton, itemId);
     }
+  });
+
+  // Row-level status select — same pattern as the staff assignment card's
+  // own .my-status-select, moved here since status is no longer part of
+  // the Edit modal (see CLAUDE.md's "Content Plan" sections).
+  planTableBody.addEventListener('change', async (event) => {
+    const select = (event.target as HTMLElement).closest<HTMLSelectElement>('.row-status-select');
+    if (!select) return;
+    const itemId = select.dataset.itemId!;
+    const { error } = await supabase.from('content_plan_items').update({ status: select.value }).eq('id', itemId);
+    if (error) {
+      window.alert('Could not update status: ' + error.message);
+      return;
+    }
+    const item = items.find((i) => i.id === itemId);
+    if (item) item.status = select.value as ContentPlanItem['status'];
+    // Re-render rather than leave the row alone — the default "Active"
+    // filter should drop a row the moment it's marked Published, not wait
+    // for the next full reload.
+    renderBoard();
   });
 
   actionsMenuEditButton.addEventListener('click', () => {
@@ -576,6 +659,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     populateLinkedPagePicker();
   }
 
+  // Same real-categories-only query as admin/blog.astro's own category
+  // dropdown (both 'Content Pillar' and 'Service Hub' can own one) — a
+  // content-plan idea's category has to match a real hub page's category,
+  // never a typo'd free-text value the blog category dropdown then can't
+  // match against.
+  async function loadCategories() {
+    const { data, error } = await supabase.from('pages').select('category').in('page_type', ['Content Pillar', 'Service Hub']);
+    categories = error
+      ? []
+      : [...new Set((data ?? []).map((r) => r.category).filter((c): c is string => !!c))].sort();
+    populateCategoryPicker();
+  }
+
   initAdminAuth(async (adminUser) => {
     // Explicitly hide both before showing the right one — onAuthed can
     // fire more than once per page load (log out, then log back in as
@@ -593,6 +689,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       boardView.classList.remove('hidden');
       await loadAssignableUsers();
       await loadPages();
+      await loadCategories();
       await loadBoard();
     }
   });
