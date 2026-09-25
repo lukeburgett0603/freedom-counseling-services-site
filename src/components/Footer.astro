@@ -151,7 +151,7 @@ function socialIconFor(url: string): IconName {
     <p class="mt-8 text-xs text-slate-400">
       &copy; {new Date().getFullYear()} {business.legal_name ?? business.display_name}. All rights reserved.
       {' · '}
-      <a href={withBase('/admin/leads')} class="hover:text-white">Admin Login</a>
+      <a href={withBase('/admin/analytics/leads')} class="hover:text-white">Admin Login</a>
       {business.client_portal_url && (
         <>
           {' · '}

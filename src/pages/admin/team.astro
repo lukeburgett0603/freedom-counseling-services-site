@@ -71,7 +71,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // email template), not guessed by the Edge Function — see the comment
   // in supabase/functions/publish-site/index.ts for why relying on the
   // Supabase dashboard's "Site URL" setting instead was a real bug.
-  const inviteRedirectTo = window.location.origin + withBase('/admin/leads');
+  const inviteRedirectTo = window.location.origin + withBase('/admin/analytics/leads');
 
   type TeamMember = {
     id: string;

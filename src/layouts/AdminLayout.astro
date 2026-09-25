@@ -11,7 +11,11 @@ import { withBase } from '../lib/url';
 interface Props {
   title: string;
   current:
-    | 'leads'
+    | 'analytics-leads'
+    | 'analytics-traffic'
+    | 'analytics-blog'
+    | 'analytics-gbp'
+    | 'analytics-seo'
     | 'crm'
     | 'blog'
     | 'content-business-info'
@@ -20,9 +24,7 @@ interface Props {
     | 'team'
     | 'suggestions'
     | 'counselor-settings'
-    | 'seo-insights'
-    | 'content-plan'
-    | 'blog-analytics';
+    | 'content-plan';
 }
 
 const { title, current } = Astro.props;
@@ -38,6 +40,17 @@ const { title, current } = Astro.props;
 // marketing working, with day-to-day lead management (notes, follow-ups,
 // detail view) kept off of it entirely.
 //
+// "Analytics Dashboards" groups every read-only reporting view in one
+// place (Leads, Website Traffic, Blog analytics, Google Business
+// Profile, SEO Insights) — see CLAUDE.md's "Analytics Dashboards reorg"
+// section. Explicitly does NOT include Lead CRM: that's a deliberate,
+// standing decision from when CRM was first built — Leads needs to stay
+// a clean, numbers-only "proof of value" view, with day-to-day lead
+// management (notes, follow-ups, detail view) kept off of it entirely.
+// Each child carries its own distinct `navKey`, same reasoning as
+// "Website content" below — a future role that can see some analytics
+// dashboards but not others needs that split available already.
+//
 // "Website content" is a collapsible group rather than a single link —
 // business info/testimonials and page copy used to be three stacked
 // sections on one route, but grew enough to warrant their own pages.
@@ -51,12 +64,20 @@ const { title, current } = Astro.props;
 // too, or the group header never shows regardless of which children it
 // can reach.
 const navItems = [
-  { key: 'leads', label: 'Leads and analytics', href: withBase('/admin/leads') },
+  {
+    key: 'analytics',
+    label: 'Analytics Dashboards',
+    children: [
+      { key: 'analytics-leads', navKey: 'analytics-leads', label: 'Leads', href: withBase('/admin/analytics/leads') },
+      { key: 'analytics-traffic', navKey: 'analytics-traffic', label: 'Website Traffic', href: withBase('/admin/analytics/traffic') },
+      { key: 'analytics-blog', navKey: 'analytics-blog', label: 'Blog analytics', href: withBase('/admin/analytics/blog') },
+      { key: 'analytics-gbp', navKey: 'analytics-gbp', label: 'Google Business Profile', href: withBase('/admin/analytics/gbp') },
+      { key: 'analytics-seo', navKey: 'analytics-seo', label: 'SEO Insights', href: withBase('/admin/analytics/seo') },
+    ],
+  },
   { key: 'crm', label: 'Lead CRM', href: withBase('/admin/crm') },
-  { key: 'seo-insights', label: 'SEO Insights', href: withBase('/admin/seo-insights') },
   { key: 'content-plan', label: 'Content Plan', href: withBase('/admin/content-plan') },
   { key: 'blog', label: 'Blog posts', href: withBase('/admin/blog') },
-  { key: 'blog-analytics', label: 'Blog analytics', href: withBase('/admin/blog-analytics') },
   {
     key: 'content',
     label: 'Website content',

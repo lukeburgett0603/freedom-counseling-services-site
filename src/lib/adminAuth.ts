@@ -30,12 +30,15 @@ export interface AdminUser {
 
 const ROLE_NAV_ACCESS: Record<AdminUser['role'], string[]> = {
   owner: [
-    'leads',
+    'analytics',
+    'analytics-leads',
+    'analytics-traffic',
+    'analytics-blog',
+    'analytics-gbp',
+    'analytics-seo',
     'crm',
-    'seo-insights',
     'content-plan',
     'blog',
-    'blog-analytics',
     'content',
     'content-business-info',
     'content-page-copy',
@@ -45,12 +48,15 @@ const ROLE_NAV_ACCESS: Record<AdminUser['role'], string[]> = {
   ],
   staff: ['blog', 'content-plan'],
   agency: [
-    'leads',
+    'analytics',
+    'analytics-leads',
+    'analytics-traffic',
+    'analytics-blog',
+    'analytics-gbp',
+    'analytics-seo',
     'crm',
-    'seo-insights',
     'content-plan',
     'blog',
-    'blog-analytics',
     'content',
     'content-business-info',
     'content-page-copy',
@@ -280,7 +286,7 @@ export function initAdminAuth(
     if (forgotPasswordStatus) forgotPasswordStatus.textContent = '';
     const formData = new FormData(forgotPasswordForm);
     const { error } = await supabase.auth.resetPasswordForEmail(formData.get('email') as string, {
-      redirectTo: window.location.origin + withBase('/admin/leads'),
+      redirectTo: window.location.origin + withBase('/admin/analytics/leads'),
     });
     if (!forgotPasswordStatus) return;
     forgotPasswordStatus.textContent = error

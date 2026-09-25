@@ -4027,3 +4027,44 @@ CMC sync applies here.
   lands on the same line. Verified the same way — live browser pass,
   confirmed bar bottoms flush across the entire row this time, not just
   a visual guess. Test account deleted after.
+
+## Analytics Dashboards reorg (2026-09-25)
+
+Template-level restructure (see `local-business-site-template`'s
+CLAUDE.md, "Analytics Dashboards reorg," for the full design writeup
+and verification detail) — synced here the same day. The old combined
+`/admin/leads` page (leads + Cloudflare traffic + Google Business
+Profile all stacked together) is now a collapsible "Analytics
+Dashboards" nav group with five real pages: **Leads**
+(`/admin/analytics/leads`), **Website Traffic**
+(`/admin/analytics/traffic`), **Blog analytics**
+(`/admin/analytics/blog`), **Google Business Profile**
+(`/admin/analytics/gbp`), **SEO Insights** (`/admin/analytics/seo`).
+Old URLs (`/admin/leads`, `/admin/blog-analytics`, `/admin/seo-
+insights`) redirect (302) to their new homes — nothing bookmarked
+breaks. Lead CRM deliberately stays outside this group, same standing
+"numbers-only proof-of-value view, kept separate from day-to-day
+workflow" decision as always.
+
+- This is the site that drove **Website Traffic (Tier 2) finally
+  getting generalized into the template** — it was Freedom-only code
+  until today, and needed to become portable the moment it had to be a
+  first-class member of a shared nav group. `get-traffic-stats`'s own
+  code didn't change at all, so no redeploy was needed here — only the
+  admin UI around it moved.
+- The extracted Google Business Profile dashboard also got the same
+  sparse-label chart fix as Website Traffic's (see the "Pageviews-per-
+  day chart" section above) — both charts now share the identical
+  pattern. GBP itself still shows "not configured yet" here, same as
+  before — the reorg didn't change its real status, just gave it its
+  own page.
+- **Live-verified end to end against this real site**: all 5
+  dashboards loaded with real data via a throwaway owner login (22 real
+  leads, real Cloudflare pageviews on the aligned chart, real per-post
+  blog data, 48 real target keywords, and GBP correctly showing not-
+  configured); the three old-URL redirects confirmed landing on their
+  new pages via the dev server's own request log. A narrow, pre-
+  existing `getSession()` timing race (not introduced by this pass —
+  see the template writeup) was found and characterized, not "fixed,"
+  since it's already hard to hit outside of scripted rapid-navigation
+  testing. Test account deleted after.

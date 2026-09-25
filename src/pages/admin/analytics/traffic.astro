@@ -1,0 +1,147 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<!--
+  Tier 2 — Cloudflare Web Analytics, sourced from the get-traffic-stats
+  Edge Function. Generalized into the template for the first time as
+  part of the "Analytics Dashboards" nav reorg (see CLAUDE.md) — this
+  used to be Freedom Counseling Services-only code (their own Cloudflare
+  account/credentials), left out of the template deliberately at the
+  time rather than half-generalized. Now that it has its own dedicated
+  page alongside Leads/Blog/GBP/SEO under one consistent nav group,
+  keeping it Freedom-only would have made "Analytics Dashboards" an
+  inconsistent folder from one client site to the next — see the real-
+  bugs list's own lesson from Tier 2's original mistake ("bring the Edge
+  Function AND this admin UI wiring together, not just the function").
+  A client with no `business.cloudflare_beacon_token`/Edge Function
+  secrets configured just sees the empty state below.
+-->
+<AdminLayout title="Website Traffic | Admin" current="analytics-traffic">
+  <div id="traffic-empty" class="rounded-lg border border-black/5 bg-white p-5 text-sm text-slate-500 shadow-sm">
+    Website traffic analytics isn't configured for this site yet.
+  </div>
+  <div id="traffic-section" class="hidden">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">This month</p>
+        <p id="traffic-this-month" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="traffic-this-month-visits" class="mt-1 text-xs text-slate-500"></p>
+      </div>
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Last month</p>
+        <p id="traffic-last-month" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="traffic-last-month-visits" class="mt-1 text-xs text-slate-500"></p>
+      </div>
+    </div>
+    <div class="mt-4 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+      <div class="mb-4 flex items-baseline justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pageviews per day</p>
+        <p id="traffic-chart-peak" class="text-xs text-slate-400"></p>
+      </div>
+      <!-- No items-end — see CLAUDE.md's "Pageviews-per-day chart" entry
+           for why a stretched, definite-height parent is required for
+           the bar's percentage height to resolve against once each day
+           became a label+bar+label column instead of a bare bar. -->
+      <div id="traffic-chart" class="flex h-28 gap-[3px]"></div>
+    </div>
+    <div class="mt-4 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Top pages</p>
+      <div id="traffic-top-pages" class="space-y-2 text-sm"></div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { initAdminAuth, supabase } from '../../../lib/adminAuth';
+
+  type TrafficStats = {
+    thisMonth: { pageviews: number; visits: number };
+    lastMonth: { pageviews: number; visits: number };
+    byDay: { date: string; pageviews: number; visits: number }[];
+    topPages: { path: string; pageviews: number }[];
+  };
+
+  // Bare bars with only a hover title give the owner no visible way to
+  // read the chart at a glance — real labels needed, but a label under
+  // every single one of ~31 daily bars would be unreadable, so counts/
+  // dates show at a sparse, regular interval (every 5th day, plus the
+  // most recent) — every bar still keeps its own exact-value hover
+  // title. Both label spans carry a fixed height regardless of whether
+  // they have text, since an empty inline span collapses to ~0 height —
+  // without that, `justify-end` packing the (label, bar, label) group
+  // as a unit put each bar's own bottom edge at a different height
+  // depending on which columns happened to be labeled (see CLAUDE.md's
+  // "Pageviews-per-day chart" entry for the full story of both fixes).
+  const LABEL_INTERVAL = 5;
+
+  async function loadTrafficStats() {
+    const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+    const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) return;
+
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/get-traffic-stats`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}` },
+      });
+      if (!response.ok) return;
+      const stats = (await response.json()) as TrafficStats;
+
+      document.getElementById('traffic-this-month')!.textContent = stats.thisMonth.pageviews.toLocaleString();
+      document.getElementById('traffic-this-month-visits')!.textContent =
+        `${stats.thisMonth.visits.toLocaleString()} visit${stats.thisMonth.visits === 1 ? '' : 's'}`;
+      document.getElementById('traffic-last-month')!.textContent = stats.lastMonth.pageviews.toLocaleString();
+      document.getElementById('traffic-last-month-visits')!.textContent =
+        `${stats.lastMonth.visits.toLocaleString()} visit${stats.lastMonth.visits === 1 ? '' : 's'}`;
+
+      const maxDayCount = Math.max(1, ...stats.byDay.map((d) => d.pageviews));
+      const peakEl = document.getElementById('traffic-chart-peak')!;
+      peakEl.textContent = maxDayCount > 0 ? `Peak: ${maxDayCount.toLocaleString()}/day` : '';
+      const chartEl = document.getElementById('traffic-chart')!;
+      chartEl.innerHTML = stats.byDay
+        .map((d, i) => {
+          const heightPct = Math.max(Math.round((d.pageviews / maxDayCount) * 100), d.pageviews > 0 ? 4 : 1);
+          const label = d.date
+            ? new Date(d.date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+            : '';
+          const showLabel = i % LABEL_INTERVAL === 0 || i === stats.byDay.length - 1;
+          return `
+      <div class="flex flex-1 flex-col items-center justify-end gap-1" title="${d.pageviews} pageview${d.pageviews === 1 ? '' : 's'} — ${label}">
+        <span class="flex h-3 items-end text-[10px] font-semibold text-slate-500">${showLabel ? d.pageviews.toLocaleString() : ''}</span>
+        <div class="w-full rounded-t bg-brand-accent" style="height: ${heightPct}%"></div>
+        <span class="flex h-3 items-start whitespace-nowrap text-[9px] text-slate-400">${showLabel ? label : ''}</span>
+      </div>`;
+        })
+        .join('');
+
+      const topPagesEl = document.getElementById('traffic-top-pages')!;
+      if (stats.topPages.length === 0) {
+        topPagesEl.innerHTML = '<p class="text-slate-500">No page views yet.</p>';
+      } else {
+        const maxPageviews = stats.topPages[0].pageviews;
+        topPagesEl.innerHTML = stats.topPages
+          .map(
+            (p) => `
+      <div class="flex items-center gap-3">
+        <span class="w-40 shrink-0 truncate text-slate-700">${p.path}</span>
+        <div class="h-2 flex-1 rounded-full bg-slate-100">
+          <div class="h-2 rounded-full bg-brand-accent" style="width: ${Math.round((p.pageviews / maxPageviews) * 100)}%"></div>
+        </div>
+        <span class="w-12 shrink-0 text-right font-semibold text-brand-ink">${p.pageviews.toLocaleString()}</span>
+      </div>`
+          )
+          .join('');
+      }
+
+      document.getElementById('traffic-empty')!.classList.add('hidden');
+      document.getElementById('traffic-section')!.classList.remove('hidden');
+    } catch {
+      // Network error, malformed response, etc. — stays on the empty state.
+    }
+  }
+
+  initAdminAuth(loadTrafficStats, { allowedRoles: ['owner', 'agency'] });
+</script>
