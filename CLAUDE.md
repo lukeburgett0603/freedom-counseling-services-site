@@ -4013,3 +4013,17 @@ CMC sync applies here.
   on the correct bars (e.g. "240" above the Sep 10 bar, matching that
   day's real peak), and the "Peak: 240/day" reference matching the
   tallest bar. Test account deleted after.
+- **Follow-up, same day: the client caught a real bug from a live
+  screenshot** — bar *bottoms* sat at different heights across the row
+  instead of one common baseline, visibly worse on labeled bars than
+  unlabeled ones. Cause: an empty `<span>` (the count/date label on a
+  bar that isn't one of the sparse labeled ones) collapses to ~0 height,
+  while a populated one takes up a real line-height's worth of space —
+  and `justify-end` packs the (label, bar, label) trio as a single unit,
+  so the bar's own bottom edge landed higher on columns whose label
+  happened to be populated. Fixed by giving both label `<span>`s a fixed
+  `h-3` regardless of whether they contain text, so every column
+  reserves identical space whether labeled or not and every bar's bottom
+  lands on the same line. Verified the same way — live browser pass,
+  confirmed bar bottoms flush across the entire row this time, not just
+  a visual guess. Test account deleted after.

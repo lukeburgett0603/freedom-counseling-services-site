@@ -400,6 +400,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       // sparse, regular interval (every 5th day, plus the very last/most
       // recent day) — every bar still keeps its exact-value hover title
       // for anyone who wants to check one specific day.
+      //
+      // Both label spans carry a fixed `h-3` regardless of whether they
+      // actually have text in them — an empty inline span collapses to
+      // ~0 height, so without this a column with a real date label
+      // underneath was taller than one without, and `justify-end`
+      // packing the (label, bar, label) group as a unit meant the bar's
+      // own bottom edge landed at a different height on every column
+      // depending on which ones happened to be labeled. Reserving the
+      // same fixed row whether populated or empty keeps every bar's
+      // bottom on one common baseline — caught live, reported directly
+      // by the client from a real screenshot.
       const maxDayCount = Math.max(1, ...stats.byDay.map((d) => d.pageviews));
       const LABEL_INTERVAL = 5;
       const peakEl = document.getElementById('traffic-chart-peak')!;
@@ -414,9 +425,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           const showLabel = i % LABEL_INTERVAL === 0 || i === stats.byDay.length - 1;
           return `
       <div class="flex flex-1 flex-col items-center justify-end gap-1" title="${d.pageviews} pageview${d.pageviews === 1 ? '' : 's'} — ${label}">
-        <span class="text-[10px] font-semibold text-slate-500">${showLabel ? d.pageviews.toLocaleString() : ''}</span>
+        <span class="flex h-3 items-end text-[10px] font-semibold text-slate-500">${showLabel ? d.pageviews.toLocaleString() : ''}</span>
         <div class="w-full rounded-t bg-brand-accent" style="height: ${heightPct}%"></div>
-        <span class="whitespace-nowrap text-[9px] text-slate-400">${showLabel ? label : ''}</span>
+        <span class="flex h-3 items-start whitespace-nowrap text-[9px] text-slate-400">${showLabel ? label : ''}</span>
       </div>`;
         })
         .join('');
