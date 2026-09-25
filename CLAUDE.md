@@ -3944,3 +3944,33 @@ real first instance, planned but not yet started for CMC/template sync.
   CTA link on a real blog post in a real browser produced a real row in
   `page_cta_clicks` moments later, confirmed via direct query. All test
   accounts/rows deleted afterward.
+
+## Backlog for this site
+
+Genuinely open items only — resolved/superseded threads get removed
+from this list, not left here as stale history (that lives in the
+dated sections above instead). Ask to see this list any time.
+
+- **Google Business Profile API access — resubmission blocked on Luke's
+  time, not on anything technical.** First application was rejected
+  (see "Google Business Profile insights" above for the full story —
+  it read as a third-party analytics platform rather than the actual
+  business's own owner viewing their own listing's data). Next step:
+  resubmit via `https://support.google.com/business/contact/api_default`
+  ("Application for Basic API Access", project number `604352951599`)
+  with narrower, first-person wording ("I am the owner of Freedom
+  Counseling Services and want to view my own listing's performance
+  data for internal use — not a third-party product"). Luke said
+  2026-09-25 he can't get to this until next week. Once Google
+  approves (checkable directly via 0→300 QPM on either Business
+  Profile API's quota page, no need to wait on their email — project
+  `604352951599`), resume at looking up the real Business Profile
+  location id and setting `business.google_business_location_id`.
+- **About page: bold redesign concept — explicitly deferred by the
+  client, not declined.** A full, unrestricted `/redesign-existing-
+  projects`-style mockup exists as a private Artifact
+  (`https://claude.ai/artifact/G53iaVnHLVfpqk7PjdDpgQ`, "Freedom
+  Counseling About Page — Bold Redesign Concept") — nothing on the live
+  site was touched. Luke's own words: "I'll come back to this design
+  stuff." Pick this back up only when he raises it again, not
+  proactively.
