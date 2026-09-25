@@ -3974,3 +3974,42 @@ dated sections above instead). Ask to see this list any time.
   site was touched. Luke's own words: "I'll come back to this design
   stuff." Pick this back up only when he raises it again, not
   proactively.
+
+## Pageviews-per-day chart: real labels, not bare bars (2026-09-25)
+
+Client-reported, directly against this real dashboard: the Tier 2
+"Pageviews per day" chart on `/admin/leads` was unreadable — just
+varying-height bars with no visible date axis or value labels, only a
+hover `title` tooltip (which most people never discover). This is
+**Freedom-only code** — `get-traffic-stats` and this whole Tier 2
+section don't exist in `local-business-site-template` at all (Freedom's
+own Cloudflare account/credentials aren't portable), so no template or
+CMC sync applies here.
+
+- **Fixed by matching a pattern already proven on this same page** —
+  the weekly leads chart directly below it already shows a count label
+  above each bar and a date label below, and was already readable.
+  Ported that same shape to the daily chart, adapted for ~31 bars
+  instead of 10: showing a label on every single bar would be
+  unreadable at that density, so count/date labels now show at a
+  sparse, regular interval (every 5th day, plus the most recent day) —
+  every bar still keeps its own exact-value hover tooltip for anyone
+  checking one specific day. Also added a "Peak: N/day" reference next
+  to the section heading, so the bar heights have a concrete number to
+  anchor against even without reading every label.
+- **A real, caught-before-shipping layout bug from restructuring the
+  bars into label+bar+label columns**: the container's `items-end`
+  class (there to keep bars bottom-aligned in the old flat-bar version)
+  prevents the flex row's default stretch behavior, so the new column
+  wrappers never got a definite height — and a percentage-height bar
+  inside a column with no definite height silently collapses, the exact
+  same class of bug as `OptimizedImage.astro`'s own wrapper-height fix
+  (see the template's real-bugs list). Fixed by dropping `items-end`
+  entirely, matching the weekly chart's own container class (which
+  never had it) — the proven-working pattern, not a new one.
+- **Verified live**: `astro check` (0 errors), then a real browser pass
+  against this project's actual Cloudflare data via a throwaway owner
+  login — confirmed real bar heights, sparse count/date labels landing
+  on the correct bars (e.g. "240" above the Sep 10 bar, matching that
+  day's real peak), and the "Peak: 240/day" reference matching the
+  tallest bar. Test account deleted after.

@@ -31,8 +31,23 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       </div>
     </div>
     <div class="mt-4 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">Pageviews per day</p>
-      <div id="traffic-chart" class="flex h-28 items-end gap-[3px]"></div>
+      <div class="mb-4 flex items-baseline justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pageviews per day</p>
+        <p id="traffic-chart-peak" class="text-xs text-slate-400"></p>
+      </div>
+      <!--
+        No items-end here (unlike this section's earlier flat-bar version)
+        — each day is now a flex-col wrapper (count label, bar, date
+        label), and the bar's own height:X% only resolves against a
+        definite parent height once the row's default align-items:stretch
+        gives that wrapper a real, definite height. items-end would
+        prevent the stretch and the bar would silently collapse, the same
+        class of bug as OptimizedImage.astro's own wrapper-height fix
+        (see CLAUDE.md's real-bugs list) — matching #weekly-chart's own
+        already-working container class (no items-end there either) is
+        what makes this the safe, proven pattern.
+      -->
+      <div id="traffic-chart" class="flex h-28 gap-[3px]"></div>
     </div>
     <div class="mt-4 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
       <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Top pages</p>
@@ -375,15 +390,34 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       document.getElementById('traffic-last-month-visits')!.textContent =
         `${stats.lastMonth.visits.toLocaleString()} visit${stats.lastMonth.visits === 1 ? '' : 's'}`;
 
+      // Bare bars with only a hover title gave the owner no visible way to
+      // read the chart at a glance (reported directly — "just varying size
+      // bars, no metric, no idea what day is what"). Fixed the same way
+      // the weekly leads chart (above) already solves this for its own 10
+      // bars: a real date label under the bar, matching that chart's own
+      // label format for consistency. With ~31 daily bars a label under
+      // every single one would be unreadable, so dates/counts show at a
+      // sparse, regular interval (every 5th day, plus the very last/most
+      // recent day) — every bar still keeps its exact-value hover title
+      // for anyone who wants to check one specific day.
       const maxDayCount = Math.max(1, ...stats.byDay.map((d) => d.pageviews));
+      const LABEL_INTERVAL = 5;
+      const peakEl = document.getElementById('traffic-chart-peak')!;
+      peakEl.textContent = maxDayCount > 0 ? `Peak: ${maxDayCount.toLocaleString()}/day` : '';
       const chartEl = document.getElementById('traffic-chart')!;
       chartEl.innerHTML = stats.byDay
-        .map((d) => {
+        .map((d, i) => {
           const heightPct = Math.max(Math.round((d.pageviews / maxDayCount) * 100), d.pageviews > 0 ? 4 : 1);
           const label = d.date
             ? new Date(d.date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
             : '';
-          return `<div class="flex-1 rounded-t bg-brand-accent" style="height: ${heightPct}%" title="${d.pageviews} pageview${d.pageviews === 1 ? '' : 's'} — ${label}"></div>`;
+          const showLabel = i % LABEL_INTERVAL === 0 || i === stats.byDay.length - 1;
+          return `
+      <div class="flex flex-1 flex-col items-center justify-end gap-1" title="${d.pageviews} pageview${d.pageviews === 1 ? '' : 's'} — ${label}">
+        <span class="text-[10px] font-semibold text-slate-500">${showLabel ? d.pageviews.toLocaleString() : ''}</span>
+        <div class="w-full rounded-t bg-brand-accent" style="height: ${heightPct}%"></div>
+        <span class="whitespace-nowrap text-[9px] text-slate-400">${showLabel ? label : ''}</span>
+      </div>`;
         })
         .join('');
 
