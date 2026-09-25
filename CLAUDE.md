@@ -3912,3 +3912,35 @@ Phase 2 rather than folded into this pass.
   (its migrations stop at `0035`, this template is at `0063`), a
   pre-existing gap unrelated to today's work. Flagged to the client
   rather than silently backporting two entire features as a side effect.
+  (Since resolved — see the "Content Plan Phase 1: board polish..." and
+  "Brought current with the template" work, 2026-09-24.)
+
+## Blog analytics: pageviews, leads, and CTA clicks per post (2026-09-25)
+
+Template-level feature (see `local-business-site-template`'s CLAUDE.md,
+"Blog analytics: pageviews, leads, and CTA clicks per post," for the
+full design writeup and verification detail) — built here first as the
+real first instance, planned but not yet started for CMC/template sync.
+
+- New admin page `/admin/blog-analytics` (owner/agency only): pageviews
+  (last 30 days, via a new `get-blog-analytics` Edge Function reusing
+  the existing Cloudflare Web Analytics secrets), leads generated (from
+  the already-collected `leads.source_page`), and CTA clicks (a new
+  `page_cta_clicks` table + tracking script on `CTA.astro`, threaded
+  through only on `BlogPost.astro` for now).
+- Migration `0065_page_cta_clicks.sql` applied directly against this
+  project's live database via `supabase db query --linked` — Freedom's
+  own migration-history table turned out to have the same "nothing past
+  0034 marked applied, despite the schema genuinely having it" gap the
+  CMC sync surfaced the day before; this predates today and isn't
+  something this pass caused.
+- **Live-verified end to end against this real site**: RLS confirmed on
+  `page_cta_clicks` (a `RETURNING`-clause false alarm during testing is
+  written up in the template CLAUDE.md — the real production code was
+  never affected); `get-blog-analytics` returned real per-path pageview
+  data from Freedom's actual Cloudflare account, including real low-
+  traffic blog post slugs; a full browser pass confirmed the admin
+  page's stat cards and sorted table render correctly; clicking a real
+  CTA link on a real blog post in a real browser produced a real row in
+  `page_cta_clicks` moments later, confirmed via direct query. All test
+  accounts/rows deleted afterward.

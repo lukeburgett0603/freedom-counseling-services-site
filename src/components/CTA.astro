@@ -11,9 +11,16 @@ interface Props {
   subheading?: string | null;
   buttonText?: string;
   href?: string;
+  // Optional — when set, a click on the button logs a best-effort,
+  // fire-and-forget row to page_cta_clicks for the admin blog analytics
+  // screen (see CLAUDE.md's "Blog analytics" section). Currently only
+  // threaded through from BlogPost.astro, where a post's own performance
+  // is actually being measured — every other template simply omits this
+  // and the button behaves exactly as it always has, untracked.
+  pageId?: string;
 }
 
-const { heading, subheading, buttonText = 'Contact Us', href = withBase('/contact') } = Astro.props;
+const { heading, subheading, buttonText = 'Contact Us', href = withBase('/contact'), pageId } = Astro.props;
 ---
 
 <section class="bg-brand-primary py-16 text-center text-white">
@@ -22,9 +29,43 @@ const { heading, subheading, buttonText = 'Contact Us', href = withBase('/contac
     {subheading && <p class="mt-3 text-white/90">{subheading}</p>}
     <a
       href={href}
-      class="mt-6 inline-block rounded-md bg-white px-6 py-3 font-semibold text-brand-primary transition hover:bg-brand-neutral hover:shadow-md"
+      class="cta-button mt-6 inline-block rounded-md bg-white px-6 py-3 font-semibold text-brand-primary transition hover:bg-brand-neutral hover:shadow-md"
+      data-page-id={pageId}
     >
       {buttonText}
     </a>
   </div>
 </section>
+
+{pageId && (
+  <script>
+    // Class selector + querySelectorAll, not an id — this component can
+    // render more than once per page in principle, same discipline as
+    // LeadGenerator.astro (see CLAUDE.md's real-bugs list). Fire-and-
+    // forget: a failed insert never blocks or affects the actual link
+    // navigation, and nothing here is sensitive enough to need retry
+    // logic — a missed click just under-counts by one.
+    const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+    const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+    document.querySelectorAll<HTMLAnchorElement>('.cta-button[data-page-id]').forEach((link) => {
+      link.addEventListener('click', () => {
+        const pageId = link.dataset.pageId;
+        if (!pageId) return;
+        fetch(`${SUPABASE_URL}/rest/v1/page_cta_clicks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({ page_id: pageId }),
+          keepalive: true,
+        }).catch(() => {
+          // Swallow — see comment above.
+        });
+      });
+    });
+  </script>
+)}

@@ -21,7 +21,8 @@ interface Props {
     | 'suggestions'
     | 'counselor-settings'
     | 'seo-insights'
-    | 'content-plan';
+    | 'content-plan'
+    | 'blog-analytics';
 }
 
 const { title, current } = Astro.props;
@@ -55,6 +56,7 @@ const navItems = [
   { key: 'seo-insights', label: 'SEO Insights', href: withBase('/admin/seo-insights') },
   { key: 'content-plan', label: 'Content Plan', href: withBase('/admin/content-plan') },
   { key: 'blog', label: 'Blog posts', href: withBase('/admin/blog') },
+  { key: 'blog-analytics', label: 'Blog analytics', href: withBase('/admin/blog-analytics') },
   {
     key: 'content',
     label: 'Website content',
