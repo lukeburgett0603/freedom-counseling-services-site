@@ -378,6 +378,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     lead_source: string | null;
     lead_source_detail: string | null;
     referral_partner_id: string | null;
+    auto_reply_sent_at: string | null;
   };
 
   const SESSION_FORMAT_LABELS: Record<string, string> = {
@@ -934,7 +935,9 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     currentLeadId = leadId;
 
     detailName.textContent = lead.name || '(no name)';
-    detailSubmitted.textContent = `Submitted ${new Date(lead.created_at).toLocaleString()}`;
+    detailSubmitted.textContent =
+      `Submitted ${new Date(lead.created_at).toLocaleString()}` +
+      (lead.auto_reply_sent_at ? ' · Automatic reply sent' : '');
     detailStatusContainer.innerHTML = renderStatusSelect(lead.id, lead.status);
     detailEmail.textContent = lead.email ?? '—';
     detailPhone.textContent = lead.phone ?? '—';

@@ -45,6 +45,7 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildLeadAutoReply } from '../_shared/leadAutoReply.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -309,6 +310,52 @@ Deno.serve(async (req: Request) => {
     // the visitor and never allowed to make a captured lead look failed.
     // Still logged, for the same reason as the non-2xx case above.
     console.error('submit-lead: notification email threw', err);
+  }
+
+  // Automatic reply to the lead (0070_lead_auto_reply.sql). Its own
+  // try/catch, independent of the practice notification above, so either
+  // one failing never stops the other. Appointment requests only: a guide
+  // download already returned above and gets its nurture sequence instead.
+  try {
+    const resendApiKey = Deno.env.get('NURTURE_RESEND_API_KEY');
+    const senderEmail = Deno.env.get('NURTURE_SENDER_EMAIL');
+    const { data: biz } = await supabase
+      .from('business')
+      .select(
+        'display_name, telephone, lead_notification_email, lead_response_time_note, lead_auto_reply_enabled, lead_auto_reply_message, show_crisis_resources'
+      )
+      .maybeSingle();
+
+    if (resendApiKey && senderEmail && biz?.lead_auto_reply_enabled && email) {
+      const { subject, html } = buildLeadAutoReply({
+        leadName: name,
+        practiceName: biz.display_name,
+        customMessage: biz.lead_auto_reply_message,
+        responseTimeNote: biz.lead_response_time_note,
+        telephone: biz.telephone,
+        showCrisisResources: biz.show_crisis_resources !== false,
+      });
+      // Replies go to the practice's own inbox (the first lead-notification
+      // address), never to the no-reply sending address.
+      const replyTo = (biz.lead_notification_email ?? '').split(',').map((s: string) => s.trim()).filter(Boolean)[0];
+      const fromHeader = `${biz.display_name} <${senderEmail}>`;
+
+      const replyResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: fromHeader, to: [email], ...(replyTo ? { reply_to: replyTo } : {}), subject, html }),
+      });
+      if (replyResponse.ok) {
+        await supabase.from('leads').update({ auto_reply_sent_at: new Date().toISOString() }).eq('id', lead.id);
+      } else {
+        console.error('submit-lead: Resend rejected the lead auto-reply', {
+          status: replyResponse.status,
+          body: await replyResponse.text(),
+        });
+      }
+    }
+  } catch (err) {
+    console.error('submit-lead: lead auto-reply threw', err);
   }
 
   return jsonResponse({ ok: true, id: lead.id });

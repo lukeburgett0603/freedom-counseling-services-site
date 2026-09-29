@@ -4233,3 +4233,38 @@ folder at `review-program/ethical-review-program.md`.
   (the Business Profile API is still pending), showing growth over time.
 - Uses the `qrcode` npm package (client-side SVG). The 6 `npm audit`
   findings in this repo predate it.
+
+## Automatic reply to new leads (built 2026-09-29)
+
+The "Get Booked" step of the Full Caseload System: the moment someone
+submits the contact form, they get a short confirmation email. Migration
+`0070_lead_auto_reply.sql`; settings on Website content → Business info
+("Automatic reply to new leads"); **off by default**, turned on by the
+practice after previewing it.
+
+- **One builder, `supabase/functions/_shared/leadAutoReply.ts`**, used by
+  `submit-lead` (the real send) and `publish-site`'s new
+  `preview-auto-reply` / `test-auto-reply` actions (owner/agency only,
+  same `getUser()` + `admin_users` check as invite/resend). The admin
+  preview is therefore exactly what a lead receives. The test goes only to
+  the signed-in admin's own address. `callPublishFunction()` now also
+  returns the response body (`data`) so the preview HTML can come back.
+- **Content rules for a therapy inquiry**: never repeats what the person
+  wrote (a shared inbox or family member could see it); "What happens
+  next" reuses `business.lead_response_time_note`; phone + reply-to the
+  practice's first `lead_notification_email` address; crisis line when
+  `show_crisis_resources` is on; neutral default wording, with the
+  practice's warmth in the optional `lead_auto_reply_message` (≤800 chars).
+- **Separate try/catch from the practice notification** in `submit-lead`,
+  so either failing never blocks the other or the lead insert.
+  Appointment requests only (guide downloads return before this).
+  `leads.auto_reply_sent_at` is set only when Resend accepts the send; the
+  CRM detail view shows "Automatic reply sent." Not counted as
+  `first_contacted_at`: speed to lead measures a human follow-up.
+- **Verified live** via a throwaway owner login whose address was Resend's
+  test inbox `delivered@resend.dev` (preview 200, test send accepted,
+  anon caller 401), plus the admin UI in the browser. Real bug caught:
+  the preview iframe with `sandbox=""` rendered blank; switched to
+  `sandbox="allow-same-origin"` (still no scripts). A real end-to-end send
+  from the live form still needs one submission once the practice turns
+  it on (Turnstile blocks localhost).

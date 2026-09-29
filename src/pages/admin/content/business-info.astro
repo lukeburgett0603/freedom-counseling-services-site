@@ -77,6 +77,50 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       </form>
     </section>
 
+    <!--
+      Automatic reply to new leads (0070_lead_auto_reply.sql). Its own Save:
+      the reply is sent server-side, so saving needs no site rebuild. The
+      preview is rendered by the same shared builder the real send uses
+      (supabase/functions/_shared/leadAutoReply.ts, via publish-site), so
+      what's shown here is exactly what a lead receives.
+    -->
+    <section>
+      <h2 class="mb-2 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Automatic reply to new leads</h2>
+      <p class="mb-4 text-sm text-slate-600">
+        The moment someone submits your contact form, they get a short email confirming you received it and what
+        happens next, so they know their message landed while they wait for a real person to follow up.
+      </p>
+      <div class="space-y-4">
+        <label class="flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2.5">
+          <input id="auto-reply-enabled" type="checkbox" />
+          <span class="text-sm font-medium">Send an automatic reply to every new appointment request</span>
+        </label>
+        <div>
+          <label for="auto-reply-message" class="mb-1 block text-sm font-semibold text-slate-700">Your personal message (optional)</label>
+          <textarea
+            id="auto-reply-message"
+            rows="4"
+            maxlength="800"
+            placeholder="e.g. Reaching out takes courage, and we're glad you did."
+            class="w-full rounded-md border border-slate-300 px-4 py-2"></textarea>
+          <p class="mt-1 text-xs text-slate-500">
+            Appears after the opening line. Keep it general: this email never repeats what the person wrote to you,
+            to protect their privacy. The "What happens next" line comes from your form's response-time note.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="auto-reply-save" type="button" class="rounded-md bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90">Save</button>
+          <button id="auto-reply-preview" type="button" class="rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Preview</button>
+          <button id="auto-reply-test" type="button" class="rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Send me a test</button>
+        </div>
+        <p id="auto-reply-status" class="text-sm" role="status"></p>
+        <div id="auto-reply-preview-wrap" class="hidden rounded-md border border-slate-200 bg-white">
+          <p id="auto-reply-preview-subject" class="border-b border-slate-200 px-4 py-2 text-sm"></p>
+          <iframe id="auto-reply-preview-frame" title="Automatic reply preview" class="h-[28rem] w-full" sandbox="allow-same-origin"></iframe>
+        </div>
+      </div>
+    </section>
+
     <section>
       <h2 class="mb-4 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Testimonials</h2>
       <p class="mb-4 text-sm text-slate-600">A genuine quote from a client, shown on the page you choose — safe to edit anytime.</p>
@@ -114,7 +158,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
 <script>
   import { supabase, initAdminAuth } from '../../../lib/adminAuth';
-  import { triggerRebuild } from '../../../lib/publishFunction';
+  import { callPublishFunction, triggerRebuild } from '../../../lib/publishFunction';
 
   type PageOption = {
     id: string;
@@ -135,6 +179,8 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     postal_code: string | null;
     client_portal_url: string | null;
     lead_notification_email: string | null;
+    lead_auto_reply_enabled: boolean;
+    lead_auto_reply_message: string | null;
   };
 
   function escapeHtml(value: string): string {
@@ -274,6 +320,66 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   });
 
   // ---------------------------------------------------------------------
+  // Automatic reply to new leads
+  // ---------------------------------------------------------------------
+  const autoReplyEnabled = document.getElementById('auto-reply-enabled') as HTMLInputElement;
+  const autoReplyMessage = document.getElementById('auto-reply-message') as HTMLTextAreaElement;
+  const autoReplyStatus = document.getElementById('auto-reply-status')!;
+  const autoReplyPreviewWrap = document.getElementById('auto-reply-preview-wrap')!;
+  const autoReplyPreviewFrame = document.getElementById('auto-reply-preview-frame') as HTMLIFrameElement;
+
+  function setAutoReplyStatus(text: string, tone: 'info' | 'ok' | 'error') {
+    autoReplyStatus.textContent = text;
+    autoReplyStatus.className =
+      'text-sm ' + (tone === 'ok' ? 'text-emerald-700' : tone === 'error' ? 'text-red-600' : 'text-slate-600');
+  }
+
+  function loadAutoReplyForm() {
+    if (!business) return;
+    autoReplyEnabled.checked = business.lead_auto_reply_enabled;
+    autoReplyMessage.value = business.lead_auto_reply_message ?? '';
+  }
+
+  document.getElementById('auto-reply-save')!.addEventListener('click', async () => {
+    if (!business) return;
+    setAutoReplyStatus('Saving...', 'info');
+    const update = {
+      lead_auto_reply_enabled: autoReplyEnabled.checked,
+      lead_auto_reply_message: autoReplyMessage.value.trim() || null,
+    };
+    const { error } = await supabase.from('business').update(update).eq('id', business.id);
+    if (error) {
+      setAutoReplyStatus('Could not save: ' + error.message, 'error');
+      return;
+    }
+    Object.assign(business, update);
+    setAutoReplyStatus(update.lead_auto_reply_enabled ? 'Saved. New leads will get this reply.' : 'Saved. Automatic replies are off.', 'ok');
+  });
+
+  document.getElementById('auto-reply-preview')!.addEventListener('click', async () => {
+    setAutoReplyStatus('Building preview...', 'info');
+    const result = await callPublishFunction({ action: 'preview-auto-reply', customMessage: autoReplyMessage.value });
+    if (!result.ok || !result.data) {
+      setAutoReplyStatus('Could not build preview: ' + (result.error ?? 'unknown error'), 'error');
+      return;
+    }
+    document.getElementById('auto-reply-preview-subject')!.textContent = `Subject: ${result.data.subject as string}`;
+    autoReplyPreviewFrame.srcdoc = result.data.html as string;
+    autoReplyPreviewWrap.classList.remove('hidden');
+    setAutoReplyStatus('Preview shown with a sample name. This is exactly what a new lead receives.', 'info');
+  });
+
+  document.getElementById('auto-reply-test')!.addEventListener('click', async () => {
+    setAutoReplyStatus('Sending...', 'info');
+    const result = await callPublishFunction({ action: 'test-auto-reply', customMessage: autoReplyMessage.value });
+    if (!result.ok) {
+      setAutoReplyStatus('Could not send: ' + (result.error ?? 'unknown error'), 'error');
+      return;
+    }
+    setAutoReplyStatus(`Test sent to ${(result.data?.sentTo as string) ?? 'your email'}.`, 'ok');
+  });
+
+  // ---------------------------------------------------------------------
   async function onAuthed() {
     const [{ data: businessData }, { data: pagesData }] = await Promise.all([
       supabase.from('business').select('*').single(),
@@ -287,6 +393,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     pages = (pagesData ?? []) as PageOption[];
 
     loadBusinessForm();
+    loadAutoReplyForm();
     populatePagePicker(testimonialPageSelect);
     loadTestimonialForm();
   }
