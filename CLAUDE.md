@@ -4175,3 +4175,33 @@ The "Get Referred" step of the Full Caseload System. Migration
   auto-linking (matched across case/whitespace, a partial name didn't),
   stage auto-advance, follow-up reminder, CRM linking, and counts. All
   `ZZTEST` rows deleted after.
+
+## Ethical review program (built 2026-09-28)
+
+The review-growth half of "Get Chosen." Migration `0069_review_program.sql`,
+admin page `admin/review-program.astro` (nav: "Review program",
+owner/agency), public page `src/pages/share-your-experience.astro`, copy in
+`src/lib/reviewProgram.ts`. CMC's delivery playbook lives in the CMC
+folder at `review-program/ethical-review-program.md`.
+
+- **Built around ACA Code of Ethics C.3.b** (no soliciting testimonials
+  from current or former clients). Nothing here asks anyone for a review.
+  The only channel is a passive waiting-room sign.
+- **The sign's QR points to `/share-your-experience`, not to Google.** That
+  page says reviewing is optional and has no effect on care, explains the
+  privacy trade-offs, says the practice doesn't respond to reviews, and
+  only then links to `business.google_review_url`. noindex, excluded from
+  the sitemap, never linked from nav. The QR always encodes the live
+  site URL (`import.meta.env.SITE`), never wherever the admin is open.
+- **Printing uses a hidden same-page iframe, not `window.open()`.** The
+  first version used a popup, which the browser blocked silently (caught
+  in the browser pass). Verified the sign renders as exactly one letter
+  page via headless Chrome `--print-to-pdf`, with
+  `print-color-adjust: exact` so the background prints.
+- **Templates**: online review policy for intake paperwork, a closing
+  survey with no review ask (it includes "How did you first hear about
+  us?"), and staff do/don't guidelines.
+- **`review_snapshots`**: a manual monthly log of review count + rating
+  (the Business Profile API is still pending), showing growth over time.
+- Uses the `qrcode` npm package (client-side SVG). The 6 `npm audit`
+  findings in this repo predate it.

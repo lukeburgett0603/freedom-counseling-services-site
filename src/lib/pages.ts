@@ -293,6 +293,9 @@ export interface Business {
   // 0039_session_format_preference.sql.
   collect_session_format_preference: boolean;
   collect_lead_source: boolean;
+  // Practice's own Google Business Profile "ask for reviews" link, used
+  // only by the /share-your-experience page. See 0069_review_program.sql.
+  google_review_url: string | null;
   // Where the submit-lead Edge Function sends a real-time "someone just
   // submitted the contact form" notification — null means no
   // notification is sent. See 0041_lead_notification_email.sql.

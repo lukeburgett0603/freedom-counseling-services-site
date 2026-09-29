@@ -56,8 +56,10 @@ export default defineConfig({
   integrations: [
     sitemap({
       // /admin/* is the internal, auth-gated admin area — never
-      // public/indexable pages.
-      filter: (page) => !page.includes('/admin'),
+      // public/indexable pages. /share-your-experience is only reached
+      // from the waiting-room sign's QR code (see the ethical review
+      // program), so it's kept out of search too.
+      filter: (page) => !page.includes('/admin') && !page.includes('/share-your-experience'),
     }),
   ],
   image: {

@@ -18,11 +18,13 @@
     "@tailwindcss/vite": "^4.0.0",
     "astro": "^5.0.0",
     "marked": "^13.0.0",
+    "qrcode": "^1.5.4",
     "tailwindcss": "^4.0.0",
     "turndown": "^7.2.4"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@types/qrcode": "^1.5.6",
     "@types/turndown": "^5.0.6",
     "typescript": "^5.9.3"
   }
