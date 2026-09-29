@@ -4304,3 +4304,46 @@ counseling practice).
   and acronyms ("christian counseling"; now preserves Christian, EMDR,
   OCD), `%40` in mailto addresses, and a missing comma/suite in the
   handout address.
+
+## Google Ads conversion tracking (built 2026-09-29)
+
+The paid half of "Get Found." Migration `0072_ad_attribution.sql`; logic in
+`src/lib/adAttribution.ts`.
+
+- **Privacy design (checked against current law, 2026-09-29)**: the site
+  adds no Google script and sends nothing to Google. After *AHA v.
+  Becerra* (June 2024, HHS dropped its appeal), capturing ad-click data on
+  unauthenticated public pages isn't treated as a HIPAA disclosure; but
+  telling Google which clicks became *clients* uses client records, and
+  Google won't sign a BAA, so that export is opt-in with a warning.
+- **Capture**: `AdAttributionCapture.astro` (in `BaseLayout`) stores
+  `gclid` / `gbraid` / `wbraid` / UTM tags + landing page from a tagged
+  landing URL in first-party localStorage for 90 days (Google's upload
+  window), last-click. `LeadGenerator` attaches it to the submission;
+  `submit-lead` accepts only known keys, strings, length-capped, and adds
+  "Came from: Google Ads (campaign)" to the notification email. Verified
+  in the browser: landed on `/` with ad params, submitted from `/contact`,
+  and the payload carried the attribution (request intercepted, nothing
+  sent). Pages outside `BaseLayout` (404, share-your-experience) don't
+  capture; a real ad landing page always uses `BaseLayout`.
+- **Reporting**: Leads dashboard "Google Ads" card (ad leads, clients,
+  share, by campaign/keyword with untagged grouped honestly); CRM detail
+  line "Clicked a Google ad: campaign, keyword (landed on ...)"; CSV
+  columns. `isGoogleAdsLead()`: any Google click ID, or UTM source google
+  with a paid medium.
+- **Google Ads upload** (CRM → "Google Ads upload"): builds Google's
+  click-conversion import file (`Parameters:TimeZone=<IANA>` row, then
+  Google Click ID / Conversion Name / Conversion Time in that zone). Two
+  events: appointment requests (default, `created_at`) and booked
+  appointments (`scheduled_at`, amber compliance warning). Last 90 days
+  only; ad leads without a gclid (UTM-only or iOS gbraid/wbraid) are
+  counted and explained, not silently dropped. Conversion action names
+  stored on `business` (`ads_request_conversion_name` /
+  `ads_booked_conversion_name`, neutral defaults) so they match exactly
+  next time. Unit-tested with tsx (time-zone conversion, window, filters)
+  and live in the browser.
+- **Follow-ups for the practice**: the privacy policy should mention that
+  the site remembers ad-click information in the visitor's browser to
+  measure advertising (legal text, not edited here). Automatic upload via
+  the Google Ads API (developer token + OAuth) was deliberately not built:
+  manual upload keeps a human decision in the loop for a sensitive export.

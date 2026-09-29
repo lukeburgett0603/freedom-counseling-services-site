@@ -93,6 +93,13 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
         >
           Export CSV
         </button>
+        <button
+          id="ads-export-button"
+          type="button"
+          class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          Google Ads upload
+        </button>
       </div>
     </div>
 
@@ -146,6 +153,48 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     up as its own clearly-labeled bucket in "Leads by page" there rather
     than being silently misattributed to a real page.
   -->
+  <!--
+    Google Ads offline conversion upload (src/lib/adAttribution.ts). Builds
+    Google's own import file from leads that clicked an ad; the practice
+    uploads it in Google Ads themselves. Nothing is sent automatically.
+  -->
+  <div id="ads-export-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
+      <div class="mb-3 flex items-center justify-between">
+        <p class="font-semibold text-brand-ink">Google Ads conversion upload</p>
+        <button id="ads-export-close" type="button" class="text-sm text-slate-500 hover:text-slate-800">Close</button>
+      </div>
+      <p class="text-sm text-slate-600">
+        Tells Google which ad clicks turned into real inquiries, so it can show your ads to more people like them. The
+        file contains only Google's own click IDs and times, never names or contact details.
+      </p>
+      <fieldset class="mt-4 space-y-2">
+        <legend class="mb-1 text-xs font-semibold uppercase text-slate-500">What to report</legend>
+        <label class="flex items-start gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm">
+          <input type="radio" name="ads-kind" value="request" checked class="mt-1" />
+          <span><span class="font-semibold">Appointment requests</span><br /><span class="text-slate-600">Every ad click that led to a form submission. Recommended.</span></span>
+        </label>
+        <label class="flex items-start gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm">
+          <input type="radio" name="ads-kind" value="booked" class="mt-1" />
+          <span><span class="font-semibold">Booked appointments</span><br /><span class="text-slate-600">Only ad clicks that became clients (marked Scheduled).</span></span>
+        </label>
+      </fieldset>
+      <p id="ads-booked-warning" class="mt-3 hidden rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        This comes from your client records, not just your website: it tells Google which ad clicks became clients. Many
+        practices treat client status as protected health information, and Google does not sign HIPAA business associate
+        agreements. Check with your compliance advisor before uploading this one.
+      </p>
+      <div class="mt-4">
+        <label for="ads-conversion-name" class="block text-xs font-semibold uppercase text-slate-500">Conversion action name in Google Ads</label>
+        <input id="ads-conversion-name" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        <p class="mt-1 text-xs text-slate-500">Must match the name of the conversion action in your Google Ads account exactly (Goals → Conversions → create one with the "Import" source, from clicks).</p>
+      </div>
+      <p class="mt-3 text-xs text-slate-500">Includes the last 90 days (Google's limit). Uploading the same file twice is safe: Google ignores duplicates.</p>
+      <p id="ads-export-status" class="mt-3 text-sm" role="status"></p>
+      <button id="ads-export-download" type="button" class="mt-3 w-full rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Download upload file</button>
+    </div>
+  </div>
+
   <div id="add-lead-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
     <div class="w-full max-w-md rounded-lg bg-white p-6">
       <div class="mb-4 flex items-center justify-between">
@@ -254,6 +303,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
         <div>
           <dt class="text-xs font-semibold uppercase text-slate-500">Source</dt>
           <dd id="detail-source" class="mt-0.5"></dd>
+          <dd id="detail-ad" class="mt-0.5 hidden text-xs text-slate-600"></dd>
         </div>
         <div>
           <dt class="text-xs font-semibold uppercase text-slate-500">Counselor preference</dt>
@@ -350,6 +400,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
 
 <script>
   import { supabase, initAdminAuth } from '../../lib/adminAuth';
+  import { buildGoogleAdsUpload, isGoogleAdsLead, type ConversionKind } from '../../lib/adAttribution';
   import { leadSourceLabel } from '../../lib/leadSource';
   import { renderStatusSelect, initStatusSelectHandler, TERMINAL_LEAD_STATUSES } from '../../lib/leadStatus';
 
@@ -379,6 +430,15 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     lead_source_detail: string | null;
     referral_partner_id: string | null;
     auto_reply_sent_at: string | null;
+    gclid: string | null;
+    gbraid: string | null;
+    wbraid: string | null;
+    utm_source: string | null;
+    utm_medium: string | null;
+    utm_campaign: string | null;
+    utm_term: string | null;
+    landing_page: string | null;
+    scheduled_at: string | null;
   };
 
   const SESSION_FORMAT_LABELS: Record<string, string> = {
@@ -698,7 +758,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
   // export to match what's on screen.
   exportButton.addEventListener('click', () => {
     const filtered = applyFilters(allLeads);
-    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Assigned counselor', 'Heard about us', 'Referred by', 'Referral partner', 'Session format preference', 'Archived', 'Message'];
+    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Assigned counselor', 'Heard about us', 'Referred by', 'Referral partner', 'Session format preference', 'Came from Google Ads', 'Ad campaign', 'Ad keyword', 'Landing page', 'Archived', 'Message'];
     const rows = filtered.map((lead) => [
       new Date(lead.created_at).toLocaleDateString(),
       lead.name ?? '',
@@ -713,6 +773,10 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
       lead.lead_source_detail ?? '',
       lead.referral_partner_id ? (partnerOptions.find((p) => p.id === lead.referral_partner_id)?.name ?? '') : '',
       lead.preferred_session_format ? (SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format) : '',
+      isGoogleAdsLead(lead) ? 'Yes' : '',
+      lead.utm_campaign ?? '',
+      lead.utm_term ?? '',
+      lead.landing_page ?? '',
       lead.archived_at ? 'Yes' : '',
       lead.message ?? '',
     ]);
@@ -726,6 +790,79 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  });
+
+  // --- Google Ads offline conversion upload ---
+  const adsModal = document.getElementById('ads-export-modal')!;
+  const adsNameInput = document.getElementById('ads-conversion-name') as HTMLInputElement;
+  const adsStatus = document.getElementById('ads-export-status')!;
+  const adsWarning = document.getElementById('ads-booked-warning')!;
+  let adsNames: { id: string; request: string; booked: string } | null = null;
+
+  function adsKind(): ConversionKind {
+    return (document.querySelector<HTMLInputElement>('input[name="ads-kind"]:checked')?.value as ConversionKind) ?? 'request';
+  }
+
+  function syncAdsKind() {
+    const kind = adsKind();
+    adsWarning.classList.toggle('hidden', kind !== 'booked');
+    if (adsNames) adsNameInput.value = kind === 'request' ? adsNames.request : adsNames.booked;
+    adsStatus.textContent = '';
+  }
+
+  document.querySelectorAll<HTMLInputElement>('input[name="ads-kind"]').forEach((r) => r.addEventListener('change', syncAdsKind));
+
+  document.getElementById('ads-export-button')!.addEventListener('click', async () => {
+    if (!adsNames) {
+      const { data } = await supabase.from('business').select('id, ads_request_conversion_name, ads_booked_conversion_name').single();
+      if (data) adsNames = { id: data.id, request: data.ads_request_conversion_name, booked: data.ads_booked_conversion_name };
+    }
+    syncAdsKind();
+    adsModal.classList.remove('hidden');
+    adsModal.classList.add('flex');
+  });
+  document.getElementById('ads-export-close')!.addEventListener('click', () => {
+    adsModal.classList.add('hidden');
+    adsModal.classList.remove('flex');
+  });
+
+  document.getElementById('ads-export-download')!.addEventListener('click', async () => {
+    const kind = adsKind();
+    const name = adsNameInput.value.trim();
+    if (!name) {
+      adsStatus.textContent = 'Enter the conversion action name first.';
+      adsStatus.className = 'mt-3 text-sm text-red-600';
+      return;
+    }
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const { csv, count, skippedNoGclid } = buildGoogleAdsUpload(allLeads, kind, name, timeZone);
+    if (count === 0) {
+      adsStatus.textContent =
+        'No leads from Google Ads to report in the last 90 days' + (kind === 'booked' ? ' that are marked Scheduled.' : '.');
+      adsStatus.className = 'mt-3 text-sm text-slate-600';
+      return;
+    }
+    // Remember the name so it matches next time without retyping.
+    if (adsNames) {
+      const column = kind === 'request' ? 'ads_request_conversion_name' : 'ads_booked_conversion_name';
+      if ((kind === 'request' ? adsNames.request : adsNames.booked) !== name) {
+        const { error } = await supabase.from('business').update({ [column]: name }).eq('id', adsNames.id);
+        if (!error) adsNames[kind === 'request' ? 'request' : 'booked'] = name;
+      }
+    }
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `google-ads-${kind === 'request' ? 'appointment-requests' : 'booked-appointments'}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    adsStatus.textContent = `Downloaded ${count} conversion${count === 1 ? '' : 's'}.${
+      skippedNoGclid ? ` ${skippedNoGclid} ad lead${skippedNoGclid === 1 ? '' : 's'} tagged only by UTM or an iPhone click ID couldn't be included (the file format needs a Google Click ID).` : ''
+    } Upload it in Google Ads under Goals → Conversions → Uploads.`;
+    adsStatus.className = 'mt-3 text-sm text-emerald-700';
   });
 
   // --- Archive / delete (shared by the row Actions menu and the detail view) ---
@@ -949,6 +1086,10 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     // read "Manually added — Manually added".
     const pageSuffix = lead.source_page && lead.source_page !== MANUAL_SOURCE ? ` — ${lead.source_page}` : '';
     detailSource.textContent = `${sourceLabel(lead)}${pageSuffix}`;
+    const detailAd = document.getElementById('detail-ad')!;
+    const adParts = [lead.utm_campaign && `campaign "${lead.utm_campaign}"`, lead.utm_term && `keyword "${lead.utm_term}"`].filter(Boolean);
+    detailAd.classList.toggle('hidden', !isGoogleAdsLead(lead));
+    detailAd.textContent = `Clicked a Google ad${adParts.length ? `: ${adParts.join(', ')}` : ''}${lead.landing_page ? ` (landed on ${lead.landing_page})` : ''}`;
     detailCounselor.textContent = lead.preferred_counselor_page_id
       ? (counselorNames.get(lead.preferred_counselor_page_id) ?? 'Unknown')
       : 'No preference (Help me choose)';

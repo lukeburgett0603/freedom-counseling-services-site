@@ -236,6 +236,8 @@ const Wrapper = embedded ? 'div' : 'section';
   // Class-based, not id-based: a page can have more than one LeadGenerator
   // (e.g. a compact one in the Hero plus the full one further down) — using
   // getElementById would only ever wire up the first form on the page.
+  import { readStoredAttribution } from '../lib/adAttribution';
+
   const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL;
   const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
@@ -300,6 +302,10 @@ const Wrapper = embedded ? 'div' : 'section';
       if (form.querySelector('[name="preferred_session_format"]')) {
         payload.preferred_session_format = formData.get('preferred_session_format') || null;
       }
+      // Google Ads click ID / UTM tags remembered from the visitor's landing
+      // URL (AdAttributionCapture in BaseLayout). First-party only.
+      const attribution = readStoredAttribution();
+      if (attribution) payload.attribution = attribution;
       if (sourceSelect) {
         payload.lead_source = formData.get('lead_source') || null;
         payload.lead_source_detail = formData.get('lead_source_detail') || null;

@@ -89,6 +89,44 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     <p class="mt-3 text-xs text-slate-500">Measured from when the form was submitted to when the lead was first moved out of <span class="font-semibold">New</span> in the Lead CRM.</p>
   </div>
 
+  <!--
+    Google Ads: leads carrying an ad click ID / paid UTM tags (tracked
+    automatically, see src/lib/adAttribution.ts), independent of the
+    self-reported "How they heard about you" answer below.
+  -->
+  <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Google Ads</p>
+    <div id="ads-empty" class="mt-2 text-sm text-slate-500">
+      No leads from Google Ads yet. When ads run, anyone who clicks an ad and then reaches out shows up here automatically.
+    </div>
+    <div id="ads-content" class="hidden">
+      <div class="mt-3 grid gap-4 sm:grid-cols-3">
+        <div>
+          <p class="text-[11px] uppercase tracking-wide text-slate-400">Leads from ads</p>
+          <p id="ads-leads" class="mt-0.5 font-[family-name:var(--font-heading)] text-2xl font-bold text-brand-ink">—</p>
+        </div>
+        <div>
+          <p class="text-[11px] uppercase tracking-wide text-slate-400">Became clients</p>
+          <p id="ads-clients" class="mt-0.5 font-[family-name:var(--font-heading)] text-2xl font-bold text-brand-ink">—</p>
+        </div>
+        <div>
+          <p class="text-[11px] uppercase tracking-wide text-slate-400">Share of all leads</p>
+          <p id="ads-share" class="mt-0.5 font-[family-name:var(--font-heading)] text-2xl font-bold text-brand-ink">—</p>
+        </div>
+      </div>
+      <div class="mt-4 grid gap-4 lg:grid-cols-2">
+        <div>
+          <p class="mb-2 text-[11px] uppercase tracking-wide text-slate-400">By campaign</p>
+          <div id="ads-by-campaign" class="space-y-1 text-sm"></div>
+        </div>
+        <div>
+          <p class="mb-2 text-[11px] uppercase tracking-wide text-slate-400">By keyword</p>
+          <div id="ads-by-keyword" class="space-y-1 text-sm"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
     <p class="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">Leads per week (last 10 weeks)</p>
     <div id="weekly-chart" class="flex h-32 gap-2"></div>
@@ -134,6 +172,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   import { supabase, initAdminAuth } from '../../../lib/adminAuth';
   import { renderStatusSelect, initStatusSelectHandler } from '../../../lib/leadStatus';
   import { formatHours, hoursToFirstContact, leadSourceLabel, median, renderSourceBars } from '../../../lib/leadSource';
+  import { isGoogleAdsLead } from '../../../lib/adAttribution';
 
   const tableBody = document.getElementById('leads-table-body')!;
   const leadsCount = document.getElementById('leads-count')!;
@@ -160,7 +199,46 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     lead_source: string | null;
     lead_source_detail: string | null;
     first_contacted_at: string | null;
+    gclid: string | null;
+    gbraid: string | null;
+    wbraid: string | null;
+    utm_source: string | null;
+    utm_medium: string | null;
+    utm_campaign: string | null;
+    utm_term: string | null;
   };
+
+  // Leads and clients per campaign/keyword. Untagged ad clicks (auto-tagging
+  // with no UTM campaign) are grouped honestly rather than guessed.
+  function renderAdsGroup(el: HTMLElement, leads: Lead[], key: 'utm_campaign' | 'utm_term', missingLabel: string) {
+    const groups = new Map<string, { leads: number; clients: number }>();
+    for (const l of leads) {
+      const name = l[key]?.trim() || missingLabel;
+      const g = groups.get(name) ?? { leads: 0, clients: 0 };
+      g.leads++;
+      if (l.status === 'scheduled') g.clients++;
+      groups.set(name, g);
+    }
+    el.innerHTML = [...groups.entries()]
+      .sort((a, b) => b[1].clients - a[1].clients || b[1].leads - a[1].leads)
+      .slice(0, 8)
+      .map(
+        ([name, g]) => `<div class="flex justify-between gap-3"><span class="truncate ${name === missingLabel ? 'text-slate-400' : 'text-slate-700'}">${escapeHtml(name)}</span><span class="shrink-0 text-slate-600">${g.leads} lead${g.leads === 1 ? '' : 's'} · <span class="font-semibold text-brand-ink">${g.clients} client${g.clients === 1 ? '' : 's'}</span></span></div>`
+      )
+      .join('');
+  }
+
+  function renderAds(leads: Lead[]) {
+    const adLeads = leads.filter(isGoogleAdsLead);
+    document.getElementById('ads-empty')!.classList.toggle('hidden', adLeads.length > 0);
+    document.getElementById('ads-content')!.classList.toggle('hidden', adLeads.length === 0);
+    if (adLeads.length === 0) return;
+    document.getElementById('ads-leads')!.textContent = String(adLeads.length);
+    document.getElementById('ads-clients')!.textContent = String(adLeads.filter((l) => l.status === 'scheduled').length);
+    document.getElementById('ads-share')!.textContent = `${Math.round((adLeads.length / leads.length) * 100)}%`;
+    renderAdsGroup(document.getElementById('ads-by-campaign')!, adLeads, 'utm_campaign', 'Campaign not tagged');
+    renderAdsGroup(document.getElementById('ads-by-keyword')!, adLeads, 'utm_term', 'Keyword not tagged');
+  }
 
   // Must match admin/crm.astro's MANUAL_SOURCE sentinel.
   const MANUAL_SOURCE = 'Manually added';
@@ -384,6 +462,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
     renderDashboard(realLeads);
     renderSpeedToLead(realLeads);
+    renderAds(realLeads);
     document.getElementById('by-source-list')!.innerHTML = renderSourceBars(
       realLeads.map((l) => l.lead_source),
       'No leads yet.'

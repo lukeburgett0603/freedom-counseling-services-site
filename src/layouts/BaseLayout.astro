@@ -3,6 +3,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MobileCTABar from '../components/MobileCTABar.astro';
 import SchemaScript from '../components/SchemaScript.astro';
+import AdAttributionCapture from '../components/AdAttributionCapture.astro';
 import { buildPageSchemas, buildBreadcrumbSchema } from '../lib/schema';
 import { buildBreadcrumbChain } from '../lib/pages';
 import type { Page, Business } from '../lib/pages';
@@ -102,5 +103,6 @@ const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbChain, siteUrl);
     </main>
     <Footer navPages={allPages} business={business} />
     <MobileCTABar telephone={business.telephone} ctaText={page.cta_button_text ?? undefined} />
+    <AdAttributionCapture />
   </body>
 </html>

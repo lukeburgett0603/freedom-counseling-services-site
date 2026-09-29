@@ -189,6 +189,16 @@ Deno.serve(async (req: Request) => {
         ? body.lead_source_detail.trim().slice(0, 120)
         : null;
   }
+  // Google Ads attribution (0072_ad_attribution.sql): click IDs and UTM
+  // tags the visitor's own browser remembered from their landing URL.
+  // Treated as untrusted input: only known keys, strings, length-capped.
+  if (body.attribution && typeof body.attribution === 'object') {
+    const a = body.attribution as Record<string, unknown>;
+    for (const key of ['gclid', 'gbraid', 'wbraid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'landing_page']) {
+      const value = a[key];
+      if (typeof value === 'string' && value.trim()) insertPayload[key] = value.trim().slice(0, 300);
+    }
+  }
   // A guide-download submission (LeadMagnet.astro) — a distinct, lower-
   // intent signal from a real appointment request, see CLAUDE.md's
   // "Contacts vs. leads" section. Only present when this call came from
@@ -264,6 +274,12 @@ Deno.serve(async (req: Request) => {
           insertPayload.lead_source
             ? LEAD_SOURCE_LABELS[insertPayload.lead_source as string] +
               (insertPayload.lead_source_detail ? ` (${insertPayload.lead_source_detail as string})` : '')
+            : null,
+        ],
+        [
+          'Came from',
+          insertPayload.gclid || insertPayload.gbraid || insertPayload.wbraid
+            ? `Google Ads${insertPayload.utm_campaign ? ` (${insertPayload.utm_campaign as string})` : ''}`
             : null,
         ],
         ['Current website', insertPayload.existing_website_url as string | null],

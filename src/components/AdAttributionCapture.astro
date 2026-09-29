@@ -1,0 +1,12 @@
+---
+// Site-wide, in BaseLayout: remembers a Google Ads click ID / UTM tags from
+// the landing URL so a lead submitted later (even pages or days later) can
+// be credited to the ad. First-party only, sends nothing anywhere. See
+// src/lib/adAttribution.ts.
+---
+
+<script>
+  import { captureAttributionFromUrl } from '../lib/adAttribution';
+
+  captureAttributionFromUrl(new URL(window.location.href));
+</script>
