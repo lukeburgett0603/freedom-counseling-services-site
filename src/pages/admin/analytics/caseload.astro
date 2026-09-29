@@ -1,0 +1,259 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { withBase } from '../../../lib/url';
+---
+
+<!--
+  Caseload dashboard: the outcome the rest of the marketing exists for.
+  Two sources, deliberately kept distinct:
+    - How full the practice is: each counselor's own self-reported
+      current_active_clients vs. their target caseload (weekly target x
+      1.5, see lib/caseload.ts), summed across counselors. Self-reported
+      because leads only ever capture NEW clients, never existing ones or
+      discharges.
+    - New clients from marketing: leads marked Scheduled, dated by
+      scheduled_at and credited via assigned_counselor_page_id (both
+      maintained by the trigger in 0066_caseload_tracking.sql).
+  Computed client-side from plain fetches, CSS bars, no chart library,
+  same pattern as the Leads dashboard.
+-->
+<AdminLayout title="Caseload | Admin" current="analytics-caseload">
+  <div id="caseload-loading" class="text-sm text-slate-500">Loading...</div>
+
+  <div id="caseload-empty" class="hidden rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+    <p class="font-semibold text-brand-ink">No caseload set up yet</p>
+    <p id="caseload-empty-body" class="mt-1"></p>
+    <a href={withBase('/admin/counselor-settings')} class="mt-3 inline-block font-semibold text-brand-primary hover:underline">Go to Counselor settings</a>
+  </div>
+
+  <div id="caseload-content" class="hidden">
+    <div class="mb-8 rounded-lg border border-black/5 bg-white p-6 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Practice caseload</p>
+      <div class="mt-2 flex flex-wrap items-baseline justify-between gap-2">
+        <p class="text-sm text-slate-600">
+          <span id="practice-current" class="font-[family-name:var(--font-heading)] text-4xl font-extrabold text-brand-ink"></span>
+          <span id="practice-of"></span>
+        </p>
+        <p id="practice-open" class="text-sm font-semibold text-slate-700"></p>
+      </div>
+      <div class="mt-3 h-4 rounded-full bg-slate-100">
+        <div id="practice-bar" class="h-4 rounded-full" style="width: 0%"></div>
+      </div>
+      <p id="practice-missing" class="mt-3 hidden text-xs text-amber-700"></p>
+    </div>
+
+    <div class="mb-8 grid gap-4 sm:grid-cols-3">
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">New clients this month</p>
+        <p id="stat-new-this-month" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="stat-new-change" class="mt-1 text-xs"></p>
+      </div>
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">New clients last month</p>
+        <p id="stat-new-last-month" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+      </div>
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Leads who became clients</p>
+        <p id="stat-conversion" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="stat-conversion-detail" class="mt-1 text-xs text-slate-500"></p>
+      </div>
+    </div>
+
+    <p class="-mt-5 mb-8 text-xs text-slate-500">
+      A new client is any lead marked <span class="font-semibold">Scheduled</span> in the Lead CRM, counted in the month it was marked.
+    </p>
+
+    <div id="unassigned-note" class="mb-8 hidden rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"></div>
+
+    <div id="by-counselor-section" class="hidden rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+      <p class="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">By counselor</p>
+      <div id="by-counselor-list" class="space-y-5"></div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase, initAdminAuth } from '../../../lib/adminAuth';
+  import { withBase } from '../../../lib/url';
+  import { caseloadBarClass, daysSince, percentFull, targetCaseload, type CounselorCaseload } from '../../../lib/caseload';
+
+  // A self-reported number older than this gets flagged, since the whole
+  // meter is only as accurate as the last time someone updated it.
+  const STALE_AFTER_DAYS = 30;
+
+  type Lead = {
+    id: string;
+    status: string | null;
+    scheduled_at: string | null;
+    assigned_counselor_page_id: string | null;
+    lead_magnet_id: string | null;
+  };
+  type Counselor = { id: string; title: string };
+
+  function escapeHtml(value: string): string {
+    const div = document.createElement('div');
+    div.textContent = value;
+    return div.innerHTML;
+  }
+
+  function openSpotsText(open: number): string {
+    if (open > 0) return `${open} open spot${open === 1 ? '' : 's'}`;
+    if (open === 0) return 'Full';
+    return `${-open} over full`;
+  }
+
+  function render(counselors: Counselor[], caseloads: Map<string, CounselorCaseload>, leads: Lead[]) {
+    document.getElementById('caseload-loading')!.classList.add('hidden');
+
+    if (counselors.length === 0) {
+      document.getElementById('caseload-empty')!.classList.remove('hidden');
+      document.getElementById('caseload-empty-body')!.textContent =
+        'Caseload tracking needs at least one counselor profile page.';
+      return;
+    }
+
+    // A counselor counts toward the practice total only once BOTH numbers
+    // are set: a target with no current count (or vice versa) would skew
+    // the percentage rather than just leave that counselor out.
+    const complete = counselors.filter((c) => {
+      const row = caseloads.get(c.id);
+      return targetCaseload(row?.weekly_client_target) !== null && row?.current_active_clients != null;
+    });
+    const missing = counselors.filter((c) => !complete.includes(c));
+
+    if (complete.length === 0) {
+      document.getElementById('caseload-empty')!.classList.remove('hidden');
+      document.getElementById('caseload-empty-body')!.textContent =
+        counselors.length === 1
+          ? 'Enter clients per week and current active clients on Counselor settings to see your caseload here.'
+          : 'Each counselor enters their clients per week and current active clients on Counselor settings. The practice total appears here once at least one has.';
+      return;
+    }
+
+    document.getElementById('caseload-content')!.classList.remove('hidden');
+
+    let practiceCurrent = 0;
+    let practiceTarget = 0;
+    for (const c of complete) {
+      const row = caseloads.get(c.id)!;
+      practiceCurrent += row.current_active_clients!;
+      practiceTarget += targetCaseload(row.weekly_client_target)!;
+    }
+    document.getElementById('practice-current')!.textContent = String(practiceCurrent);
+    document.getElementById('practice-of')!.textContent =
+      ` of ${practiceTarget} clients (${Math.round((practiceCurrent / practiceTarget) * 100)}% full)`;
+    document.getElementById('practice-open')!.textContent = openSpotsText(practiceTarget - practiceCurrent);
+    const practiceBar = document.getElementById('practice-bar')!;
+    practiceBar.style.width = `${percentFull(practiceCurrent, practiceTarget)}%`;
+    practiceBar.className = `h-4 rounded-full ${caseloadBarClass(practiceCurrent, practiceTarget)}`;
+
+    const missingEl = document.getElementById('practice-missing')!;
+    if (missing.length > 0) {
+      missingEl.classList.remove('hidden');
+      missingEl.textContent = `Not included yet (caseload not set): ${missing.map((c) => c.title).join(', ')}.`;
+    }
+
+    // New clients: Scheduled leads, real leads only (a guide download is
+    // never a client), dated by when they were marked Scheduled.
+    const realLeads = leads.filter((l) => !l.lead_magnet_id);
+    const clients = realLeads.filter((l) => l.status === 'scheduled' && l.scheduled_at);
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const thisMonth = clients.filter((l) => new Date(l.scheduled_at!) >= startOfThisMonth);
+    const lastMonthCount = clients.filter((l) => {
+      const d = new Date(l.scheduled_at!);
+      return d >= startOfLastMonth && d < startOfThisMonth;
+    }).length;
+
+    document.getElementById('stat-new-this-month')!.textContent = String(thisMonth.length);
+    document.getElementById('stat-new-last-month')!.textContent = String(lastMonthCount);
+    const changeEl = document.getElementById('stat-new-change')!;
+    if (lastMonthCount > 0) {
+      const diff = thisMonth.length - lastMonthCount;
+      changeEl.textContent = `${diff > 0 ? '+' : ''}${diff} vs last month`;
+      changeEl.className = 'mt-1 text-xs ' + (diff >= 0 ? 'text-emerald-600' : 'text-red-500');
+    }
+
+    const conversionEl = document.getElementById('stat-conversion')!;
+    const conversionDetail = document.getElementById('stat-conversion-detail')!;
+    if (realLeads.length === 0) {
+      conversionEl.textContent = '—';
+      conversionDetail.textContent = 'No leads yet';
+    } else {
+      conversionEl.textContent = `${Math.round((clients.length / realLeads.length) * 100)}%`;
+      conversionDetail.textContent = `${clients.length} of ${realLeads.length} leads, all time`;
+    }
+
+    // Per-counselor view only matters in a group practice.
+    if (counselors.length > 1) {
+      const unassigned = clients.filter((l) => !l.assigned_counselor_page_id).length;
+      if (unassigned > 0) {
+        const note = document.getElementById('unassigned-note')!;
+        note.classList.remove('hidden');
+        note.innerHTML = `${unassigned} scheduled client${unassigned === 1 ? ' has' : 's have'} no assigned counselor, so ${unassigned === 1 ? 'it isn\'t' : 'they aren\'t'} credited to anyone below. <a href="${withBase('/admin/crm')}" class="font-semibold underline">Assign in the Lead CRM</a>.`;
+      }
+
+      const newThisMonthBy = new Map<string, number>();
+      for (const l of thisMonth) {
+        if (!l.assigned_counselor_page_id) continue;
+        newThisMonthBy.set(l.assigned_counselor_page_id, (newThisMonthBy.get(l.assigned_counselor_page_id) ?? 0) + 1);
+      }
+
+      document.getElementById('by-counselor-section')!.classList.remove('hidden');
+      document.getElementById('by-counselor-list')!.innerHTML = counselors
+        .map((c) => {
+          const row = caseloads.get(c.id);
+          const target = targetCaseload(row?.weekly_client_target);
+          const current = row?.current_active_clients ?? null;
+          const newCount = newThisMonthBy.get(c.id) ?? 0;
+          const newLine = `<span class="text-slate-500">${newCount} new this month</span>`;
+
+          if (target === null || current === null) {
+            return `
+          <div>
+            <div class="flex items-baseline justify-between text-sm">
+              <span class="font-semibold text-brand-ink">${escapeHtml(c.title)}</span>
+              ${newLine}
+            </div>
+            <p class="mt-1 text-xs text-slate-400">Caseload not set on Counselor settings yet.</p>
+          </div>`;
+          }
+
+          const age = daysSince(row!.updated_at);
+          const updated =
+            age > STALE_AFTER_DAYS
+              ? `<span class="text-amber-700">Updated ${age} days ago. Worth a refresh.</span>`
+              : `<span class="text-slate-400">Updated ${age === 0 ? 'today' : `${age} day${age === 1 ? '' : 's'} ago`}</span>`;
+          return `
+          <div>
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4 text-sm">
+              <span class="font-semibold text-brand-ink">${escapeHtml(c.title)}</span>
+              <span class="text-slate-700">${current} of ${target} · ${openSpotsText(target - current)}</span>
+            </div>
+            <div class="mt-1.5 h-2.5 rounded-full bg-slate-100">
+              <div class="h-2.5 rounded-full ${caseloadBarClass(current, target)}" style="width: ${percentFull(current, target)}%"></div>
+            </div>
+            <div class="mt-1 flex flex-wrap justify-between gap-x-4 text-xs">${newLine}${updated}</div>
+          </div>`;
+        })
+        .join('');
+    }
+  }
+
+  async function load() {
+    const [{ data: counselors }, { data: caseloadRows }, { data: leads, error }] = await Promise.all([
+      supabase.from('pages').select('id, title').eq('page_type', 'Counselor Profile').order('title'),
+      supabase.from('counselor_caseload').select('*'),
+      supabase.from('leads').select('id, status, scheduled_at, assigned_counselor_page_id, lead_magnet_id'),
+    ]);
+    if (error) {
+      document.getElementById('caseload-loading')!.textContent = 'Could not load caseload: ' + error.message;
+      return;
+    }
+    const caseloads = new Map(((caseloadRows ?? []) as CounselorCaseload[]).map((c) => [c.counselor_page_id, c]));
+    render((counselors ?? []) as Counselor[], caseloads, (leads ?? []) as Lead[]);
+  }
+
+  initAdminAuth(load, { allowedRoles: ['owner', 'agency'] });
+</script>

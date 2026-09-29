@@ -14,7 +14,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   report.
 -->
 <AdminLayout title="Leads | Admin" current="analytics-leads">
-  <div class="mb-8 grid gap-4 sm:grid-cols-3">
+  <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
       <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total leads</p>
       <p id="stat-total" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
@@ -27,6 +27,12 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
       <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Last month</p>
       <p id="stat-last-month" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+    </div>
+    <!-- Scheduled = became a client. Full breakdown on the Caseload dashboard. -->
+    <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Became clients</p>
+      <p id="stat-clients" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+      <p id="stat-clients-rate" class="mt-1 text-xs text-slate-500"></p>
     </div>
   </div>
 
@@ -145,6 +151,11 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     document.getElementById('stat-total')!.textContent = String(leads.length);
     document.getElementById('stat-this-month')!.textContent = String(thisMonthCount);
     document.getElementById('stat-last-month')!.textContent = String(lastMonthCount);
+
+    const clientCount = leads.filter((l) => l.status === 'scheduled').length;
+    document.getElementById('stat-clients')!.textContent = String(clientCount);
+    document.getElementById('stat-clients-rate')!.textContent =
+      leads.length > 0 ? `${Math.round((clientCount / leads.length) * 100)}% of all leads` : '';
 
     const changeEl = document.getElementById('stat-month-change')!;
     if (lastMonthCount > 0) {

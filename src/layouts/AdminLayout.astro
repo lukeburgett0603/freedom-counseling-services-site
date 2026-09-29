@@ -11,6 +11,7 @@ import { withBase } from '../lib/url';
 interface Props {
   title: string;
   current:
+    | 'analytics-caseload'
     | 'analytics-leads'
     | 'analytics-traffic'
     | 'analytics-blog'
@@ -41,7 +42,7 @@ const { title, current } = Astro.props;
 // detail view) kept off of it entirely.
 //
 // "Analytics Dashboards" groups every read-only reporting view in one
-// place (Leads, Website Traffic, Blog analytics, Google Business
+// place (Caseload, Leads, Website Traffic, Blog analytics, Google Business
 // Profile, SEO Insights) — see CLAUDE.md's "Analytics Dashboards reorg"
 // section. Explicitly does NOT include Lead CRM: that's a deliberate,
 // standing decision from when CRM was first built — Leads needs to stay
@@ -68,6 +69,7 @@ const navItems = [
     key: 'analytics',
     label: 'Analytics Dashboards',
     children: [
+      { key: 'analytics-caseload', navKey: 'analytics-caseload', label: 'Caseload', href: withBase('/admin/analytics/caseload') },
       { key: 'analytics-leads', navKey: 'analytics-leads', label: 'Leads', href: withBase('/admin/analytics/leads') },
       { key: 'analytics-traffic', navKey: 'analytics-traffic', label: 'Website Traffic', href: withBase('/admin/analytics/traffic') },
       { key: 'analytics-blog', navKey: 'analytics-blog', label: 'Blog analytics', href: withBase('/admin/analytics/blog') },

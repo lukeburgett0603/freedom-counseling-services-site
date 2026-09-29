@@ -245,6 +245,20 @@ function statusLabel(status: string): string {
           <dt class="text-xs font-semibold uppercase text-slate-500">Counselor preference</dt>
           <dd id="detail-counselor" class="mt-0.5"></dd>
         </div>
+        <!--
+          Who this lead actually ended up with. Prefilled from their
+          preference by a DB trigger (0066_caseload_tracking.sql), but
+          editable, since intake often matches someone differently. A
+          Scheduled lead counts as a new client for this counselor on the
+          Caseload dashboard.
+        -->
+        <div id="detail-assigned-wrap" class="hidden">
+          <dt><label for="detail-assigned-select" class="text-xs font-semibold uppercase text-slate-500">Assigned counselor</label></dt>
+          <dd class="mt-0.5">
+            <select id="detail-assigned-select" class="block w-full rounded-md border border-slate-300 px-2 py-1 text-sm"></select>
+            <p id="detail-assigned-status" class="mt-1 text-xs"></p>
+          </dd>
+        </div>
         <div>
           <dt class="text-xs font-semibold uppercase text-slate-500">Session format preference</dt>
           <dd id="detail-session-format" class="mt-0.5"></dd>
@@ -315,6 +329,7 @@ function statusLabel(status: string): string {
     lead_magnet_id: string | null;
     archived_at: string | null;
     preferred_counselor_page_id: string | null;
+    assigned_counselor_page_id: string | null;
     preferred_session_format: string | null;
   };
 
@@ -635,7 +650,7 @@ function statusLabel(status: string): string {
   // export to match what's on screen.
   exportButton.addEventListener('click', () => {
     const filtered = applyFilters(allLeads);
-    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Session format preference', 'Archived', 'Message'];
+    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Assigned counselor', 'Session format preference', 'Archived', 'Message'];
     const rows = filtered.map((lead) => [
       new Date(lead.created_at).toLocaleDateString(),
       lead.name ?? '',
@@ -645,6 +660,7 @@ function statusLabel(status: string): string {
       lead.follow_up_date ?? '',
       sourceLabel(lead),
       lead.preferred_counselor_page_id ? (counselorNames.get(lead.preferred_counselor_page_id) ?? 'Unknown') : '',
+      lead.assigned_counselor_page_id ? (counselorNames.get(lead.assigned_counselor_page_id) ?? 'Unknown') : '',
       lead.preferred_session_format ? (SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format) : '',
       lead.archived_at ? 'Yes' : '',
       lead.message ?? '',
@@ -707,6 +723,9 @@ function statusLabel(status: string): string {
   const detailWebsite = document.getElementById('detail-website')!;
   const detailCounselor = document.getElementById('detail-counselor')!;
   const detailSessionFormat = document.getElementById('detail-session-format')!;
+  const detailAssignedWrap = document.getElementById('detail-assigned-wrap')!;
+  const detailAssignedSelect = document.getElementById('detail-assigned-select') as HTMLSelectElement;
+  const detailAssignedStatus = document.getElementById('detail-assigned-status')!;
   const detailSource = document.getElementById('detail-source')!;
   const detailMessage = document.getElementById('detail-message')!;
   const detailFollowUp = document.getElementById('detail-follow-up') as HTMLInputElement;
@@ -724,6 +743,53 @@ function statusLabel(status: string): string {
     const lead = allLeads.find((l) => l.id === leadId);
     if (lead) lead.status = newStatus;
     renderDueThisWeek();
+    if (lead) renderAssignedHint(lead);
+  });
+
+  // In a group practice, a Scheduled client with no counselor can't be
+  // credited to anyone's caseload — say so right where it can be fixed.
+  // A solo practice (one counselor) never needs this.
+  function renderAssignedHint(lead: Lead) {
+    if (lead.status === 'scheduled' && !lead.assigned_counselor_page_id && counselorNames.size > 1) {
+      detailAssignedStatus.textContent = 'Assign a counselor so this new client counts toward their caseload.';
+      detailAssignedStatus.className = 'mt-1 text-xs text-amber-700';
+    } else {
+      detailAssignedStatus.textContent = '';
+    }
+  }
+
+  function renderAssignedSelect(lead: Lead) {
+    detailAssignedWrap.classList.toggle('hidden', counselorNames.size === 0);
+    const options = [...counselorNames.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+    detailAssignedSelect.innerHTML =
+      `<option value="">Not assigned</option>` +
+      options
+        .map(([id, name]) => `<option value="${id}" ${id === lead.assigned_counselor_page_id ? 'selected' : ''}>${escapeHtml(name)}</option>`)
+        .join('');
+    renderAssignedHint(lead);
+  }
+
+  detailAssignedSelect.addEventListener('change', async () => {
+    if (!currentLeadId) return;
+    const lead = allLeads.find((l) => l.id === currentLeadId);
+    if (!lead) return;
+    const previous = lead.assigned_counselor_page_id;
+    const next = detailAssignedSelect.value || null;
+    detailAssignedSelect.disabled = true;
+    const { error } = await supabase.from('leads').update({ assigned_counselor_page_id: next }).eq('id', lead.id);
+    detailAssignedSelect.disabled = false;
+    if (error) {
+      detailAssignedSelect.value = previous ?? '';
+      detailAssignedStatus.textContent = 'Could not save: ' + error.message;
+      detailAssignedStatus.className = 'mt-1 text-xs text-red-600';
+      return;
+    }
+    lead.assigned_counselor_page_id = next;
+    renderAssignedHint(lead);
+    if (!detailAssignedStatus.textContent) {
+      detailAssignedStatus.textContent = 'Saved.';
+      detailAssignedStatus.className = 'mt-1 text-xs text-emerald-700';
+    }
   });
 
   backButton.addEventListener('click', () => {
@@ -772,6 +838,7 @@ function statusLabel(status: string): string {
     detailCounselor.textContent = lead.preferred_counselor_page_id
       ? (counselorNames.get(lead.preferred_counselor_page_id) ?? 'Unknown')
       : 'No preference (Help me choose)';
+    renderAssignedSelect(lead);
     detailSessionFormat.textContent = lead.preferred_session_format
       ? (SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format)
       : 'No preference stated';

@@ -125,6 +125,76 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
           Save
         </button>
         <p id="settings-status-msg" class="text-sm" role="status"></p>
+
+        <!--
+          Caseload lives in its own table (counselor_caseload), not on
+          `pages`, so it has its own Save: it's private, never on the
+          public site, and saving it needs no site rebuild. See
+          0066_caseload_tracking.sql.
+        -->
+        <div class="space-y-4 border-t border-slate-200 pt-6">
+          <div>
+            <p class="font-semibold text-brand-ink">Caseload</p>
+            <p class="mt-1 text-xs text-slate-500">Private. Never shown on your website. Feeds the practice's Caseload dashboard.</p>
+          </div>
+
+          <div>
+            <label for="weekly-target-input" class="mb-1 block text-sm font-semibold text-slate-700">Clients you want to see per week</label>
+            <input
+              id="weekly-target-input"
+              type="number"
+              min="1"
+              max="60"
+              inputmode="numeric"
+              placeholder="e.g. 20"
+              class="w-32 rounded-md border border-slate-300 px-4 py-2"
+            />
+            <p id="weekly-target-guidance" class="mt-1 text-xs text-slate-500"></p>
+          </div>
+
+          <div id="target-caseload-box" class="hidden rounded-md border border-slate-200 bg-white px-4 py-3">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Your full caseload</p>
+            <p class="mt-0.5 text-sm text-slate-700">
+              <span id="target-caseload-value" class="font-[family-name:var(--font-heading)] text-2xl font-extrabold text-brand-ink"></span>
+              clients
+            </p>
+            <p id="target-caseload-explainer" class="mt-1 text-xs text-slate-500"></p>
+          </div>
+
+          <div>
+            <label for="current-clients-input" class="mb-1 block text-sm font-semibold text-slate-700">Current active clients</label>
+            <input
+              id="current-clients-input"
+              type="number"
+              min="0"
+              max="200"
+              inputmode="numeric"
+              placeholder="e.g. 14"
+              class="w-32 rounded-md border border-slate-300 px-4 py-2"
+            />
+            <p class="mt-1 text-xs text-slate-500">Everyone you're currently seeing, however often. Update it whenever it changes.</p>
+          </div>
+
+          <div id="caseload-meter" class="hidden">
+            <div class="mb-1 flex items-baseline justify-between text-sm">
+              <span id="caseload-meter-label" class="font-semibold text-brand-ink"></span>
+              <span id="caseload-meter-open" class="text-slate-600"></span>
+            </div>
+            <div class="h-3 rounded-full bg-slate-100">
+              <div id="caseload-meter-bar" class="h-3 rounded-full" style="width: 0%"></div>
+            </div>
+            <p id="caseload-availability-hint" class="mt-2 hidden rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"></p>
+          </div>
+
+          <button
+            id="caseload-save-button"
+            type="button"
+            class="rounded-md bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+          >
+            Save caseload
+          </button>
+          <p id="caseload-status-msg" class="text-sm" role="status"></p>
+        </div>
       </div>
     </section>
   </div>
@@ -134,6 +204,15 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
   import { supabase, initAdminAuth, type AdminUser } from '../../lib/adminAuth';
   import { triggerRebuild } from '../../lib/publishFunction';
   import { MODALITY_OPTIONS } from '../../lib/modalities';
+  import {
+    ALMOST_FULL_THRESHOLD,
+    CASELOAD_MULTIPLIER,
+    WEEKLY_TARGET_GUIDANCE,
+    caseloadBarClass,
+    percentFull,
+    targetCaseload,
+    type CounselorCaseload,
+  } from '../../lib/caseload';
 
   type CounselorPage = {
     id: string;
@@ -166,7 +245,115 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
   const modalityCheckboxes = document.querySelectorAll<HTMLInputElement>('.modality-checkbox');
   const modalityOptionLabels = document.querySelectorAll<HTMLLabelElement>('.modality-option');
 
+  const weeklyTargetInput = document.getElementById('weekly-target-input') as HTMLInputElement;
+  const currentClientsInput = document.getElementById('current-clients-input') as HTMLInputElement;
+  const targetCaseloadBox = document.getElementById('target-caseload-box')!;
+  const targetCaseloadValue = document.getElementById('target-caseload-value')!;
+  const caseloadMeter = document.getElementById('caseload-meter')!;
+  const caseloadMeterLabel = document.getElementById('caseload-meter-label')!;
+  const caseloadMeterOpen = document.getElementById('caseload-meter-open')!;
+  const caseloadMeterBar = document.getElementById('caseload-meter-bar')!;
+  const caseloadAvailabilityHint = document.getElementById('caseload-availability-hint')!;
+  const caseloadSaveButton = document.getElementById('caseload-save-button')!;
+  const caseloadStatusMsg = document.getElementById('caseload-status-msg')!;
+
+  document.getElementById('weekly-target-guidance')!.textContent = WEEKLY_TARGET_GUIDANCE;
+  document.getElementById('target-caseload-explainer')!.textContent =
+    `Clients per week x ${CASELOAD_MULTIPLIER}. Your caseload is bigger than your weekly sessions because some clients come every other week or monthly.`;
+
   const KNOWN_MODALITIES = new Set(MODALITY_OPTIONS.map((m) => m.toLowerCase()));
+
+  // Keyed by counselor page id. Missing key = this counselor hasn't set a
+  // caseload yet (no row), which is a normal state, not an error.
+  let caseloads = new Map<string, CounselorCaseload>();
+
+  function readIntInput(input: HTMLInputElement): number | null {
+    const n = parseInt(input.value, 10);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  // Recomputed live on every keystroke so the counselor sees their full
+  // caseload number the moment they type a weekly target.
+  function renderCaseloadPreview() {
+    const target = targetCaseload(readIntInput(weeklyTargetInput));
+    const current = readIntInput(currentClientsInput);
+
+    targetCaseloadBox.classList.toggle('hidden', target === null);
+    if (target !== null) targetCaseloadValue.textContent = String(target);
+
+    if (target === null || current === null) {
+      caseloadMeter.classList.add('hidden');
+      return;
+    }
+    caseloadMeter.classList.remove('hidden');
+    const open = target - current;
+    caseloadMeterLabel.textContent = `${current} of ${target} clients (${Math.round((current / target) * 100)}% full)`;
+    caseloadMeterOpen.textContent =
+      open > 0 ? `${open} open spot${open === 1 ? '' : 's'}` : open === 0 ? 'Full' : `${-open} over full`;
+    caseloadMeterBar.style.width = `${percentFull(current, target)}%`;
+    caseloadMeterBar.className = `h-3 rounded-full ${caseloadBarClass(current, target)}`;
+
+    // Only a nudge, never an automatic change: the public availability
+    // pill stays the counselor's own call.
+    const status = document.querySelector<HTMLInputElement>('.availability-radio:checked')?.value;
+    const showHint = current / target >= ALMOST_FULL_THRESHOLD && status === 'accepting';
+    caseloadAvailabilityHint.classList.toggle('hidden', !showHint);
+    if (showHint) {
+      caseloadAvailabilityHint.textContent =
+        'You\'re close to full, but your page still says "Accepting New Clients." Consider switching to "Almost Full" above.';
+    }
+  }
+
+  weeklyTargetInput.addEventListener('input', renderCaseloadPreview);
+  currentClientsInput.addEventListener('input', renderCaseloadPreview);
+  radios.forEach((r) => r.addEventListener('change', renderCaseloadPreview));
+
+  caseloadSaveButton.addEventListener('click', async () => {
+    if (!selectedPage) return;
+    const weekly = readIntInput(weeklyTargetInput);
+    const current = readIntInput(currentClientsInput);
+    if (weekly !== null && (weekly < 1 || weekly > 60)) {
+      caseloadStatusMsg.textContent = 'Clients per week should be between 1 and 60.';
+      caseloadStatusMsg.className = 'text-sm text-red-600';
+      return;
+    }
+    if (current !== null && (current < 0 || current > 200)) {
+      caseloadStatusMsg.textContent = 'Current active clients should be between 0 and 200.';
+      caseloadStatusMsg.className = 'text-sm text-red-600';
+      return;
+    }
+    caseloadStatusMsg.textContent = 'Saving...';
+    caseloadStatusMsg.className = 'text-sm text-slate-600';
+    const row = {
+      counselor_page_id: selectedPage.id,
+      weekly_client_target: weekly,
+      current_active_clients: current,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from('counselor_caseload').upsert(row);
+    if (error) {
+      caseloadStatusMsg.textContent = 'Could not save: ' + error.message;
+      caseloadStatusMsg.className = 'text-sm text-red-600';
+      return;
+    }
+    caseloads.set(selectedPage.id, row);
+    caseloadStatusMsg.textContent = 'Caseload saved.';
+    caseloadStatusMsg.className = 'text-sm text-emerald-700';
+  });
+
+  function loadCaseloadForm() {
+    const row = selectedPage ? caseloads.get(selectedPage.id) : undefined;
+    weeklyTargetInput.value = row?.weekly_client_target != null ? String(row.weekly_client_target) : '';
+    currentClientsInput.value = row?.current_active_clients != null ? String(row.current_active_clients) : '';
+    caseloadStatusMsg.textContent = '';
+    renderCaseloadPreview();
+  }
+
+  async function loadCaseloads(pageIds: string[]) {
+    if (pageIds.length === 0) return;
+    const { data } = await supabase.from('counselor_caseload').select('*').in('counselor_page_id', pageIds);
+    caseloads = new Map(((data ?? []) as CounselorCaseload[]).map((c) => [c.counselor_page_id, c]));
+  }
 
   let counselorPages: CounselorPage[] = [];
   let selectedPage: CounselorPage | null = null;
@@ -265,6 +452,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     modalityNoResults.classList.add('hidden');
 
     statusMsg.textContent = '';
+    loadCaseloadForm();
   }
 
   pageSelect.addEventListener('change', () => {
@@ -315,6 +503,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
       pickerWrap.classList.remove('hidden');
       pageSelect.innerHTML = counselorPages.map((p) => `<option value="${p.id}">${escapeHtml(p.title)}</option>`).join('');
       selectedPage = counselorPages[0] ?? null;
+      await loadCaseloads(counselorPages.map((p) => p.id));
       loadForm();
       return;
     }
@@ -336,6 +525,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     }
     counselorPages = [data as CounselorPage];
     selectedPage = counselorPages[0];
+    await loadCaseloads([selectedPage.id]);
     loadForm();
   }
 

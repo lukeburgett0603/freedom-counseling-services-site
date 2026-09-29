@@ -4068,3 +4068,46 @@ workflow" decision as always.
   see the template writeup) was found and characterized, not "fixed,"
   since it's already hard to hit outside of scripted rapid-navigation
   testing. Test account deleted after.
+
+## Caseload tracking: clients, not just leads (built 2026-09-28)
+
+Measures the outcome the marketing exists for: how full each counselor's
+caseload is, and how many leads became clients. Built here first, synced to
+`local-business-site-template` the same day.
+
+- **"Became a client" = a lead marked `scheduled`.** Migration
+  `0066_caseload_tracking.sql` adds `leads.scheduled_at`, set/cleared by the
+  `leads_caseload_fields` trigger (set on entering `scheduled`, cleared on
+  leaving it), so "new clients this month" counts the month someone became
+  a client, not the month they submitted the form. Backfill used
+  `created_at` for leads already `scheduled`, the closest honest proxy.
+- **`leads.assigned_counselor_page_id`** credits a client to a counselor.
+  The same trigger prefills it from `preferred_counselor_page_id` on insert
+  (and the migration backfilled existing rows); editable in the Lead CRM
+  detail view, which warns when a Scheduled lead in a multi-counselor
+  practice has no one assigned.
+- **`counselor_caseload` is its own table, not columns on `pages`.** `pages`
+  is publicly readable, and caseload numbers are private. Separate table
+  also means no `enforce_content_permission()` carve-out and no site
+  rebuild on save. RLS: owner/agency read/write all; a linked-counselor
+  staff login reads/writes only its own row. Verified via direct REST
+  calls (own row 201, another counselor's 403, anon reads empty, a
+  61/week value rejected by the CHECK constraint).
+- **Target caseload is derived, never stored**: `weekly_client_target x
+  CASELOAD_MULTIPLIER` (1.5, a deliberate rule of thumb per client
+  decision, in `src/lib/caseload.ts`). Change the multiplier there, no
+  migration needed. `current_active_clients` is self-reported because
+  leads only capture new clients, never existing ones or discharges.
+- **Counselor settings** gained a Caseload section with its own Save
+  (weekly target with 16-30/20-typical guidance, live full-caseload number,
+  current clients, a personal meter, and a nudge (never an automatic
+  change) toward "Almost Full" at 90%+ while still marked Accepting).
+- **Analytics Dashboards → Caseload** (`/admin/analytics/caseload`, first
+  in the group): practice bar summing only counselors with both numbers
+  set (the rest listed as "not included yet"), new clients this/last
+  month, lead-to-client rate, and a by-counselor section (multi-counselor
+  practices only) with a 30-day staleness flag on each self-reported
+  number. Leads dashboard gained a "Became clients" card.
+- Verified live against this project with throwaway owner + linked-staff
+  logins and a `ZZTEST` lead (all deleted after; lead total confirmed back
+  to its pre-test count).
