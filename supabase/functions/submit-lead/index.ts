@@ -71,6 +71,22 @@ const SESSION_FORMAT_LABELS: Record<string, string> = {
   telehealth: 'Telehealth',
 };
 
+// Copy of src/lib/leadSource.ts's LEAD_SOURCES (Deno can't import from
+// src/). Add a new option in both places.
+const LEAD_SOURCE_LABELS: Record<string, string> = {
+  google_search: 'Google search',
+  google_maps: 'Google Maps',
+  ai_assistant: 'ChatGPT or another AI assistant',
+  directory: 'Psychology Today or another directory',
+  insurance: 'My insurance company',
+  doctor: 'My doctor or another healthcare provider',
+  professional: 'An attorney or other professional',
+  church: 'My church or pastor',
+  friend_family: 'A friend or family member',
+  social_media: 'Social media',
+  other: 'Other',
+};
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -160,6 +176,18 @@ Deno.serve(async (req: Request) => {
   if ('preferred_session_format' in body) {
     insertPayload.preferred_session_format = body.preferred_session_format || null;
   }
+  // "How did you hear about us?" — sanitized to a known value here rather
+  // than by a DB CHECK constraint, so an unexpected value is dropped
+  // instead of failing the whole lead insert. Keep in sync with
+  // src/lib/leadSource.ts.
+  if ('lead_source' in body) {
+    insertPayload.lead_source =
+      typeof body.lead_source === 'string' && LEAD_SOURCE_LABELS[body.lead_source] ? body.lead_source : null;
+    insertPayload.lead_source_detail =
+      typeof body.lead_source_detail === 'string' && body.lead_source_detail.trim()
+        ? body.lead_source_detail.trim().slice(0, 120)
+        : null;
+  }
   // A guide-download submission (LeadMagnet.astro) — a distinct, lower-
   // intent signal from a real appointment request, see CLAUDE.md's
   // "Contacts vs. leads" section. Only present when this call came from
@@ -228,6 +256,13 @@ Deno.serve(async (req: Request) => {
           insertPayload.preferred_session_format
             ? (SESSION_FORMAT_LABELS[insertPayload.preferred_session_format as string] ??
               (insertPayload.preferred_session_format as string))
+            : null,
+        ],
+        [
+          'Heard about us',
+          insertPayload.lead_source
+            ? LEAD_SOURCE_LABELS[insertPayload.lead_source as string] +
+              (insertPayload.lead_source_detail ? ` (${insertPayload.lead_source_detail as string})` : '')
             : null,
         ],
         ['Current website', insertPayload.existing_website_url as string | null],

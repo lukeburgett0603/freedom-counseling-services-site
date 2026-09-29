@@ -64,14 +64,45 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     </div>
   </div>
 
+  <!--
+    Speed to lead: form submission -> first time the lead leaves "New" in
+    the CRM (first_contacted_at, trigger-maintained, see
+    0067_lead_source_and_response_time.sql). Manually added leads are
+    excluded: they're logged after contact has already happened.
+  -->
+  <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Speed to lead (last 30 days)</p>
+    <div class="mt-3 grid gap-4 sm:grid-cols-3">
+      <div>
+        <p class="text-[11px] uppercase tracking-wide text-slate-400">Median time to first contact</p>
+        <p id="speed-median" class="mt-0.5 font-[family-name:var(--font-heading)] text-2xl font-bold text-brand-ink">—</p>
+      </div>
+      <div>
+        <p class="text-[11px] uppercase tracking-wide text-slate-400">Contacted within 24 hours</p>
+        <p id="speed-within-24" class="mt-0.5 font-[family-name:var(--font-heading)] text-2xl font-bold text-brand-ink">—</p>
+      </div>
+      <div>
+        <p class="text-[11px] uppercase tracking-wide text-slate-400">Waiting on a first contact</p>
+        <p id="speed-waiting" class="mt-0.5 font-[family-name:var(--font-heading)] text-2xl font-bold text-brand-ink">—</p>
+      </div>
+    </div>
+    <p class="mt-3 text-xs text-slate-500">Measured from when the form was submitted to when the lead was first moved out of <span class="font-semibold">New</span> in the Lead CRM.</p>
+  </div>
+
   <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
     <p class="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">Leads per week (last 10 weeks)</p>
     <div id="weekly-chart" class="flex h-32 gap-2"></div>
   </div>
 
-  <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-    <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Leads by page</p>
-    <div id="by-page-list" class="space-y-2 text-sm"></div>
+  <div class="mb-8 grid gap-4 lg:grid-cols-2">
+    <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">How they heard about you</p>
+      <div id="by-source-list" class="space-y-2 text-sm"></div>
+    </div>
+    <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Leads by page</p>
+      <div id="by-page-list" class="space-y-2 text-sm"></div>
+    </div>
   </div>
 
   <div class="mb-4 flex items-center justify-between">
@@ -88,6 +119,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           <th class="px-4 py-3 font-semibold">Current site</th>
           <th class="px-4 py-3 font-semibold">Message</th>
           <th class="px-4 py-3 font-semibold">From page</th>
+          <th class="px-4 py-3 font-semibold">Heard about us</th>
           <th class="px-4 py-3 font-semibold">Counselor</th>
           <th class="px-4 py-3 font-semibold">Format</th>
           <th class="px-4 py-3 font-semibold">Status</th>
@@ -101,6 +133,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 <script>
   import { supabase, initAdminAuth } from '../../../lib/adminAuth';
   import { renderStatusSelect, initStatusSelectHandler } from '../../../lib/leadStatus';
+  import { formatHours, hoursToFirstContact, leadSourceLabel, median, renderSourceBars } from '../../../lib/leadSource';
 
   const tableBody = document.getElementById('leads-table-body')!;
   const leadsCount = document.getElementById('leads-count')!;
@@ -124,7 +157,49 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     preferred_counselor_page_id: string | null;
     preferred_session_format: string | null;
     lead_magnet_id: string | null;
+    lead_source: string | null;
+    lead_source_detail: string | null;
+    first_contacted_at: string | null;
   };
+
+  // Must match admin/crm.astro's MANUAL_SOURCE sentinel.
+  const MANUAL_SOURCE = 'Manually added';
+
+  function renderSpeedToLead(leads: Lead[]) {
+    const cutoff = Date.now() - 30 * 86_400_000;
+    // A lead that already left "New" but has no first_contacted_at was
+    // contacted before response-time tracking existed (0067 has no honest
+    // backfill), so it's left out entirely rather than counted as slow.
+    // A lead still sitting in "New" always counts: that one is really waiting.
+    const recent = leads.filter(
+      (l) =>
+        new Date(l.created_at).getTime() >= cutoff &&
+        l.source_page !== MANUAL_SOURCE &&
+        (l.first_contacted_at || (l.status ?? 'new') === 'new')
+    );
+    const contacted = recent.filter((l) => l.first_contacted_at);
+    const hours = contacted.map((l) => hoursToFirstContact(l.created_at, l.first_contacted_at!));
+    const med = median(hours);
+    document.getElementById('speed-median')!.textContent = med === null ? '—' : formatHours(med);
+
+    // Denominator: every recent lead that has either been contacted or had
+    // a full 24 hours, so a lead submitted an hour ago and not yet
+    // contacted doesn't count against the practice yet.
+    const dayOld = recent.filter(
+      (l) => l.first_contacted_at || Date.now() - new Date(l.created_at).getTime() >= 86_400_000
+    );
+    const within = dayOld.filter(
+      (l) => l.first_contacted_at && hoursToFirstContact(l.created_at, l.first_contacted_at) <= 24
+    ).length;
+    document.getElementById('speed-within-24')!.textContent =
+      dayOld.length === 0 ? '—' : `${Math.round((within / dayOld.length) * 100)}%`;
+
+    const waiting = leads.filter((l) => (l.status ?? 'new') === 'new' && l.source_page !== MANUAL_SOURCE).length;
+    const waitingEl = document.getElementById('speed-waiting')!;
+    waitingEl.textContent = String(waiting);
+    waitingEl.className =
+      'mt-0.5 font-[family-name:var(--font-heading)] text-2xl font-bold ' + (waiting > 0 ? 'text-amber-700' : 'text-brand-ink');
+  }
 
   const SESSION_FORMAT_LABELS: Record<string, string> = {
     in_person: 'In-Person',
@@ -308,6 +383,11 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     const contacts = (data as Lead[]).filter((l) => l.lead_magnet_id);
 
     renderDashboard(realLeads);
+    renderSpeedToLead(realLeads);
+    document.getElementById('by-source-list')!.innerHTML = renderSourceBars(
+      realLeads.map((l) => l.lead_source),
+      'No leads yet.'
+    );
     renderContactsWidget(contacts, realLeads);
 
     leadsCount.textContent = `${realLeads.length} lead${realLeads.length === 1 ? '' : 's'}`;
@@ -322,6 +402,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
         <td class="px-4 py-3">${lead.existing_website_url ? `<a href="${escapeHtml(lead.existing_website_url)}" target="_blank" rel="noopener" class="text-brand-primary hover:underline">link</a>` : ''}</td>
         <td class="px-4 py-3 max-w-xs truncate" title="${escapeHtml(lead.message ?? '')}">${escapeHtml(lead.message ?? '')}</td>
         <td class="px-4 py-3">${escapeHtml(lead.source_page ?? '')}</td>
+        <td class="px-4 py-3">${lead.lead_source ? escapeHtml(leadSourceLabel(lead.lead_source) + (lead.lead_source_detail ? ` (${lead.lead_source_detail})` : '')) : ''}</td>
         <td class="px-4 py-3">${lead.preferred_counselor_page_id ? escapeHtml(counselorNames.get(lead.preferred_counselor_page_id) ?? 'Unknown') : ''}</td>
         <td class="px-4 py-3">${lead.preferred_session_format ? escapeHtml(SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format) : ''}</td>
         <td class="px-4 py-3">${renderStatusSelect(lead.id, lead.status)}</td>

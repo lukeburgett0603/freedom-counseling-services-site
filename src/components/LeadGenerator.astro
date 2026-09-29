@@ -1,4 +1,6 @@
 ---
+import { LEAD_SOURCES, REFERRAL_LEAD_SOURCES } from '../lib/leadSource';
+
 interface Counselor {
   id: string;
   title: string;
@@ -51,6 +53,12 @@ interface Props {
   // server-side verification, which is the real enforcement — this only
   // controls whether the client-side widget renders.
   turnstileSiteKey?: string | null;
+  // "How did you hear about us?" — opt-in via business.collect_lead_source,
+  // same pattern as collectSessionFormat. Optional to answer; "Who
+  // referred you?" appears only for referral answers. Hidden on the
+  // compact field set, which exists to keep friction low. See
+  // 0067_lead_source_and_response_time.sql.
+  collectLeadSource?: boolean;
 }
 
 const {
@@ -75,6 +83,7 @@ const {
   defaultCounselorId,
   collectSessionFormat = false,
   turnstileSiteKey,
+  collectLeadSource = false,
 } = Astro.props;
 
 const Wrapper = embedded ? 'div' : 'section';
@@ -176,6 +185,28 @@ const Wrapper = embedded ? 'div' : 'section';
           </div>
         </div>
       )}
+      {collectLeadSource && !compact && (
+        <div class="space-y-2">
+          <select
+            name="lead_source"
+            aria-label="How did you hear about us? (optional)"
+            class="lead-source-select w-full rounded-md border border-slate-300 px-4 py-2 text-slate-700"
+            data-referral-values={REFERRAL_LEAD_SOURCES.join(',')}
+          >
+            <option value="" selected>How did you hear about us? (optional)</option>
+            {LEAD_SOURCES.map((source) => (
+              <option value={source.value}>{source.label}</option>
+            ))}
+          </select>
+          <input
+            name="lead_source_detail"
+            type="text"
+            placeholder="Who referred you? (optional)"
+            maxlength="120"
+            class="lead-source-detail hidden w-full rounded-md border border-slate-300 px-4 py-2"
+          />
+        </div>
+      )}
       {!compact && (
         <textarea
           name="message"
@@ -225,6 +256,18 @@ const Wrapper = embedded ? 'div' : 'section';
   document.querySelectorAll<HTMLFormElement>('.lead-form').forEach((form) => {
     const status = form.querySelector<HTMLElement>('.lead-form-status');
 
+    // Show "Who referred you?" only for referral answers.
+    const sourceSelect = form.querySelector<HTMLSelectElement>('.lead-source-select');
+    const sourceDetail = form.querySelector<HTMLInputElement>('.lead-source-detail');
+    if (sourceSelect && sourceDetail) {
+      const referralValues = (sourceSelect.dataset.referralValues ?? '').split(',');
+      sourceSelect.addEventListener('change', () => {
+        const isReferral = referralValues.includes(sourceSelect.value);
+        sourceDetail.classList.toggle('hidden', !isReferral);
+        if (!isReferral) sourceDetail.value = '';
+      });
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!status) return;
@@ -257,6 +300,10 @@ const Wrapper = embedded ? 'div' : 'section';
       if (form.querySelector('[name="preferred_session_format"]')) {
         payload.preferred_session_format = formData.get('preferred_session_format') || null;
       }
+      if (sourceSelect) {
+        payload.lead_source = formData.get('lead_source') || null;
+        payload.lead_source_detail = formData.get('lead_source_detail') || null;
+      }
 
       const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-lead`, {
         method: 'POST',
@@ -271,7 +318,10 @@ const Wrapper = embedded ? 'div' : 'section';
       status.textContent = response.ok
         ? 'Thanks! We’ll be in touch soon.'
         : 'Something went wrong. Please try again.';
-      if (response.ok) form.reset();
+      if (response.ok) {
+        form.reset();
+        sourceDetail?.classList.add('hidden');
+      }
     });
   });
 </script>

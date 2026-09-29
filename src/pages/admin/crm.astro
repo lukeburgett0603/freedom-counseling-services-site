@@ -5,6 +5,7 @@ import { LEAD_STATUSES } from '../../lib/leadStatus';
 function statusLabel(status: string): string {
   return status[0].toUpperCase() + status.slice(1);
 }
+import { LEAD_SOURCES } from '../../lib/leadSource';
 ---
 
 <!--
@@ -171,6 +172,19 @@ function statusLabel(status: string): string {
           </select>
         </div>
         <div>
+          <label class="block text-xs font-semibold text-slate-500">How did they hear about you?</label>
+          <select name="lead_source" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Not asked / unknown</option>
+            {LEAD_SOURCES.map((src) => <option value={src.value}>{src.label}</option>)}
+          </select>
+          <input
+            name="lead_source_detail"
+            type="text"
+            placeholder="Who referred them? (optional)"
+            class="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
           <label class="block text-xs font-semibold text-slate-500">Notes</label>
           <textarea
             name="message"
@@ -259,6 +273,25 @@ function statusLabel(status: string): string {
             <p id="detail-assigned-status" class="mt-1 text-xs"></p>
           </dd>
         </div>
+        <!-- The lead's own answer from the form, or what they said on the
+             phone. Editable so staff can fill it in after a call; feeds
+             the "how they heard about you" dashboards. -->
+        <div>
+          <dt><label for="detail-source-select" class="text-xs font-semibold uppercase text-slate-500">Heard about us</label></dt>
+          <dd class="mt-0.5 space-y-1">
+            <select id="detail-source-select" class="block w-full rounded-md border border-slate-300 px-2 py-1 text-sm">
+              <option value="">Not answered</option>
+              {LEAD_SOURCES.map((src) => <option value={src.value}>{src.label}</option>)}
+            </select>
+            <input
+              id="detail-source-detail"
+              type="text"
+              placeholder="Who referred them? (optional)"
+              class="block w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+            />
+            <p id="detail-source-status" class="text-xs"></p>
+          </dd>
+        </div>
         <div>
           <dt class="text-xs font-semibold uppercase text-slate-500">Session format preference</dt>
           <dd id="detail-session-format" class="mt-0.5"></dd>
@@ -307,6 +340,7 @@ function statusLabel(status: string): string {
 
 <script>
   import { supabase, initAdminAuth } from '../../lib/adminAuth';
+  import { leadSourceLabel } from '../../lib/leadSource';
   import { renderStatusSelect, initStatusSelectHandler, TERMINAL_LEAD_STATUSES } from '../../lib/leadStatus';
 
   function escapeHtml(value: string): string {
@@ -331,6 +365,8 @@ function statusLabel(status: string): string {
     preferred_counselor_page_id: string | null;
     assigned_counselor_page_id: string | null;
     preferred_session_format: string | null;
+    lead_source: string | null;
+    lead_source_detail: string | null;
   };
 
   const SESSION_FORMAT_LABELS: Record<string, string> = {
@@ -650,7 +686,7 @@ function statusLabel(status: string): string {
   // export to match what's on screen.
   exportButton.addEventListener('click', () => {
     const filtered = applyFilters(allLeads);
-    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Assigned counselor', 'Session format preference', 'Archived', 'Message'];
+    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Assigned counselor', 'Heard about us', 'Referred by', 'Session format preference', 'Archived', 'Message'];
     const rows = filtered.map((lead) => [
       new Date(lead.created_at).toLocaleDateString(),
       lead.name ?? '',
@@ -661,6 +697,8 @@ function statusLabel(status: string): string {
       sourceLabel(lead),
       lead.preferred_counselor_page_id ? (counselorNames.get(lead.preferred_counselor_page_id) ?? 'Unknown') : '',
       lead.assigned_counselor_page_id ? (counselorNames.get(lead.assigned_counselor_page_id) ?? 'Unknown') : '',
+      lead.lead_source ? leadSourceLabel(lead.lead_source) : '',
+      lead.lead_source_detail ?? '',
       lead.preferred_session_format ? (SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format) : '',
       lead.archived_at ? 'Yes' : '',
       lead.message ?? '',
@@ -726,6 +764,33 @@ function statusLabel(status: string): string {
   const detailAssignedWrap = document.getElementById('detail-assigned-wrap')!;
   const detailAssignedSelect = document.getElementById('detail-assigned-select') as HTMLSelectElement;
   const detailAssignedStatus = document.getElementById('detail-assigned-status')!;
+  const detailSourceSelect = document.getElementById('detail-source-select') as HTMLSelectElement;
+  const detailSourceDetail = document.getElementById('detail-source-detail') as HTMLInputElement;
+  const detailSourceStatus = document.getElementById('detail-source-status')!;
+
+  // Saves on change (select) or blur (text), same inline-save feel as the
+  // status and assigned-counselor selects.
+  async function saveLeadSource() {
+    if (!currentLeadId) return;
+    const lead = allLeads.find((l) => l.id === currentLeadId);
+    if (!lead) return;
+    const next = {
+      lead_source: detailSourceSelect.value || null,
+      lead_source_detail: detailSourceDetail.value.trim() || null,
+    };
+    if (next.lead_source === lead.lead_source && next.lead_source_detail === lead.lead_source_detail) return;
+    const { error } = await supabase.from('leads').update(next).eq('id', lead.id);
+    if (error) {
+      detailSourceStatus.textContent = 'Could not save: ' + error.message;
+      detailSourceStatus.className = 'text-xs text-red-600';
+      return;
+    }
+    Object.assign(lead, next);
+    detailSourceStatus.textContent = 'Saved.';
+    detailSourceStatus.className = 'text-xs text-emerald-700';
+  }
+  detailSourceSelect.addEventListener('change', saveLeadSource);
+  detailSourceDetail.addEventListener('blur', saveLeadSource);
   const detailSource = document.getElementById('detail-source')!;
   const detailMessage = document.getElementById('detail-message')!;
   const detailFollowUp = document.getElementById('detail-follow-up') as HTMLInputElement;
@@ -839,6 +904,9 @@ function statusLabel(status: string): string {
       ? (counselorNames.get(lead.preferred_counselor_page_id) ?? 'Unknown')
       : 'No preference (Help me choose)';
     renderAssignedSelect(lead);
+    detailSourceSelect.value = lead.lead_source ?? '';
+    detailSourceDetail.value = lead.lead_source_detail ?? '';
+    detailSourceStatus.textContent = '';
     detailSessionFormat.textContent = lead.preferred_session_format
       ? (SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format)
       : 'No preference stated';
@@ -966,6 +1034,8 @@ function statusLabel(status: string): string {
       // "(unknown page)" on Leads and analytics, indistinguishable from a
       // real data gap).
       source_page: MANUAL_SOURCE,
+      lead_source: (formData.get('lead_source') as string) || null,
+      lead_source_detail: (formData.get('lead_source_detail') as string).trim() || null,
       lead_magnet_id: null,
       existing_website_url: null,
     };

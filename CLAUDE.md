@@ -4111,3 +4111,35 @@ caseload is, and how many leads became clients. Built here first, synced to
 - Verified live against this project with throwaway owner + linked-staff
   logins and a `ZZTEST` lead (all deleted after; lead total confirmed back
   to its pre-test count).
+
+## Lead source + speed to lead (built 2026-09-28)
+
+Measurement for the Full Caseload System's "Get Found / Get Referred" and
+"Get Booked" steps. Migration `0067_lead_source_and_response_time.sql`.
+
+- **"How did you hear about us?"** — optional select on `LeadGenerator`
+  (full field set only, never the compact one), opt-in via
+  `business.collect_lead_source` (on for this site), threaded through all
+  14 template call sites next to `collectSessionFormat`. Referral answers
+  (doctor / professional / church) reveal an optional "Who referred you?"
+  box. Values and labels live in `src/lib/leadSource.ts`; `submit-lead`
+  keeps its own allowlist copy (Deno can't import from `src/`) and drops
+  unknown values instead of a DB CHECK constraint, so a bad value never
+  fails the lead insert. The answer is also in the notification email.
+- **`leads.first_contacted_at`** — trigger-set the first time status leaves
+  `new`. It measures CRM status updates, not replies sent from the
+  practice's inbox. No backfill.
+- **Dashboards**: Leads gained "Speed to lead (last 30 days)" (median time
+  to first contact, % contacted within 24 hours, count still waiting) and
+  "How they heard about you"; Caseload gained "Where new clients came
+  from." Speed math excludes manually added leads and leads contacted
+  before tracking existed (non-`new` with no `first_contacted_at`); a lead
+  counts in the 24-hour denominator once it's contacted or 24 hours old.
+  Both rules were real bugs caught in the live-data browser pass (the
+  first version showed 0% because of pre-tracking leads).
+- **CRM**: "+ Add lead" and the detail view both take a source and
+  referrer (inline save), and the CSV export includes them.
+- Live form submission can't be tested from localhost (Turnstile rejects
+  it) and a live test emails the practice's real inbox, so verification
+  covered the function deploy (honeypot smoke test), the trigger (seeded
+  `ZZTEST` leads), and every UI surface locally.
