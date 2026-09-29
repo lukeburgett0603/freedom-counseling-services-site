@@ -135,6 +135,11 @@ import { SIGN_COPY, STAFF_GUIDELINES } from '../../lib/reviewProgram';
   import QRCode from 'qrcode';
   import { supabase, initAdminAuth } from '../../lib/adminAuth';
   import { withBase } from '../../lib/url';
+  // Static, not a dynamic import(): with Vite 8 (Astro 7), a lone dynamic
+  // import of a module every other admin page imports statically made the
+  // bundler put a shared helper inside this page's entry chunk, so every
+  // admin page using publishFunction also ran this page's script and threw.
+  import { triggerRebuild } from '../../lib/publishFunction';
   import { SIGN_COPY, dischargeSurveyTemplate, reviewPolicyTemplate } from '../../lib/reviewProgram';
 
   type Snapshot = { id: string; recorded_on: string; review_count: number; average_rating: number | null };
@@ -191,7 +196,6 @@ import { SIGN_COPY, STAFF_GUIDELINES } from '../../lib/reviewProgram';
     }
     // The public page is static, so it only picks up the new link after
     // a rebuild. Same best-effort rebuild as other business-info saves.
-    const { triggerRebuild } = await import('../../lib/publishFunction');
     const result = await triggerRebuild();
     reviewUrlStatus.textContent = result.ok
       ? 'Saved. Your "Share your experience" page will update shortly.'

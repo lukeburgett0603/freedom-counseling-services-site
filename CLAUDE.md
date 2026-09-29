@@ -558,6 +558,23 @@ before touching the related code on a future client site.
   change was harmless: attribute values like `RichTextEditor`'s
   `<option value="<p>">` are now escaped as `&lt;p&gt;`, which the browser
   decodes to the identical value.)
+- **Under Astro 7 (Vite 8), a lone dynamic `import()` of a module other
+  pages import statically can break every one of those other pages.**
+  `admin/review-program.astro` was the only page that did `await
+  import('../../lib/publishFunction')`; everywhere else imports it
+  statically. The v7 bundler responded by putting a shared helper
+  *inside review-program's own entry chunk*, so `publishFunction.js`
+  imported that chunk — meaning `/admin/blog`, `suggestions`,
+  `lead-magnets`, `business-info`, `counselor-settings`, `page-copy`,
+  and `team` all silently ran the review-program page's script on load,
+  which threw (`public-page-link` doesn't exist there), which in turn
+  stopped each of those pages' own scripts from ever running. Astro 5
+  never did this. `astro check` and `npm run build` were both clean; it
+  only showed up as a console error while spot-checking `/admin/blog`.
+  Fixed by making the import static. After any build, this one-liner
+  should print nothing (a page's entry chunk must only ever be loaded by
+  its own HTML, never imported by another chunk):
+  `grep -lE '(from|import)"\./[^"]*astro_type_script[^"]*"' dist/_astro/*.js`
 
 ## Client dashboard (`/admin/leads` login)
 
