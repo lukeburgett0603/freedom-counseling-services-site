@@ -4347,3 +4347,36 @@ The paid half of "Get Found." Migration `0072_ad_attribution.sql`; logic in
   measure advertising (legal text, not edited here). Automatic upload via
   the Google Ads API (developer token + OAuth) was deliberately not built:
   manual upload keeps a human decision in the loop for a sensitive export.
+
+## Overview dashboard: the whole Full Caseload System on one screen (built 2026-09-29)
+
+`admin/analytics/overview.astro`, first item under Analytics Dashboards.
+No migration: it reads data every other dashboard already uses, through
+the same shared helpers (`leadSource.ts` speed rules, `caseload.ts`,
+`adAttribution.ts`), so the numbers always agree with the detail pages.
+
+- **Report month**: "This month (so far)" or "Last month," each compared
+  with the month before. Website visits come from `get-traffic-stats`,
+  which only returns this and last month, so "Last month" shows visits
+  without a comparison.
+- **Layout**: headline row (new clients, new leads, caseload % full,
+  median response time), a "Needs attention" list (always about now:
+  leads waiting 24h+, overdue partner follow-ups, counselors without or
+  with stale caseload numbers, unassigned new clients, review count not
+  logged in 30 days, automatic reply off, lead-source question off), then
+  one card per step: Get Found (visits, rankings, Google/Maps leads, ads
+  leads), Get Chosen (visit-to-lead rate, reviews), Get Referred (active
+  partners, outreach touches, referred leads/clients), Get Booked (speed,
+  booking rate, auto-reply), Watch It Work (caseload bar, clients by
+  source). Each card links to its detail page.
+- **Print report** = the monthly client report: `window.print()`, with
+  AdminLayout's `<nav>` now `print:hidden` (applies to every admin page),
+  controls hidden, and a report title shown only in print.
+- Dates compared against `date` columns use local calendar dates, never
+  `toISOString()` (UTC shifts the day in some zones). `load()` is wrapped
+  so an unexpected error shows a message instead of "Loading..." forever
+  (a one-time hang was seen in testing and not reproducible).
+- Verified against this site's real data with a throwaway owner login
+  (deleted after): 17 new clients / 23 leads in September, the real
+  caseload and review entries, the first real partner, and the correct
+  zeros for August.

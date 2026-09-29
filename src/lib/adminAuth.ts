@@ -31,6 +31,7 @@ export interface AdminUser {
 const ROLE_NAV_ACCESS: Record<AdminUser['role'], string[]> = {
   owner: [
     'analytics',
+    'analytics-overview',
     'analytics-caseload',
     'analytics-leads',
     'analytics-traffic',
@@ -52,6 +53,7 @@ const ROLE_NAV_ACCESS: Record<AdminUser['role'], string[]> = {
   staff: ['blog', 'content-plan'],
   agency: [
     'analytics',
+    'analytics-overview',
     'analytics-caseload',
     'analytics-leads',
     'analytics-traffic',

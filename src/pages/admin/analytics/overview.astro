@@ -1,0 +1,492 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { withBase } from '../../../lib/url';
+
+const link = (path: string) => withBase(path);
+---
+
+<!--
+  Overview: the whole Full Caseload System on one screen (Get Found, Get
+  Chosen, Get Referred, Get Booked, Watch It Work), plus a "Needs
+  attention" list. Doubles as the monthly client report ("Print report";
+  the admin sidebar is hidden in print by AdminLayout). Every number comes
+  from data the detail dashboards already use, computed client-side with
+  the same shared helpers, so the two never disagree:
+  leadSource.ts (speed to lead), caseload.ts, adAttribution.ts.
+  Website visits come from get-traffic-stats, which only knows this month
+  and last month, so the "Last month" view shows visits without a
+  comparison.
+-->
+<AdminLayout title="Overview | Admin" current="analytics-overview">
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-3 print:hidden">
+    <div>
+      <label for="period-select" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Report month</label>
+      <select id="period-select" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
+        <option value="0">This month (so far)</option>
+        <option value="1">Last month</option>
+      </select>
+    </div>
+    <button id="print-report" type="button" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print report</button>
+  </div>
+
+  <p id="report-title" class="mb-4 hidden font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink print:block"></p>
+  <p id="loading" class="text-sm text-slate-500">Loading...</p>
+
+  <div id="overview" class="hidden">
+    <p id="period-label" class="mb-4 text-sm text-slate-600"></p>
+
+    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">New clients</p>
+        <p id="h-clients" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="h-clients-change" class="mt-1 text-xs"></p>
+      </div>
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">New leads</p>
+        <p id="h-leads" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="h-leads-change" class="mt-1 text-xs"></p>
+      </div>
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Caseload</p>
+        <p id="h-caseload" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="h-caseload-sub" class="mt-1 text-xs text-slate-500"></p>
+      </div>
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Median response time</p>
+        <p id="h-speed" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="h-speed-sub" class="mt-1 text-xs text-slate-500"></p>
+      </div>
+    </div>
+
+    <div id="attention" class="mb-8 hidden rounded-lg border border-amber-200 bg-amber-50 p-5 print:hidden">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-800">Needs attention</p>
+      <ul id="attention-list" class="space-y-2 text-sm"></ul>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-2">
+      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <div class="flex items-baseline justify-between gap-2">
+          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">1</span> Get Found</p>
+          <a href={link('/admin/analytics/traffic')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
+        </div>
+        <dl id="found" class="mt-3 space-y-2 text-sm"></dl>
+      </section>
+
+      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <div class="flex items-baseline justify-between gap-2">
+          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">2</span> Get Chosen</p>
+          <a href={link('/admin/review-program')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
+        </div>
+        <dl id="chosen" class="mt-3 space-y-2 text-sm"></dl>
+      </section>
+
+      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <div class="flex items-baseline justify-between gap-2">
+          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">3</span> Get Referred</p>
+          <a href={link('/admin/referral-partners')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
+        </div>
+        <dl id="referred" class="mt-3 space-y-2 text-sm"></dl>
+      </section>
+
+      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <div class="flex items-baseline justify-between gap-2">
+          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">4</span> Get Booked</p>
+          <a href={link('/admin/analytics/leads')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
+        </div>
+        <dl id="booked" class="mt-3 space-y-2 text-sm"></dl>
+      </section>
+
+      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm lg:col-span-2">
+        <div class="flex items-baseline justify-between gap-2">
+          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">5</span> Watch It Work</p>
+          <a href={link('/admin/analytics/caseload')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
+        </div>
+        <div id="work" class="mt-3 text-sm"></div>
+      </section>
+    </div>
+  </div>
+</AdminLayout>
+
+<style is:global>
+  @media print {
+    @page {
+      size: letter portrait;
+      margin: 0.5in;
+    }
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .step-card {
+      break-inside: avoid;
+    }
+  }
+</style>
+
+<script>
+  import { supabase, initAdminAuth } from '../../../lib/adminAuth';
+  import { withBase } from '../../../lib/url';
+  import { formatHours, hoursToFirstContact, leadSourceShortLabel, median, REFERRAL_LEAD_SOURCES } from '../../../lib/leadSource';
+  import { caseloadBarClass, daysSince, percentFull, targetCaseload, type CounselorCaseload } from '../../../lib/caseload';
+  import { isGoogleAdsLead } from '../../../lib/adAttribution';
+
+  const MANUAL_SOURCE = 'Manually added'; // matches admin/crm.astro
+  const STALE_DAYS = 30;
+
+  type Lead = {
+    id: string;
+    created_at: string;
+    status: string | null;
+    scheduled_at: string | null;
+    first_contacted_at: string | null;
+    source_page: string | null;
+    lead_magnet_id: string | null;
+    lead_source: string | null;
+    referral_partner_id: string | null;
+    assigned_counselor_page_id: string | null;
+    archived_at: string | null;
+    gclid: string | null;
+    gbraid: string | null;
+    wbraid: string | null;
+    utm_source: string | null;
+    utm_medium: string | null;
+  };
+  type Partner = { id: string; status: string; next_follow_up: string | null; archived_at: string | null };
+  type Activity = { activity_type: string; occurred_on: string };
+  type Snapshot = { recorded_on: string; review_count: number; average_rating: number | null };
+  type Business = {
+    display_name: string;
+    lead_auto_reply_enabled: boolean;
+    collect_lead_source: boolean;
+    google_review_url: string | null;
+  };
+  type Traffic = { thisMonth: { visits: number }; lastMonth: { visits: number } } | null;
+
+  type Data = {
+    leads: Lead[];
+    counselors: { id: string; title: string }[];
+    caseloads: Map<string, CounselorCaseload>;
+    partners: Partner[];
+    activities: Activity[];
+    snapshots: Snapshot[];
+    business: Business | null;
+    keywords: { id: string }[];
+    latestRanks: Map<string, number | null>;
+    traffic: Traffic;
+  };
+
+  let data: Data | null = null;
+
+  function escapeHtml(value: string): string {
+    const div = document.createElement('div');
+    div.textContent = value;
+    return div.innerHTML;
+  }
+
+  function monthBounds(offset: number) {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() - offset + 1, 1);
+    const prevStart = new Date(now.getFullYear(), now.getMonth() - offset - 1, 1);
+    return { start, end, prevStart, prevEnd: start };
+  }
+
+  // Plain local calendar dates (YYYY-MM-DD) for comparing against `date`
+  // columns, never toISOString() (UTC), which shifts the day in some zones.
+  function localIso(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  const inRange = (iso: string | null, a: Date, b: Date) => {
+    if (!iso) return false;
+    const t = new Date(iso).getTime();
+    return t >= a.getTime() && t < b.getTime();
+  };
+
+  function change(current: number, previous: number, unit: string): { text: string; cls: string } {
+    const diff = current - previous;
+    if (diff === 0) return { text: `Same as the month before (${previous} ${unit})`, cls: 'text-slate-500' };
+    return {
+      text: `${diff > 0 ? '+' : ''}${diff} vs the month before (${previous})`,
+      cls: diff > 0 ? 'text-emerald-600' : 'text-red-500',
+    };
+  }
+
+  function row(label: string, value: string, note = ''): string {
+    return `<div class="flex items-baseline justify-between gap-4 border-b border-slate-100 pb-2 last:border-0">
+      <dt class="text-slate-600">${label}</dt>
+      <dd class="text-right"><span class="font-semibold text-brand-ink">${value}</span>${note ? `<span class="block text-xs text-slate-500">${note}</span>` : ''}</dd>
+    </div>`;
+  }
+
+  // Same rules as the Leads dashboard's speed to lead: manual leads are
+  // excluded, and a lead that left "New" before tracking existed is
+  // excluded rather than counted as slow.
+  function speedStats(leads: Lead[]) {
+    const tracked = leads.filter((l) => l.source_page !== MANUAL_SOURCE && (l.first_contacted_at || (l.status ?? 'new') === 'new'));
+    const hours = tracked.filter((l) => l.first_contacted_at).map((l) => hoursToFirstContact(l.created_at, l.first_contacted_at!));
+    const eligible = tracked.filter((l) => l.first_contacted_at || Date.now() - new Date(l.created_at).getTime() >= 86_400_000);
+    const within = eligible.filter((l) => l.first_contacted_at && hoursToFirstContact(l.created_at, l.first_contacted_at) <= 24).length;
+    return { median: median(hours), withinPct: eligible.length ? Math.round((within / eligible.length) * 100) : null };
+  }
+
+  const isReferral = (l: Lead) => Boolean(l.referral_partner_id) || REFERRAL_LEAD_SOURCES.includes(l.lead_source ?? '');
+
+  function render(offset: number) {
+    if (!data) return;
+    const { start, end, prevStart, prevEnd } = monthBounds(offset);
+    const monthName = start.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    document.getElementById('period-label')!.textContent =
+      offset === 0 ? `${monthName}, month to date, compared with the month before.` : `${monthName}, compared with the month before.`;
+    document.getElementById('report-title')!.textContent = `${data.business?.display_name ?? ''}: ${monthName} report`;
+
+    const realLeads = data.leads.filter((l) => !l.lead_magnet_id);
+    const leadsNow = realLeads.filter((l) => inRange(l.created_at, start, end));
+    const leadsPrev = realLeads.filter((l) => inRange(l.created_at, prevStart, prevEnd));
+    const clients = realLeads.filter((l) => l.status === 'scheduled' && l.scheduled_at);
+    const clientsNow = clients.filter((l) => inRange(l.scheduled_at, start, end));
+    const clientsPrev = clients.filter((l) => inRange(l.scheduled_at, prevStart, prevEnd));
+
+    // Headline
+    document.getElementById('h-clients')!.textContent = String(clientsNow.length);
+    const cc = change(clientsNow.length, clientsPrev.length, 'clients');
+    Object.assign(document.getElementById('h-clients-change')!, { textContent: cc.text, className: `mt-1 text-xs ${cc.cls}` });
+    document.getElementById('h-leads')!.textContent = String(leadsNow.length);
+    const lc = change(leadsNow.length, leadsPrev.length, 'leads');
+    Object.assign(document.getElementById('h-leads-change')!, { textContent: lc.text, className: `mt-1 text-xs ${lc.cls}` });
+
+    const complete = data.counselors.filter((c) => {
+      const r = data!.caseloads.get(c.id);
+      return targetCaseload(r?.weekly_client_target) !== null && r?.current_active_clients != null;
+    });
+    let current = 0;
+    let target = 0;
+    for (const c of complete) {
+      const r = data.caseloads.get(c.id)!;
+      current += r.current_active_clients!;
+      target += targetCaseload(r.weekly_client_target)!;
+    }
+    document.getElementById('h-caseload')!.textContent = target ? `${Math.round((current / target) * 100)}%` : '—';
+    document.getElementById('h-caseload-sub')!.textContent = target
+      ? `${current} of ${target} clients, ${Math.max(0, target - current)} open spots (current)`
+      : 'Counselors haven’t set their caseloads yet';
+
+    const speedNow = speedStats(leadsNow);
+    const speedPrev = speedStats(leadsPrev);
+    document.getElementById('h-speed')!.textContent = speedNow.median === null ? '—' : formatHours(speedNow.median);
+    document.getElementById('h-speed-sub')!.textContent =
+      speedNow.median === null
+        ? 'None recorded yet. Timed from form to first move out of New in the CRM.'
+        : `${speedNow.withinPct ?? 0}% contacted within 24 hours${speedPrev.median !== null ? ` (was ${formatHours(speedPrev.median)})` : ''}`;
+
+    // 1. Get Found
+    const visits = data.traffic ? (offset === 0 ? data.traffic.thisMonth.visits : data.traffic.lastMonth.visits) : null;
+    const prevVisits = data.traffic && offset === 0 ? data.traffic.lastMonth.visits : null;
+    const ranked = [...data.latestRanks.values()];
+    const top3 = ranked.filter((p) => p !== null && p <= 3).length;
+    const top10 = ranked.filter((p) => p !== null && p <= 10).length;
+    const adLeadsNow = leadsNow.filter(isGoogleAdsLead).length;
+    const searchLeadsNow = leadsNow.filter((l) => l.lead_source === 'google_search' || l.lead_source === 'google_maps').length;
+    document.getElementById('found')!.innerHTML = [
+      row('Website visits', visits === null ? 'Not connected' : visits.toLocaleString(), prevVisits !== null ? `${prevVisits.toLocaleString()} the month before` : ''),
+      row(
+        'Search rankings',
+        ranked.length ? `${top3} in the top 3` : 'Tracking starts soon',
+        ranked.length ? `${top10} of ${data.keywords.length} tracked searches on page 1` : `${data.keywords.length} target searches chosen`
+      ),
+      row('Leads who found you on Google', String(searchLeadsNow), 'Search or Maps, as they told us'),
+      row('Leads from Google Ads', String(adLeadsNow)),
+    ].join('');
+
+    // 2. Get Chosen
+    const snaps = [...data.snapshots].sort((a, b) => a.recorded_on.localeCompare(b.recorded_on));
+    const latest = snaps.at(-1);
+    const endIso = localIso(end);
+    const startIso = localIso(start);
+    const lastInPeriod = [...snaps].reverse().find((s) => s.recorded_on < endIso);
+    const lastBefore = [...snaps].reverse().find((s) => s.recorded_on < startIso);
+    const gained = lastInPeriod && lastBefore ? lastInPeriod.review_count - lastBefore.review_count : null;
+    document.getElementById('chosen')!.innerHTML = [
+      row('Visits that became leads', visits ? `${((leadsNow.length / visits) * 100).toFixed(1)}%` : '—', visits ? `${leadsNow.length} leads from ${visits.toLocaleString()} visits` : ''),
+      row(
+        'Google reviews',
+        latest ? `${latest.review_count}${latest.average_rating ? ` · ${latest.average_rating}★` : ''}` : 'Not logged yet',
+        gained !== null
+          ? `${gained >= 0 ? '+' : ''}${gained} this month`
+          : latest
+            ? `As of ${new Date(latest.recorded_on + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+            : 'Log your count on the Review program page'
+      ),
+    ].join('');
+
+    // 3. Get Referred
+    const livePartners = data.partners.filter((p) => !p.archived_at);
+    const activePartners = livePartners.filter((p) => p.status === 'active').length;
+    const inProgress = livePartners.filter((p) => ['prospect', 'contacted', 'meeting'].includes(p.status)).length;
+    const touches = data.activities.filter((a) => a.activity_type !== 'note' && a.occurred_on >= startIso && a.occurred_on < endIso).length;
+    const refLeads = leadsNow.filter(isReferral).length;
+    const refClients = clientsNow.filter(isReferral).length;
+    document.getElementById('referred')!.innerHTML = [
+      row('Active referral partners', String(activePartners), `${inProgress} more in progress`),
+      row('Outreach this month', `${touches} touch${touches === 1 ? '' : 'es'}`, 'Emails, calls, visits, thank-yous'),
+      row('Referred leads', String(refLeads)),
+      row('Clients from referrals', String(refClients)),
+    ].join('');
+
+    // 4. Get Booked
+    const bookedFromNow = leadsNow.filter((l) => l.status === 'scheduled').length;
+    document.getElementById('booked')!.innerHTML = [
+      row('Median time to first contact', speedNow.median === null ? '—' : formatHours(speedNow.median), speedNow.withinPct !== null ? `${speedNow.withinPct}% within 24 hours` : ''),
+      row('Booking rate', leadsNow.length ? `${Math.round((bookedFromNow / leadsNow.length) * 100)}%` : '—', `${bookedFromNow} of ${leadsNow.length} leads this month are scheduled`),
+      row('Automatic reply to new leads', data.business?.lead_auto_reply_enabled ? 'On' : 'Off'),
+    ].join('');
+
+    // 5. Watch It Work
+    const bySource = new Map<string, number>();
+    for (const l of clientsNow) {
+      const key = isGoogleAdsLead(l) ? 'Google Ads' : leadSourceShortLabel(l.lead_source);
+      bySource.set(key, (bySource.get(key) ?? 0) + 1);
+    }
+    const sources = [...bySource.entries()].sort((a, b) => b[1] - a[1]);
+    document.getElementById('work')!.innerHTML = `
+      ${
+        target
+          ? `<div class="mb-1 flex items-baseline justify-between"><span class="font-semibold text-brand-ink">${current} of ${target} clients (${Math.round((current / target) * 100)}% full)</span><span class="text-slate-600">${Math.max(0, target - current)} open spots</span></div>
+             <div class="h-3 rounded-full bg-slate-100"><div class="h-3 rounded-full ${caseloadBarClass(current, target)}" style="width:${percentFull(current, target)}%"></div></div>`
+          : '<p class="text-slate-500">Caseload bar appears once counselors set their numbers on Counselor settings.</p>'
+      }
+      <p class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Where this month's new clients came from</p>
+      ${
+        sources.length
+          ? `<p class="text-slate-700">${sources.map(([s, n]) => `${escapeHtml(s)} <span class="font-semibold">${n}</span>`).join(' · ')}</p>`
+          : '<p class="text-slate-500">No new clients yet this month.</p>'
+      }`;
+
+    renderAttention();
+  }
+
+  // Always about right now, whichever month is being viewed.
+  function renderAttention() {
+    if (!data) return;
+    const items: string[] = [];
+    const add = (text: string, href: string | null, label: string) =>
+      items.push(
+        `<li class="flex flex-wrap items-baseline justify-between gap-2"><span>${text}</span>${
+          href ? `<a href="${withBase(href)}" class="font-semibold text-amber-900 underline">${label}</a>` : `<span class="text-amber-900">${label}</span>`
+        }</li>`
+      );
+
+    const waiting = data.leads.filter(
+      (l) => !l.lead_magnet_id && !l.archived_at && (l.status ?? 'new') === 'new' && l.source_page !== MANUAL_SOURCE && Date.now() - new Date(l.created_at).getTime() > 86_400_000
+    ).length;
+    if (waiting) add(`${waiting} lead${waiting === 1 ? ' has' : 's have'} waited more than 24 hours for a first contact.`, '/admin/crm', 'Open Lead CRM');
+
+    const today = localIso(new Date());
+    const overdue = data.partners.filter((p) => !p.archived_at && p.status !== 'inactive' && p.next_follow_up && p.next_follow_up < today).length;
+    if (overdue) add(`${overdue} referral partner follow-up${overdue === 1 ? ' is' : 's are'} overdue.`, '/admin/referral-partners', 'Referral partners');
+
+    const unset = data.counselors.filter((c) => !data!.caseloads.get(c.id)?.weekly_client_target).length;
+    const stale = data.counselors.filter((c) => {
+      const r = data!.caseloads.get(c.id);
+      return r?.weekly_client_target && daysSince(r.updated_at) > STALE_DAYS;
+    }).length;
+    if (unset) add(`${unset} counselor${unset === 1 ? " hasn't" : "s haven't"} set a caseload yet.`, '/admin/counselor-settings', 'Counselor settings');
+    if (stale) add(`${stale} counselor${stale === 1 ? "'s" : "s'"} caseload numbers are over ${STALE_DAYS} days old.`, '/admin/counselor-settings', 'Counselor settings');
+
+    const unassigned =
+      data.counselors.length > 1
+        ? data.leads.filter((l) => l.status === 'scheduled' && !l.assigned_counselor_page_id && !l.lead_magnet_id).length
+        : 0;
+    if (unassigned) add(`${unassigned} new client${unassigned === 1 ? " isn't" : "s aren't"} assigned to a counselor.`, '/admin/crm', 'Open Lead CRM');
+
+    const lastSnap = [...data.snapshots].sort((a, b) => b.recorded_on.localeCompare(a.recorded_on))[0];
+    if (!lastSnap || (Date.now() - new Date(lastSnap.recorded_on).getTime()) / 86_400_000 > STALE_DAYS) {
+      add(lastSnap ? `Google review count hasn't been logged in over ${STALE_DAYS} days.` : 'Google review count has never been logged.', '/admin/review-program', 'Review program');
+    }
+    if (data.business && !data.business.lead_auto_reply_enabled) {
+      add('Automatic reply to new leads is off.', '/admin/content/business-info', 'Turn it on');
+    }
+    if (data.business && !data.business.collect_lead_source) {
+      add(`Your form doesn't ask "How did you hear about us?", so sources can't be measured.`, null, 'Ask your agency to turn it on');
+    }
+
+    const box = document.getElementById('attention')!;
+    box.classList.toggle('hidden', items.length === 0);
+    document.getElementById('attention-list')!.innerHTML = items.join('');
+  }
+
+  async function fetchTraffic(): Promise<Traffic> {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) return null;
+      const response = await fetch(`${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/get-traffic-stats`, {
+        method: 'POST',
+        headers: { apikey: import.meta.env.PUBLIC_SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` },
+      });
+      return response.ok ? ((await response.json()) as Traffic) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function load() {
+    const [leads, counselors, caseloads, partners, activities, snapshots, business, keywords, ranks, traffic] = await Promise.all([
+      supabase
+        .from('leads')
+        .select('id, created_at, status, scheduled_at, first_contacted_at, source_page, lead_magnet_id, lead_source, referral_partner_id, assigned_counselor_page_id, archived_at, gclid, gbraid, wbraid, utm_source, utm_medium'),
+      supabase.from('pages').select('id, title').eq('page_type', 'Counselor Profile'),
+      supabase.from('counselor_caseload').select('*'),
+      supabase.from('referral_partners').select('id, status, next_follow_up, archived_at'),
+      supabase.from('referral_partner_activities').select('activity_type, occurred_on'),
+      supabase.from('review_snapshots').select('recorded_on, review_count, average_rating'),
+      supabase.from('business').select('display_name, lead_auto_reply_enabled, collect_lead_source, google_review_url').single(),
+      supabase.from('target_keywords').select('id').eq('status', 'active'),
+      supabase.from('keyword_rank_snapshots').select('target_keyword_id, position, checked_at').order('checked_at', { ascending: false }),
+      fetchTraffic(),
+    ]);
+    if (leads.error) {
+      document.getElementById('loading')!.textContent = 'Could not load: ' + leads.error.message;
+      return;
+    }
+    // Latest position per keyword (rows arrive newest first).
+    const latestRanks = new Map<string, number | null>();
+    for (const r of (ranks.data ?? []) as { target_keyword_id: string; position: number | null }[]) {
+      if (!latestRanks.has(r.target_keyword_id)) latestRanks.set(r.target_keyword_id, r.position);
+    }
+    data = {
+      leads: (leads.data ?? []) as Lead[],
+      counselors: (counselors.data ?? []) as { id: string; title: string }[],
+      caseloads: new Map(((caseloads.data ?? []) as CounselorCaseload[]).map((c) => [c.counselor_page_id, c])),
+      partners: (partners.data ?? []) as Partner[],
+      activities: (activities.data ?? []) as Activity[],
+      snapshots: (snapshots.data ?? []) as Snapshot[],
+      business: (business.data as Business) ?? null,
+      keywords: (keywords.data ?? []) as { id: string }[],
+      latestRanks,
+      traffic,
+    };
+    document.getElementById('loading')!.classList.add('hidden');
+    document.getElementById('overview')!.classList.remove('hidden');
+    render(0);
+  }
+
+  const periodSelect = document.getElementById('period-select') as HTMLSelectElement;
+  periodSelect.addEventListener('change', () => render(Number(periodSelect.value)));
+  document.getElementById('print-report')!.addEventListener('click', () => window.print());
+
+  // Never leave the page stuck on "Loading..." if something unexpected
+  // throws: say so, and log the real error for debugging.
+  async function safeLoad() {
+    try {
+      await load();
+    } catch (err) {
+      console.error('overview: failed to build dashboard', err);
+      const el = document.getElementById('loading')!;
+      el.classList.remove('hidden');
+      el.textContent = 'Something went wrong building this overview. Try reloading the page.';
+    }
+  }
+
+  initAdminAuth(safeLoad, { allowedRoles: ['owner', 'agency'] });
+</script>
