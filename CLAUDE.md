@@ -4268,3 +4268,39 @@ practice after previewing it.
   `sandbox="allow-same-origin"` (still no scripts). A real end-to-end send
   from the live form still needs one submission once the practice turns
   it on (Turnstile blocks localhost).
+
+## Referral partner outreach kit (built 2026-09-29)
+
+The "Get Referred" step's ready-to-send materials, on the Referral partners
+page. Copy and logic in `src/lib/outreachKit.ts`; migration
+`0071_outreach_faith_flag.sql` (`business.offers_faith_integration`,
+default false, **set true for this site**: Freedom is a Christian
+counseling practice).
+
+- **Per-partner messages** (partner detail view → "Outreach message"):
+  intro email, follow-up email, drop-off note, and thank-you note, each
+  personalized from the partner (name, contact, category) and live
+  practice data (counselors' specialties, telehealth, accepting status,
+  phone, site, `lead_response_time_note`). Category tone groups: doctor,
+  pediatrician, therapist/psychiatrist, attorney (states counselors
+  provide therapy, not custody evaluations or testimony), church (faith
+  line only when `offers_faith_integration`), school, general. Editable
+  before sending; Copy, "Open in email" (mailto, only when the partner has
+  an email and the template has a subject), and "Log as sent" (logs the
+  matching activity type and advances a prospect, via the shared
+  `logActivity()`). Signer name remembered per browser (guarded
+  localStorage).
+- **Practice handout**: one letter page (verified via `--print-to-pdf`
+  with this site's 5 counselors, room for ~3 more), printed through a
+  hidden iframe like the review sign. QR goes to the live `/contact`
+  page. Includes the crisis line.
+- **Ethics built in**: ACA Code of Ethics A.10.b (no remuneration for
+  referrals) and confidentiality (thank-you notes never name or confirm a
+  client; coordination needs a signed release), shown as "Ground rules."
+- Real bugs caught reading generated output in the browser: titled
+  contacts greeted as "Hi Pastor," (now "Hi Pastor Allen,"), a doubled
+  possessive ("your members of your congregation"; audience phrases now
+  carry their own possessive), specialty lowercasing breaking proper nouns
+  and acronyms ("christian counseling"; now preserves Christian, EMDR,
+  OCD), `%40` in mailto addresses, and a missing comma/suite in the
+  handout address.
