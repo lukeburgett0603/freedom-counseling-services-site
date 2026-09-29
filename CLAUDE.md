@@ -547,6 +547,17 @@ before touching the related code on a future client site.
   Profile, `'hero'` otherwise), used consistently everywhere this field
   is read or written — the load logic, `getCurrentValueText`, and the
   save payload all called it independently before.
+- **Astro 7's default `compressHTML: 'jsx'` strips the space between
+  adjacent inline elements** (React-style whitespace rules). Caught during
+  the Astro 5 → 7 security upgrade (2026-09-28) by diffing every built
+  page's visible text against a v5 baseline build: the nav read
+  `HomeAboutServices…` as text, and the same rule would glue a word to a
+  following `<a>`/`<strong>` in body copy. `astro.config.mjs` sets
+  `compressHTML: true` to keep v5's HTML-aware behavior — don't remove it
+  without re-running that same text diff. (The only other v5 → v7 output
+  change was harmless: attribute values like `RichTextEditor`'s
+  `<option value="<p>">` are now escaped as `&lt;p&gt;`, which the browser
+  decodes to the identical value.)
 
 ## Client dashboard (`/admin/leads` login)
 

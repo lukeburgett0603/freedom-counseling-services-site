@@ -38,6 +38,12 @@ export default defineConfig({
   site: 'https://www.freedomcounselingservices.org',
   base: '/',
   trailingSlash: 'never',
+  // Astro 7 changed the default to 'jsx' (React-style whitespace stripping),
+  // which drops the space between adjacent inline elements (e.g. a word
+  // and a following <a>/<strong>). `true` keeps Astro 5's HTML-aware
+  // behavior — verified by diffing every page's visible text across the
+  // v5 → v7 upgrade.
+  compressHTML: true,
   redirects: {
     '/home': '/',
     '/our-counselors': '/counselors',
