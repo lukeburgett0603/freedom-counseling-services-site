@@ -4143,3 +4143,35 @@ Measurement for the Full Caseload System's "Get Found / Get Referred" and
   it) and a live test emails the practice's real inbox, so verification
   covered the function deploy (honeypot smoke test), the trigger (seeded
   `ZZTEST` leads), and every UI surface locally.
+
+## Referral partner tracker (built 2026-09-28)
+
+The "Get Referred" step of the Full Caseload System. Migration
+`0068_referral_partners.sql`, page `admin/referral-partners.astro` (nav:
+"Referral partners", owner/agency only).
+
+- **`referral_partners`** (name, category, contact info, stage
+  prospect → contacted → meeting → active / inactive, `next_follow_up`,
+  notes, soft archive) and **`referral_partner_activities`** (append-only
+  log: email / call / dropped by / meeting / sent materials / thank-you /
+  note, with a date). Vocabularies in `src/lib/referralPartners.ts` must
+  match the migration's CHECK constraints.
+- **`leads.referral_partner_id`** credits a lead to a partner. Linked by
+  hand in the Lead CRM detail view, or automatically on insert by the
+  `leads_link_referral_partner` trigger when "Who referred you?" exactly
+  matches a partner's name (case/whitespace-insensitive, never fuzzy: a
+  wrong automatic credit is worse than none). The trigger is SECURITY
+  DEFINER because the form's insert role can't read partners.
+- The page shows active partners, referred leads, clients from partners,
+  a "Follow up this week" list (overdue stays visible, same rule as the
+  CRM), and per-partner lead/client counts. Logging the first non-note
+  activity on a prospect moves it to "contacted" automatically; every
+  later stage change is manual.
+- Real bug caught in the browser pass: a lead's `created_at` timestamp was
+  formatted by slicing its UTC date, so an evening lead showed tomorrow's
+  date. `formatDate` now parses full timestamps as instants and plain
+  `date` columns as local dates.
+- Verified live: RLS (anon read empty, anon insert 42501), exact-match
+  auto-linking (matched across case/whitespace, a partial name didn't),
+  stage auto-advance, follow-up reminder, CRM linking, and counts. All
+  `ZZTEST` rows deleted after.

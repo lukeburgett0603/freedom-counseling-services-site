@@ -1,0 +1,581 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { ACTIVITY_TYPES, PARTNER_CATEGORIES, PARTNER_STATUSES } from '../../lib/referralPartners';
+---
+
+<!--
+  Referral partner tracker: the "Get Referred" step of the Full Caseload
+  System. A small CRM for the practice's referral relationships (doctors,
+  attorneys, churches...): relationship stage, follow-up reminders, an
+  append-only activity log, and the leads/clients each partner actually
+  sent (leads.referral_partner_id, linked in the Lead CRM or automatically
+  on an exact "Who referred you?" match). Same list/detail toggle and
+  "due this week" patterns as admin/crm.astro. See
+  0068_referral_partners.sql.
+-->
+<AdminLayout title="Referral partners | Admin" current="referral-partners">
+  <div id="partners-list-view">
+    <div class="mb-8 grid gap-4 sm:grid-cols-3">
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Active partners</p>
+        <p id="stat-active" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p id="stat-pipeline" class="mt-1 text-xs text-slate-500"></p>
+      </div>
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Referred leads</p>
+        <p id="stat-referred-leads" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p class="mt-1 text-xs text-slate-500">All time, linked to a partner</p>
+      </div>
+      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Clients from partners</p>
+        <p id="stat-referred-clients" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
+        <p class="mt-1 text-xs text-slate-500">Referred leads marked Scheduled</p>
+      </div>
+    </div>
+
+    <div id="due-section" class="mb-8 hidden rounded-lg border border-amber-200 bg-amber-50 p-5">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-800">Follow up this week</p>
+      <div id="due-list" class="space-y-2 text-sm"></div>
+    </div>
+
+    <div class="mb-4 flex flex-wrap items-end gap-3">
+      <div>
+        <label for="search-input" class="block text-xs font-semibold text-slate-500">Search</label>
+        <input id="search-input" type="search" placeholder="Name, contact..." class="rounded-md border border-slate-300 px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label for="status-filter" class="block text-xs font-semibold text-slate-500">Stage</label>
+        <select id="status-filter" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
+          <option value="">All</option>
+          {PARTNER_STATUSES.map((s) => <option value={s.value}>{s.label}</option>)}
+        </select>
+      </div>
+      <div>
+        <label for="category-filter" class="block text-xs font-semibold text-slate-500">Type</label>
+        <select id="category-filter" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
+          <option value="">All</option>
+          {PARTNER_CATEGORIES.map((c) => <option value={c.value}>{c.label}</option>)}
+        </select>
+      </div>
+      <label class="flex items-center gap-2 pb-2 text-sm text-slate-600">
+        <input id="show-archived" type="checkbox" />
+        Show archived
+      </label>
+      <button
+        id="add-partner-button"
+        type="button"
+        class="ml-auto rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+      >
+        + Add partner
+      </button>
+    </div>
+
+    <p id="partners-count" class="mb-2 text-sm text-slate-600"></p>
+    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-slate-200 bg-slate-50">
+          <tr>
+            <th class="px-4 py-3 font-semibold">Partner</th>
+            <th class="px-4 py-3 font-semibold">Type</th>
+            <th class="px-4 py-3 font-semibold">Stage</th>
+            <th class="px-4 py-3 font-semibold">Last touch</th>
+            <th class="px-4 py-3 font-semibold">Next follow-up</th>
+            <th class="px-4 py-3 font-semibold">Leads</th>
+            <th class="px-4 py-3 font-semibold">Clients</th>
+          </tr>
+        </thead>
+        <tbody id="partners-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="partner-detail-view" class="hidden">
+    <div class="mb-4 flex items-center justify-between">
+      <button id="back-button" type="button" class="text-sm font-semibold text-brand-primary hover:underline">&larr; Back to all partners</button>
+      <div class="flex gap-2">
+        <button id="archive-button" type="button" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Archive</button>
+        <button id="delete-button" type="button" class="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50">Delete</button>
+      </div>
+    </div>
+
+    <div class="mb-6 grid gap-6 lg:grid-cols-5">
+      <form id="partner-form" class="space-y-3 rounded-lg border border-black/5 bg-white p-5 shadow-sm lg:col-span-3">
+        <p id="detail-archived-banner" class="hidden rounded-md bg-slate-100 px-3 py-2 text-xs text-slate-600">Archived. Hidden from the default list.</p>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="sm:col-span-2">
+            <label for="pf-name" class="block text-xs font-semibold text-slate-500">Name (office, practice, or organization)</label>
+            <input id="pf-name" name="name" type="text" required class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="pf-category" class="block text-xs font-semibold text-slate-500">Type</label>
+            <select id="pf-category" name="category" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+              {PARTNER_CATEGORIES.map((c) => <option value={c.value}>{c.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label for="pf-status" class="block text-xs font-semibold text-slate-500">Stage</label>
+            <select id="pf-status" name="status" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+              {PARTNER_STATUSES.map((s) => <option value={s.value}>{s.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label for="pf-contact-name" class="block text-xs font-semibold text-slate-500">Contact person</label>
+            <input id="pf-contact-name" name="contact_name" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="pf-next-follow-up" class="block text-xs font-semibold text-slate-500">Next follow-up</label>
+            <input id="pf-next-follow-up" name="next_follow_up" type="date" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="pf-email" class="block text-xs font-semibold text-slate-500">Email</label>
+            <input id="pf-email" name="email" type="email" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="pf-phone" class="block text-xs font-semibold text-slate-500">Phone</label>
+            <input id="pf-phone" name="phone" type="tel" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="pf-website" class="block text-xs font-semibold text-slate-500">Website</label>
+            <input id="pf-website" name="website" type="url" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="pf-address" class="block text-xs font-semibold text-slate-500">Address</label>
+            <input id="pf-address" name="address" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="pf-notes" class="block text-xs font-semibold text-slate-500">About this relationship</label>
+            <textarea id="pf-notes" name="notes" rows="3" placeholder="Who they serve, what kinds of clients they'd refer, how they prefer to be contacted..." class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button type="submit" class="rounded-md bg-brand-primary px-5 py-2 text-sm font-semibold text-white hover:opacity-90">Save</button>
+          <span id="partner-form-status" class="text-sm" role="status"></span>
+        </div>
+      </form>
+
+      <div class="space-y-6 lg:col-span-2">
+        <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Referrals from this partner</p>
+          <p id="detail-referral-summary" class="mb-2 text-sm text-slate-700"></p>
+          <ul id="detail-referral-list" class="space-y-1 text-sm"></ul>
+          <p class="mt-3 text-xs text-slate-500">Link a lead to this partner from its detail view in the Lead CRM.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Activity</p>
+      <form id="activity-form" class="mb-4 grid gap-2 sm:grid-cols-7">
+        <select name="activity_type" aria-label="Activity type" class="rounded-md border border-slate-300 px-3 py-2 text-sm sm:col-span-2">
+          {ACTIVITY_TYPES.map((a) => <option value={a.value}>{a.label}</option>)}
+        </select>
+        <input name="occurred_on" type="date" aria-label="Date" class="rounded-md border border-slate-300 px-3 py-2 text-sm sm:col-span-1" />
+        <input name="note" type="text" aria-label="What happened" placeholder="What happened? e.g. Dropped off brochures, met the office manager" class="rounded-md border border-slate-300 px-3 py-2 text-sm sm:col-span-3" />
+        <button type="submit" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 sm:col-span-1">Log it</button>
+      </form>
+      <ul id="activity-list" class="space-y-3 text-sm"></ul>
+    </div>
+  </div>
+
+  <div id="add-partner-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+      <div class="mb-4 flex items-center justify-between">
+        <p class="font-semibold text-brand-ink">Add a referral partner</p>
+        <button id="add-partner-close" type="button" class="text-sm text-slate-500 hover:text-slate-800">Close</button>
+      </div>
+      <form id="add-partner-form" class="space-y-3">
+        <div>
+          <label for="ap-name" class="block text-xs font-semibold text-slate-500">Name (office, practice, or organization)</label>
+          <input id="ap-name" name="name" type="text" required placeholder="e.g. Grace Church, Dr. Lee's Family Medicine" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label for="ap-category" class="block text-xs font-semibold text-slate-500">Type</label>
+          <select id="ap-category" name="category" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+            {PARTNER_CATEGORIES.map((c) => <option value={c.value}>{c.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <label for="ap-contact-name" class="block text-xs font-semibold text-slate-500">Contact person (optional)</label>
+          <input id="ap-contact-name" name="contact_name" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <p id="add-partner-status" class="text-sm text-red-600"></p>
+        <button type="submit" class="w-full rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Add partner</button>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase, initAdminAuth } from '../../lib/adminAuth';
+  import {
+    activityLabel,
+    categoryLabel,
+    partnerStatusClasses,
+    partnerStatusLabel,
+    type PartnerActivity,
+    type ReferralPartner,
+  } from '../../lib/referralPartners';
+
+  type LinkedLead = {
+    id: string;
+    name: string | null;
+    created_at: string;
+    status: string | null;
+    referral_partner_id: string;
+  };
+
+  let partners: ReferralPartner[] = [];
+  let activities: PartnerActivity[] = [];
+  let linkedLeads: LinkedLead[] = [];
+  let currentId: string | null = null;
+
+  const listView = document.getElementById('partners-list-view')!;
+  const detailView = document.getElementById('partner-detail-view')!;
+  const tableBody = document.getElementById('partners-table-body')!;
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const statusFilter = document.getElementById('status-filter') as HTMLSelectElement;
+  const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
+  const showArchived = document.getElementById('show-archived') as HTMLInputElement;
+  const partnerForm = document.getElementById('partner-form') as HTMLFormElement;
+  const partnerFormStatus = document.getElementById('partner-form-status')!;
+  const activityForm = document.getElementById('activity-form') as HTMLFormElement;
+  const activityList = document.getElementById('activity-list')!;
+  const archiveButton = document.getElementById('archive-button')!;
+  const deleteButton = document.getElementById('delete-button')!;
+  const archivedBanner = document.getElementById('detail-archived-banner')!;
+  const addModal = document.getElementById('add-partner-modal')!;
+  const addForm = document.getElementById('add-partner-form') as HTMLFormElement;
+  const addStatus = document.getElementById('add-partner-status')!;
+
+  function escapeHtml(value: string): string {
+    const div = document.createElement('div');
+    div.textContent = value;
+    return div.innerHTML;
+  }
+
+  function todayIso(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  // Plain `date` columns (follow-ups, activity dates) have no time zone:
+  // parse them as local so "today" doesn't render as yesterday west of
+  // UTC. Full timestamps (a lead's created_at) are real instants: let
+  // Date convert them to local time.
+  function formatDate(iso: string): string {
+    const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+    if (iso.length > 10) return new Date(iso).toLocaleDateString(undefined, opts);
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, opts);
+  }
+
+  function lastTouch(partnerId: string): string | null {
+    const dates = activities.filter((a) => a.partner_id === partnerId).map((a) => a.occurred_on);
+    return dates.length ? dates.sort().at(-1)! : null;
+  }
+
+  function referralCounts(partnerId: string) {
+    const leads = linkedLeads.filter((l) => l.referral_partner_id === partnerId);
+    return { leads: leads.length, clients: leads.filter((l) => l.status === 'scheduled').length };
+  }
+
+  function statusBadge(status: string): string {
+    return `<span class="inline-block rounded-md border px-2 py-0.5 text-xs font-semibold ${partnerStatusClasses(status)}">${escapeHtml(partnerStatusLabel(status))}</span>`;
+  }
+
+  function renderStats() {
+    const live = partners.filter((p) => !p.archived_at);
+    document.getElementById('stat-active')!.textContent = String(live.filter((p) => p.status === 'active').length);
+    const inProgress = live.filter((p) => ['prospect', 'contacted', 'meeting'].includes(p.status)).length;
+    document.getElementById('stat-pipeline')!.textContent = `${inProgress} more in progress`;
+    document.getElementById('stat-referred-leads')!.textContent = String(linkedLeads.length);
+    document.getElementById('stat-referred-clients')!.textContent = String(
+      linkedLeads.filter((l) => l.status === 'scheduled').length
+    );
+  }
+
+  // Same rule as the Lead CRM: no lower bound, so an overdue follow-up
+  // keeps showing instead of silently disappearing once its date passes.
+  function renderDue() {
+    const weekOut = new Date();
+    weekOut.setDate(weekOut.getDate() + 7);
+    const limit = `${weekOut.getFullYear()}-${String(weekOut.getMonth() + 1).padStart(2, '0')}-${String(weekOut.getDate()).padStart(2, '0')}`;
+    const today = todayIso();
+    const due = partners
+      .filter((p) => !p.archived_at && p.status !== 'inactive' && p.next_follow_up && p.next_follow_up <= limit)
+      .sort((a, b) => a.next_follow_up!.localeCompare(b.next_follow_up!));
+    const section = document.getElementById('due-section')!;
+    section.classList.toggle('hidden', due.length === 0);
+    document.getElementById('due-list')!.innerHTML = due
+      .map((p) => {
+        const overdue = p.next_follow_up! < today;
+        return `
+        <button type="button" data-partner-id="${p.id}" class="open-partner flex w-full items-center justify-between rounded-md bg-white px-3 py-2 text-left hover:bg-amber-100/50">
+          <span class="font-semibold text-brand-ink">${escapeHtml(p.name)}</span>
+          <span class="${overdue ? 'font-semibold text-red-600' : 'text-amber-800'}">${overdue ? 'Overdue: ' : ''}${formatDate(p.next_follow_up!)}</span>
+        </button>`;
+      })
+      .join('');
+  }
+
+  function renderList() {
+    const q = searchInput.value.trim().toLowerCase();
+    const rows = partners.filter((p) => {
+      if (!showArchived.checked && p.archived_at) return false;
+      if (statusFilter.value && p.status !== statusFilter.value) return false;
+      if (categoryFilter.value && p.category !== categoryFilter.value) return false;
+      if (q && ![p.name, p.contact_name ?? '', p.email ?? ''].some((v) => v.toLowerCase().includes(q))) return false;
+      return true;
+    });
+    document.getElementById('partners-count')!.textContent = `${rows.length} partner${rows.length === 1 ? '' : 's'}`;
+    if (rows.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-slate-500">${
+        partners.length === 0 ? 'No referral partners yet. Add the doctors, attorneys, churches, and other professionals you want referrals from.' : 'No partners match these filters.'
+      }</td></tr>`;
+      return;
+    }
+    tableBody.innerHTML = rows
+      .map((p) => {
+        const touch = lastTouch(p.id);
+        const counts = referralCounts(p.id);
+        return `
+      <tr class="border-b border-slate-100 last:border-0 ${p.archived_at ? 'opacity-60' : ''}">
+        <td class="px-4 py-3">
+          <button type="button" data-partner-id="${p.id}" class="open-partner text-left font-semibold text-brand-ink hover:underline">${escapeHtml(p.name)}</button>
+          ${p.contact_name ? `<p class="text-xs text-slate-500">${escapeHtml(p.contact_name)}</p>` : ''}
+        </td>
+        <td class="px-4 py-3">${escapeHtml(categoryLabel(p.category))}</td>
+        <td class="px-4 py-3">${statusBadge(p.status)}</td>
+        <td class="px-4 py-3 whitespace-nowrap">${touch ? formatDate(touch) : '<span class="text-slate-400">Never</span>'}</td>
+        <td class="px-4 py-3 whitespace-nowrap">${p.next_follow_up ? formatDate(p.next_follow_up) : ''}</td>
+        <td class="px-4 py-3">${counts.leads}</td>
+        <td class="px-4 py-3 font-semibold ${counts.clients ? 'text-emerald-700' : ''}">${counts.clients}</td>
+      </tr>`;
+      })
+      .join('');
+  }
+
+  function renderAll() {
+    renderStats();
+    renderDue();
+    renderList();
+  }
+
+  [searchInput, statusFilter, categoryFilter, showArchived].forEach((el) => el.addEventListener('input', renderList));
+
+  document.addEventListener('click', (event) => {
+    const target = (event.target as HTMLElement).closest<HTMLElement>('.open-partner');
+    if (target?.dataset.partnerId) openDetail(target.dataset.partnerId);
+  });
+
+  function renderActivities() {
+    const rows = activities
+      .filter((a) => a.partner_id === currentId)
+      .sort((a, b) => b.occurred_on.localeCompare(a.occurred_on) || b.created_at.localeCompare(a.created_at));
+    activityList.innerHTML = rows.length
+      ? rows
+          .map(
+            (a) => `
+        <li class="border-l-2 border-slate-200 pl-3">
+          <p class="text-xs text-slate-500"><span class="font-semibold text-slate-700">${escapeHtml(activityLabel(a.activity_type))}</span> · ${formatDate(a.occurred_on)}</p>
+          ${a.note ? `<p class="mt-0.5 text-slate-700">${escapeHtml(a.note)}</p>` : ''}
+        </li>`
+          )
+          .join('')
+      : '<li class="text-slate-500">Nothing logged yet. Log every email, call, visit, and thank-you so you can see the relationship over time.</li>';
+  }
+
+  function renderReferrals() {
+    const leads = linkedLeads
+      .filter((l) => l.referral_partner_id === currentId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+    const clients = leads.filter((l) => l.status === 'scheduled').length;
+    document.getElementById('detail-referral-summary')!.textContent = leads.length
+      ? `${leads.length} lead${leads.length === 1 ? '' : 's'}, ${clients} became client${clients === 1 ? '' : 's'}`
+      : 'No referrals linked yet.';
+    document.getElementById('detail-referral-list')!.innerHTML = leads
+      .map(
+        (l) => `
+      <li class="flex justify-between gap-2">
+        <span>${escapeHtml(l.name ?? '(no name)')}</span>
+        <span class="text-slate-500">${formatDate(l.created_at)}${l.status === 'scheduled' ? ' · <span class="font-semibold text-emerald-700">Client</span>' : ''}</span>
+      </li>`
+      )
+      .join('');
+  }
+
+  function openDetail(id: string) {
+    const p = partners.find((x) => x.id === id);
+    if (!p) return;
+    currentId = id;
+    const f = partnerForm.elements as unknown as Record<string, HTMLInputElement>;
+    for (const key of ['name', 'category', 'status', 'contact_name', 'next_follow_up', 'email', 'phone', 'website', 'address', 'notes']) {
+      f[key].value = ((p as unknown as Record<string, string | null>)[key] ?? '') as string;
+    }
+    partnerFormStatus.textContent = '';
+    archiveButton.textContent = p.archived_at ? 'Unarchive' : 'Archive';
+    archivedBanner.classList.toggle('hidden', !p.archived_at);
+    (activityForm.elements.namedItem('occurred_on') as HTMLInputElement).value = todayIso();
+    renderActivities();
+    renderReferrals();
+    listView.classList.add('hidden');
+    detailView.classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+
+  document.getElementById('back-button')!.addEventListener('click', () => {
+    detailView.classList.add('hidden');
+    listView.classList.remove('hidden');
+    renderAll();
+  });
+
+  partnerForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentId) return;
+    const data = new FormData(partnerForm);
+    const text = (k: string) => ((data.get(k) as string) ?? '').trim() || null;
+    const update = {
+      name: text('name') ?? '',
+      category: data.get('category') as string,
+      status: data.get('status') as string,
+      contact_name: text('contact_name'),
+      next_follow_up: text('next_follow_up'),
+      email: text('email'),
+      phone: text('phone'),
+      website: text('website'),
+      address: text('address'),
+      notes: text('notes'),
+    };
+    if (!update.name) return;
+    partnerFormStatus.textContent = 'Saving...';
+    partnerFormStatus.className = 'text-sm text-slate-600';
+    const { error } = await supabase.from('referral_partners').update(update).eq('id', currentId);
+    if (error) {
+      partnerFormStatus.textContent = 'Could not save: ' + error.message;
+      partnerFormStatus.className = 'text-sm text-red-600';
+      return;
+    }
+    Object.assign(partners.find((p) => p.id === currentId)!, update);
+    partnerFormStatus.textContent = 'Saved.';
+    partnerFormStatus.className = 'text-sm text-emerald-700';
+  });
+
+  activityForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentId) return;
+    const data = new FormData(activityForm);
+    const row = {
+      partner_id: currentId,
+      activity_type: data.get('activity_type') as string,
+      occurred_on: (data.get('occurred_on') as string) || todayIso(),
+      note: ((data.get('note') as string) ?? '').trim() || null,
+    };
+    const { data: inserted, error } = await supabase.from('referral_partner_activities').insert(row).select().single();
+    if (error) {
+      window.alert('Could not log activity: ' + error.message);
+      return;
+    }
+    activities.push(inserted as PartnerActivity);
+    (activityForm.elements.namedItem('note') as HTMLInputElement).value = '';
+
+    // First real outreach moves a prospect forward automatically; any
+    // later stage change stays the user's call.
+    const partner = partners.find((p) => p.id === currentId)!;
+    if (partner.status === 'prospect' && row.activity_type !== 'note') {
+      const { error: stageError } = await supabase.from('referral_partners').update({ status: 'contacted' }).eq('id', currentId);
+      if (!stageError) {
+        partner.status = 'contacted';
+        (partnerForm.elements.namedItem('status') as HTMLSelectElement).value = 'contacted';
+      }
+    }
+    renderActivities();
+  });
+
+  archiveButton.addEventListener('click', async () => {
+    const p = partners.find((x) => x.id === currentId);
+    if (!p) return;
+    const archived_at = p.archived_at ? null : new Date().toISOString();
+    const { error } = await supabase.from('referral_partners').update({ archived_at }).eq('id', p.id);
+    if (error) {
+      window.alert('Could not update: ' + error.message);
+      return;
+    }
+    p.archived_at = archived_at;
+    archiveButton.textContent = archived_at ? 'Unarchive' : 'Archive';
+    archivedBanner.classList.toggle('hidden', !archived_at);
+  });
+
+  deleteButton.addEventListener('click', async () => {
+    const p = partners.find((x) => x.id === currentId);
+    if (!p) return;
+    if (!window.confirm(`Delete ${p.name} and its activity log? Leads linked to it stay, but lose the link. Archive instead if you might want it later.`)) return;
+    const { error } = await supabase.from('referral_partners').delete().eq('id', p.id);
+    if (error) {
+      window.alert('Could not delete: ' + error.message);
+      return;
+    }
+    partners = partners.filter((x) => x.id !== p.id);
+    activities = activities.filter((a) => a.partner_id !== p.id);
+    linkedLeads = linkedLeads.filter((l) => l.referral_partner_id !== p.id);
+    detailView.classList.add('hidden');
+    listView.classList.remove('hidden');
+    renderAll();
+  });
+
+  document.getElementById('add-partner-button')!.addEventListener('click', () => {
+    addForm.reset();
+    addStatus.textContent = '';
+    addModal.classList.remove('hidden');
+    addModal.classList.add('flex');
+  });
+  document.getElementById('add-partner-close')!.addEventListener('click', () => {
+    addModal.classList.add('hidden');
+    addModal.classList.remove('flex');
+  });
+
+  addForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const data = new FormData(addForm);
+    const name = ((data.get('name') as string) ?? '').trim();
+    if (!name) return;
+    const { data: inserted, error } = await supabase
+      .from('referral_partners')
+      .insert({
+        name,
+        category: data.get('category') as string,
+        contact_name: ((data.get('contact_name') as string) ?? '').trim() || null,
+      })
+      .select()
+      .single();
+    if (error) {
+      addStatus.textContent = 'Could not add partner: ' + error.message;
+      return;
+    }
+    partners.push(inserted as ReferralPartner);
+    partners.sort((a, b) => a.name.localeCompare(b.name));
+    addModal.classList.add('hidden');
+    addModal.classList.remove('flex');
+    openDetail((inserted as ReferralPartner).id);
+  });
+
+  async function load() {
+    const [p, a, l] = await Promise.all([
+      supabase.from('referral_partners').select('*').order('name'),
+      supabase.from('referral_partner_activities').select('*'),
+      supabase
+        .from('leads')
+        .select('id, name, created_at, status, referral_partner_id')
+        .not('referral_partner_id', 'is', null),
+    ]);
+    if (p.error) {
+      document.getElementById('partners-count')!.textContent = 'Could not load partners: ' + p.error.message;
+      return;
+    }
+    partners = (p.data ?? []) as ReferralPartner[];
+    activities = (a.data ?? []) as PartnerActivity[];
+    linkedLeads = (l.data ?? []) as LinkedLead[];
+    renderAll();
+  }
+
+  initAdminAuth(load, { allowedRoles: ['owner', 'agency'] });
+</script>

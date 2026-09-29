@@ -292,6 +292,16 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
             <p id="detail-source-status" class="text-xs"></p>
           </dd>
         </div>
+        <!-- Credits this lead to a tracked referral partner (Referral
+             partners page). Set automatically when "Who referred you?"
+             exactly matches a partner's name; otherwise link it here. -->
+        <div id="detail-partner-wrap" class="hidden">
+          <dt><label for="detail-partner-select" class="text-xs font-semibold uppercase text-slate-500">Referral partner</label></dt>
+          <dd class="mt-0.5">
+            <select id="detail-partner-select" class="block w-full rounded-md border border-slate-300 px-2 py-1 text-sm"></select>
+            <p id="detail-partner-status" class="mt-1 text-xs"></p>
+          </dd>
+        </div>
         <div>
           <dt class="text-xs font-semibold uppercase text-slate-500">Session format preference</dt>
           <dd id="detail-session-format" class="mt-0.5"></dd>
@@ -367,6 +377,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     preferred_session_format: string | null;
     lead_source: string | null;
     lead_source_detail: string | null;
+    referral_partner_id: string | null;
   };
 
   const SESSION_FORMAT_LABELS: Record<string, string> = {
@@ -686,7 +697,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
   // export to match what's on screen.
   exportButton.addEventListener('click', () => {
     const filtered = applyFilters(allLeads);
-    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Assigned counselor', 'Heard about us', 'Referred by', 'Session format preference', 'Archived', 'Message'];
+    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Assigned counselor', 'Heard about us', 'Referred by', 'Referral partner', 'Session format preference', 'Archived', 'Message'];
     const rows = filtered.map((lead) => [
       new Date(lead.created_at).toLocaleDateString(),
       lead.name ?? '',
@@ -699,6 +710,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
       lead.assigned_counselor_page_id ? (counselorNames.get(lead.assigned_counselor_page_id) ?? 'Unknown') : '',
       lead.lead_source ? leadSourceLabel(lead.lead_source) : '',
       lead.lead_source_detail ?? '',
+      lead.referral_partner_id ? (partnerOptions.find((p) => p.id === lead.referral_partner_id)?.name ?? '') : '',
       lead.preferred_session_format ? (SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format) : '',
       lead.archived_at ? 'Yes' : '',
       lead.message ?? '',
@@ -790,6 +802,40 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     detailSourceStatus.className = 'text-xs text-emerald-700';
   }
   detailSourceSelect.addEventListener('change', saveLeadSource);
+
+  const detailPartnerWrap = document.getElementById('detail-partner-wrap')!;
+  const detailPartnerSelect = document.getElementById('detail-partner-select') as HTMLSelectElement;
+  const detailPartnerStatus = document.getElementById('detail-partner-status')!;
+  let partnerOptions: { id: string; name: string; archived_at: string | null }[] = [];
+
+  function renderPartnerSelect(lead: Lead) {
+    detailPartnerWrap.classList.toggle('hidden', partnerOptions.length === 0);
+    // Archived partners stay listed only when this lead already points at
+    // one, so an old link never silently shows as "None".
+    const visible = partnerOptions.filter((p) => !p.archived_at || p.id === lead.referral_partner_id);
+    detailPartnerSelect.innerHTML =
+      '<option value="">None</option>' +
+      visible
+        .map((p) => `<option value="${p.id}" ${p.id === lead.referral_partner_id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`)
+        .join('');
+    detailPartnerStatus.textContent = '';
+  }
+
+  detailPartnerSelect.addEventListener('change', async () => {
+    const lead = allLeads.find((l) => l.id === currentLeadId);
+    if (!lead) return;
+    const next = detailPartnerSelect.value || null;
+    const { error } = await supabase.from('leads').update({ referral_partner_id: next }).eq('id', lead.id);
+    if (error) {
+      detailPartnerSelect.value = lead.referral_partner_id ?? '';
+      detailPartnerStatus.textContent = 'Could not save: ' + error.message;
+      detailPartnerStatus.className = 'mt-1 text-xs text-red-600';
+      return;
+    }
+    lead.referral_partner_id = next;
+    detailPartnerStatus.textContent = 'Saved.';
+    detailPartnerStatus.className = 'mt-1 text-xs text-emerald-700';
+  });
   detailSourceDetail.addEventListener('blur', saveLeadSource);
   const detailSource = document.getElementById('detail-source')!;
   const detailMessage = document.getElementById('detail-message')!;
@@ -907,6 +953,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     detailSourceSelect.value = lead.lead_source ?? '';
     detailSourceDetail.value = lead.lead_source_detail ?? '';
     detailSourceStatus.textContent = '';
+    renderPartnerSelect(lead);
     detailSessionFormat.textContent = lead.preferred_session_format
       ? (SESSION_FORMAT_LABELS[lead.preferred_session_format] ?? lead.preferred_session_format)
       : 'No preference stated';
@@ -1064,6 +1111,11 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     updateSourceFilterOptions();
   }
 
+  async function loadPartners() {
+    const { data } = await supabase.from('referral_partners').select('id, name, archived_at').order('name');
+    partnerOptions = data ?? [];
+  }
+
   async function loadCounselors() {
     const { data } = await supabase.from('pages').select('id, title').eq('page_type', 'Counselor Profile');
     counselorNames = new Map((data ?? []).map((p) => [p.id, p.title]));
@@ -1093,6 +1145,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     async () => {
       await loadLeadMagnets();
       await loadCounselors();
+      await loadPartners();
       await loadLeads();
       setView('leads');
     },
