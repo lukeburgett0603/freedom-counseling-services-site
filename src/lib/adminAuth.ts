@@ -48,6 +48,7 @@ const ROLE_NAV_ACCESS: Record<AdminUser['role'], string[]> = {
     'content-page-copy',
     'lead-magnets',
     'team',
+    'your-data',
     'counselor-settings',
   ],
   staff: ['blog', 'content-plan'],
@@ -71,6 +72,7 @@ const ROLE_NAV_ACCESS: Record<AdminUser['role'], string[]> = {
     'lead-magnets',
     'suggestions',
     'team',
+    'your-data',
     'counselor-settings',
   ],
 };

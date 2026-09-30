@@ -58,6 +58,7 @@ function socialIconFor(url: string): IconName {
   if (/linkedin\.com/i.test(url)) return 'linkedin';
   return 'external-link';
 }
+import { STATIC_EXPORT } from '../lib/exportMode';
 ---
 
 <footer class="border-t border-slate-200 bg-brand-secondary text-slate-200">
@@ -150,8 +151,12 @@ function socialIconFor(url: string): IconName {
     )}
     <p class="mt-8 text-xs text-slate-400">
       &copy; {new Date().getFullYear()} {business.legal_name ?? business.display_name}. All rights reserved.
-      {' · '}
-      <a href={withBase('/admin/analytics/leads')} class="hover:text-white">Admin Login</a>
+      {!STATIC_EXPORT && (
+        <>
+          {' · '}
+          <a href={withBase('/admin/analytics/leads')} class="hover:text-white">Admin Login</a>
+        </>
+      )}
       {business.client_portal_url && (
         <>
           {' · '}

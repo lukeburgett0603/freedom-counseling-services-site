@@ -4380,3 +4380,44 @@ the same shared helpers (`leadSource.ts` speed rules, `caseload.ts`,
   (deleted after): 17 new clients / 23 leads in September, the real
   caseload and review entries, the first real partner, and the correct
   zeros for August.
+
+## Exit export: the practice keeps its website and data (built 2026-09-29)
+
+CMC policy (CMC folder CLAUDE.md, "Pricing update"): a practice's data is
+theirs and always goes with them; if they leave they keep their website
+and domain, and the CMC platform (admin, CRM, dashboards, automations)
+stays with CMC. Offboarding steps: CMC folder,
+`offboarding/client-exit-process.md`.
+
+- **"Your data" page** (`admin/your-data.astro`, owner/agency, logic in
+  `src/lib/dataExport.ts`): one button builds a ZIP in the browser (fflate)
+  with every practice table as CSV + JSON (`EXPORT_TABLES`; `admin_users`
+  deliberately excluded), every Supabase Storage file referenced anywhere
+  in that data (files over 25 MB are linked in the README instead), and a
+  README listing row counts plus anything that couldn't be included. Uses
+  the same RLS-protected reads as the rest of the admin. Available any
+  time, not just at exit. Verified against this site's real data: all 16
+  tables' row counts matched the database, 8 files included (incl. the
+  guide PDF).
+- **Static website export** (`npm run export:site`,
+  `scripts/export-static-site.mjs`): builds with `PUBLIC_STATIC_EXPORT=true`
+  (`src/lib/exportMode.ts`), which removes every backend dependency from
+  public pages: `LeadGenerator` renders a plain form posting to
+  `--form-action=<url>` (e.g. Formspree) or, without one, the practice's
+  phone/email; `LeadMagnet` hidden; `CTA` click tracking off; `Footer`
+  Admin Login removed; `BaseLayout` drops the Cloudflare beacon and ad-click
+  capture. The script then deletes `/admin`, prunes JS/CSS only admin pages
+  used, downloads Storage images into `_files/`, **fails if any reference
+  to the Supabase host remains**, writes `HOSTING-README.md`, and zips to
+  `exports/` (gitignored). Run it while the Supabase project still exists.
+- **Real bug caught serving the export standalone**: localized images were
+  first rewritten as absolute `https://<domain>/_files/...` URLs, which
+  broke on any preview host (and on the real domain until DNS moves).
+  Visible references are now site-relative; only `content="..."` meta tags
+  and JSON-LD `url`/`logo`/`image` keep absolute URLs. After the fix the
+  60-page export served from a plain static server with zero failed
+  requests and every image loading; the `--form-action` variant was checked
+  to render a real form posting to the endpoint.
+- Content caveat for phone/email-only exports: page copy that says "the
+  form below" (this site's Contact page does) should be reworded; the
+  HOSTING-README tells the practice.

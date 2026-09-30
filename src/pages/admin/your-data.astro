@@ -1,0 +1,86 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { EXPORT_TABLES } from '../../lib/dataExport';
+---
+
+<!--
+  "Your data": the practice downloads everything it owns, any time, as one
+  ZIP (CSV + JSON per table, its uploaded files, and a README). CMC policy
+  (CMC folder CLAUDE.md, "Pricing update"): a practice's data is theirs and
+  always goes with them; the CMC platform itself (this admin, CRM,
+  dashboards, automations) does not. The public website half of an exit is
+  scripts/export-static-site.mjs. Built client-side with fflate from the
+  same RLS-protected reads the rest of the admin uses, so it can only ever
+  contain what this login is allowed to see.
+-->
+<AdminLayout title="Your data | Admin" current="your-data">
+  <div class="max-w-3xl space-y-6">
+    <div class="rounded-lg border border-black/5 bg-white p-6 shadow-sm">
+      <p class="font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Your data is yours.</p>
+      <p class="mt-2 text-sm text-slate-700">
+        Download everything your practice has in this system, any time, in standard formats (spreadsheet-ready CSV and
+        JSON). If you ever leave, your data and your website go with you. The dashboard software itself stays behind.
+      </p>
+      <button id="download-button" type="button" class="mt-5 rounded-md bg-brand-accent px-5 py-3 font-semibold text-white hover:opacity-90">
+        Download all my data (.zip)
+      </button>
+      <p id="download-status" class="mt-3 text-sm" role="status"></p>
+      <p class="mt-3 text-xs text-slate-500">
+        This file includes names and contact details of people who reached out to you. Store it somewhere secure, and
+        don't email it unencrypted.
+      </p>
+    </div>
+
+    <div class="rounded-lg border border-black/5 bg-white p-6 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">What's included</p>
+      <ul class="mt-3 grid gap-x-6 gap-y-1.5 text-sm text-slate-700 sm:grid-cols-2">
+        {EXPORT_TABLES.map((t) => <li>{t.label}</li>)}
+        <li>Your uploaded images and guide files</li>
+      </ul>
+      <p class="mt-4 text-xs text-slate-500">
+        Not included: admin logins and passwords (those belong to each person), and the software that runs this dashboard.
+      </p>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase, initAdminAuth } from '../../lib/adminAuth';
+  import { buildDataExport } from '../../lib/dataExport';
+
+  const button = document.getElementById('download-button') as HTMLButtonElement;
+  const status = document.getElementById('download-status')!;
+  let practiceName = 'practice';
+
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    status.className = 'mt-3 text-sm text-slate-600';
+    try {
+      const { zip, summary } = await buildDataExport(supabase, (message) => (status.textContent = message));
+      const blob = new Blob([zip as Uint8Array<ArrayBuffer>], { type: 'application/zip' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${practiceName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-data-${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      status.textContent = summary;
+      status.className = 'mt-3 text-sm text-emerald-700';
+    } catch (err) {
+      status.textContent = 'Could not build the export: ' + (err instanceof Error ? err.message : String(err));
+      status.className = 'mt-3 text-sm text-red-600';
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  initAdminAuth(
+    async () => {
+      const { data } = await supabase.from('business').select('display_name').single();
+      if (data?.display_name) practiceName = data.display_name;
+    },
+    { allowedRoles: ['owner', 'agency'] }
+  );
+</script>

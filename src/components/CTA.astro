@@ -21,6 +21,7 @@ interface Props {
 }
 
 const { heading, subheading, buttonText = 'Contact Us', href = withBase('/contact'), pageId } = Astro.props;
+import { STATIC_EXPORT } from '../lib/exportMode';
 ---
 
 <section class="bg-brand-primary py-16 text-center text-white">
@@ -37,7 +38,7 @@ const { heading, subheading, buttonText = 'Contact Us', href = withBase('/contac
   </div>
 </section>
 
-{pageId && (
+{pageId && !STATIC_EXPORT && (
   <script>
     // Class selector + querySelectorAll, not an id — this component can
     // render more than once per page in principle, same discipline as

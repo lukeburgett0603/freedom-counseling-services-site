@@ -1,5 +1,7 @@
 ---
 import { LEAD_SOURCES, REFERRAL_LEAD_SOURCES } from '../lib/leadSource';
+import { EXPORT_FORM_ACTION, STATIC_EXPORT } from '../lib/exportMode';
+import { getBusiness } from '../lib/pages';
 
 interface Counselor {
   id: string;
@@ -87,6 +89,12 @@ const {
 } = Astro.props;
 
 const Wrapper = embedded ? 'div' : 'section';
+
+// Static exit export only (see src/lib/exportMode.ts): the normal form
+// posts to CMC's submit-lead function, which won't exist once the practice
+// has left. With a form endpoint the practice set up, render a plain HTML
+// form posting there; otherwise show their phone and email instead.
+const exportBusiness = STATIC_EXPORT && !EXPORT_FORM_ACTION ? await getBusiness() : null;
 ---
 
 <Wrapper
@@ -109,6 +117,7 @@ const Wrapper = embedded ? 'div' : 'section';
     >
       {heading}
     </h2>
+    {!STATIC_EXPORT && (
     <form
       class="lead-form space-y-3"
       data-source-page={slug}
@@ -224,9 +233,36 @@ const Wrapper = embedded ? 'div' : 'section';
       {responseTimeNote && <p class="text-center text-xs text-slate-500">{responseTimeNote}</p>}
       <p class="lead-form-status text-center text-sm" role="status"></p>
     </form>
+    )}
+    {STATIC_EXPORT && EXPORT_FORM_ACTION && (
+      <form class="space-y-3" method="POST" action={EXPORT_FORM_ACTION}>
+        <input name="name" type="text" placeholder="Name" required class="w-full rounded-md border border-slate-300 px-4 py-2" />
+        <input name="email" type="email" placeholder="Email" required class="w-full rounded-md border border-slate-300 px-4 py-2" />
+        {!compact && <input name="phone" type="tel" placeholder="Phone (optional)" class="w-full rounded-md border border-slate-300 px-4 py-2" />}
+        {!compact && <textarea name="message" placeholder="How can we help?" rows="4" class="w-full rounded-md border border-slate-300 px-4 py-2"></textarea>}
+        <button type="submit" class="w-full rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90 hover:shadow-md">{submitText}</button>
+        {responseTimeNote && <p class="text-center text-xs text-slate-500">{responseTimeNote}</p>}
+      </form>
+    )}
+    {exportBusiness && (
+      <div class="space-y-2 text-center">
+        {exportBusiness.telephone && (
+          <a href={`tel:${exportBusiness.telephone}`} class="block w-full rounded-md bg-brand-accent px-6 py-3 font-semibold text-white transition hover:opacity-90">
+            Call {exportBusiness.telephone}
+          </a>
+        )}
+        {exportBusiness.email && (
+          <a href={`mailto:${exportBusiness.email}`} class="block w-full rounded-md border border-slate-300 px-6 py-3 font-semibold text-brand-ink hover:bg-slate-50">
+            Email {exportBusiness.email}
+          </a>
+        )}
+        {responseTimeNote && <p class="text-xs text-slate-500">{responseTimeNote}</p>}
+      </div>
+    )}
   </div>
 </Wrapper>
 
+{!STATIC_EXPORT && (
 <script>
   // A direct REST call instead of importing @supabase/supabase-js here:
   // the full SDK adds ~200KB of JS to every single page (this component can
@@ -331,3 +367,4 @@ const Wrapper = embedded ? 'div' : 'section';
     });
   });
 </script>
+)}
