@@ -3973,6 +3973,99 @@ real first instance, planned but not yet started for CMC/template sync.
   `page_cta_clicks` moments later, confirmed via direct query. All test
   accounts/rows deleted afterward.
 
+## Blog post heading bug + explicit heading hierarchy + content plan title fix (2026-10-01)
+
+Client-reported, directly against the live `/when-everyday-stress-becomes-
+something-more/` post: the intro paragraph rendered as a giant, unstyled
+heading on the live page, while the admin editor showed it as a normal
+paragraph. See `local-business-site-template`'s CLAUDE.md ("Explicit
+heading hierarchy for `.prose` body copy...") for the full technical
+writeup (diagnosed and fixed here first, then generalized to the
+template) — this entry covers what's specific to this real site.
+
+- **Root cause was a real content bug, not a CSS one**: the stored
+  `pages.copy` for this post had a literal stray `# ` (a single-hash
+  Markdown H1 marker) directly in front of "Everyone experiences
+  stress..." — almost certainly a leftover from a draft document's own
+  working title that never got stripped before being pasted in. Scanned
+  all 13 of this site's real blog posts for the same pattern; only this
+  one had it. Fixed directly on the live row (Blog Post rows are exempt
+  from `enforce_content_permission()`, so no trigger-disable dance was
+  needed).
+- **Why the editor didn't show it as a heading**: `RichTextEditor.astro`
+  deliberately excludes Heading 1 from its block-style dropdown (H1 is
+  reserved for the post's own title) — a real `<h1>` sitting in the
+  editor's contenteditable box has no dropdown state that represents it,
+  so nothing in the UI revealed it was secretly an H1.
+- **A second, real, independent gap**: `.prose h2`/`h3` only ever set
+  `font-weight: 500` (this site's own "Visual Design Brief" softening,
+  not a template default) and left font-size to Typography's
+  em-relative-to-prose-variant scale — confirmed live, the same heading
+  rendered at 20px/weight-500 in the admin editor's `prose-sm` box vs.
+  ~30px on the actual `prose-lg` live page, which is why selecting
+  "Heading 2" barely looked different while writing. Fixed with explicit,
+  fixed `rem` sizes + a real bold weight (700, up from the softer 500)
+  for `.prose h1`/`h2`/`h3` — H2 is now 1.75rem/700, H3 is 1.375rem/700,
+  both Fraunces, both render identically in the editor and on the
+  published page. `.prose h1` is a new, defensive addition (body copy
+  should never contain one, but if one ever slips in again, it now
+  renders as a legitimate heading instead of Typography's jarring 800-
+  weight Inter fallback — the exact thing that made this bug visually
+  obvious in the first place).
+- **Note on the weight change**: this site's own CSS previously
+  dialed Fraunces down to 500 everywhere, including body-copy H2/H3, to
+  match the Visual Design Brief's softer display-type aesthetic. This
+  fix deliberately overrides that to 700 for `.prose h2`/`h3`
+  specifically — a client-requested, explicit SEO/scannability call for
+  long-form body content, not a reversal of the brand's hero/CTA
+  typography, which is untouched.
+- **Also answered directly**: yes, a blog post's target keyword belongs
+  in its own title — one of the strongest on-page relevance signals for
+  both classic search and AI answer-engine citation — but the literal
+  "near me"/long-tail phrase itself usually shouldn't appear verbatim in
+  a headline ("church counseling" reads naturally in a title; "church
+  counseling near me" doesn't). Checked this against this site's real
+  Content Plan and found a genuine gap: most idea-stage titles didn't
+  reflect their keyword's core terms at all. Fixed:
+  - "Men's Counseling" → **"Men's Counseling in Louisville, KY"**
+    (keyword: "therapy for men near me")
+  - "Women's Counseling" → **"Women's Counseling in Louisville, KY"**
+    (keyword: "women's counselor near me")
+  - "Counseling for Pastors, Ministry Leaders, and Their Families" →
+    **"Church Counseling for Pastors, Ministry Leaders, and Their
+    Families"** (keyword: "church counseling")
+  - "Is Online Counseling Right for You? What to Expect from Telehealth
+    at Freedom" → **"Online Mental Health Counseling: What to Expect
+    from Telehealth at Freedom"** (keyword: "mental health online
+    services")
+  - "What Is DBT, and Could It Help You?" (keyword: "dbt near me") was
+    left as-is — "DBT" is already the keyword's core term, front and
+    center.
+  Both already-published post titles were deliberately left untouched —
+  an indexed, ranking title isn't something to casually rewrite without
+  a specific reason. The three `update_existing_page` rows ("Update
+  Anxiety & Depression Counseling copy for near-me phrasing," etc.) were
+  left alone too — those are task descriptions, not real page titles;
+  the actual page's H1/meta gets the keyword when that update runs.
+  Applied directly via `supabase db query --linked` with
+  `content_plan_items_enforce_staff_update` temporarily disabled (a raw
+  SQL session has no real `auth.uid()` to satisfy its "only your own
+  assigned items" check) — confirmed genuinely re-enabled afterward via
+  `pg_trigger.tgenabled`.
+- Also added the same title-placement guidance to
+  `admin/blog.astro`'s Content Plan hand-off panel and a one-line tip on
+  `admin/content-plan.astro`'s "Add idea" Title field, so future ideas
+  don't drift the same way — see the template CLAUDE.md for the exact
+  copy.
+- **Verified**: `astro check` (0 errors) and a real `npm run build` both
+  clean; the built `dist/when-everyday-stress-becomes-something-more/
+  index.html` confirmed the paragraph is now a plain `<p>`, not a
+  heading; a live local dev-server browser pass confirmed the new H2/H3
+  sizing on both the published post and a fresh test post in the admin
+  editor (28px/700 and 22px/700 respectively, matching exactly). Content
+  plan titles reconfirmed via direct query after the trigger dance.
+  Rebuild triggered via `gh workflow run` to publish both fixes.
+
 ## Backlog for this site
 
 Genuinely open items only — resolved/superseded threads get removed
