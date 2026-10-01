@@ -4066,6 +4066,31 @@ template) — this entry covers what's specific to this real site.
   plan titles reconfirmed via direct query after the trigger dance.
   Rebuild triggered via `gh workflow run` to publish both fixes.
 
+## Blog sidebar CTA (built 2026-10-01)
+
+Requested directly: improve blog-post conversion with a desktop-only
+sticky sidebar CTA that follows the reader down the page, plus 2-3
+related posts. See `local-business-site-template`'s CLAUDE.md ("Blog
+sidebar CTA") for the full design writeup (built there first, synced
+here the same day) — this entry covers what's specific to this real
+site.
+
+- **Live-verified against this site's real blog posts**: "When Everyday
+  Stress Becomes Something More" (category: Anxiety & Depression
+  Counseling, 4 real posts) showed a real 3-post related-articles grid
+  and a sticky sidebar CTA ("Want help from Freedom Counseling
+  Services?") that stayed pinned while scrolling, correctly hid
+  (`display: none`, confirmed via direct computed-style checks) the
+  moment the bottom CTA band scrolled into view, and reappeared once
+  scrolled back away. "Becoming a Free-Range Hamster" (category:
+  Individual Counseling, no sibling posts) correctly rendered no
+  "Related articles" section at all while the sidebar still rendered
+  normally — confirmed the empty state degrades cleanly rather than
+  showing a broken/empty block. Mobile confirmed unaffected: full-width
+  single column, the existing Call Now/Get a Quote bottom bar untouched.
+- `astro check` (0 errors) and a real `npm run build` against this
+  site's live Supabase project (62 pages) both clean.
+
 ## Backlog for this site
 
 Genuinely open items only — resolved/superseded threads get removed

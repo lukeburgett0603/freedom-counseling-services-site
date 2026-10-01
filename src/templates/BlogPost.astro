@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import KeyTakeaways from '../components/KeyTakeaways.astro';
+import BlogPreview from '../components/BlogPreview.astro';
 import CTA from '../components/CTA.astro';
 import LeadGenerator from '../components/LeadGenerator.astro';
 import LeadMagnet from '../components/LeadMagnet.astro';
@@ -35,6 +36,17 @@ const hubPage = page.category
 const publishedDate = page.date_published
   ? new Date(page.date_published).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
   : null;
+
+// Related-posts cards, same category-match pattern as ContentPillar/
+// ServiceHub's own BlogPreview — a Blog Post page never had this at all
+// before (see CLAUDE.md's "Blog sidebar CTA" section); capped to 3, not
+// the usual 6, since this is a lighter "keep reading" nudge here, not a
+// hub page's own dedicated related-content section.
+const relatedPosts = page.category
+  ? allPages
+      .filter((p) => p.page_type === 'Blog Post' && p.category === page.category && p.id !== page.id)
+      .sort((a, b) => (b.date_published ?? '').localeCompare(a.date_published ?? ''))
+  : [];
 ---
 
 <BaseLayout page={page} allPages={allPages} business={business}>
@@ -62,10 +74,40 @@ const publishedDate = page.date_published
   <div class="mx-auto max-w-3xl px-6 pt-6">
     <KeyTakeaways items={page.key_takeaways} />
   </div>
-  <article class="prose prose-lg mx-auto max-w-3xl px-6 pb-10 pt-4">
-    <Fragment set:html={renderCopy(page.copy)} />
-  </article>
+  {/*
+    Desktop-only two-column layout: the article sits in a wider grid
+    track than before (was mx-auto max-w-3xl, centered) — prose-lg's own
+    65ch line-length cap (see ContentPillar.astro's identical comment)
+    still keeps the text itself readable, it just now sits flush-left in
+    its track rather than centered, which is what actually "nudges it
+    left." The sidebar is a sticky CTA card (see CTA.astro's `sidebar`
+    variant) so a reader scrolling through a long post always has an
+    easy next step in view, without competing with the full CTA band
+    once that scrolls into view (handled by the script below). Hidden
+    below `lg` — a sticky sidebar has nowhere sensible to sit on a
+    narrow viewport, and mobile already has MobileCTABar's persistent
+    bottom bar for this same job.
+  */}
+  <div class="mx-auto grid max-w-5xl grid-cols-1 gap-10 px-6 pb-10 lg:grid-cols-[1fr_320px]">
+    <article class="prose prose-lg">
+      <Fragment set:html={renderCopy(page.copy)} />
+    </article>
+    <aside id="blog-sidebar-cta" class="hidden lg:sticky lg:top-24 lg:block lg:self-start">
+      <CTA
+        variant="sidebar"
+        heading={page.cta_heading ?? `Want help from ${business.display_name}?`}
+        subheading={page.cta_subheading}
+        buttonText={page.cta_button_text ?? undefined}
+        href="#lead-generator"
+        pageId={page.id}
+      />
+    </aside>
+  </div>
+  {relatedPosts.length > 0 && page.category && (
+    <BlogPreview posts={relatedPosts} category={page.category} allPages={allPages} limit={3} />
+  )}
   <CTA
+    id="blog-main-cta"
     heading={page.cta_heading ?? `Want help from ${business.display_name}?`}
     subheading={page.cta_subheading}
     buttonText={page.cta_button_text ?? undefined}
@@ -85,3 +127,27 @@ const publishedDate = page.date_published
     counselors={counselors}
   />
 </BaseLayout>
+
+<script>
+  // Hide the sticky sidebar CTA the moment the real, bottom CTA band
+  // scrolls into view — same "don't show two near-identical CTAs in one
+  // view at once" rule MobileCTABar.astro already enforces against a
+  // visible lead-form submit button, just watching the CTA band instead
+  // here (the sidebar's whole job is to stand in for that band while
+  // it's out of view below). Reappears if the reader scrolls back up
+  // past it, matching the same toggle-on-every-intersection-change
+  // behavior MobileCTABar uses rather than a one-shot hide.
+  const sidebar = document.getElementById('blog-sidebar-cta');
+  const mainCta = document.getElementById('blog-main-cta');
+  if (sidebar && mainCta) {
+    // Inline style, not a Tailwind class — see adminAuth.ts's own note on
+    // why toggling classList against an element that already carries a
+    // responsive display utility (`lg:block` here) doesn't reliably work;
+    // an empty string clears the inline override, letting `hidden`/
+    // `lg:block` resume controlling visibility normally again.
+    const observer = new IntersectionObserver(([entry]) => {
+      sidebar.style.display = entry.isIntersecting ? 'none' : '';
+    });
+    observer.observe(mainCta);
+  }
+</script>

@@ -18,25 +18,61 @@ interface Props {
   // is actually being measured — every other template simply omits this
   // and the button behaves exactly as it always has, untracked.
   pageId?: string;
+  // 'band' (default) is the full-bleed section used at the bottom of
+  // every page. 'sidebar' is a compact card for BlogPost.astro's sticky
+  // sidebar (see CLAUDE.md's "Blog sidebar CTA" section) — same copy
+  // fields, same click-tracking script below (already multi-instance-
+  // safe via querySelectorAll, so rendering CTA.astro twice on one page
+  // — band + sidebar — needs no changes there), just a smaller card
+  // instead of a full-bleed band, so a reader never sees two near-
+  // identical full CTAs stacked on the same screen.
+  variant?: 'band' | 'sidebar';
+  // Lets a caller target this exact instance (e.g. BlogPost.astro's
+  // IntersectionObserver watching for when the bottom band scrolls into
+  // view, to hide the sidebar CTA at that point) — optional since no
+  // other call site needs to address a specific instance.
+  id?: string;
 }
 
-const { heading, subheading, buttonText = 'Contact Us', href = withBase('/contact'), pageId } = Astro.props;
+const {
+  heading,
+  subheading,
+  buttonText = 'Contact Us',
+  href = withBase('/contact'),
+  pageId,
+  variant = 'band',
+  id,
+} = Astro.props;
 import { STATIC_EXPORT } from '../lib/exportMode';
 ---
 
-<section class="bg-brand-primary py-16 text-center text-white">
-  <div class="mx-auto max-w-3xl px-6">
-    <h2 class="font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</h2>
-    {subheading && <p class="mt-3 text-white/90">{subheading}</p>}
+{variant === 'sidebar' ? (
+  <div id={id} class="rounded-xl bg-brand-primary p-6 text-white shadow-md">
+    <h2 class="font-[family-name:var(--font-heading)] text-lg font-bold">{heading}</h2>
+    {subheading && <p class="mt-2 text-sm text-white/90">{subheading}</p>}
     <a
       href={href}
-      class="cta-button mt-6 inline-block rounded-md bg-white px-6 py-3 font-semibold text-brand-primary transition hover:bg-brand-neutral hover:shadow-md"
+      class="cta-button mt-4 block rounded-md bg-white px-4 py-2 text-center text-sm font-semibold text-brand-primary transition hover:bg-brand-neutral hover:shadow-md"
       data-page-id={pageId}
     >
       {buttonText}
     </a>
   </div>
-</section>
+) : (
+  <section id={id} class="bg-brand-primary py-16 text-center text-white">
+    <div class="mx-auto max-w-3xl px-6">
+      <h2 class="font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</h2>
+      {subheading && <p class="mt-3 text-white/90">{subheading}</p>}
+      <a
+        href={href}
+        class="cta-button mt-6 inline-block rounded-md bg-white px-6 py-3 font-semibold text-brand-primary transition hover:bg-brand-neutral hover:shadow-md"
+        data-page-id={pageId}
+      >
+        {buttonText}
+      </a>
+    </div>
+  </section>
+)}
 
 {pageId && !STATIC_EXPORT && (
   <script>

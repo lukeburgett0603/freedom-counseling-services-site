@@ -13,10 +13,14 @@ interface Props {
   posts: Page[];
   category: string;
   allPages: Page[];
+  // Defaults to 6 (ContentPillar/ServiceHub's original behavior,
+  // unchanged) — BlogPost.astro's own related-posts section passes 3,
+  // matching what was actually asked for there.
+  limit?: number;
 }
 
-const { posts, category, allPages } = Astro.props;
-const shown = posts.slice(0, 6);
+const { posts, category, allPages, limit = 6 } = Astro.props;
+const shown = posts.slice(0, limit);
 ---
 
 {shown.length > 0 && (
