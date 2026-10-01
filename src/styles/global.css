@@ -73,32 +73,62 @@ body {
   font-weight: 700;
 }
 
-/* Match the heading treatment used everywhere else on the site — Tailwind
-   Typography's defaults are noticeably lighter/looser than the rest of the
-   type system otherwise. Weight 500, not 800 — see the heading-weight rule
-   above; body copy's own H2/H3s get the same soft Fraunces treatment as
-   every other heading on the site, not a heavier one.
-
-   Real bug fixed here: this rule set weight/tracking but never set
-   font-family, so Typography's default (inherit the surrounding body
-   font) left every markdown-rendered H2/H3 — page copy, blog posts, any
-   long-form `.prose` content — rendering in Inter while every hand-coded
-   component heading (FAQ, CTA, PlanSteps, FeatureGrid, etc.) used
-   Fraunces via `font-[family-name:var(--font-heading)]`. Found via
-   Impeccable Live steer (2026-09-09): "many h2 headers use the Inter
-   font creating inconsistency." */
-.prose h2,
-.prose h3 {
+/* Explicit, fixed heading hierarchy for every markdown-rendered body copy
+   section (.prose) — blog posts, page copy, content pillars/hubs, FAQ/
+   collapsible content, the admin rich-text editor's own preview. Real bug
+   found 2026-10-01: the old rule only set font-weight: 500 (medium) and
+   left font-size to Tailwind Typography's own em-relative-to-prose-variant
+   scale — e.g. 20px/weight-500 inside the admin editor's `prose-sm` box
+   (vs. a 14px paragraph), which barely reads as a heading at all. A client
+   asked directly for a clear, deliberate hierarchy instead, which also
+   happens to be the right call for SEO/AI-answer-engine extractability:
+   search engines and LLM summarizers weight a visually/structurally
+   distinct heading tree as a real content outline, not a styling detail.
+   Fixed sizes in rem (not Typography's em, which scales with whichever
+   prose-sm/prose/prose-lg variant a given `.prose` container happens to
+   use) so H2/H3 render at the identical pixel size everywhere, including
+   the admin editor — what you see while writing now matches what
+   publishes, instead of the editor's small prose-sm box understating it.
+   Weight 700 (true bold), not the softer 500 the rest of the site's
+   hand-coded headings use (see the font-heading override above) —
+   deliberate exception for body-copy headings specifically, where
+   scannability/hierarchy matters more than the brand's softer display
+   type. H1 is included defensively even though content should never put
+   one in body copy (reserved for the post title/page H1 — see the admin
+   editor's own help text) — if one ever slips in again by mistake (a
+   stray leading "# " in pasted/drafted markdown, the exact bug this same
+   pass fixed on a live post), it renders as a large, legitimate-looking
+   heading instead of Typography's unstyled 800-weight Inter fallback,
+   which read as visibly broken. */
+.prose h1 {
   font-family: var(--font-heading);
-  font-weight: 500;
+  font-weight: 700;
+  font-size: 2.25rem;
+  line-height: 1.2;
   letter-spacing: normal;
   font-optical-sizing: auto;
 }
 
-/* A TableOfContents.astro link jumps straight to `#<id>`, which by default
-   lands the heading flush against the very top edge of the viewport — this
-   gives it breathing room above instead. H3, not H2 — see lib/markdown.ts. */
+.prose h2 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 1.3;
+  letter-spacing: normal;
+  font-optical-sizing: auto;
+}
+
 .prose h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.375rem;
+  line-height: 1.35;
+  letter-spacing: normal;
+  font-optical-sizing: auto;
+  /* A TableOfContents.astro link jumps straight to `#<id>`, which by
+     default lands the heading flush against the very top edge of the
+     viewport — this gives it breathing room above instead. H3, not H2 —
+     see lib/markdown.ts. */
   scroll-margin-top: 6rem;
 }
 
