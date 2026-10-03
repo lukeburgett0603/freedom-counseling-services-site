@@ -58,13 +58,17 @@ export default defineConfig({
     // post slug typo" entry) — fixed at the data level, this redirect
     // just protects the ~2 months this URL was already live/indexable.
     '/blog/repairing-after-a-fight': '/repairing-after-a-fight',
+    // Retired 2026-10-03 with the waiting-room review sign whose QR code
+    // pointed here (see admin/review-program.astro). A sign still up in
+    // the office lands on the homepage, with no review ask, instead of a
+    // 404. Astro's static redirect page is noindex.
+    '/share-your-experience': '/',
   },
   integrations: [
     sitemap({
       // /admin/* is the internal, auth-gated admin area — never
-      // public/indexable pages. /share-your-experience is only reached
-      // from the waiting-room sign's QR code (see the ethical review
-      // program), so it's kept out of search too.
+      // public/indexable pages. /share-your-experience is a redirect (see
+      // `redirects` below), kept out explicitly in case a build lists it.
       filter: (page) => !page.includes('/admin') && !page.includes('/share-your-experience'),
     }),
   ],

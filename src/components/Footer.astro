@@ -113,6 +113,18 @@ import { STATIC_EXPORT } from '../lib/exportMode';
             )}
           </p>
         )}
+        {/*
+          Neutral by design: "Find us on Google," never "review us"
+          (Trusted Without Asking, pillar 2). Points at the Business
+          Profile itself, not the write-a-review link.
+        */}
+        {business.google_maps_url && (
+          <p class="mt-2 text-sm">
+            <a href={business.google_maps_url} target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:text-white">
+              Find us on Google <Icon name="external-link" class="h-3.5 w-3.5" />
+            </a>
+          </p>
+        )}
         {business.same_as.length > 0 && (
           <div class="mt-4 flex gap-3">
             {business.same_as.map((url) => (

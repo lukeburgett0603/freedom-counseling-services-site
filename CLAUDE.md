@@ -4322,35 +4322,36 @@ The "Get Referred" step of the Full Caseload System. Migration
   stage auto-advance, follow-up reminder, CRM linking, and counts. All
   `ZZTEST` rows deleted after.
 
-## Ethical review program (built 2026-09-28)
+## Ethical review program: "Trusted Without Asking" (built 2026-09-28, rebuilt 2026-10-03)
 
-The review-growth half of "Get Chosen." Migration `0069_review_program.sql`,
+The review half of "Get Chosen." Migration `0069_review_program.sql`,
 admin page `admin/review-program.astro` (nav: "Review program",
-owner/agency), public page `src/pages/share-your-experience.astro`, copy in
-`src/lib/reviewProgram.ts`. CMC's delivery playbook lives in the CMC
-folder at `review-program/ethical-review-program.md`.
+owner/agency), copy in `src/lib/reviewProgram.ts`. Built in the template
+first and synced here (same files, see the template's CLAUDE.md).
 
-- **Built around ACA Code of Ethics C.3.b** (no soliciting testimonials
-  from current or former clients). Nothing here asks anyone for a review.
-  The only channel is a passive waiting-room sign.
-- **The sign's QR points to `/share-your-experience`, not to Google.** That
-  page says reviewing is optional and has no effect on care, explains the
-  privacy trade-offs, says the practice doesn't respond to reviews, and
-  only then links to `business.google_review_url`. noindex, excluded from
-  the sitemap, never linked from nav. The QR always encodes the live
-  site URL (`import.meta.env.SITE`), never wherever the admin is open.
-- **Printing uses a hidden same-page iframe, not `window.open()`.** The
-  first version used a popup, which the browser blocked silently (caught
-  in the browser pass). Verified the sign renders as exactly one letter
-  page via headless Chrome `--print-to-pdf`, with
-  `print-color-adjust: exact` so the background prints.
-- **Templates**: online review policy for intake paperwork, a closing
-  survey with no review ask (it includes "How did you first hear about
-  us?"), and staff do/don't guidelines.
-- **`review_snapshots`**: a manual monthly log of review count + rating
-  (the Business Profile API is still pending), showing growth over time.
-- Uses the `qrcode` npm package (client-side SVG). The 6 `npm audit`
-  findings in this repo predate it.
+- **2026-10-03: the waiting-room sign and `/share-your-experience` are
+  retired.** A sign only clients see still solicits current/former
+  clients under ACA C.3.b (also APA 5.05, NASW 4.07(b)), however passive.
+  `/share-your-experience` is now an Astro redirect to `/` in
+  `astro.config.mjs` (noindex), so a scan of a sign still in the office
+  lands on the homepage, not a review request or a 404. **The printed sign
+  must come down from Freedom's office** (the redirect is a safety net,
+  not the fix).
+- **The admin page now follows the five pillars**: ethics checklist;
+  Google links (`business.google_maps_url` = Business Profile, rendered as
+  a neutral "Find us on Google" link in the footer and on Contact, and the
+  save refuses a review-style URL; `business.google_review_url` = the
+  write-a-review link, admin only); event QR kit (printable card + PNG,
+  public workshops/talks/trainings only); the one HIPAA-safe reply plus a
+  negative-review protocol; attorney-review policy, front-desk script,
+  staff do/don't, closing survey (no review ask); `review_snapshots` log.
+- **Printing uses a hidden same-page iframe, not `window.open()`** (a
+  popup was blocked silently in the first version).
+- Freedom's `google_maps_url` was empty on 2026-10-03: paste the Maps
+  "Share" link on the Review program page to turn on "Find us on Google."
+- Freedom's earlier 3.5 to 4.0 star result came from the retired approach
+  and is not used in any public CMC material.
+- Uses the `qrcode` npm package (client-side SVG/PNG).
 
 ## Automatic reply to new leads (built 2026-09-29)
 
@@ -4442,7 +4443,7 @@ The paid half of "Get Found." Migration `0072_ad_attribution.sql`; logic in
   "Came from: Google Ads (campaign)" to the notification email. Verified
   in the browser: landed on `/` with ad params, submitted from `/contact`,
   and the payload carried the attribution (request intercepted, nothing
-  sent). Pages outside `BaseLayout` (404, share-your-experience) don't
+  sent). Pages outside `BaseLayout` (404) don't
   capture; a real ad landing page always uses `BaseLayout`.
 - **Reporting**: Leads dashboard "Google Ads" card (ad leads, clients,
   share, by campaign/keyword with untagged grouped honestly); CRM detail

@@ -44,6 +44,12 @@ const fullAddress = streetLine
       </p>
     )}
     {fullAddress && <p>{fullAddress}</p>}
+    {/* Neutral, no review ask. See Footer.astro. */}
+    {business.google_maps_url && (
+      <p>
+        <a href={business.google_maps_url} target="_blank" rel="noopener" class="text-brand-primary">Find us on Google</a>
+      </p>
+    )}
   </div>
   <LeadMagnet pageId={page.id} turnstileSiteKey={business.cloudflare_turnstile_site_key} />
   <LeadGenerator

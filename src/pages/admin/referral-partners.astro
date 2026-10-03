@@ -695,7 +695,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   }
 
   // One letter-size page, printed from a hidden same-page iframe (a popup
-  // can be blocked silently; same approach as the review program's sign).
+  // can be blocked silently; same approach as the review program's event card).
   document.getElementById('print-handout-button')!.addEventListener('click', async () => {
     if (!practice) return;
     const css = getComputedStyle(document.documentElement);
