@@ -4334,9 +4334,8 @@ first and synced here (same files, see the template's CLAUDE.md).
   clients under ACA C.3.b (also APA 5.05, NASW 4.07(b)), however passive.
   `/share-your-experience` is now an Astro redirect to `/` in
   `astro.config.mjs` (noindex), so a scan of a sign still in the office
-  lands on the homepage, not a review request or a 404. **The printed sign
-  must come down from Freedom's office** (the redirect is a safety net,
-  not the fix).
+  lands on the homepage, not a review request or a 404. The printed sign
+  was taken down from Freedom's office (confirmed by Luke 2026-10-05).
 - **The admin page now follows the five pillars**: ethics checklist;
   Google links (`business.google_maps_url` = Business Profile, rendered as
   a neutral "Find us on Google" link in the footer and on Contact, and the
@@ -4347,8 +4346,8 @@ first and synced here (same files, see the template's CLAUDE.md).
   staff do/don't, closing survey (no review ask); `review_snapshots` log.
 - **Printing uses a hidden same-page iframe, not `window.open()`** (a
   popup was blocked silently in the first version).
-- Freedom's `google_maps_url` was empty on 2026-10-03: paste the Maps
-  "Share" link on the Review program page to turn on "Find us on Google."
+- Freedom's `google_maps_url` set 2026-10-05; "Find us on Google" is live
+  in the footer and on Contact.
 - Freedom's earlier 3.5 to 4.0 star result came from the retired approach
   and is not used in any public CMC material.
 - Uses the `qrcode` npm package (client-side SVG/PNG).
