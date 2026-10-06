@@ -1,0 +1,499 @@
+---
+// Today: the admin home screen, personal to whoever signs in (admin
+// redesign phase 2, 2026-10-06; design approved in the CMC folder's
+// admin-redesign/prototype.html).
+//
+// - Owner / agency: the whole practice (caseload across counselors,
+//   practice numbers, every waiting inquiry, partner follow-ups).
+// - Linked counselor (staff + linked_counselor_page_id): only their own
+//   inquiries, caseload, reply time, and availability. Enforced by RLS
+//   (0073_counselor_today.sql), and every counselor query also filters
+//   by their page explicitly.
+// - Solo practice: the owner is the counselor, so it's the owner view
+//   without the per-counselor team section.
+// - Other staff (blog-only): a greeting and links to what they can use.
+//
+// "Your next moves" is built only from real records (waiting inquiries,
+// inquiries to book, due follow-ups, overdue partner follow-ups). Its
+// check circles perform the real action; nothing is marked done unless
+// the database changed.
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Today | Admin" current="today" hideTitle>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="t-spark-line" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--a-violet)" /><stop offset="1" style="stop-color:var(--a-accent)" /></linearGradient>
+      <linearGradient id="t-spark-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--a-accent);stop-opacity:.28" /><stop offset="1" style="stop-color:var(--a-accent);stop-opacity:0" /></linearGradient>
+    </defs>
+  </svg>
+
+  <div id="today-root">
+    <section class="t-hello">
+      <small id="t-date"></small>
+      <h1 id="t-greeting">Welcome back.</h1>
+      <p id="t-headline">Getting your practice's numbers ready.</p>
+    </section>
+    <div class="t-grid" id="t-loading" aria-hidden="true">
+      <div class="t-skel t-s4" style="height:290px"></div>
+      <div class="t-skel t-s8" style="height:290px"></div>
+      <div class="t-skel t-s7" style="height:260px"></div>
+      <div class="t-skel t-s5" style="height:260px"></div>
+    </div>
+    <div class="t-grid" id="t-body" hidden></div>
+  </div>
+  <div class="t-toast" id="t-toast" role="status" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import { initAdminAuth, supabase, type AdminUser } from '../../lib/adminAuth';
+  import { withBase } from '../../lib/url';
+  import { targetCaseload, ALMOST_FULL_THRESHOLD, type CounselorCaseload } from '../../lib/caseload';
+  import { leadSourceShortLabel, hoursToFirstContact, formatHours, median } from '../../lib/leadSource';
+
+  type Lead = {
+    id: string;
+    name: string | null;
+    created_at: string;
+    status: string | null;
+    scheduled_at: string | null;
+    first_contacted_at: string | null;
+    follow_up_date: string | null;
+    archived_at: string | null;
+    lead_magnet_id: string | null;
+    lead_source: string | null;
+    assigned_counselor_page_id: string | null;
+    source_page: string | null;
+  };
+  type Counselor = { id: string; title: string; availability_status: string | null };
+  type Partner = { id: string; name: string; next_follow_up: string | null; status: string; archived_at: string | null };
+
+  const MANUAL_SOURCE = 'Manually added';
+  const DAY = 86_400_000;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (id: string) => document.getElementById(id)!;
+  const esc = (v: string) => {
+    const d = document.createElement('div');
+    d.textContent = v;
+    return d.innerHTML;
+  };
+  const ICON = {
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7"/></svg>',
+    partner: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 20c0-3 2.7-5 6-5s6 2 6 5m0-4.6c.6-.3 1.3-.4 2-.4 3.3 0 6 2 6 5"/></svg>',
+    profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg>',
+    gauge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12l6 6"/></svg>',
+  };
+
+  // ------------------------------------------------------------- helpers
+  function firstName(user: AdminUser, counselorTitle: string | null): string | null {
+    if (user.display_name?.trim()) return user.display_name.trim().split(/\s+/)[0];
+    if (counselorTitle) return counselorTitle.split(/[ ,]/)[0];
+    const local = (user.email || '').split('@')[0];
+    const word = local.split(/[._-]/)[0];
+    if (!/^[a-z]{2,}$/i.test(word) || ['info', 'admin', 'office', 'contact', 'hello', 'team', 'support'].includes(word.toLowerCase())) return null;
+    return word[0].toUpperCase() + word.slice(1).toLowerCase();
+  }
+  function greeting(): string {
+    const h = new Date().getHours();
+    return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  }
+  function initials(title: string): string {
+    return title
+      .split(',')[0]
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0].toUpperCase())
+      .join('');
+  }
+  function monthStart(offset = 0): Date {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth() + offset, 1);
+  }
+  const inRange = (iso: string | null, from: Date, to: Date) => !!iso && new Date(iso) >= from && new Date(iso) < to;
+  function hoursAgo(iso: string): string {
+    const h = (Date.now() - new Date(iso).getTime()) / 3_600_000;
+    return h < 1 ? 'less than an hour' : h < 48 ? `${Math.round(h)} hrs` : `${Math.round(h / 24)} days`;
+  }
+  function countUp(el: HTMLElement, to: number, dec = 0, suffix = '', dur = 1100) {
+    if (reduced) {
+      el.textContent = to.toFixed(dec) + suffix;
+      return;
+    }
+    const t0 = performance.now();
+    const step = (t: number) => {
+      const k = Math.min((t - t0) / dur, 1);
+      el.textContent = (to * (1 - Math.pow(1 - k, 3))).toFixed(dec) + suffix;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  // Weekly buckets for sparklines: oldest to newest, last `weeks` weeks.
+  function weekly<T>(items: T[], date: (x: T) => string | null, weeks = 8, reduce: (xs: T[]) => number = (xs) => xs.length): number[] {
+    const now = Date.now();
+    return Array.from({ length: weeks }, (_, i) => {
+      const end = now - (weeks - 1 - i) * 7 * DAY;
+      const start = end - 7 * DAY;
+      return reduce(items.filter((x) => {
+        const d = date(x);
+        return !!d && new Date(d).getTime() > start && new Date(d).getTime() <= end;
+      }));
+    });
+  }
+  function spark(vals: number[], invert = false): string {
+    if (vals.every((v) => v === 0)) return '';
+    const w = 96, h = 34, p = 3;
+    const mn = Math.min(...vals), mx = Math.max(...vals);
+    const pts = vals.map((v, i) => {
+      let y = (v - mn) / (mx - mn || 1);
+      if (invert) y = 1 - y;
+      return [p + (i * (w - 2 * p)) / (vals.length - 1), h - p - y * (h - 2 * p)];
+    });
+    const d = pts.map((q, i) => `${i ? 'L' : 'M'}${q[0].toFixed(1)} ${q[1].toFixed(1)}`).join(' ');
+    const last = pts[pts.length - 1];
+    return `<svg class="t-spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path class="a" d="${d} L${last[0]} ${h} L${pts[0][0]} ${h}Z"/><path class="l" d="${d}"/><circle cx="${last[0]}" cy="${last[1]}" r="2.6"/></svg>`;
+  }
+  function delta(cur: number, prev: number, _unit: string): { text: string; cls: string } {
+    const diff = cur - prev;
+    if (diff === 0) return { text: `Same as this point last month`, cls: '' };
+    return { text: `${diff > 0 ? '+' : ''}${diff} vs this point last month (${prev})`, cls: diff > 0 ? 'up' : 'down' };
+  }
+
+  let toastTimer: number | undefined;
+  function toast(title: string, sub: string, error = false) {
+    const t = $('t-toast');
+    t.classList.toggle('err', error);
+    t.innerHTML = `<span class="t-ok">${error ? '!' : ICON.check}</span><span><b>${esc(title)}</b><small>${esc(sub)}</small></span>`;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => t.classList.remove('show'), 4200);
+  }
+
+  // ---------------------------------------------------------------- load
+  async function load(user: AdminUser) {
+    $('t-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const isCounselor = user.role === 'staff' && !!user.linked_counselor_page_id;
+    const isFull = user.role === 'owner' || user.role === 'agency';
+
+    if (!isFull && !isCounselor) return renderStaff(user);
+
+    const leadCols = 'id, name, created_at, status, scheduled_at, first_contacted_at, follow_up_date, archived_at, lead_magnet_id, lead_source, assigned_counselor_page_id, source_page';
+    let leadsQuery = supabase.from('leads').select(leadCols).is('lead_magnet_id', null);
+    let caseQuery = supabase.from('counselor_caseload').select('*');
+    if (isCounselor) {
+      leadsQuery = leadsQuery.eq('assigned_counselor_page_id', user.linked_counselor_page_id!);
+      caseQuery = caseQuery.eq('counselor_page_id', user.linked_counselor_page_id!);
+    }
+    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes] = await Promise.all([
+      leadsQuery,
+      supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').order('title'),
+      caseQuery,
+      isFull ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at') : Promise.resolve({ data: [] }),
+      isFull ? supabase.from('target_keywords').select('id').eq('status', 'active') : Promise.resolve({ data: [] }),
+      isFull ? supabase.from('keyword_rank_snapshots').select('target_keyword_id, position, checked_at').order('checked_at', { ascending: false }) : Promise.resolve({ data: [] }),
+      supabase.from('business').select('display_name').single(),
+    ]);
+    if ('error' in leadsRes && leadsRes.error) {
+      $('t-headline').textContent = "Couldn't load your numbers. Try reloading the page.";
+      $('t-loading').hidden = true;
+      return;
+    }
+    const leads = ((leadsRes.data ?? []) as Lead[]).filter((l) => !l.archived_at);
+    const counselors = (counselorsRes.data ?? []) as Counselor[];
+    const caseloads = (caseRes.data ?? []) as CounselorCaseload[];
+    const partners = ((partnersRes.data ?? []) as Partner[]).filter((p) => !p.archived_at);
+    const practice = (bizRes.data as { display_name?: string } | null)?.display_name ?? 'Your practice';
+    const me = isCounselor ? counselors.find((c) => c.id === user.linked_counselor_page_id) ?? null : null;
+
+    // Search rankings: active keywords whose latest position is on page 1.
+    const activeKw = new Set(((kwRes.data ?? []) as { id: string }[]).map((k) => k.id));
+    const latest = new Map<string, number | null>();
+    for (const r of (rankRes.data ?? []) as { target_keyword_id: string; position: number | null }[]) {
+      if (activeKw.has(r.target_keyword_id) && !latest.has(r.target_keyword_id)) latest.set(r.target_keyword_id, r.position);
+    }
+    const pageOne = [...latest.values()].filter((p) => p != null && p <= 10).length;
+
+    render({ user, isCounselor, leads, counselors, caseloads, partners, practice, me, keywords: activeKw.size, pageOne });
+  }
+
+  type Ctx = {
+    user: AdminUser;
+    isCounselor: boolean;
+    leads: Lead[];
+    counselors: Counselor[];
+    caseloads: CounselorCaseload[];
+    partners: Partner[];
+    practice: string;
+    me: Counselor | null;
+    keywords: number;
+    pageOne: number;
+  };
+
+  function render(ctx: Ctx) {
+    const { user, isCounselor, leads, counselors, caseloads, partners, practice, me } = ctx;
+    const name = firstName(user, me?.title ?? null);
+    $('t-greeting').textContent = name ? `${greeting()}, ${name}.` : `${greeting()}.`;
+
+    // Caseload: counselors with a weekly target set.
+    const rows = caseloads
+      .map((c) => ({ c, target: targetCaseload(c.weekly_client_target), counselor: counselors.find((x) => x.id === c.counselor_page_id) }))
+      .filter((r) => r.target && r.counselor) as { c: CounselorCaseload; target: number; counselor: Counselor }[];
+    let cur = rows.reduce((s, r) => s + (r.c.current_active_clients ?? 0), 0);
+    const full = rows.reduce((s, r) => s + r.target, 0);
+    const open = Math.max(0, full - cur);
+    const team = !isCounselor && rows.length > 1;
+
+    // This month vs last month.
+    // Month to date vs the same point last month, so early-month numbers
+    // aren't compared against a whole month.
+    const m0 = monthStart(0), m1 = monthStart(1), mPrev = monthStart(-1);
+    const prevCut = new Date(Math.min(mPrev.getTime() + (Date.now() - m0.getTime()), m0.getTime()));
+    const clientsNow = leads.filter((l) => l.status === 'scheduled' && inRange(l.scheduled_at, m0, m1)).length;
+    const clientsPrev = leads.filter((l) => l.status === 'scheduled' && inRange(l.scheduled_at, mPrev, prevCut)).length;
+    const inqNow = leads.filter((l) => inRange(l.created_at, m0, m1));
+    const inqPrev = leads.filter((l) => inRange(l.created_at, mPrev, prevCut)).length;
+    const replyHours = (ls: Lead[]) => ls.filter((l) => l.first_contacted_at && l.source_page !== MANUAL_SOURCE).map((l) => hoursToFirstContact(l.created_at, l.first_contacted_at!));
+    const replyNow = median(replyHours(leads.filter((l) => inRange(l.created_at, new Date(Date.now() - 30 * DAY), new Date(Date.now() + DAY)))));
+    const booked = leads.filter((l) => l.status === 'scheduled').length;
+    const bookRate = leads.length ? Math.round((booked / leads.length) * 100) : null;
+    const waiting = leads.filter((l) => l.status === 'new').sort((a, b) => a.created_at.localeCompare(b.created_at));
+
+    // Headline: the one number that matters, then the next thing to do.
+    const who = isCounselor ? 'You have' : `${esc(practice)} has`;
+    let headline = full ? `${who} <b>${open} open ${open === 1 ? 'spot' : 'spots'}</b>${team ? ` across ${rows.length} counselors` : ''}.` : `${isCounselor ? 'Set your caseload' : 'Set each counselor\'s caseload'} to see how many spots are open.`;
+    if (waiting.length) headline += ` ${waiting.length === 1 ? 'One inquiry is' : `${waiting.length} inquiries are`} waiting on a reply.`;
+    else headline += " Every inquiry has a reply. Here's what moves the needle today.";
+    $('t-headline').innerHTML = headline;
+
+    const kpis = isCounselor
+      ? [
+          { l: 'Your new clients so far this month', v: clientsNow, d: delta(clientsNow, clientsPrev, ''), s: weekly(leads.filter((l) => l.status === 'scheduled'), (l) => l.scheduled_at) },
+          { l: 'Inquiries sent to you so far this month', v: inqNow.length, d: delta(inqNow.length, inqPrev, ''), s: weekly(leads, (l) => l.created_at) },
+          { l: 'Your median reply time', v: replyNow, fmt: 'hours', d: { text: 'Last 30 days', cls: '' }, s: weekly(leads, (l) => l.created_at, 8, (xs) => median(replyHours(xs)) ?? 0), invert: true },
+          { l: 'Your booking rate', v: bookRate, suf: '%', d: { text: `${booked} of ${leads.length} inquiries became clients`, cls: '' }, s: [] },
+        ]
+      : [
+          { l: 'New clients so far this month', v: clientsNow, d: delta(clientsNow, clientsPrev, ''), s: weekly(leads.filter((l) => l.status === 'scheduled'), (l) => l.scheduled_at) },
+          { l: 'New inquiries so far this month', v: inqNow.length, d: delta(inqNow.length, inqPrev, ''), s: weekly(leads, (l) => l.created_at) },
+          { l: 'Median reply time', v: replyNow, fmt: 'hours', d: { text: 'Last 30 days', cls: '' }, s: weekly(leads, (l) => l.created_at, 8, (xs) => median(replyHours(xs)) ?? 0), invert: true },
+          ctx.keywords
+            ? { l: 'Searches on page 1', v: ctx.pageOne, suf: ` of ${ctx.keywords}`, d: { text: 'Latest weekly check', cls: '' }, s: [] }
+            : { l: 'Booking rate', v: bookRate, suf: '%', d: { text: `${booked} of ${leads.length} inquiries became clients`, cls: '' }, s: [] },
+        ];
+
+    // ---------------------------------------------------------- moves
+    type Move = { id: string; title: string; sub: string; tag: string; warn?: boolean; check?: () => Promise<boolean>; link?: string; linkText?: string; icon?: string };
+    const moves: Move[] = [];
+    const nameOf = (l: Lead) => l.name?.trim() || 'Someone';
+    const counselorName = (id: string | null) => counselors.find((c) => c.id === id)?.title.split(',')[0] ?? null;
+    const setStatus = async (lead: Lead, status: string) => {
+      const { error } = await supabase.from('leads').update({ status }).eq('id', lead.id);
+      if (error) toast("That didn't save", error.message, true);
+      return !error;
+    };
+    const crm = withBase('/admin/crm');
+    for (const l of waiting.slice(0, 3)) {
+      const assigned = !isCounselor ? counselorName(l.assigned_counselor_page_id) : null;
+      moves.push({
+        id: `w-${l.id}`,
+        title: `Reply to ${nameOf(l)}`,
+        sub: `Waiting ${hoursAgo(l.created_at)}${assigned ? ` · for ${assigned}` : !isCounselor ? ' · not assigned yet' : ''}. Check it off once you've reached out.`,
+        tag: 'Get booked',
+        warn: true,
+        check: async () => (await setStatus(l, 'contacted')) && (toast(`${nameOf(l)} marked contacted`, 'Your reply time is counted from now.'), true),
+        link: isCounselor ? undefined : crm,
+        linkText: 'Open',
+      });
+    }
+    for (const l of leads.filter((x) => x.status === 'contacted').sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 2)) {
+      moves.push({
+        id: `s-${l.id}`,
+        title: `Book ${nameOf(l)}'s first session`,
+        sub: 'Contacted. Check it off when the first session is on the calendar.',
+        tag: 'Get booked',
+        check: async () => {
+          if (!(await setStatus(l, 'scheduled'))) return false;
+          // The database adds them to their counselor's caseload (0074):
+          // to the assigned counselor, or the only one in a solo practice.
+          const page = l.assigned_counselor_page_id ?? (counselors.length === 1 ? counselors[0].id : null);
+          const row = rows.find((r) => r.c.counselor_page_id === page);
+          if (row) {
+            row.c.current_active_clients = (row.c.current_active_clients ?? 0) + 1;
+            cur += 1;
+            paintRing();
+          }
+          const ring = document.querySelector('.t-ring');
+          ring?.classList.remove('pulse');
+          void (ring as HTMLElement | null)?.offsetWidth;
+          ring?.classList.add('pulse');
+          toast(
+            `New client: ${nameOf(l)}`,
+            row ? `Added to ${isCounselor ? 'your' : `${row.counselor.title.split(',')[0]}'s`} caseload. ${Math.max(0, full - cur)} open spots left.` : "Counted in this month's new clients."
+          );
+          return true;
+        },
+      });
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    for (const l of leads.filter((x) => x.follow_up_date && x.follow_up_date <= today && !['scheduled', 'referred', 'withdrawn', 'new'].includes(x.status ?? '')).slice(0, 2)) {
+      if (moves.some((m) => m.id.endsWith(l.id))) continue;
+      moves.push({ id: `f-${l.id}`, title: `Follow up with ${nameOf(l)}`, sub: l.follow_up_date! < today ? `Follow-up was due ${new Date(l.follow_up_date! + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Follow-up due today', tag: 'Get booked', link: isCounselor ? undefined : crm, linkText: 'Open' });
+    }
+    for (const p of partners.filter((x) => x.next_follow_up && x.next_follow_up <= today).sort((a, b) => a.next_follow_up!.localeCompare(b.next_follow_up!)).slice(0, 2)) {
+      moves.push({ id: `p-${p.id}`, title: `Follow up with ${p.name}`, sub: p.next_follow_up! < today ? 'Referral partner follow-up is overdue' : 'Referral partner follow-up due today', tag: 'Get referred', icon: ICON.partner, link: withBase('/admin/referral-partners'), linkText: 'Open' });
+    }
+    if (isCounselor && me && full && cur / full >= ALMOST_FULL_THRESHOLD && me.availability_status === 'accepting') {
+      moves.push({ id: 'avail', title: 'Update your availability', sub: 'Your caseload is nearly full, but your page still says you\'re accepting new clients.', tag: 'Profile', icon: ICON.profile, link: '#t-status', linkText: 'Update' });
+    }
+    if (!full) {
+      moves.push({ id: 'case', title: isCounselor ? 'Set your caseload' : 'Set each counselor\'s caseload', sub: 'A weekly client target turns on the caseload meter and open spots.', tag: 'Watch it work', icon: ICON.gauge, link: withBase('/admin/counselor-settings'), linkText: 'Set it' });
+    }
+
+    // ---------------------------------------------------------- sources
+    const quarterAgo = new Date(Date.now() - 90 * DAY);
+    const counts = new Map<string, number>();
+    for (const l of leads.filter((x) => x.status === 'scheduled' && x.scheduled_at && new Date(x.scheduled_at) >= quarterAgo)) {
+      const k = leadSourceShortLabel(l.lead_source);
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    const sources = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+    // ---------------------------------------------------------- markup
+    const pct = full ? Math.round((cur / full) * 100) : 0;
+    let html = `
+      <div class="t-card t-s4 t-ringcard">
+        <h2>${isCounselor ? 'Your caseload' : 'Practice caseload'}</h2>
+        ${full
+          ? `<div class="t-ring" role="img" aria-label="Caseload ${pct} percent full"><svg viewBox="0 0 168 168"><circle class="trk" cx="84" cy="84" r="76"/><circle class="val" cx="84" cy="84" r="76" style="stroke-dasharray:477.5;stroke-dashoffset:477.5"/></svg><div class="mid"><span class="a-num" id="t-pct">0%</span><small>full</small></div></div>
+             <div class="t-sub"><b>${cur}</b> of ${full} clients · <b>${open}</b> open ${open === 1 ? 'spot' : 'spots'}</div>`
+          : `<div class="t-empty" style="text-align:center"><b>No caseload set yet</b>Add a weekly client target to see how full you are.<br><a class="t-act" href="${withBase('/admin/counselor-settings')}">Set caseload</a></div>`}
+      </div>
+      <div class="t-s8 t-kpis">
+        ${kpis.map((k, i) => `<div class="t-kpi"><span class="t-lbl">${k.l}</span><div class="t-row"><span class="t-v a-num" data-k="${i}">${k.v == null ? 'Not enough data' : '0'}</span>${spark(k.s, (k as { invert?: boolean }).invert)}</div><span class="t-delta ${k.d.cls}">${k.d.text}</span></div>`).join('')}
+      </div>
+      <div class="t-card t-s7">
+        <h2>Your next moves<span class="t-aside">${moves.length ? `${moves.length} for today` : ''}</span></h2>
+        <div class="t-moves" id="t-moves">
+          ${moves.length
+            ? moves.map((m, i) => `<div class="t-move" data-m="${i}">${m.check ? `<button type="button" class="t-chk" data-chk="${i}" aria-label="Done: ${esc(m.title)}">${ICON.check}</button>` : `<span class="t-dot">${m.icon ?? ''}</span>`}<div class="t-t">${esc(m.title)}<small>${esc(m.sub)}</small></div><span class="t-tag${m.warn ? ' warn' : ''}">${m.tag}</span>${m.link ? `<a class="t-act" href="${m.link}">${m.linkText}</a>` : ''}</div>`).join('')
+            : `<div class="t-empty"><b>You're all caught up.</b>No inquiries waiting and no follow-ups due. New ones will show up here.</div>`}
+        </div>
+      </div>
+      <div class="t-card t-s5">
+        <h2>${isCounselor ? 'Where your clients came from' : 'Where new clients came from'}<span class="t-aside">Last 90 days</span></h2>
+        ${sources.length
+          ? `<div class="t-bars">${sources.map(([l, n]) => `<div class="t-bar"><span class="t-lbl">${esc(l)}</span><div class="t-track"><div class="t-fill" data-w="${Math.round((n / sources[0][1]) * 100)}"></div></div><span class="a-num">${n}</span></div>`).join('')}</div>`
+          : `<div class="t-empty"><b>No new clients in the last 90 days yet.</b>Each one's source shows here once an inquiry is marked scheduled.</div>`}
+      </div>`;
+    if (team) {
+      html += `<div class="t-card t-s12"><h2>Caseload by counselor<a class="t-aside" href="${withBase('/admin/analytics/caseload')}">Details</a></h2><div class="t-team">${rows
+        .sort((a, b) => a.counselor.title.localeCompare(b.counselor.title))
+        .map((r) => {
+          const c = r.c.current_active_clients ?? 0;
+          const ratio = c / r.target;
+          const cls = ratio >= ALMOST_FULL_THRESHOLD ? 'good' : ratio < 0.6 ? 'low' : '';
+          const note = ratio >= 1 ? 'Full' : ratio >= ALMOST_FULL_THRESHOLD ? 'Almost full' : ratio < 0.6 ? 'Send referrals here' : 'Room to grow';
+          return `<div class="t-mate"><div class="t-who"><span class="t-initials">${initials(r.counselor.title)}</span>${esc(r.counselor.title.split(',')[0])}<small>${Math.max(0, r.target - c)} open</small></div><div class="t-track"><div class="t-fill ${cls}" data-w="${Math.min(100, Math.round(ratio * 100))}"></div></div><div class="t-meta"><span class="a-num">${c} of ${r.target}</span><span>${note}</span></div></div>`;
+        })
+        .join('')}</div></div>`;
+    }
+    if (isCounselor && me) {
+      const opts: [string, string, string][] = [
+        ['accepting', 'Accepting new clients', 'var(--a-good)'],
+        ['almost_full', 'Almost full', 'var(--a-warn)'],
+        ['not_accepting', 'Not accepting right now', 'var(--a-faint)'],
+      ];
+      html += `<div class="t-card t-s12" id="t-status"><h2>Your availability<span class="t-aside">Shows on your page on the website</span></h2><div class="t-pills" role="radiogroup" aria-label="Your availability">${opts
+        .map(([v, l, c]) => `<button type="button" class="t-pill" role="radio" aria-checked="${me.availability_status === v}" data-avail="${v}"><i style="color:${c}"></i>${l}</button>`)
+        .join('')}</div></div>`;
+    }
+
+    const body = $('t-body');
+    body.innerHTML = html;
+    $('t-loading').hidden = true;
+    body.hidden = false;
+
+    // Caseload meter: drawn on load and again when a client is booked.
+    function paintRing() {
+      const val = body.querySelector<SVGCircleElement>('.t-ring .val');
+      if (!val || !full) return;
+      const C = 2 * Math.PI * 76;
+      val.style.strokeDasharray = String(C);
+      val.style.strokeDashoffset = String(C * (1 - Math.min(1, cur / full)));
+      countUp($('t-pct'), Math.round((cur / full) * 100), 0, '%', 1400);
+      const left = Math.max(0, full - cur);
+      const sub = body.querySelector('.t-ringcard .t-sub');
+      if (sub) sub.innerHTML = `<b>${cur}</b> of ${full} clients · <b>${left}</b> open ${left === 1 ? 'spot' : 'spots'}`;
+    }
+
+    // Animate in.
+    requestAnimationFrame(() => {
+      paintRing();
+      kpis.forEach((k, i) => {
+        const el = body.querySelector<HTMLElement>(`[data-k="${i}"]`);
+        if (!el || k.v == null) return;
+        if ((k as { fmt?: string }).fmt === 'hours') el.textContent = formatHours(k.v);
+        else countUp(el, k.v, 0, (k as { suf?: string }).suf ?? '');
+      });
+      setTimeout(() => body.querySelectorAll<HTMLElement>('[data-w]').forEach((el) => (el.style.width = `${el.dataset.w}%`)), 120);
+    });
+
+    // Interactions.
+    body.addEventListener('click', async (e) => {
+      const t = e.target as HTMLElement;
+      const chk = t.closest<HTMLButtonElement>('[data-chk]');
+      if (chk && !chk.disabled) {
+        chk.disabled = true;
+        const row = chk.closest<HTMLElement>('.t-move')!;
+        const ok = await moves[Number(chk.dataset.chk)].check!();
+        if (!ok) {
+          chk.disabled = false;
+          return;
+        }
+        row.classList.add('done');
+        setTimeout(() => row.classList.add('gone'), 650);
+        return;
+      }
+      const pill = t.closest<HTMLButtonElement>('[data-avail]');
+      if (pill && me) {
+        const value = pill.dataset.avail!;
+        const { error } = await supabase.from('pages').update({ availability_status: value }).eq('id', me.id);
+        if (error) return toast("That didn't save", error.message, true);
+        body.querySelectorAll<HTMLElement>('[data-avail]').forEach((b) => b.setAttribute('aria-checked', String(b === pill)));
+        me.availability_status = value;
+        toast('Availability updated', 'Your page shows it after the next site update.');
+      }
+    });
+    body.addEventListener('pointermove', (e) => {
+      const c = (e.target as HTMLElement).closest<HTMLElement>('.t-card, .t-kpi');
+      if (!c) return;
+      const r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      c.style.setProperty('--my', `${e.clientY - r.top}px`);
+    });
+  }
+
+  // Blog-only staff: nothing practice-level to show.
+  function renderStaff(user: AdminUser) {
+    const name = firstName(user, null);
+    $('t-greeting').textContent = name ? `${greeting()}, ${name}.` : `${greeting()}.`;
+    $('t-headline').innerHTML = 'Your work today lives in the blog and the content plan.';
+    $('t-loading').hidden = true;
+    const body = $('t-body');
+    body.innerHTML = `<div class="t-card t-s12"><h2>Jump back in</h2><div class="t-moves">
+      <div class="t-move"><span class="t-dot"></span><div class="t-t">Content plan<small>Topics to write next, researched from real searches</small></div><a class="t-act" href="${withBase('/admin/content-plan')}">Open</a></div>
+      <div class="t-move"><span class="t-dot"></span><div class="t-t">Blog posts<small>Drafts and published posts</small></div><a class="t-act" href="${withBase('/admin/blog')}">Open</a></div>
+    </div></div>`;
+    body.hidden = false;
+  }
+
+  initAdminAuth(async (user) => {
+    try {
+      await load(user);
+    } catch (err) {
+      console.error('today: failed to load', err);
+      $('t-loading').hidden = true;
+      $('t-headline').textContent = 'Something went wrong loading today. Try reloading the page.';
+    }
+  });
+</script>

@@ -14,6 +14,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <table class="w-full text-left text-sm">
           <thead class="border-b border-slate-200 bg-slate-50">
             <tr>
+              <th class="px-4 py-3 font-semibold">Name</th>
               <th class="px-4 py-3 font-semibold">Email</th>
               <th class="px-4 py-3 font-semibold">Role</th>
               <th class="px-4 py-3 font-semibold">Status</th>
@@ -29,7 +30,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <h2 class="mb-4 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Invite someone</h2>
       <form id="invite-form" class="space-y-4">
         <div>
-          <label class="mb-1 block text-sm font-semibold text-slate-700">Email</label>
+          <label for="invite-name" class="mb-1 block text-sm font-semibold text-slate-700">Name</label>
+          <input id="invite-name" type="text" maxlength="80" autocomplete="off" placeholder="Jordan Reyes" class="w-full rounded-md border border-slate-300 px-4 py-2" />
+          <p class="mt-1 text-xs text-slate-500">Used to greet them on their Today page. You can change it later.</p>
+        </div>
+        <div>
+          <label for="invite-email" class="mb-1 block text-sm font-semibold text-slate-700">Email</label>
           <input id="invite-email" type="email" required class="w-full rounded-md border border-slate-300 px-4 py-2" />
         </div>
         <div>
@@ -71,7 +77,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // email template), not guessed by the Edge Function — see the comment
   // in supabase/functions/publish-site/index.ts for why relying on the
   // Supabase dashboard's "Site URL" setting instead was a real bug.
-  const inviteRedirectTo = window.location.origin + withBase('/admin/analytics/leads');
+  const inviteRedirectTo = window.location.origin + withBase('/admin/today');
 
   type TeamMember = {
     id: string;
@@ -79,11 +85,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     role: 'owner' | 'staff' | 'agency';
     status: 'pending' | 'active';
     linked_counselor_page_id: string | null;
+    display_name: string | null;
   };
 
   type CounselorPage = { id: string; title: string };
 
   const tableBody = document.getElementById('team-table-body')!;
+  const inviteName = document.getElementById('invite-name') as HTMLInputElement;
   const inviteEmail = document.getElementById('invite-email') as HTMLInputElement;
   const inviteRole = document.getElementById('invite-role') as HTMLSelectElement;
   const inviteCounselorLinkWrap = document.getElementById('invite-counselor-link-wrap')!;
@@ -121,7 +129,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   async function loadTeam() {
     const { data, error } = await supabase.from('admin_users').select('*').order('created_at');
     if (error) {
-      tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-sm text-red-600">Could not load team: ${escapeHtml(error.message)}</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="5" class="px-4 py-3 text-sm text-red-600">Could not load team: ${escapeHtml(error.message)}</td></tr>`;
       return;
     }
     const members = (data ?? []) as TeamMember[];
@@ -141,6 +149,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         if (member.status === 'pending') {
           actions.push(`<button data-resend-id="${member.id}" class="resend-button text-brand-primary hover:underline">Resend invite</button>`);
         }
+        // Names: anyone's for owner/agency, except only agency renames
+        // agency (matches set_admin_user_name in 0074).
+        const canRename = isSelf || currentAdminUser?.role === 'agency' || member.role !== 'agency';
+        const nameCell = canRename
+          ? `<input data-name-id="${member.id}" type="text" maxlength="80" value="${escapeHtml(member.display_name ?? '')}" placeholder="Add a name" aria-label="Name for ${escapeHtml(member.email)}" class="w-40 rounded-md border border-slate-300 px-2 py-1 text-sm" />`
+          : escapeHtml(member.display_name ?? '');
         // An agency row can only ever be revoked by another agency login
         // — matches the RLS policy (see 0013), which is the real
         // boundary; this just avoids offering a button that would fail.
@@ -150,6 +164,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         }
         return `
       <tr class="border-b border-slate-100 last:border-0">
+        <td class="px-4 py-3">${nameCell}</td>
         <td class="px-4 py-3">${escapeHtml(member.email)}${isSelf ? ' <span class="text-xs text-slate-400">(you)</span>' : ''}</td>
         <td class="px-4 py-3">${member.role === 'staff' ? roleCell : `<span class="capitalize">${escapeHtml(member.role)}</span>`}</td>
         <td class="px-4 py-3">${statusLabel}</td>
@@ -159,6 +174,37 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       .join('');
     populateCounselorLinkOptions();
   }
+
+  // Save a name when the field loses focus or Enter is pressed.
+  async function saveName(input: HTMLInputElement) {
+    const id = input.dataset.nameId!;
+    const before = existingMembers.find((m) => m.id === id)?.display_name ?? '';
+    const value = input.value.trim();
+    if (value === before) return;
+    input.disabled = true;
+    const { error } = await supabase.rpc('set_admin_user_name', { target_id: id, new_name: value });
+    input.disabled = false;
+    if (error) {
+      window.alert('Could not save the name: ' + error.message);
+      input.value = before;
+      return;
+    }
+    const member = existingMembers.find((m) => m.id === id);
+    if (member) member.display_name = value || null;
+    input.style.borderColor = 'var(--a-good, #10b981)';
+    setTimeout(() => (input.style.borderColor = ''), 1200);
+  }
+  tableBody.addEventListener('focusout', (event) => {
+    const input = (event.target as HTMLElement).closest<HTMLInputElement>('input[data-name-id]');
+    if (input) saveName(input);
+  });
+  tableBody.addEventListener('keydown', (event) => {
+    const input = (event.target as HTMLElement).closest<HTMLInputElement>('input[data-name-id]');
+    if (input && event.key === 'Enter') {
+      event.preventDefault();
+      input.blur();
+    }
+  });
 
   tableBody.addEventListener('click', async (event) => {
     const target = event.target as HTMLElement;
@@ -211,8 +257,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       inviteStatus.className = 'text-sm text-red-600';
       return;
     }
+    // The Edge Function creates the admin_users row; add the name to it.
+    const name = inviteName.value.trim();
+    if (name) {
+      const { data: target } = await supabase.from('admin_users').select('id').ilike('email', email).maybeSingle();
+      if (target) await supabase.rpc('set_admin_user_name', { target_id: (target as { id: string }).id, new_name: name });
+    }
     inviteStatus.textContent = 'Invite sent.';
     inviteStatus.className = 'text-sm text-emerald-700';
+    inviteName.value = '';
     inviteEmail.value = '';
     inviteCounselorLink.value = '';
     await loadTeam();
