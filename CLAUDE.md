@@ -4539,3 +4539,18 @@ stays with CMC. Offboarding steps: CMC folder,
 - Content caveat for phone/email-only exports: page copy that says "the
   form below" (this site's Contact page does) should be reworded; the
   HOSTING-README tells the practice.
+
+
+## Admin redesign live (2026-10-06)
+
+Synced from the template's `admin-redesign` branch: new admin look,
+Today home screen, Team names, automatic caseload count (migrations
+0073-0075, applied 2026-10-06). See the template's CLAUDE.md "Admin
+redesign" section for how it works.
+
+**This project's migration history was missing 0035-0072** even though
+every table/column they create is live (61 objects checked). They were
+marked applied with `supabase migration repair --status applied` before
+pushing 0073-0075. Always `supabase db push --linked --dry-run` first: if
+it lists migrations you know are live, repair the history rather than
+re-running them.
