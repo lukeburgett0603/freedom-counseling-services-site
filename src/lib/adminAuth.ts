@@ -150,6 +150,8 @@ export function initAdminAuth(
       // child key or the "Website content" header never shows at all.
       allowed.add('content');
       allowed.add('content-page-copy');
+      // "My inquiries": only leads assigned to them (0073, 0076).
+      allowed.add('crm');
     }
     document.querySelectorAll<HTMLElement>('[data-nav-key]').forEach((el) => {
       el.classList.toggle('hidden', !allowed.has(el.dataset.navKey!));

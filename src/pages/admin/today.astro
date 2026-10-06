@@ -301,7 +301,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         tag: 'Get booked',
         warn: true,
         check: async () => (await setStatus(l, 'contacted')) && (toast(`${nameOf(l)} marked contacted`, 'Your reply time is counted from now.'), true),
-        link: isCounselor ? undefined : crm,
+        link: `${crm}?lead=${l.id}`,
         linkText: 'Open',
       });
     }
@@ -311,6 +311,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         title: `Book ${nameOf(l)}'s first session`,
         sub: 'Contacted. Check it off when the first session is on the calendar.',
         tag: 'Get booked',
+        link: `${crm}?lead=${l.id}`,
+        linkText: 'Open',
         check: async () => {
           if (!(await setStatus(l, 'scheduled'))) return false;
           // The database adds them to their counselor's caseload (0074):
@@ -337,7 +339,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const today = new Date().toISOString().slice(0, 10);
     for (const l of leads.filter((x) => x.follow_up_date && x.follow_up_date <= today && !['scheduled', 'referred', 'withdrawn', 'new'].includes(x.status ?? '')).slice(0, 2)) {
       if (moves.some((m) => m.id.endsWith(l.id))) continue;
-      moves.push({ id: `f-${l.id}`, title: `Follow up with ${nameOf(l)}`, sub: l.follow_up_date! < today ? `Follow-up was due ${new Date(l.follow_up_date! + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Follow-up due today', tag: 'Get booked', link: isCounselor ? undefined : crm, linkText: 'Open' });
+      moves.push({ id: `f-${l.id}`, title: `Follow up with ${nameOf(l)}`, sub: l.follow_up_date! < today ? `Follow-up was due ${new Date(l.follow_up_date! + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Follow-up due today', tag: 'Get booked', link: `${crm}?lead=${l.id}`, linkText: 'Open' });
     }
     for (const p of partners.filter((x) => x.next_follow_up && x.next_follow_up <= today).sort((a, b) => a.next_follow_up!.localeCompare(b.next_follow_up!)).slice(0, 2)) {
       moves.push({ id: `p-${p.id}`, title: `Follow up with ${p.name}`, sub: p.next_follow_up! < today ? 'Referral partner follow-up is overdue' : 'Referral partner follow-up due today', tag: 'Get referred', icon: ICON.partner, link: withBase('/admin/referral-partners'), linkText: 'Open' });

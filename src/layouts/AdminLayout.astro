@@ -356,19 +356,32 @@ const svg = (name: string) =>
     document.getElementById('a-user-role')!.textContent = label;
     document.getElementById('a-role-label')!.textContent = label;
     if (user.role === 'owner' || user.role === 'agency') updateInquiriesBadge();
+    // A counselor's Inquiries is their own list.
+    if (user.role === 'staff' && user.linked_counselor_page_id) {
+      const item = document.querySelector<HTMLAnchorElement>('#a-side a[data-label="Inquiries"]');
+      if (item) {
+        item.dataset.label = 'My inquiries';
+        item.querySelector('span')!.textContent = 'My inquiries';
+      }
+      const crumb = document.querySelector('.a-crumb b');
+      if (crumb?.textContent === 'Inquiries') crumb.textContent = 'My inquiries';
+      updateInquiriesBadge(user.linked_counselor_page_id);
+    }
   });
 
   // Inquiries still waiting on a first reply (status "new", not archived,
   // real appointment requests only; guide downloads aren't inquiries).
-  async function updateInquiriesBadge() {
+  async function updateInquiriesBadge(counselorPageId?: string) {
     const badge = document.querySelector<HTMLElement>('[data-inquiries-badge]');
     if (!badge) return;
-    const { count, error } = await supabase
+    let query = supabase
       .from('leads')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'new')
       .is('archived_at', null)
       .is('lead_magnet_id', null);
+    if (counselorPageId) query = query.eq('assigned_counselor_page_id', counselorPageId);
+    const { count, error } = await query;
     badge.textContent = !error && count ? String(count) : '';
   }
 
