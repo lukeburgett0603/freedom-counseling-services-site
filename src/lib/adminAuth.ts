@@ -152,6 +152,8 @@ export function initAdminAuth(
       allowed.add('content-page-copy');
       // "My inquiries": only leads assigned to them (0073, 0076).
       allowed.add('crm');
+      // "My caseload": only their own card.
+      allowed.add('analytics-caseload');
     }
     document.querySelectorAll<HTMLElement>('[data-nav-key]').forEach((el) => {
       el.classList.toggle('hidden', !allowed.has(el.dataset.navKey!));

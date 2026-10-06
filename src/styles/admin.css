@@ -1732,6 +1732,170 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* ------------------------------------------------- Caseload (phase 3) */
+
+.c-section {
+  margin-top: 14px;
+}
+.c-missing {
+  margin-top: 10px;
+  color: var(--a-warn);
+}
+.c-team {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+.c-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--a-line);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--a-card-top), transparent), var(--a-raise);
+  transition: border-color 0.2s, transform 0.2s;
+}
+.c-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--a-line2);
+}
+.c-card.c-unset {
+  align-content: start;
+}
+.c-who {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.c-who b {
+  display: block;
+  font-weight: 500;
+}
+.c-who small {
+  color: var(--a-faint);
+  font-size: 12px;
+}
+.c-note {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--a-sel);
+  color: var(--a-muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.c-note.good {
+  background: var(--a-good-soft);
+  color: var(--a-good);
+}
+.c-note.low {
+  background: var(--a-warn-soft);
+  color: var(--a-warn);
+}
+.c-count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.c-big {
+  font-size: 30px;
+  font-weight: 500;
+}
+.c-of {
+  color: var(--a-muted);
+}
+.c-step {
+  display: inline-flex;
+  margin-left: auto;
+  align-self: center;
+  border: 1px solid var(--a-line2);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.c-step button {
+  width: 34px;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--a-fg);
+  font: 500 16px var(--a-font);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.c-step button + button {
+  border-left: 1px solid var(--a-line2);
+}
+.c-step button:hover {
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+}
+.c-step button:disabled {
+  opacity: 0.4;
+}
+.c-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--a-faint);
+  font-size: 12px;
+}
+.t-fill.good {
+  background: var(--a-good);
+  box-shadow: 0 0 12px -2px var(--a-good);
+}
+.t-fill.low {
+  background: var(--a-warn);
+  box-shadow: none;
+}
+.c-section h2 {
+  flex-wrap: wrap;
+}
+@media (max-width: 640px) {
+  .c-section h2 .t-aside {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
+.c-flag {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--a-warn-soft);
+  color: var(--a-warn);
+  font-size: 12px;
+}
+.c-range {
+  display: inline-flex;
+  gap: 2px;
+}
+.c-range button {
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--a-faint);
+  font: 12px var(--a-font);
+  cursor: pointer;
+}
+.c-range button[aria-pressed='true'] {
+  background: var(--a-sel);
+  color: var(--a-fg);
+}
+.c-notes {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+  color: var(--a-muted);
+  font-size: 13px;
+}
+.c-notes b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+
 @media (max-width: 860px) {
   #admin-content {
     grid-template-columns: minmax(0, 1fr);

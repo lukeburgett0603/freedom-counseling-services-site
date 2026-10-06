@@ -358,13 +358,15 @@ const svg = (name: string) =>
     if (user.role === 'owner' || user.role === 'agency') updateInquiriesBadge();
     // A counselor's Inquiries is their own list.
     if (user.role === 'staff' && user.linked_counselor_page_id) {
-      const item = document.querySelector<HTMLAnchorElement>('#a-side a[data-label="Inquiries"]');
-      if (item) {
-        item.dataset.label = 'My inquiries';
-        item.querySelector('span')!.textContent = 'My inquiries';
+      for (const [from, to] of [['Inquiries', 'My inquiries'], ['Caseload', 'My caseload']]) {
+        const item = document.querySelector<HTMLAnchorElement>(`#a-side a[data-label="${from}"]`);
+        if (item) {
+          item.dataset.label = to;
+          item.querySelector('span')!.textContent = to;
+        }
+        const crumb = document.querySelector('.a-crumb b');
+        if (crumb?.textContent === from) crumb.textContent = to;
       }
-      const crumb = document.querySelector('.a-crumb b');
-      if (crumb?.textContent === 'Inquiries') crumb.textContent = 'My inquiries';
       updateInquiriesBadge(user.linked_counselor_page_id);
     }
   });
