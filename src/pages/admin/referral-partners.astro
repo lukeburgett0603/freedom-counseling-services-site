@@ -12,228 +12,239 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   sent (leads.referral_partner_id, linked in the Lead CRM or automatically
   on an exact "Who referred you?" match). Same list/detail toggle and
   "due this week" patterns as admin/crm.astro. See
-  0068_referral_partners.sql.
+  0068_referral_partners.sql. Redesigned in phase 3 of the admin
+  redesign (2026-10-06): same features and element ids, new layout
+  (stage counts as the filter, follow-ups due, a partner list, and a
+  two-column detail view). Owners and agency only.
 -->
 <AdminLayout title="Referral partners | Admin" current="referral-partners">
   <div id="partners-list-view">
-    <div class="mb-8 grid gap-4 sm:grid-cols-3">
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Active partners</p>
-        <p id="stat-active" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p id="stat-pipeline" class="mt-1 text-xs text-slate-500"></p>
+    <p class="i-intro">The professionals who send you clients, and where each relationship stands.</p>
+
+    <div class="r-kpis">
+      <div class="t-kpi">
+        <span class="t-lbl">Active partners</span>
+        <span id="stat-active" class="t-v a-num">—</span>
+        <span id="stat-pipeline" class="t-delta"></span>
       </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Referred leads</p>
-        <p id="stat-referred-leads" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p class="mt-1 text-xs text-slate-500">All time, linked to a partner</p>
+      <div class="t-kpi">
+        <span class="t-lbl">Inquiries they sent</span>
+        <span id="stat-referred-leads" class="t-v a-num">—</span>
+        <span class="t-delta">All time, linked to a partner</span>
       </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Clients from partners</p>
-        <p id="stat-referred-clients" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p class="mt-1 text-xs text-slate-500">Referred leads marked Scheduled</p>
+      <div class="t-kpi">
+        <span class="t-lbl">Became clients</span>
+        <span id="stat-referred-clients" class="t-v a-num">—</span>
+        <span class="t-delta">Referred inquiries marked Scheduled</span>
       </div>
     </div>
 
-    <!-- Outreach kit, practice-wide half: the printable handout and the
-         ground rules. The per-partner messages live in the detail view. -->
-    <div class="mb-8 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Outreach kit</p>
-          <p class="mt-1 text-sm text-slate-600">
-            A one-page overview of your practice to leave with partners, and ready-to-send messages on each partner's page.
-          </p>
-        </div>
-        <button id="print-handout-button" type="button" class="rounded-md bg-brand-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Print practice handout</button>
-      </div>
-      <label class="mt-3 flex items-center gap-2 text-sm text-slate-700">
-        <input id="faith-integration-checkbox" type="checkbox" />
-        We offer faith-integrated counseling (mentioned in church outreach and on the handout)
+    <!-- Stage counts double as the stage filter. -->
+    <div class="i-pipeline" id="r-pipeline" role="group" aria-label="Filter by stage"></div>
+
+    <div id="due-section" class="t-card i-due hidden">
+      <h2>Follow-ups due<span class="t-aside" id="r-due-count"></span></h2>
+      <div id="due-list" class="i-due-list"></div>
+    </div>
+
+    <div class="i-filters">
+      <label class="i-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+        <input id="search-input" type="text" placeholder="Search by name, contact, or email" aria-label="Search partners" />
       </label>
-      <p id="faith-status" class="text-xs" role="status"></p>
-      <details class="mt-3 text-sm">
-        <summary class="cursor-pointer font-semibold text-brand-ink">Ground rules for referral outreach</summary>
-        <ul class="mt-2 list-disc space-y-1.5 pl-5 text-slate-700">
-          {OUTREACH_GUIDELINES.map((g) => <li>{g}</li>)}
-        </ul>
-      </details>
-    </div>
-
-    <div id="due-section" class="mb-8 hidden rounded-lg border border-amber-200 bg-amber-50 p-5">
-      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-800">Follow up this week</p>
-      <div id="due-list" class="space-y-2 text-sm"></div>
-    </div>
-
-    <div class="mb-4 flex flex-wrap items-end gap-3">
-      <div>
-        <label for="search-input" class="block text-xs font-semibold text-slate-500">Search</label>
-        <input id="search-input" type="search" placeholder="Name, contact..." class="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-      </div>
-      <div>
-        <label for="status-filter" class="block text-xs font-semibold text-slate-500">Stage</label>
-        <select id="status-filter" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
-          <option value="">All</option>
-          {PARTNER_STATUSES.map((s) => <option value={s.value}>{s.label}</option>)}
-        </select>
-      </div>
-      <div>
-        <label for="category-filter" class="block text-xs font-semibold text-slate-500">Type</label>
-        <select id="category-filter" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
-          <option value="">All</option>
-          {PARTNER_CATEGORIES.map((c) => <option value={c.value}>{c.label}</option>)}
-        </select>
-      </div>
-      <label class="flex items-center gap-2 pb-2 text-sm text-slate-600">
+      <select id="status-filter" hidden aria-hidden="true" tabindex="-1">
+        <option value="">All</option>
+        {PARTNER_STATUSES.map((s) => <option value={s.value}>{s.label}</option>)}
+      </select>
+      <select id="category-filter" aria-label="Type">
+        <option value="">All types</option>
+        {PARTNER_CATEGORIES.map((c) => <option value={c.value}>{c.label}</option>)}
+      </select>
+      <label class="i-check">
         <input id="show-archived" type="checkbox" />
-        Show archived
+        <span>Show archived</span>
       </label>
-      <button
-        id="add-partner-button"
-        type="button"
-        class="ml-auto rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-      >
-        + Add partner
-      </button>
+      <p id="partners-count" class="i-count"></p>
+      <button id="add-partner-button" type="button" class="a-btn a-btn-primary i-btn">+ Add partner</button>
     </div>
 
-    <p id="partners-count" class="mb-2 text-sm text-slate-600"></p>
-    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-      <table class="w-full text-left text-sm">
-        <thead class="border-b border-slate-200 bg-slate-50">
+    <div class="i-list t-card">
+      <table class="i-table">
+        <thead>
           <tr>
-            <th class="px-4 py-3 font-semibold">Partner</th>
-            <th class="px-4 py-3 font-semibold">Type</th>
-            <th class="px-4 py-3 font-semibold">Stage</th>
-            <th class="px-4 py-3 font-semibold">Last touch</th>
-            <th class="px-4 py-3 font-semibold">Next follow-up</th>
-            <th class="px-4 py-3 font-semibold">Leads</th>
-            <th class="px-4 py-3 font-semibold">Clients</th>
+            <th>Partner</th>
+            <th class="i-hide-md">Type</th>
+            <th>Stage</th>
+            <th class="i-hide-sm">Last touch</th>
+            <th class="i-hide-sm">Follow-up</th>
+            <th class="i-hide-md r-num">Inquiries</th>
+            <th class="r-num">Clients</th>
           </tr>
         </thead>
         <tbody id="partners-table-body"></tbody>
       </table>
+      <div id="r-empty" class="t-empty" hidden></div>
     </div>
+
+    <!-- Outreach kit, practice-wide half: the printable handout and the
+         ground rules. The per-partner messages live in the detail view. -->
+    <section class="t-card r-kit-card">
+      <h2>Outreach kit</h2>
+      <div class="r-kit-row">
+        <p>A one-page overview of your practice to leave with partners. Each partner's page has ready-to-send messages written for them.</p>
+        <button id="print-handout-button" type="button" class="a-btn i-btn">Print practice handout</button>
+      </div>
+      <label class="i-check r-faith">
+        <input id="faith-integration-checkbox" type="checkbox" />
+        <span>We offer faith-integrated counseling (mentioned in church outreach and on the handout)</span>
+      </label>
+      <p id="faith-status" class="i-hint" role="status"></p>
+      <details class="r-rules">
+        <summary>Ground rules for referral outreach</summary>
+        <ul>
+          {OUTREACH_GUIDELINES.map((g) => <li>{g}</li>)}
+        </ul>
+      </details>
+    </section>
   </div>
 
   <div id="partner-detail-view" class="hidden">
-    <div class="mb-4 flex items-center justify-between">
-      <button id="back-button" type="button" class="text-sm font-semibold text-brand-primary hover:underline">&larr; Back to all partners</button>
-      <div class="flex gap-2">
-        <button id="archive-button" type="button" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Archive</button>
-        <button id="delete-button" type="button" class="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50">Delete</button>
+    <div class="i-detail-top">
+      <button id="back-button" type="button" class="a-link">&larr; All partners</button>
+      <div class="i-detail-tools">
+        <button id="archive-button" type="button" class="a-btn i-btn">Archive</button>
+        <button id="delete-button" type="button" class="a-btn i-btn i-danger">Delete</button>
       </div>
     </div>
 
-    <div class="mb-6 grid gap-6 lg:grid-cols-5">
-      <form id="partner-form" class="space-y-3 rounded-lg border border-black/5 bg-white p-5 shadow-sm lg:col-span-3">
-        <p id="detail-archived-banner" class="hidden rounded-md bg-slate-100 px-3 py-2 text-xs text-slate-600">Archived. Hidden from the default list.</p>
-        <div class="grid gap-3 sm:grid-cols-2">
-          <div class="sm:col-span-2">
-            <label for="pf-name" class="block text-xs font-semibold text-slate-500">Name (office, practice, or organization)</label>
-            <input id="pf-name" name="name" type="text" required class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+    <p id="detail-archived-banner" class="i-banner hidden">Archived: hidden from the partner list. Linked inquiries keep counting.</p>
+
+    <div class="i-detail">
+      <div class="i-detail-main">
+        <section class="t-card i-person">
+          <div class="i-person-head">
+            <span class="i-avatar" id="r-detail-avatar"></span>
+            <div>
+              <h2 id="r-detail-name"></h2>
+              <p id="r-detail-meta"></p>
+            </div>
+            <span id="r-detail-stage" class="r-head-stage"></span>
           </div>
-          <div>
-            <label for="pf-category" class="block text-xs font-semibold text-slate-500">Type</label>
-            <select id="pf-category" name="category" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
-              {PARTNER_CATEGORIES.map((c) => <option value={c.value}>{c.label}</option>)}
+          <div class="r-stats">
+            <div><span>Inquiries sent</span><b class="a-num" id="r-detail-leads">0</b></div>
+            <div><span>Became clients</span><b class="a-num" id="r-detail-clients">0</b></div>
+            <div><span>Last touch</span><b id="r-detail-touch">Never</b></div>
+          </div>
+          <div class="r-links" id="r-detail-links"></div>
+        </section>
+
+        <!-- Outreach kit, per-partner half: a message personalized with this
+             partner's name, contact, and type plus the practice's live data.
+             Editable before sending; "Log as sent" records it in Activity. -->
+        <section class="t-card r-kit">
+          <h2>Outreach message<span class="t-aside">Edit freely before sending</span></h2>
+          <div class="r-kit-grid">
+            <div class="i-field">
+              <label for="kit-template">Message</label>
+              <select id="kit-template">
+                {OUTREACH_TEMPLATES.map((t) => <option value={t.key}>{t.label}</option>)}
+              </select>
+            </div>
+            <div class="i-field">
+              <label for="kit-signer">Signed by</label>
+              <input id="kit-signer" type="text" placeholder="Your name and title" />
+            </div>
+          </div>
+          <div id="kit-subject-wrap" class="i-field">
+            <label for="kit-subject">Subject</label>
+            <input id="kit-subject" type="text" />
+          </div>
+          <div class="i-field">
+            <label for="kit-body">Message</label>
+            <textarea id="kit-body" rows="13"></textarea>
+          </div>
+          <div class="i-inline r-kit-actions">
+            <button id="kit-log" type="button" class="a-btn a-btn-primary i-btn">Log as sent</button>
+            <button id="kit-copy" type="button" class="a-btn i-btn">Copy</button>
+            <a id="kit-mailto" href="#" class="a-btn i-btn" hidden>Open in email</a>
+            <span id="kit-status" class="i-hint" role="status"></span>
+          </div>
+          <p class="i-hint">Never mention a client by name, or that someone became a client, without their signed release.</p>
+        </section>
+
+        <section class="t-card">
+          <h2>Activity<span class="t-aside">Newest first</span></h2>
+          <form id="activity-form" class="r-activity-form">
+            <select name="activity_type" aria-label="Activity type">
+              {ACTIVITY_TYPES.map((a) => <option value={a.value}>{a.label}</option>)}
             </select>
-          </div>
-          <div>
-            <label for="pf-status" class="block text-xs font-semibold text-slate-500">Stage</label>
-            <select id="pf-status" name="status" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+            <input name="occurred_on" type="date" aria-label="Date" />
+            <input name="note" type="text" aria-label="What happened" placeholder="What happened? e.g. Dropped off brochures, met the office manager" />
+            <button type="submit" class="a-btn a-btn-primary i-btn">Log it</button>
+          </form>
+          <ul id="activity-list" class="i-notes r-activity"></ul>
+        </section>
+      </div>
+
+      <aside class="i-detail-side">
+        <form id="partner-form" class="t-card i-fields">
+          <div class="i-field">
+            <label for="pf-status">Stage</label>
+            <select id="pf-status" name="status">
               {PARTNER_STATUSES.map((s) => <option value={s.value}>{s.label}</option>)}
             </select>
           </div>
-          <div>
-            <label for="pf-contact-name" class="block text-xs font-semibold text-slate-500">Contact person</label>
-            <input id="pf-contact-name" name="contact_name" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <div class="i-field">
+            <label for="pf-next-follow-up">Next follow-up</label>
+            <input id="pf-next-follow-up" name="next_follow_up" type="date" />
           </div>
-          <div>
-            <label for="pf-next-follow-up" class="block text-xs font-semibold text-slate-500">Next follow-up</label>
-            <input id="pf-next-follow-up" name="next_follow_up" type="date" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <div class="i-field">
+            <label for="pf-name">Name (office, practice, or organization)</label>
+            <input id="pf-name" name="name" type="text" required />
           </div>
-          <div>
-            <label for="pf-email" class="block text-xs font-semibold text-slate-500">Email</label>
-            <input id="pf-email" name="email" type="email" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <div class="i-field">
+            <label for="pf-category">Type</label>
+            <select id="pf-category" name="category">
+              {PARTNER_CATEGORIES.map((c) => <option value={c.value}>{c.label}</option>)}
+            </select>
           </div>
-          <div>
-            <label for="pf-phone" class="block text-xs font-semibold text-slate-500">Phone</label>
-            <input id="pf-phone" name="phone" type="tel" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <div class="i-field">
+            <label for="pf-contact-name">Contact person</label>
+            <input id="pf-contact-name" name="contact_name" type="text" />
           </div>
-          <div>
-            <label for="pf-website" class="block text-xs font-semibold text-slate-500">Website</label>
-            <input id="pf-website" name="website" type="url" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <div class="i-field">
+            <label for="pf-email">Email</label>
+            <input id="pf-email" name="email" type="email" />
           </div>
-          <div>
-            <label for="pf-address" class="block text-xs font-semibold text-slate-500">Address</label>
-            <input id="pf-address" name="address" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <div class="i-field">
+            <label for="pf-phone">Phone</label>
+            <input id="pf-phone" name="phone" type="tel" />
           </div>
-          <div class="sm:col-span-2">
-            <label for="pf-notes" class="block text-xs font-semibold text-slate-500">About this relationship</label>
-            <textarea id="pf-notes" name="notes" rows="3" placeholder="Who they serve, what kinds of clients they'd refer, how they prefer to be contacted..." class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+          <div class="i-field">
+            <label for="pf-website">Website</label>
+            <input id="pf-website" name="website" type="url" />
           </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <button type="submit" class="rounded-md bg-brand-primary px-5 py-2 text-sm font-semibold text-white hover:opacity-90">Save</button>
-          <span id="partner-form-status" class="text-sm" role="status"></span>
-        </div>
-      </form>
+          <div class="i-field">
+            <label for="pf-address">Address</label>
+            <input id="pf-address" name="address" type="text" />
+          </div>
+          <div class="i-field">
+            <label for="pf-notes">About this relationship</label>
+            <textarea id="pf-notes" name="notes" rows="4" placeholder="Who they serve, what kinds of clients they'd refer, how they prefer to be contacted..."></textarea>
+          </div>
+          <div class="i-inline">
+            <button type="submit" class="a-btn a-btn-primary i-btn">Save</button>
+            <span id="partner-form-status" class="i-hint" role="status"></span>
+          </div>
+        </form>
 
-      <div class="space-y-6 lg:col-span-2">
-        <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-          <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Referrals from this partner</p>
-          <p id="detail-referral-summary" class="mb-2 text-sm text-slate-700"></p>
-          <ul id="detail-referral-list" class="space-y-1 text-sm"></ul>
-          <p class="mt-3 text-xs text-slate-500">Link a lead to this partner from its detail view in the Lead CRM.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Outreach kit, per-partner half: a message personalized with this
-         partner's name, contact, and type plus the practice's live data.
-         Editable before sending; "Log as sent" records it in Activity. -->
-    <div class="mb-6 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Outreach message</p>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label for="kit-template" class="block text-xs font-semibold text-slate-500">Message</label>
-          <select id="kit-template" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
-            {OUTREACH_TEMPLATES.map((t) => <option value={t.key}>{t.label}</option>)}
-          </select>
-        </div>
-        <div>
-          <label for="kit-signer" class="block text-xs font-semibold text-slate-500">Signed by</label>
-          <input id="kit-signer" type="text" placeholder="Your name and title" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        </div>
-      </div>
-      <div id="kit-subject-wrap" class="mt-3">
-        <label for="kit-subject" class="block text-xs font-semibold text-slate-500">Subject</label>
-        <input id="kit-subject" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-      </div>
-      <div class="mt-3">
-        <label for="kit-body" class="block text-xs font-semibold text-slate-500">Message (edit freely before sending)</label>
-        <textarea id="kit-body" rows="14" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
-      </div>
-      <div class="mt-3 flex flex-wrap items-center gap-2">
-        <button id="kit-copy" type="button" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Copy</button>
-        <a id="kit-mailto" href="#" class="hidden rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Open in email</a>
-        <button id="kit-log" type="button" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Log as sent</button>
-        <span id="kit-status" class="text-sm" role="status"></span>
-      </div>
-      <p class="mt-2 text-xs text-slate-500">Never mention a client by name, or that someone became a client, without their signed release.</p>
-    </div>
-
-    <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Activity</p>
-      <form id="activity-form" class="mb-4 grid gap-2 sm:grid-cols-7">
-        <select name="activity_type" aria-label="Activity type" class="rounded-md border border-slate-300 px-3 py-2 text-sm sm:col-span-2">
-          {ACTIVITY_TYPES.map((a) => <option value={a.value}>{a.label}</option>)}
-        </select>
-        <input name="occurred_on" type="date" aria-label="Date" class="rounded-md border border-slate-300 px-3 py-2 text-sm sm:col-span-1" />
-        <input name="note" type="text" aria-label="What happened" placeholder="What happened? e.g. Dropped off brochures, met the office manager" class="rounded-md border border-slate-300 px-3 py-2 text-sm sm:col-span-3" />
-        <button type="submit" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 sm:col-span-1">Log it</button>
-      </form>
-      <ul id="activity-list" class="space-y-3 text-sm"></ul>
+        <section class="t-card">
+          <h2>Referrals from this partner</h2>
+          <p id="detail-referral-summary" class="r-ref-summary"></p>
+          <ul id="detail-referral-list" class="r-ref-list"></ul>
+          <p class="i-hint">Link an inquiry to this partner from its page in Inquiries.</p>
+        </section>
+      </aside>
     </div>
   </div>
 
@@ -259,7 +270,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
           <input id="ap-contact-name" name="contact_name" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
         </div>
         <p id="add-partner-status" class="text-sm text-red-600"></p>
-        <button type="submit" class="w-full rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Add partner</button>
+        <button type="submit" class="a-btn a-btn-primary w-full">Add partner</button>
       </form>
     </div>
   </div>
@@ -276,9 +287,9 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     type OutreachTemplateKey,
   } from '../../lib/outreachKit';
   import {
+    PARTNER_STATUSES,
     activityLabel,
     categoryLabel,
-    partnerStatusClasses,
     partnerStatusLabel,
     type PartnerActivity,
     type ReferralPartner,
@@ -330,6 +341,11 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   // parse them as local so "today" doesn't render as yesterday west of
   // UTC. Full timestamps (a lead's created_at) are real instants: let
   // Date convert them to local time.
+  function formatShort(ymd: string): string {
+    const [y, m, d] = ymd.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
   function formatDate(iso: string): string {
     const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
     if (iso.length > 10) return new Date(iso).toLocaleDateString(undefined, opts);
@@ -347,9 +363,33 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     return { leads: leads.length, clients: leads.filter((l) => l.status === 'scheduled').length };
   }
 
-  function statusBadge(status: string): string {
-    return `<span class="inline-block rounded-md border px-2 py-0.5 text-xs font-semibold ${partnerStatusClasses(status)}">${escapeHtml(partnerStatusLabel(status))}</span>`;
+  function stageBadge(status: string): string {
+    return `<span class="r-stage r-stage-${escapeAttr(status)}">${escapeHtml(partnerStatusLabel(status))}</span>`;
   }
+
+  function initials(name: string): string {
+    const words = name.replace(/^(dr\.?|the)\s+/i, '').trim().split(/\s+/).filter((w) => /^[A-Za-z]/.test(w));
+    return (words.slice(0, 2).map((w) => w[0]).join('') || '?').toUpperCase();
+  }
+
+  function daysSince(ymd: string): number {
+    const [y, m, d] = ymd.split('-').map(Number);
+    const then = new Date(y, m - 1, d).getTime();
+    const now = new Date();
+    return Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() - then) / 86_400_000);
+  }
+
+  function touchText(ymd: string): string {
+    const days = daysSince(ymd);
+    if (days <= 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days <= QUIET_DAYS) return `${days} days ago`;
+    return formatDate(ymd);
+  }
+
+  // An active partner nobody has contacted in two months is a relationship
+  // going quiet: worth a thank-you or a check-in.
+  const QUIET_DAYS = 60;
 
   function renderStats() {
     const live = partners.filter((p) => !p.archived_at);
@@ -362,8 +402,8 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     );
   }
 
-  // Same rule as the Lead CRM: no lower bound, so an overdue follow-up
-  // keeps showing instead of silently disappearing once its date passes.
+  // Same rule as Inquiries: no lower bound, so an overdue follow-up keeps
+  // showing instead of silently disappearing once its date passes.
   function renderDue() {
     const weekOut = new Date();
     weekOut.setDate(weekOut.getDate() + 7);
@@ -374,19 +414,34 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       .sort((a, b) => a.next_follow_up!.localeCompare(b.next_follow_up!));
     const section = document.getElementById('due-section')!;
     section.classList.toggle('hidden', due.length === 0);
+    document.getElementById('r-due-count')!.textContent = `${due.length} in the next 7 days`;
     document.getElementById('due-list')!.innerHTML = due
       .map((p) => {
         const overdue = p.next_follow_up! < today;
-        return `
-        <button type="button" data-partner-id="${p.id}" class="open-partner flex w-full items-center justify-between rounded-md bg-white px-3 py-2 text-left hover:bg-amber-100/50">
-          <span class="font-semibold text-brand-ink">${escapeHtml(p.name)}</span>
-          <span class="${overdue ? 'font-semibold text-red-600' : 'text-amber-800'}">${overdue ? 'Overdue: ' : ''}${formatDate(p.next_follow_up!)}</span>
-        </button>`;
+        const when = overdue ? `Overdue · was due ${formatShort(p.next_follow_up!)}` : p.next_follow_up === today ? 'Due today' : `Due ${formatShort(p.next_follow_up!)}`;
+        return `<button type="button" data-partner-id="${p.id}" class="open-partner due-item"><span class="i-avatar sm">${escapeHtml(initials(p.name))}</span><span class="i-due-name">${escapeHtml(p.name)}</span><span class="i-due-when${overdue ? ' late' : ''}">${when}</span></button>`;
       })
       .join('');
   }
 
+  // Stage counts (respecting "show archived"), which double as the filter.
+  function renderPipeline() {
+    const pool = partners.filter((p) => showArchived.checked || !p.archived_at);
+    const current = statusFilter.value;
+    const chip = (value: string, label: string, n: number) =>
+      `<button type="button" class="i-chip r-chip-${value || 'all'}" data-stage="${value}" aria-pressed="${current === value}"><span>${label}</span><b class="a-num">${n}</b></button>`;
+    document.getElementById('r-pipeline')!.innerHTML =
+      chip('', 'All', pool.length) + PARTNER_STATUSES.map((s) => chip(s.value, s.label, pool.filter((p) => p.status === s.value).length)).join('');
+  }
+  document.getElementById('r-pipeline')!.addEventListener('click', (event) => {
+    const chip = (event.target as HTMLElement).closest<HTMLElement>('[data-stage]');
+    if (!chip) return;
+    statusFilter.value = chip.dataset.stage!;
+    renderList();
+  });
+
   function renderList() {
+    renderPipeline();
     const q = searchInput.value.trim().toLowerCase();
     const rows = partners.filter((p) => {
       if (!showArchived.checked && p.archived_at) return false;
@@ -396,28 +451,29 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       return true;
     });
     document.getElementById('partners-count')!.textContent = `${rows.length} partner${rows.length === 1 ? '' : 's'}`;
-    if (rows.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-slate-500">${
-        partners.length === 0 ? 'No referral partners yet. Add the doctors, attorneys, churches, and other professionals you want referrals from.' : 'No partners match these filters.'
-      }</td></tr>`;
-      return;
+    const empty = document.getElementById('r-empty')!;
+    empty.hidden = rows.length > 0;
+    if (!rows.length) {
+      empty.innerHTML = partners.length
+        ? '<b>No partners match these filters.</b>Try a different stage, type, or search.'
+        : '<b>No referral partners yet.</b>Add the doctors, attorneys, churches, schools, and other professionals you want referrals from.';
     }
+    const today = todayIso();
     tableBody.innerHTML = rows
       .map((p) => {
         const touch = lastTouch(p.id);
         const counts = referralCounts(p.id);
+        const quiet = p.status === 'active' && !p.archived_at && (!touch || daysSince(touch) > QUIET_DAYS);
+        const late = p.next_follow_up && p.next_follow_up < today && p.status !== 'inactive' && !p.archived_at;
         return `
-      <tr class="border-b border-slate-100 last:border-0 ${p.archived_at ? 'opacity-60' : ''}">
-        <td class="px-4 py-3">
-          <button type="button" data-partner-id="${p.id}" class="open-partner text-left font-semibold text-brand-ink hover:underline">${escapeHtml(p.name)}</button>
-          ${p.contact_name ? `<p class="text-xs text-slate-500">${escapeHtml(p.contact_name)}</p>` : ''}
-        </td>
-        <td class="px-4 py-3">${escapeHtml(categoryLabel(p.category))}</td>
-        <td class="px-4 py-3">${statusBadge(p.status)}</td>
-        <td class="px-4 py-3 whitespace-nowrap">${touch ? formatDate(touch) : '<span class="text-slate-400">Never</span>'}</td>
-        <td class="px-4 py-3 whitespace-nowrap">${p.next_follow_up ? formatDate(p.next_follow_up) : ''}</td>
-        <td class="px-4 py-3">${counts.leads}</td>
-        <td class="px-4 py-3 font-semibold ${counts.clients ? 'text-emerald-700' : ''}">${counts.clients}</td>
+      <tr data-partner-id="${p.id}" class="open-partner ${p.archived_at ? 'i-archived' : ''}">
+        <td><div class="i-who"><span class="i-avatar">${escapeHtml(initials(p.name))}</span><div><b>${escapeHtml(p.name)}${p.archived_at ? ' <span class="i-tag">Archived</span>' : ''}</b><small>${escapeHtml(p.contact_name ?? categoryLabel(p.category))}</small></div></div></td>
+        <td class="i-hide-md i-muted">${escapeHtml(categoryLabel(p.category))}</td>
+        <td>${stageBadge(p.status)}</td>
+        <td class="i-hide-sm ${quiet ? 'r-quiet' : 'i-muted'}"${quiet ? ` title="No contact in over ${QUIET_DAYS} days"` : ''}>${touch ? touchText(touch) : '<span class="i-faint">Never</span>'}</td>
+        <td class="i-hide-sm ${late ? 'i-late' : 'i-muted'}">${p.next_follow_up ? formatShort(p.next_follow_up) : ''}</td>
+        <td class="i-hide-md r-num i-muted">${counts.leads}</td>
+        <td class="r-num">${counts.clients ? `<span class="r-clients">${counts.clients}</span>` : '<span class="i-faint">0</span>'}</td>
       </tr>`;
       })
       .join('');
@@ -444,13 +500,14 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       ? rows
           .map(
             (a) => `
-        <li class="border-l-2 border-slate-200 pl-3">
-          <p class="text-xs text-slate-500"><span class="font-semibold text-slate-700">${escapeHtml(activityLabel(a.activity_type))}</span> · ${formatDate(a.occurred_on)}</p>
-          ${a.note ? `<p class="mt-0.5 text-slate-700">${escapeHtml(a.note)}</p>` : ''}
+        <li class="i-note">
+          <small><b>${escapeHtml(activityLabel(a.activity_type))}</b> · ${formatDate(a.occurred_on)}</small>
+          ${a.note ? `<p>${escapeHtml(a.note)}</p>` : ''}
         </li>`
           )
           .join('')
-      : '<li class="text-slate-500">Nothing logged yet. Log every email, call, visit, and thank-you so you can see the relationship over time.</li>';
+      : '<li class="t-empty r-activity-empty">Nothing logged yet. Log every email, call, visit, and thank-you so you can see the relationship over time.</li>';
+    renderHeader();
   }
 
   function renderReferrals() {
@@ -459,17 +516,43 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       .sort((a, b) => b.created_at.localeCompare(a.created_at));
     const clients = leads.filter((l) => l.status === 'scheduled').length;
     document.getElementById('detail-referral-summary')!.textContent = leads.length
-      ? `${leads.length} lead${leads.length === 1 ? '' : 's'}, ${clients} became client${clients === 1 ? '' : 's'}`
-      : 'No referrals linked yet.';
+      ? `${leads.length} inquir${leads.length === 1 ? 'y' : 'ies'}, ${clients} became client${clients === 1 ? '' : 's'}`
+      : 'No inquiries linked yet.';
     document.getElementById('detail-referral-list')!.innerHTML = leads
       .map(
         (l) => `
-      <li class="flex justify-between gap-2">
-        <span>${escapeHtml(l.name ?? '(no name)')}</span>
-        <span class="text-slate-500">${formatDate(l.created_at)}${l.status === 'scheduled' ? ' · <span class="font-semibold text-emerald-700">Client</span>' : ''}</span>
+      <li>
+        <a href="${withBase('/admin/crm')}?lead=${l.id}">${escapeHtml(l.name ?? '(no name)')}</a>
+        <span>${new Date(l.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}${l.status === 'scheduled' ? ' · <b class="r-clients">Client</b>' : ''}</span>
       </li>`
       )
       .join('');
+  }
+
+  // The summary card at the top of the detail view. Re-run after a save,
+  // an activity, or a stage change so it never shows stale values.
+  function renderHeader() {
+    const p = partners.find((x) => x.id === currentId);
+    if (!p) return;
+    document.getElementById('r-detail-avatar')!.textContent = initials(p.name);
+    document.getElementById('r-detail-name')!.textContent = p.name;
+    document.getElementById('r-detail-meta')!.textContent = [categoryLabel(p.category), p.contact_name].filter(Boolean).join(' · ');
+    document.getElementById('r-detail-stage')!.innerHTML = stageBadge(p.status);
+    const counts = referralCounts(p.id);
+    document.getElementById('r-detail-leads')!.textContent = String(counts.leads);
+    document.getElementById('r-detail-clients')!.textContent = String(counts.clients);
+    const touch = lastTouch(p.id);
+    const touchEl = document.getElementById('r-detail-touch')!;
+    touchEl.textContent = touch ? touchText(touch) : 'Never';
+    touchEl.classList.toggle('r-quiet', p.status === 'active' && (!touch || daysSince(touch) > QUIET_DAYS));
+    const links: string[] = [];
+    if (p.email) links.push(`<a class="a-btn i-btn" href="mailto:${escapeAttr(p.email.trim())}">Email</a>`);
+    if (p.phone) links.push(`<a class="a-btn i-btn" href="tel:${escapeAttr(p.phone.replace(/[^\d+]/g, ''))}">Call ${escapeHtml(p.phone)}</a>`);
+    if (p.website && /^https?:\/\//i.test(p.website.trim())) links.push(`<a class="a-btn i-btn" href="${escapeAttr(p.website.trim())}" target="_blank" rel="noopener">Website</a>`);
+    if (p.address) links.push(`<a class="a-btn i-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}" target="_blank" rel="noopener">Map</a>`);
+    const linksEl = document.getElementById('r-detail-links')!;
+    linksEl.innerHTML = links.join('');
+    linksEl.hidden = links.length === 0;
   }
 
   function openDetail(id: string) {
@@ -484,6 +567,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     archiveButton.textContent = p.archived_at ? 'Unarchive' : 'Archive';
     archivedBanner.classList.toggle('hidden', !p.archived_at);
     (activityForm.elements.namedItem('occurred_on') as HTMLInputElement).value = todayIso();
+    kitTemplate.value = STAGE_TEMPLATE[p.status] ?? 'intro_email';
     renderActivities();
     renderReferrals();
     renderKit();
@@ -517,16 +601,18 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     };
     if (!update.name) return;
     partnerFormStatus.textContent = 'Saving...';
-    partnerFormStatus.className = 'text-sm text-slate-600';
+    partnerFormStatus.className = 'i-hint';
     const { error } = await supabase.from('referral_partners').update(update).eq('id', currentId);
     if (error) {
       partnerFormStatus.textContent = 'Could not save: ' + error.message;
-      partnerFormStatus.className = 'text-sm text-red-600';
+      partnerFormStatus.className = 'i-hint r-err';
       return;
     }
     Object.assign(partners.find((p) => p.id === currentId)!, update);
     partnerFormStatus.textContent = 'Saved.';
-    partnerFormStatus.className = 'text-sm text-emerald-700';
+    partnerFormStatus.className = 'i-hint r-ok';
+    renderHeader();
+    renderKit();
   });
 
   // Shared by the Activity form and the outreach kit's "Log as sent".
@@ -589,6 +675,14 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   const contactUrl = new URL(withBase('/contact'), import.meta.env.SITE).toString();
 
   const kitTemplate = document.getElementById('kit-template') as HTMLSelectElement;
+  // The message a partner most likely needs next, given their stage.
+  const STAGE_TEMPLATE: Record<string, OutreachTemplateKey> = {
+    prospect: 'intro_email',
+    contacted: 'follow_up_email',
+    meeting: 'drop_off_note',
+    active: 'thank_you_note',
+    inactive: 'follow_up_email',
+  };
   const kitSigner = document.getElementById('kit-signer') as HTMLInputElement;
   const kitSubject = document.getElementById('kit-subject') as HTMLInputElement;
   const kitSubjectWrap = document.getElementById('kit-subject-wrap')!;
@@ -625,7 +719,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       offersFaithIntegration: practice.offers_faith_integration,
       signer: kitSigner.value,
     });
-    kitSubjectWrap.classList.toggle('hidden', !meta.hasSubject);
+    kitSubjectWrap.hidden = !meta.hasSubject;
     kitSubject.value = message.subject;
     kitBody.value = message.body;
     kitStatus.textContent = '';
@@ -636,7 +730,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     const partner = partners.find((p) => p.id === currentId);
     const meta = OUTREACH_TEMPLATES.find((t) => t.key === kitTemplate.value)!;
     const show = Boolean(partner?.email) && meta.hasSubject;
-    kitMailto.classList.toggle('hidden', !show);
+    kitMailto.hidden = !show;
     if (show) {
       kitMailto.href = `mailto:${partner!.email!.trim()}?subject=${encodeURIComponent(kitSubject.value)}&body=${encodeURIComponent(kitBody.value)}`;
     }
@@ -655,14 +749,14 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   kitBody.addEventListener('input', updateMailto);
 
   document.getElementById('kit-copy')!.addEventListener('click', async () => {
-    const text = kitSubjectWrap.classList.contains('hidden') ? kitBody.value : `Subject: ${kitSubject.value}\n\n${kitBody.value}`;
+    const text = kitSubjectWrap.hidden ? kitBody.value : `Subject: ${kitSubject.value}\n\n${kitBody.value}`;
     try {
       await navigator.clipboard.writeText(text);
       kitStatus.textContent = 'Copied.';
-      kitStatus.className = 'text-sm text-emerald-700';
+      kitStatus.className = 'i-hint r-ok';
     } catch {
       kitStatus.textContent = 'Select the text and copy it manually.';
-      kitStatus.className = 'text-sm text-amber-700';
+      kitStatus.className = 'i-hint r-warn';
     }
   });
 
@@ -671,7 +765,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     const ok = await logActivity(meta.activityType, `Sent: ${meta.label.replace(/ \(.*\)$/, '')} (outreach kit)`);
     if (ok) {
       kitStatus.textContent = 'Logged in Activity.';
-      kitStatus.className = 'text-sm text-emerald-700';
+      kitStatus.className = 'i-hint r-ok';
     }
   });
 
@@ -682,12 +776,12 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     if (error) {
       faithCheckbox.checked = !value;
       faithStatus.textContent = 'Could not save: ' + error.message;
-      faithStatus.className = 'text-xs text-red-600';
+      faithStatus.className = 'i-hint r-err';
       return;
     }
     practice.offers_faith_integration = value;
     faithStatus.textContent = 'Saved.';
-    faithStatus.className = 'text-xs text-emerald-700';
+    faithStatus.className = 'i-hint r-ok';
   });
 
   function escapeAttr(value: string): string {
