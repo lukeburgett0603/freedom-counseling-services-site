@@ -3559,6 +3559,126 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* ------------------------------------------- Blog analytics (phase 3) */
+
+.b-warn {
+  margin-bottom: 14px;
+}
+.b-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 0;
+  background: radial-gradient(90% 140% at 0% 0%, color-mix(in srgb, var(--a-violet) 14%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--a-card-top), var(--a-card-bot)), var(--a-panel);
+}
+.b-badge {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--a-accent) 35%, transparent), 0 0 18px -6px var(--a-accent-glow);
+}
+.b-top-main a {
+  color: var(--a-fg);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.b-top-main a:hover,
+.b-main a:hover {
+  color: var(--a-accent);
+}
+.b-top-main p {
+  margin: 4px 0 0;
+  color: var(--a-muted);
+  max-width: 75ch;
+}
+.b-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.b-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(120px, 1fr) 64px 72px 64px;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--a-line);
+}
+.b-row:first-child {
+  border-top: 0;
+  padding-top: 2px;
+}
+.b-row.b-quiet .b-main a {
+  color: var(--a-muted);
+}
+.b-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.b-main a {
+  overflow: hidden;
+  color: var(--a-fg);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.b-main small {
+  color: var(--a-faint);
+  font-size: 12px;
+}
+.b-views {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.b-views .a-num {
+  text-align: right;
+}
+.b-num {
+  display: grid;
+  justify-items: end;
+  line-height: 1.2;
+}
+.b-num b {
+  color: var(--a-fg);
+  font-size: 15px;
+  font-weight: 500;
+}
+.b-num b.r-ok {
+  color: var(--a-good);
+}
+.b-num small {
+  color: var(--a-faint);
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .b-row {
+    grid-template-columns: minmax(0, 1fr) 56px 64px;
+    gap: 10px;
+  }
+  .b-views {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .b-row .b-num:last-child {
+    display: none;
+  }
+  .b-top {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the
