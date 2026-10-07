@@ -14,198 +14,216 @@ import { ETHICS_CHECKLIST, EVENT_CARD_COPY, EVENT_RULES, REVIEW_REPLY, NEGATIVE_
   be findable with no ask (the "Find us on Google" link), earn reviews
   from non-clients at public events (event QR kit), HIPAA-safe replies,
   and measure more than stars. All copy is in src/lib/reviewProgram.ts.
+  Redesigned in phase 3 of the admin redesign (2026-10-07): the review
+  count and trend on top with a setup checklist built from real settings,
+  and the program's reference material in tabs. Same ids and features.
 -->
-<AdminLayout title="Review program | Admin" current="review-program">
-  <div class="max-w-4xl space-y-8">
-    <div>
-      <h1 class="font-[family-name:var(--font-heading)] text-2xl font-extrabold tracking-tight text-brand-ink">Trusted Without Asking</h1>
-      <p class="mt-2 text-sm text-slate-600">
-        Build a strong Google reputation without ever asking a client for a review. Make your practice easy to find, earn
-        reviews from people who attend your public events, reply to every review the same privacy-safe way, and measure
-        the calls and inquiries your profile brings in, not just the stars.
+<AdminLayout title="Reviews | Admin" current="review-program">
+  <p class="i-intro">
+    <b class="v-name">Trusted Without Asking.</b> A strong Google reputation without ever asking a client for a review.
+  </p>
+
+  <div class="t-grid v-top">
+    <section class="t-card t-s7 v-rep">
+      <h2>Your Google reviews<span class="t-aside" id="v-rep-when"></span></h2>
+      <div class="v-rep-head">
+        <div>
+          <span class="v-big a-num" id="v-count">—</span>
+          <span class="v-unit">reviews</span>
+        </div>
+        <div class="v-rating" id="v-rating" hidden>
+          <span class="v-stars" aria-hidden="true"><span class="v-stars-fill" id="v-stars-fill"></span></span>
+          <b class="a-num" id="v-rating-num"></b>
+        </div>
+      </div>
+      <p id="snapshot-summary" class="v-summary"></p>
+      <div class="v-chart" id="v-chart" aria-hidden="true"></div>
+
+      <form id="snapshot-form" class="v-log">
+        <div class="i-field">
+          <label for="snapshot-date">Date</label>
+          <input id="snapshot-date" name="recorded_on" type="date" required />
+        </div>
+        <div class="i-field">
+          <label for="snapshot-count">Total reviews</label>
+          <input id="snapshot-count" name="review_count" type="number" min="0" required inputmode="numeric" />
+        </div>
+        <div class="i-field">
+          <label for="snapshot-rating">Star rating</label>
+          <input id="snapshot-rating" name="average_rating" type="number" min="1" max="5" step="0.1" inputmode="decimal" />
+        </div>
+        <button type="submit" class="a-btn a-btn-primary i-btn">Log count</button>
+      </form>
+      <p id="snapshot-status" class="i-hint r-err" role="status"></p>
+      <p class="i-hint">Once a month, copy the count and star rating from your Business Profile.</p>
+
+      <details class="v-history" id="v-history">
+        <summary>History</summary>
+        <table class="i-table v-table">
+          <thead><tr><th>Date</th><th class="r-num">Reviews</th><th class="r-num">Change</th><th class="r-num">Rating</th><th><span class="sr-only">Remove</span></th></tr></thead>
+          <tbody id="snapshot-body"></tbody>
+        </table>
+      </details>
+    </section>
+
+    <section class="t-card t-s5 v-setup">
+      <h2>Program setup<span class="t-aside" id="v-setup-count"></span></h2>
+      <ul class="v-steps" id="v-steps"></ul>
+      <p class="v-measure">
+        Stars are only part of it. What your profile brings in (views, calls, directions, website clicks) is on
+        <a href={withBase('/admin/analytics/gbp')}>Google profile</a>, and the people it sends are in
+        <a href={withBase('/admin/crm')}>Inquiries</a>.
       </p>
+    </section>
+  </div>
+
+  <section class="t-card v-guide">
+    <div class="i-seg v-tabs" role="tablist" aria-label="Review program">
+      <button type="button" role="tab" data-tab="ethics" aria-selected="true">Ethics check</button>
+      <button type="button" role="tab" data-tab="links" aria-selected="false">Google links</button>
+      <button type="button" role="tab" data-tab="events" aria-selected="false">Event kit</button>
+      <button type="button" role="tab" data-tab="replies" aria-selected="false">Replying</button>
+      <button type="button" role="tab" data-tab="templates" aria-selected="false">Templates</button>
     </div>
 
-    <section class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">1. Ethics check</p>
-      <p class="mt-2 text-sm text-slate-600">
+    <div class="v-panel" data-panel="ethics" role="tabpanel">
+      <p class="v-lede">
         Go through your office, paperwork, and messages once and make sure every one of these is true. A sign or a
         discharge flier is still a request aimed at clients, even when it's "passive."
       </p>
-      <ul class="mt-3 list-disc space-y-1.5 pl-5 text-sm text-slate-700">
+      <ul class="v-checklist">
         {ETHICS_CHECKLIST.map((item) => <li>{item}</li>)}
       </ul>
-    </section>
+    </div>
 
-    <section class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">2. Your Google links</p>
-
-      <div class="mt-3">
-        <label for="profile-url-input" class="block text-sm font-semibold text-brand-ink">Business Profile link</label>
-        <p class="mt-1 text-sm text-slate-600">
-          Your listing on Google Maps (in Maps, open your practice and choose <span class="font-semibold">Share</span>).
-          It adds a "Find us on Google" link to your website's footer and contact page. No mention of reviews.
-        </p>
-        <div class="mt-2 flex flex-wrap gap-2">
-          <input id="profile-url-input" type="url" placeholder="https://maps.app.goo.gl/..." class="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <button id="profile-url-save" type="button" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Save</button>
-        </div>
-        <p id="profile-url-status" class="mt-2 text-sm" role="status"></p>
-      </div>
-
-      <div class="mt-5 border-t border-slate-100 pt-5">
-        <label for="review-url-input" class="block text-sm font-semibold text-brand-ink">Review link (public events only)</label>
-        <p class="mt-1 text-sm text-slate-600">
-          In your Google Business Profile, choose <span class="font-semibold">Ask for reviews</span> and copy the link. It's
-          used only in the event QR kit below. Never put it on your website or in anything clients receive.
-        </p>
-        <div class="mt-2 flex flex-wrap gap-2">
-          <input id="review-url-input" type="url" placeholder="https://g.page/r/.../review" class="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <button id="review-url-save" type="button" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Save</button>
-        </div>
-        <p id="review-url-status" class="mt-2 text-sm" role="status"></p>
-      </div>
-    </section>
-
-    <section class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">3. Event QR kit</p>
-          <p class="mt-2 text-sm text-slate-600">
-            For workshops, talks, and trainings open to the public. Put the card on your closing slide or handout so
-            attendees can review the event.
+    <div class="v-panel" data-panel="links" role="tabpanel" hidden>
+      <div class="v-link">
+        <div class="i-field">
+          <label for="profile-url-input">Business Profile link</label>
+          <p class="v-help">
+            Your listing on Google Maps (in Maps, open your practice and choose <b>Share</b>). It adds a "Find us on
+            Google" link to your website's footer and contact page. No mention of reviews.
           </p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button id="download-qr-button" type="button" disabled class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50">Download QR (PNG)</button>
-          <button id="print-card-button" type="button" disabled class="rounded-md bg-brand-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Print handout card</button>
-        </div>
-      </div>
-      <p class="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
-        Public events only. Never in your waiting room, session rooms, client portal, reminders, or discharge papers.
-      </p>
-      <p id="event-kit-missing" class="mt-3 text-sm text-slate-500">Add your review link above to generate the QR code.</p>
-      <div id="card-preview" class="mx-auto mt-5 hidden max-w-sm rounded-lg border border-slate-200 bg-brand-neutral p-8 text-center">
-        <p class="font-[family-name:var(--font-heading)] text-xl font-extrabold leading-snug text-brand-ink">{EVENT_CARD_COPY.heading}</p>
-        <p class="mt-3 text-sm text-slate-700">{EVENT_CARD_COPY.body}</p>
-        <div id="card-qr" class="mx-auto mt-5 h-36 w-36"></div>
-        <p class="mt-2 text-xs font-semibold text-slate-700">{EVENT_CARD_COPY.qrCaption}</p>
-        <p class="mt-5 text-[11px] text-slate-500">{EVENT_CARD_COPY.footer}</p>
-        <p id="card-practice-name" class="mt-1 text-[11px] font-semibold text-slate-600"></p>
-      </div>
-      <div class="mt-5 grid gap-4 sm:grid-cols-2">
-        <div class="rounded-md border border-emerald-200 bg-emerald-50 p-4">
-          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-800">Do</p>
-          <ul class="mt-2 list-disc space-y-1.5 pl-5 text-sm text-slate-700">
-            {EVENT_RULES.do.map((item) => <li>{item}</li>)}
-          </ul>
-        </div>
-        <div class="rounded-md border border-rose-200 bg-rose-50 p-4">
-          <p class="text-xs font-semibold uppercase tracking-wide text-rose-800">Don't</p>
-          <ul class="mt-2 list-disc space-y-1.5 pl-5 text-sm text-slate-700">
-            {EVENT_RULES.dont.map((item) => <li>{item}</li>)}
-          </ul>
+          <div class="i-inline v-url">
+            <input id="profile-url-input" type="url" placeholder="https://maps.app.goo.gl/..." />
+            <button id="profile-url-save" type="button" class="a-btn a-btn-primary i-btn">Save</button>
+          </div>
+          <p id="profile-url-status" class="i-hint" role="status"></p>
         </div>
       </div>
-    </section>
+      <div class="v-link">
+        <div class="i-field">
+          <label for="review-url-input">Review link (public events only)</label>
+          <p class="v-help">
+            In your Google Business Profile, choose <b>Ask for reviews</b> and copy the link. It's used only in the event
+            kit. Never put it on your website or in anything clients receive.
+          </p>
+          <div class="i-inline v-url">
+            <input id="review-url-input" type="url" placeholder="https://g.page/r/.../review" />
+            <button id="review-url-save" type="button" class="a-btn a-btn-primary i-btn">Save</button>
+          </div>
+          <p id="review-url-status" class="i-hint" role="status"></p>
+        </div>
+      </div>
+    </div>
 
-    <section class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">4. Replying to reviews</p>
-      <div class="mt-3 flex items-center justify-between gap-3">
-        <p class="font-semibold text-brand-ink">The one reply, for every review</p>
-        <button type="button" data-copy-target="reply-text" class="copy-button rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Copy</button>
-      </div>
-      <p class="mt-1 text-xs text-slate-500">
-        Use it for positive and negative reviews alike. Anything more specific can confirm someone is a client, which can be
-        a HIPAA disclosure.
-      </p>
-      <p id="reply-text" class="mt-2 rounded-md bg-slate-50 p-4 text-sm text-slate-700">{REVIEW_REPLY}</p>
-      <p class="mt-5 font-semibold text-brand-ink">If a review is negative</p>
-      <ol class="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-slate-700">
-        {NEGATIVE_REVIEW_PROTOCOL.map((item) => <li>{item}</li>)}
-      </ol>
-    </section>
-
-    <section class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">5. Templates for your paperwork and staff</p>
-      <div class="mt-4 space-y-6">
-        <div>
-          <div class="flex items-center justify-between gap-3">
-            <p class="font-semibold text-brand-ink">Review and social media policy (for informed consent)</p>
-            <button type="button" data-copy-target="policy-text" class="copy-button rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Copy</button>
-          </div>
-          <p class="mt-1 text-xs text-slate-500">Have your attorney approve it before it goes into your paperwork.</p>
-          <pre id="policy-text" class="mt-2 whitespace-pre-wrap rounded-md bg-slate-50 p-4 font-[family-name:var(--font-body)] text-sm text-slate-700"></pre>
-        </div>
-        <div>
-          <div class="flex items-center justify-between gap-3">
-            <p class="font-semibold text-brand-ink">Front-desk script</p>
-            <button type="button" data-copy-target="script-text" class="copy-button rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Copy</button>
-          </div>
-          <p class="mt-1 text-xs text-slate-500">For the one legitimate case: a client asks, on their own, how to leave a review.</p>
-          <pre id="script-text" class="mt-2 whitespace-pre-wrap rounded-md bg-slate-50 p-4 font-[family-name:var(--font-body)] text-sm text-slate-700"></pre>
-        </div>
-        <div>
-          <p class="font-semibold text-brand-ink">Staff guidelines</p>
-          <div class="mt-2 grid gap-4 sm:grid-cols-2">
-            <div class="rounded-md border border-emerald-200 bg-emerald-50 p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-emerald-800">Do</p>
-              <ul class="mt-2 list-disc space-y-1.5 pl-5 text-sm text-slate-700">
-                {STAFF_GUIDELINES.do.map((item) => <li>{item}</li>)}
-              </ul>
-            </div>
-            <div class="rounded-md border border-rose-200 bg-rose-50 p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-rose-800">Don't</p>
-              <ul class="mt-2 list-disc space-y-1.5 pl-5 text-sm text-slate-700">
-                {STAFF_GUIDELINES.dont.map((item) => <li>{item}</li>)}
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="flex items-center justify-between gap-3">
-            <p class="font-semibold text-brand-ink">Closing (discharge) survey</p>
-            <button type="button" data-copy-target="survey-text" class="copy-button rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Copy</button>
-          </div>
-          <p class="mt-1 text-xs text-slate-500">No review request and no Google link, on purpose. It asks how they first heard about you, which shows which marketing brings clients.</p>
-          <pre id="survey-text" class="mt-2 whitespace-pre-wrap rounded-md bg-slate-50 p-4 font-[family-name:var(--font-body)] text-sm text-slate-700"></pre>
+    <div class="v-panel" data-panel="events" role="tabpanel" hidden>
+      <div class="r-kit-row">
+        <p class="v-lede">
+          For workshops, talks, and trainings open to the public. Put the card on your closing slide or handout so
+          attendees can review the event.
+        </p>
+        <div class="i-inline">
+          <button id="download-qr-button" type="button" disabled class="a-btn i-btn">Download QR (PNG)</button>
+          <button id="print-card-button" type="button" disabled class="a-btn a-btn-primary i-btn">Print handout card</button>
         </div>
       </div>
-    </section>
-
-    <section class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">6. Track your progress</p>
-      <p class="mt-2 text-sm text-slate-600">
-        The best measure is what your profile brings in: views, calls, direction requests, and website clicks, on your
-        <a href={withBase('/admin/analytics/gbp')} class="font-semibold text-brand-primary underline">Google Business Profile</a> dashboard,
-        and inquiries in your Lead CRM. Review count is worth logging too. Once a month, copy your count and star rating
-        from your Business Profile.
+      <p class="v-warn">Public events only. Never in your waiting room, session rooms, client portal, reminders, or discharge papers.</p>
+      <p id="event-kit-missing" class="v-help">
+        Add your review link under <button type="button" class="a-link" data-goto="links">Google links</button> to generate the QR code.
       </p>
-      <form id="snapshot-form" class="mt-3 flex flex-wrap items-end gap-2">
-        <div>
-          <label for="snapshot-date" class="block text-xs font-semibold text-slate-500">Date</label>
-          <input id="snapshot-date" name="recorded_on" type="date" required class="rounded-md border border-slate-300 px-3 py-2 text-sm" />
+      <div class="v-event">
+        <div id="card-preview" class="v-paper" hidden>
+          <p class="v-paper-h">{EVENT_CARD_COPY.heading}</p>
+          <p class="v-paper-b">{EVENT_CARD_COPY.body}</p>
+          <div id="card-qr" class="v-paper-qr"></div>
+          <p class="v-paper-cap">{EVENT_CARD_COPY.qrCaption}</p>
+          <p class="v-paper-f">{EVENT_CARD_COPY.footer}</p>
+          <p id="card-practice-name" class="v-paper-n"></p>
         </div>
-        <div>
-          <label for="snapshot-count" class="block text-xs font-semibold text-slate-500">Total reviews</label>
-          <input id="snapshot-count" name="review_count" type="number" min="0" required class="w-28 rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        <div class="v-dodont">
+          <div class="v-do">
+            <p>Do</p>
+            <ul>{EVENT_RULES.do.map((item) => <li>{item}</li>)}</ul>
+          </div>
+          <div class="v-dont">
+            <p>Don't</p>
+            <ul>{EVENT_RULES.dont.map((item) => <li>{item}</li>)}</ul>
+          </div>
         </div>
-        <div>
-          <label for="snapshot-rating" class="block text-xs font-semibold text-slate-500">Star rating</label>
-          <input id="snapshot-rating" name="average_rating" type="number" min="1" max="5" step="0.1" class="w-24 rounded-md border border-slate-300 px-3 py-2 text-sm" />
+      </div>
+    </div>
+
+    <div class="v-panel" data-panel="replies" role="tabpanel" hidden>
+      <div class="v-block">
+        <div class="v-block-head">
+          <b>The one reply, for every review</b>
+          <button type="button" data-copy-target="reply-text" class="copy-button a-btn i-btn">Copy</button>
         </div>
-        <button type="submit" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Add</button>
-        <span id="snapshot-status" class="text-sm text-red-600" role="status"></span>
-      </form>
-      <p id="snapshot-summary" class="mt-4 text-sm text-slate-700"></p>
-      <table class="mt-2 w-full max-w-md text-left text-sm">
-        <thead class="border-b border-slate-200 text-xs text-slate-500">
-          <tr><th class="py-2 font-semibold">Date</th><th class="py-2 font-semibold">Reviews</th><th class="py-2 font-semibold">Change</th><th class="py-2 font-semibold">Rating</th><th></th></tr>
-        </thead>
-        <tbody id="snapshot-body"></tbody>
-      </table>
-    </section>
-  </div>
+        <p class="v-help">
+          Use it for positive and negative reviews alike. Anything more specific can confirm someone is a client, which can
+          be a HIPAA disclosure.
+        </p>
+        <p id="reply-text" class="v-quote">{REVIEW_REPLY}</p>
+      </div>
+      <div class="v-block">
+        <b>If a review is negative</b>
+        <ol class="v-numbered">
+          {NEGATIVE_REVIEW_PROTOCOL.map((item) => <li>{item}</li>)}
+        </ol>
+      </div>
+    </div>
+
+    <div class="v-panel" data-panel="templates" role="tabpanel" hidden>
+      <div class="v-block">
+        <div class="v-block-head">
+          <b>Review and social media policy (for informed consent)</b>
+          <button type="button" data-copy-target="policy-text" class="copy-button a-btn i-btn">Copy</button>
+        </div>
+        <p class="v-help">Have your attorney approve it before it goes into your paperwork.</p>
+        <pre id="policy-text" class="v-quote"></pre>
+      </div>
+      <div class="v-block">
+        <div class="v-block-head">
+          <b>Front-desk script</b>
+          <button type="button" data-copy-target="script-text" class="copy-button a-btn i-btn">Copy</button>
+        </div>
+        <p class="v-help">For the one legitimate case: a client asks, on their own, how to leave a review.</p>
+        <pre id="script-text" class="v-quote"></pre>
+      </div>
+      <div class="v-block">
+        <b>Staff guidelines</b>
+        <div class="v-dodont v-dodont-2">
+          <div class="v-do">
+            <p>Do</p>
+            <ul>{STAFF_GUIDELINES.do.map((item) => <li>{item}</li>)}</ul>
+          </div>
+          <div class="v-dont">
+            <p>Don't</p>
+            <ul>{STAFF_GUIDELINES.dont.map((item) => <li>{item}</li>)}</ul>
+          </div>
+        </div>
+      </div>
+      <div class="v-block">
+        <div class="v-block-head">
+          <b>Closing (discharge) survey</b>
+          <button type="button" data-copy-target="survey-text" class="copy-button a-btn i-btn">Copy</button>
+        </div>
+        <p class="v-help">No review request and no Google link, on purpose. It asks how they first heard about you, which shows which marketing brings clients.</p>
+        <pre id="survey-text" class="v-quote"></pre>
+      </div>
+    </div>
+  </section>
 </AdminLayout>
 
 <script>
@@ -218,7 +236,7 @@ import { ETHICS_CHECKLIST, EVENT_CARD_COPY, EVENT_RULES, REVIEW_REPLY, NEGATIVE_
   import { triggerRebuild } from '../../lib/publishFunction';
   import { EVENT_CARD_COPY, dischargeSurveyTemplate, frontDeskScript, reviewPolicyTemplate } from '../../lib/reviewProgram';
 
-  type Snapshot = { id: string; recorded_on: string; review_count: number; average_rating: number | null };
+  type Snapshot = { id: string; recorded_on: string; review_count: number; average_rating: number | null; created_at: string };
 
   const profileUrlInput = document.getElementById('profile-url-input') as HTMLInputElement;
   const reviewUrlInput = document.getElementById('review-url-input') as HTMLInputElement;
@@ -232,6 +250,7 @@ import { ETHICS_CHECKLIST, EVENT_CARD_COPY, EVENT_RULES, REVIEW_REPLY, NEGATIVE_
   let reviewUrl: string | null = null;
   let qrSvg = '';
   let snapshots: Snapshot[] = [];
+  let profileUrl: string | null = null;
 
   // A Google "write a review" link: the g.page/r/.../review short link,
   // or a search/maps URL carrying the writereview action.
@@ -254,9 +273,9 @@ import { ETHICS_CHECKLIST, EVENT_CARD_COPY, EVENT_RULES, REVIEW_REPLY, NEGATIVE_
   }
 
   function setStatus(el: HTMLElement, text: string, tone: 'info' | 'ok' | 'warn' | 'error') {
-    const color = { info: 'text-slate-600', ok: 'text-emerald-700', warn: 'text-amber-700', error: 'text-red-600' }[tone];
+    const color = { info: '', ok: 'r-ok', warn: 'r-warn', error: 'r-err' }[tone];
     el.textContent = text;
-    el.className = `mt-2 text-sm ${color}`;
+    el.className = `i-hint ${color}`;
   }
 
   document.getElementById('profile-url-save')!.addEventListener('click', async () => {
@@ -272,6 +291,8 @@ import { ETHICS_CHECKLIST, EVENT_CARD_COPY, EVENT_RULES, REVIEW_REPLY, NEGATIVE_
     setStatus(status, 'Saving...', 'info');
     const { error } = await supabase.from('business').update({ google_maps_url: value }).eq('id', businessId);
     if (error) return setStatus(status, 'Could not save: ' + error.message, 'error');
+    profileUrl = value;
+    renderSetup();
     // The footer and contact page are static, so they only pick up the
     // link after a rebuild. Same best-effort rebuild as other business-info saves.
     const result = await triggerRebuild();
@@ -290,13 +311,14 @@ import { ETHICS_CHECKLIST, EVENT_CARD_COPY, EVENT_RULES, REVIEW_REPLY, NEGATIVE_
     if (error) return setStatus(status, 'Could not save: ' + error.message, 'error');
     reviewUrl = value;
     await renderEventKit();
+    renderSetup();
     setStatus(status, 'Saved.', 'ok');
   });
 
   async function renderEventKit() {
     const ready = Boolean(reviewUrl);
-    document.getElementById('card-preview')!.classList.toggle('hidden', !ready);
-    document.getElementById('event-kit-missing')!.classList.toggle('hidden', ready);
+    document.getElementById('card-preview')!.hidden = !ready;
+    document.getElementById('event-kit-missing')!.hidden = ready;
     printButton.disabled = !ready;
     downloadButton.disabled = !ready;
     qrSvg = ready ? await QRCode.toString(reviewUrl!, { type: 'svg', margin: 0, errorCorrectionLevel: 'M' }) : '';
@@ -363,34 +385,158 @@ import { ETHICS_CHECKLIST, EVENT_CARD_COPY, EVENT_RULES, REVIEW_REPLY, NEGATIVE_
     document.body.appendChild(frame);
   });
 
+  function shortDate(iso: string): string {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  function sortedSnapshots(): Snapshot[] {
+    // Newest first; two entries on the same day go by when they were logged.
+    return [...snapshots].sort((a, b) => b.recorded_on.localeCompare(a.recorded_on) || (b.created_at ?? '').localeCompare(a.created_at ?? ''));
+  }
+
   function renderSnapshots() {
-    const sorted = [...snapshots].sort((a, b) => b.recorded_on.localeCompare(a.recorded_on));
+    const sorted = sortedSnapshots();
+    const latest = sorted[0];
+    const oldest = sorted[sorted.length - 1];
     const summary = document.getElementById('snapshot-summary')!;
-    if (sorted.length === 0) {
-      summary.textContent = 'No entries yet. Add your current count to set your starting point.';
-    } else {
-      const latest = sorted[0];
-      const oldest = sorted[sorted.length - 1];
-      const gained = latest.review_count - oldest.review_count;
-      summary.innerHTML =
-        sorted.length > 1
-          ? `<span class="font-semibold">${latest.review_count} reviews</span>${latest.average_rating ? `, ${latest.average_rating} stars` : ''}. ${gained >= 0 ? '+' : ''}${gained} since ${formatDate(oldest.recorded_on)}.`
-          : `Starting point: <span class="font-semibold">${latest.review_count} reviews</span>${latest.average_rating ? `, ${latest.average_rating} stars` : ''}.`;
+    document.getElementById('v-count')!.textContent = latest ? String(latest.review_count) : '—';
+    document.getElementById('v-rep-when')!.textContent = latest ? `As of ${formatDate(latest.recorded_on)}` : '';
+    // The most recent rating logged (the newest entry may skip it).
+    // numeric(2,1): coerce in case it arrives as a string.
+    const rated = sorted.find((s) => s.average_rating != null);
+    const rating = rated ? Number(rated.average_rating) : null;
+    document.getElementById('v-rating')!.hidden = rating == null;
+    if (rating != null) {
+      document.getElementById('v-rating-num')!.textContent = rating.toFixed(1);
+      (document.getElementById('v-stars-fill') as HTMLElement).style.width = `${(rating / 5) * 100}%`;
     }
+    if (!latest) {
+      summary.textContent = 'No entries yet. Log your current count to set your starting point.';
+    } else if (sorted.length === 1) {
+      summary.textContent = 'Your starting point. Log again next month to see the trend.';
+    } else {
+      const gained = latest.review_count - oldest.review_count;
+      const prev = sorted[1];
+      const lastChange = latest.review_count - prev.review_count;
+      summary.innerHTML = `<b class="${gained > 0 ? 'r-ok' : ''}">${gained >= 0 ? '+' : ''}${gained}</b> since ${formatDate(oldest.recorded_on)} · ${lastChange >= 0 ? '+' : ''}${lastChange} since ${shortDate(prev.recorded_on)}`;
+    }
+    // One point per day: the last entry logged that day.
+    const perDay = sorted.filter((s, i) => i === 0 || s.recorded_on !== sorted[i - 1].recorded_on);
+    renderChart([...perDay].reverse());
+    document.getElementById('v-history')!.hidden = sorted.length === 0;
     document.getElementById('snapshot-body')!.innerHTML = sorted
       .map((s, i) => {
         const prev = sorted[i + 1];
         const change = prev ? s.review_count - prev.review_count : null;
-        return `<tr class="border-b border-slate-100">
-          <td class="py-2">${formatDate(s.recorded_on)}</td>
-          <td class="py-2 font-semibold">${s.review_count}</td>
-          <td class="py-2 ${change && change > 0 ? 'text-emerald-700' : 'text-slate-500'}">${change === null ? '' : `${change > 0 ? '+' : ''}${change}`}</td>
-          <td class="py-2">${s.average_rating ?? ''}</td>
-          <td class="py-2 text-right"><button type="button" data-snapshot-id="${s.id}" class="delete-snapshot text-xs text-slate-400 hover:text-red-600">Remove</button></td>
+        return `<tr>
+          <td>${formatDate(s.recorded_on)}</td>
+          <td class="r-num">${s.review_count}</td>
+          <td class="r-num ${change && change > 0 ? 'r-ok' : 'i-muted'}">${change === null ? '' : `${change > 0 ? '+' : ''}${change}`}</td>
+          <td class="r-num i-muted">${s.average_rating ?? ''}</td>
+          <td class="i-right"><button type="button" data-snapshot-id="${s.id}" class="delete-snapshot a-link v-remove">Remove</button></td>
         </tr>`;
       })
       .join('');
+    renderSetup();
   }
+
+  // Review count over time: a soft area line, one dot per logged month.
+  function renderChart(points: Snapshot[]) {
+    const el = document.getElementById('v-chart')!;
+    if (points.length < 2) {
+      el.innerHTML = '';
+      el.hidden = true;
+      return;
+    }
+    el.hidden = false;
+    const W = 600, H = 120, P = 8;
+    const t = points.map((p) => new Date(p.recorded_on + 'T12:00').getTime());
+    const t0 = t[0], t1 = t[t.length - 1] || t0 + 1;
+    const counts = points.map((p) => p.review_count);
+    const lo = Math.min(...counts), hi = Math.max(...counts);
+    const span = Math.max(hi - lo, 1);
+    const x = (i: number) => P + ((t[i] - t0) / Math.max(t1 - t0, 1)) * (W - 2 * P);
+    const y = (c: number) => H - P - ((c - lo) / span) * (H - 2 * P - 14);
+    const line = points.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.review_count).toFixed(1)}`).join(' ');
+    const area = `${line} L${x(points.length - 1).toFixed(1)},${H} L${x(0).toFixed(1)},${H} Z`;
+    const dots = points
+      .map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.review_count).toFixed(1)}" r="${i === points.length - 1 ? 4 : 2.6}" class="${i === points.length - 1 ? 'v-dot-last' : 'v-dot'}"><title>${formatDate(p.recorded_on)}: ${p.review_count}</title></circle>`)
+      .join('');
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <defs><linearGradient id="v-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--a-accent)" stop-opacity="0.28"/><stop offset="1" stop-color="var(--a-accent)" stop-opacity="0"/></linearGradient></defs>
+      <path d="${area}" fill="url(#v-area)"/><path d="${line}" class="v-line"/>${dots}</svg>
+      <div class="v-axis"><span>${shortDate(points[0].recorded_on)}</span><span>${shortDate(points[points.length - 1].recorded_on)}</span></div>`;
+  }
+
+  // Setup steps the dashboard can actually check from saved settings.
+  function renderSetup() {
+    const now = new Date();
+    const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const latest = sortedSnapshots()[0];
+    const steps = [
+      {
+        done: Boolean(profileUrl),
+        title: '"Find us on Google" link on your website',
+        detail: profileUrl ? 'In your footer and on your contact page.' : 'Add your Business Profile link. No mention of reviews.',
+        action: 'links',
+        label: 'Add link',
+      },
+      {
+        done: Boolean(reviewUrl),
+        title: 'Event kit ready',
+        detail: reviewUrl ? 'QR card ready for your next public workshop or talk.' : 'Save your review link to make the QR card for public events.',
+        action: reviewUrl ? 'events' : 'links',
+        label: reviewUrl ? 'Open' : 'Add link',
+      },
+      {
+        done: Boolean(latest && latest.recorded_on.startsWith(thisMonth)),
+        title: "This month's count logged",
+        detail: latest ? `Last logged ${formatDate(latest.recorded_on)}.` : 'Log your current count to set a starting point.',
+        action: 'log',
+        label: 'Log it',
+      },
+    ];
+    const done = steps.filter((st) => st.done).length;
+    document.getElementById('v-setup-count')!.textContent = `${done} of ${steps.length} done`;
+    document.getElementById('v-steps')!.innerHTML = steps
+      .map(
+        (st) => `<li class="${st.done ? 'done' : ''}">
+        <span class="v-check" aria-hidden="true"></span>
+        <div><b>${escapeHtml(st.title)}</b><small>${escapeHtml(st.detail)}</small></div>
+        ${st.done && st.action !== 'events' ? '' : `<button type="button" class="a-btn i-btn" data-goto="${st.action}">${st.label}</button>`}
+      </li>`
+      )
+      .join('');
+  }
+
+  // Tabs for the program's reference material. The open tab is a per-person
+  // convenience, kept in the URL hash so a link can point at one.
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.v-tabs [data-tab]')];
+  function showTab(name: string, focus = false) {
+    if (!tabs.some((t) => t.dataset.tab === name)) name = 'ethics';
+    tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+    document.querySelectorAll<HTMLElement>('.v-panel').forEach((p) => (p.hidden = p.dataset.panel !== name));
+    if (focus) {
+      history.replaceState(null, '', `#${name}`);
+      document.querySelector('.v-guide')!.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab!, false)));
+  showTab(location.hash.slice(1));
+  window.addEventListener('hashchange', () => showTab(location.hash.slice(1)));
+
+  document.addEventListener('click', (event) => {
+    const target = (event.target as HTMLElement).closest<HTMLElement>('[data-goto]');
+    if (!target) return;
+    if (target.dataset.goto === 'log') {
+      const count = document.getElementById('snapshot-count') as HTMLInputElement;
+      count.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      count.focus({ preventScroll: true });
+      return;
+    }
+    showTab(target.dataset.goto!, true);
+  });
 
   snapshotForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -448,6 +594,7 @@ import { ETHICS_CHECKLIST, EVENT_CARD_COPY, EVENT_RULES, REVIEW_REPLY, NEGATIVE_
     practiceName = business?.display_name ?? '';
     googleFontsUrl = business?.google_fonts_url ?? null;
     reviewUrl = business?.google_review_url ?? null;
+    profileUrl = business?.google_maps_url ?? null;
     profileUrlInput.value = business?.google_maps_url ?? '';
     reviewUrlInput.value = reviewUrl ?? '';
     document.getElementById('card-practice-name')!.textContent = practiceName;

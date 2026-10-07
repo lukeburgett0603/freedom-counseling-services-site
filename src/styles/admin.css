@@ -2220,6 +2220,472 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* -------------------------------------------------- Reviews (phase 3) */
+
+.v-name {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.v-top {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+.v-rep-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v-big {
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  background: linear-gradient(180deg, var(--a-fg), color-mix(in srgb, var(--a-fg) 65%, var(--a-accent)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.v-unit {
+  margin-left: 6px;
+  color: var(--a-muted);
+}
+.v-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.v-rating b {
+  color: var(--a-fg);
+  font-size: 18px;
+  font-weight: 500;
+}
+.v-stars,
+.v-stars-fill {
+  display: inline-block;
+  height: 16px;
+  background: var(--a-track);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z'/%3E%3C/svg%3E") 0 0 / 16px 16px repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z'/%3E%3C/svg%3E") 0 0 / 16px 16px repeat-x;
+}
+.v-stars {
+  position: relative;
+  width: 80px;
+}
+.v-stars-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--a-warn);
+  transition: width 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.v-summary {
+  margin: 10px 0 0;
+  color: var(--a-muted);
+}
+.v-summary b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.v-summary b.r-ok {
+  color: var(--a-good);
+}
+.v-chart {
+  margin-top: 14px;
+}
+.v-chart svg {
+  display: block;
+  width: 100%;
+  height: 120px;
+  overflow: visible;
+}
+.v-line {
+  fill: none;
+  stroke: var(--a-accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.v-dot {
+  fill: var(--a-panel);
+  stroke: var(--a-accent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.v-dot-last {
+  fill: var(--a-accent);
+}
+.v-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  color: var(--a-faint);
+  font-size: 11.5px;
+}
+.v-log {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--a-line);
+}
+.v-log input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--a-line2);
+  border-radius: 8px;
+  font: 13.5px var(--a-font);
+}
+.v-rep > .i-hint {
+  margin: 8px 0 0;
+}
+.v-history {
+  margin-top: 12px;
+}
+.v-history summary {
+  color: var(--a-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+.v-history summary:hover {
+  color: var(--a-fg);
+}
+.v-table {
+  margin-top: 8px;
+}
+.v-table td,
+.v-table th {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.v-remove {
+  color: var(--a-faint);
+  font-size: 12px;
+}
+.v-remove:hover {
+  color: var(--a-bad);
+}
+.v-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--a-line);
+  border-radius: 10px;
+  background: var(--a-raise);
+}
+.v-steps li > div {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+.v-steps b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.v-steps small {
+  color: var(--a-muted);
+  font-size: 12.5px;
+}
+.v-check {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--a-line2);
+  border-radius: 50%;
+}
+.v-steps li.done .v-check {
+  border-color: var(--a-good);
+  background: var(--a-good) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12.5 4 4 8-9'/%3E%3C/svg%3E") center / 13px no-repeat;
+  box-shadow: 0 0 12px -2px var(--a-good);
+}
+.v-steps li.done b {
+  color: var(--a-fg2);
+}
+.v-measure {
+  margin: 14px 0 0;
+  color: var(--a-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.v-measure a,
+.v-help a {
+  color: var(--a-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--a-line2);
+  text-underline-offset: 3px;
+}
+.v-measure a:hover {
+  color: var(--a-accent);
+}
+.v-guide {
+  display: grid;
+  gap: 18px;
+}
+.v-tabs {
+  justify-self: start;
+  flex-wrap: wrap;
+}
+.v-tabs button[aria-selected='true'] {
+  background: var(--a-sel);
+  color: var(--a-fg);
+  box-shadow: inset 0 0 0 1px var(--a-line);
+}
+.v-panel {
+  display: grid;
+  gap: 16px;
+  animation: v-in 0.25s ease-out;
+}
+@keyframes v-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.v-lede {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--a-fg2);
+}
+.v-help {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--a-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.v-help b {
+  color: var(--a-fg2);
+  font-weight: 500;
+}
+.v-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v-checklist li {
+  position: relative;
+  padding: 12px 14px 12px 40px;
+  border: 1px solid var(--a-line);
+  border-radius: 10px;
+  background: var(--a-raise);
+  color: var(--a-fg2);
+  line-height: 1.5;
+}
+.v-checklist li::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  width: 16px;
+  height: 16px;
+  background: var(--a-good);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z'/%3E%3Cpath d='m8.5 12 2.5 2.5 4.5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z'/%3E%3Cpath d='m8.5 12 2.5 2.5 4.5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.v-link + .v-link {
+  padding-top: 16px;
+  border-top: 1px solid var(--a-line);
+}
+.v-link .i-field > label {
+  color: var(--a-fg);
+  font-size: 14px;
+  font-weight: 500;
+}
+.v-url {
+  max-width: 640px;
+}
+.v-url input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--a-line2);
+  border-radius: 8px;
+  font: 13.5px var(--a-font);
+}
+.v-warn {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--a-warn-line);
+  border-radius: 10px;
+  background: var(--a-warn-soft);
+  color: var(--a-warn);
+  font-weight: 500;
+}
+.v-event {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+.v-event:has(.v-paper[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+/* The handout card preview stays paper-white in both themes: it's what
+   prints. */
+.v-paper {
+  padding: 28px 24px;
+  border-radius: 14px;
+  background: #fbfaf7;
+  color: #1c1917;
+  text-align: center;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  transform: rotate(-0.6deg);
+}
+.v-paper p {
+  margin: 0;
+}
+.v-paper-h {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.v-paper-b {
+  margin-top: 10px !important;
+  color: #44403c;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.v-paper-qr {
+  width: 132px;
+  height: 132px;
+  margin: 18px auto 6px;
+}
+.v-paper-qr svg {
+  width: 100%;
+  height: 100%;
+}
+.v-paper-cap {
+  font-size: 12px;
+  font-weight: 600;
+}
+.v-paper-f {
+  margin-top: 16px !important;
+  color: #78716c;
+  font-size: 10.5px;
+}
+.v-paper-n {
+  margin-top: 2px !important;
+  color: #57534e;
+  font-size: 11px;
+  font-weight: 600;
+}
+.v-dodont {
+  display: grid;
+  gap: 10px;
+}
+.v-dodont-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 10px;
+}
+.v-do,
+.v-dont {
+  padding: 12px 14px;
+  border: 1px solid var(--a-good-line);
+  border-radius: 10px;
+  background: var(--a-good-soft);
+}
+.v-dont {
+  border-color: var(--a-bad-line);
+  background: var(--a-bad-soft);
+}
+.v-do > p,
+.v-dont > p {
+  margin: 0 0 6px;
+  color: var(--a-good);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.v-dont > p {
+  color: var(--a-bad);
+}
+.v-do ul,
+.v-dont ul,
+.v-numbered {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--a-fg2);
+  line-height: 1.55;
+}
+.v-do li + li,
+.v-dont li + li,
+.v-numbered li + li {
+  margin-top: 5px;
+}
+.v-block {
+  display: grid;
+  gap: 8px;
+}
+.v-block + .v-block {
+  padding-top: 18px;
+  border-top: 1px solid var(--a-line);
+}
+.v-block > b,
+.v-block-head b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.v-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v-quote {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--a-line);
+  border-left: 2px solid var(--a-accent);
+  border-radius: 10px;
+  background: var(--a-raise);
+  color: var(--a-fg2);
+  font: 13.5px/1.6 var(--a-font);
+  white-space: pre-wrap;
+}
+@media (max-width: 1000px) {
+  .v-event {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v-paper {
+    max-width: 340px;
+    justify-self: center;
+  }
+}
+@media (max-width: 640px) {
+  .v-log {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .v-log button {
+    grid-column: span 2;
+  }
+  .v-checklist,
+  .v-dodont-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v-steps li {
+    flex-wrap: wrap;
+  }
+  .v-steps li > button {
+    margin-left: 32px;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the
