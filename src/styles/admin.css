@@ -3256,6 +3256,199 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* ------------------------------------------ Search rankings (phase 3) */
+
+.s-add {
+  margin-left: 4px;
+}
+.s-list,
+.s-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.s-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 120px 76px auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--a-line);
+}
+.s-row:first-child {
+  border-top: 0;
+  padding-top: 2px;
+}
+.s-row.s-paused {
+  opacity: 0.55;
+}
+.s-pos {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  height: 40px;
+  padding: 0 6px;
+  border: 1px solid var(--a-line2);
+  border-radius: 11px;
+  background: var(--a-raise);
+  color: var(--a-fg2);
+  font: 500 16px var(--a-mono, ui-monospace, monospace);
+}
+.s-pos.s-top {
+  border-color: var(--a-good-line);
+  background: var(--a-good-soft);
+  color: var(--a-good);
+  box-shadow: 0 0 18px -6px var(--a-good);
+}
+.s-pos.s-p1 {
+  border-color: color-mix(in srgb, var(--a-accent) 40%, transparent);
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+}
+.s-pos.s-p2 {
+  color: var(--a-fg);
+}
+.s-pos.s-none {
+  color: var(--a-faint);
+  border-style: dashed;
+}
+.s-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.s-main b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.s-main small {
+  overflow: hidden;
+  color: var(--a-muted);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.s-main a {
+  color: var(--a-fg2);
+  text-decoration: underline;
+  text-decoration-color: var(--a-line2);
+  text-underline-offset: 3px;
+}
+.s-main a:hover {
+  color: var(--a-accent);
+}
+.s-nopage {
+  color: var(--a-warn);
+}
+.s-spark {
+  width: 120px;
+  height: 34px;
+  overflow: visible;
+}
+.s-spark-empty {
+  display: block;
+}
+.s-path {
+  fill: none;
+  stroke: var(--a-accent);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.s-end {
+  fill: var(--a-accent);
+}
+.s-p1line {
+  stroke: var(--a-line2);
+  stroke-dasharray: 2 3;
+}
+.s-chg {
+  color: var(--a-faint);
+  font-size: 12.5px;
+  text-align: right;
+  white-space: nowrap;
+}
+.s-chg.s-up {
+  color: var(--a-good);
+  font-weight: 500;
+}
+.s-chg.s-down {
+  color: var(--a-warn);
+  font-weight: 500;
+}
+.s-chg.s-new {
+  color: var(--a-accent);
+}
+.s-tag-good {
+  border-color: var(--a-good-line);
+  color: var(--a-good);
+}
+.s-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--a-line);
+}
+.s-legend .s-pos {
+  min-width: 26px;
+  height: 22px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  margin-left: 6px;
+}
+.s-legend .s-pos:first-child {
+  margin-left: 0;
+}
+.s-sub {
+  margin: -6px 0 12px;
+}
+.s-sub a {
+  color: var(--a-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--a-line2);
+  text-underline-offset: 3px;
+}
+.s-rows li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--a-line);
+}
+.s-rows li:first-child {
+  border-top: 0;
+}
+.s-rows li > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.s-rows b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.s-rows small {
+  color: var(--a-muted);
+  font-size: 12.5px;
+}
+@media (max-width: 760px) {
+  .s-row {
+    grid-template-columns: 44px minmax(0, 1fr) auto auto;
+    gap: 10px;
+  }
+  .s-row .s-spark {
+    display: none;
+  }
+  .s-main small {
+    white-space: normal;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the
