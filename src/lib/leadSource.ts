@@ -57,7 +57,7 @@ export function leadSourceShortLabel(value: string | null | undefined): string {
 // Renders a "count per source" bar list, same visual as the Leads
 // dashboard's existing "Leads by page" list.
 export function renderSourceBars(values: (string | null)[], emptyText: string): string {
-  if (values.length === 0) return `<p class="text-slate-500">${emptyText}</p>`;
+  if (values.length === 0) return `<p class="i-hint">${emptyText}</p>`;
   const counts = new Map<string, number>();
   for (const v of values) {
     const key = v ?? '';
@@ -65,18 +65,13 @@ export function renderSourceBars(values: (string | null)[], emptyText: string): 
   }
   const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   const max = sorted[0][1];
-  return sorted
+  // Admin redesign bar style (t-bars in admin.css).
+  return `<div class="t-bars">${sorted
     .map(
-      ([value, count]) => `
-      <div class="flex items-center gap-3">
-        <span class="w-40 shrink-0 truncate ${value ? 'text-slate-700' : 'text-slate-400'}">${leadSourceShortLabel(value || null)}</span>
-        <div class="h-2 flex-1 rounded-full bg-slate-100">
-          <div class="h-2 rounded-full bg-brand-accent" style="width: ${Math.round((count / max) * 100)}%"></div>
-        </div>
-        <span class="w-6 shrink-0 text-right font-semibold text-brand-ink">${count}</span>
-      </div>`
+      ([value, count]) =>
+        `<div class="t-bar"><span class="t-lbl${value ? '' : ' i-faint'}">${leadSourceShortLabel(value || null)}</span><div class="t-track"><div class="t-fill" style="width:${Math.round((count / max) * 100)}%"></div></div><span class="a-num">${count}</span></div>`
     )
-    .join('');
+    .join('')}</div>`;
 }
 
 // Speed to lead: hours from form submission to the lead first leaving
