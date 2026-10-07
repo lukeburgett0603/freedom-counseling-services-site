@@ -3449,6 +3449,116 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* ------------------------------------------- Google profile (phase 3) */
+
+.g-top {
+  margin-top: 0;
+}
+.g-views .v-big {
+  display: block;
+  margin-bottom: 4px;
+}
+.g-split {
+  display: flex;
+  gap: 3px;
+  height: 10px;
+  margin: 18px 0 10px;
+  overflow: hidden;
+  border-radius: 6px;
+}
+.g-split span {
+  flex: 0 0 50%;
+  border-radius: 3px;
+  transition: flex-basis 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.g-maps {
+  background: linear-gradient(90deg, var(--a-accent), var(--a-violet));
+  box-shadow: 0 0 12px -2px var(--a-accent-glow);
+}
+.g-search {
+  background: var(--a-cyan);
+}
+.g-split-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  color: var(--a-muted);
+  font-size: 13px;
+}
+.g-split-legend b {
+  margin-left: 4px;
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.g-key {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 3px;
+  box-shadow: none;
+}
+.g-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.g-act {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--a-line);
+  border-radius: 12px;
+  background: var(--a-raise);
+}
+.g-act > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.g-act span {
+  color: var(--a-muted);
+  font-size: 12.5px;
+}
+.g-act b {
+  color: var(--a-fg);
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+.g-act small {
+  color: var(--a-faint);
+  font-size: 11.5px;
+}
+.g-ico {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--a-accent) 30%, transparent);
+}
+.g-ico svg {
+  width: 17px;
+  height: 17px;
+}
+.g-note {
+  margin: 12px 0 0;
+}
+@media (max-width: 640px) {
+  .g-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .g-act {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the

@@ -11,55 +11,77 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   just on a site with no google_business_location_id/OAuth credentials
   configured but on ANY failure calling the function, same graceful-
   degrade discipline as every other tier.
+
+  Redesigned in phase 3 of the admin redesign (2026-10-07): views and
+  actions (calls, website clicks, directions) as separate stories, the
+  share of viewers who acted, Maps vs Search, and the daily views chart
+  (shared src/lib/areaChart.ts). This month is month to date while the
+  function only returns last month as a whole, so last month is shown as
+  a plain total, never as a percent change.
 -->
-<AdminLayout title="Google Business Profile | Admin" current="analytics-gbp">
-  <div id="gbp-empty" class="rounded-lg border border-black/5 bg-white p-5 text-sm text-slate-500 shadow-sm">
-    Google Business Profile insights aren't configured for this site yet.
+<AdminLayout title="Google profile | Admin" current="analytics-gbp">
+  <p class="i-intro">Your listing in Google Maps and search: how many people see it, and how many call, visit your website, or get directions.</p>
+
+  <div class="t-grid m-loading" id="g-loading" aria-hidden="true">
+    <div class="t-skel t-s12" style="height:110px"></div>
+    <div class="t-skel t-s12" style="height:260px"></div>
   </div>
-  <div id="gbp-section" class="hidden">
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Map views</p>
-        <p id="gbp-map-views" class="mt-1 font-[family-name:var(--font-heading)] text-2xl font-extrabold text-brand-ink">—</p>
-        <p id="gbp-map-views-last" class="mt-1 text-xs text-slate-500"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Search views</p>
-        <p id="gbp-search-views" class="mt-1 font-[family-name:var(--font-heading)] text-2xl font-extrabold text-brand-ink">—</p>
-        <p id="gbp-search-views-last" class="mt-1 text-xs text-slate-500"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Website clicks</p>
-        <p id="gbp-website-clicks" class="mt-1 font-[family-name:var(--font-heading)] text-2xl font-extrabold text-brand-ink">—</p>
-        <p id="gbp-website-clicks-last" class="mt-1 text-xs text-slate-500"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Calls</p>
-        <p id="gbp-call-clicks" class="mt-1 font-[family-name:var(--font-heading)] text-2xl font-extrabold text-brand-ink">—</p>
-        <p id="gbp-call-clicks-last" class="mt-1 text-xs text-slate-500"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Direction requests</p>
-        <p id="gbp-direction-requests" class="mt-1 font-[family-name:var(--font-heading)] text-2xl font-extrabold text-brand-ink">—</p>
-        <p id="gbp-direction-requests-last" class="mt-1 text-xs text-slate-500"></p>
-      </div>
+
+  <section id="gbp-empty" class="t-card" hidden>
+    <div class="t-empty">
+      <b>Google profile insights aren't connected yet</b>
+      These numbers come straight from your Google Business Profile. Ask your agency to connect it.
     </div>
-    <div class="mt-4 rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-      <div class="mb-4 flex items-baseline justify-between">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Map + search views per day</p>
-        <p id="gbp-chart-peak" class="text-xs text-slate-400"></p>
-      </div>
-      <!-- No items-end — see CLAUDE.md's "Pageviews-per-day chart" entry
-           for why a stretched, definite-height parent is required for
-           the bar's percentage height to resolve against once each day
-           became a label+bar+label column instead of a bare bar. -->
-      <div id="gbp-chart" class="flex h-28 gap-[3px]"></div>
+  </section>
+
+  <div id="gbp-section" hidden>
+    <div class="t-grid g-top">
+      <section class="t-card t-s5 g-views">
+        <h2>People who saw your profile<span class="t-aside">This month</span></h2>
+        <span class="v-big a-num" id="g-views">—</span>
+        <p class="i-hint" id="g-views-last"></p>
+        <div class="g-split" aria-hidden="true"><span class="g-maps" id="g-split-maps"></span><span class="g-search" id="g-split-search"></span></div>
+        <div class="g-split-legend">
+          <span><i class="g-key g-maps"></i>Google Maps <b class="a-num" id="gbp-map-views">—</b></span>
+          <span><i class="g-key g-search"></i>Google Search <b class="a-num" id="gbp-search-views">—</b></span>
+        </div>
+        <p class="i-hint" hidden><span id="gbp-map-views-last"></span><span id="gbp-search-views-last"></span></p>
+      </section>
+
+      <section class="t-card t-s7">
+        <h2>People who took action<span class="t-aside" id="g-rate"></span></h2>
+        <div class="g-actions">
+          <div class="g-act">
+            <span class="g-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg></span>
+            <div><span>Calls</span><b class="a-num" id="gbp-call-clicks">—</b><small id="gbp-call-clicks-last"></small></div>
+          </div>
+          <div class="g-act">
+            <span class="g-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></svg></span>
+            <div><span>Website clicks</span><b class="a-num" id="gbp-website-clicks">—</b><small id="gbp-website-clicks-last"></small></div>
+          </div>
+          <div class="g-act">
+            <span class="g-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></svg></span>
+            <div><span>Direction requests</span><b class="a-num" id="gbp-direction-requests">—</b><small id="gbp-direction-requests-last"></small></div>
+          </div>
+        </div>
+        <p class="i-hint g-note">Calls from your profile skip your website entirely, so they won't show up in Inquiries unless someone logs them.</p>
+      </section>
     </div>
+
+    <section class="t-card w-chart-card q-section">
+      <h2>Profile views per day<span class="t-aside" id="gbp-chart-peak"></span></h2>
+      <div class="w-chart" id="gbp-chart">
+        <div class="w-tip" id="g-tip" hidden></div>
+      </div>
+      <div class="v-axis" id="g-axis"></div>
+      <p class="i-hint g-note">Maps and Search combined. Google's numbers usually run a few days behind.</p>
+    </section>
   </div>
 </AdminLayout>
 
 <script>
   import { supabase, initAdminAuth } from '../../../lib/adminAuth';
+  import { localDay, renderAreaChart, shortDay } from '../../../lib/areaChart';
 
   type GbpMonthSummary = {
     mapViews: number;
@@ -74,80 +96,70 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     byDay: { date: string; value: number }[];
   };
 
-  function formatGbpDelta(thisValue: number, lastValue: number): string {
-    if (lastValue > 0) {
-      const pct = Math.round(((thisValue - lastValue) / lastValue) * 100);
-      return `${pct > 0 ? '+' : ''}${pct}% vs last month`;
-    }
-    if (thisValue > 0) return 'None last month';
-    return '';
-  }
+  const set = (id: string, text: string) => (document.getElementById(id)!.textContent = text);
 
   async function loadGbpInsights() {
     const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL;
     const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const empty = () => {
+      document.getElementById('g-loading')!.hidden = true;
+      document.getElementById('gbp-empty')!.hidden = false;
+    };
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
-      if (!accessToken) return;
+      if (!accessToken) return empty();
 
       const response = await fetch(`${SUPABASE_URL}/functions/v1/get-gbp-insights`, {
         method: 'POST',
         headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}` },
       });
-      if (!response.ok) return;
+      if (!response.ok) return empty();
       const stats = (await response.json()) as GbpInsights;
+      const t = stats.thisMonth;
+      const l = stats.lastMonth;
+      const lastMonthName = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toLocaleDateString(undefined, { month: 'long' });
+      // This month is month to date; last month is only available whole,
+      // so it's shown as a total rather than a misleading percent change.
+      const last = (n: number) => `${n.toLocaleString()} in all of ${lastMonthName}`;
 
-      document.getElementById('gbp-map-views')!.textContent = stats.thisMonth.mapViews.toLocaleString();
-      document.getElementById('gbp-map-views-last')!.textContent = formatGbpDelta(stats.thisMonth.mapViews, stats.lastMonth.mapViews);
-      document.getElementById('gbp-search-views')!.textContent = stats.thisMonth.searchViews.toLocaleString();
-      document.getElementById('gbp-search-views-last')!.textContent = formatGbpDelta(
-        stats.thisMonth.searchViews,
-        stats.lastMonth.searchViews
-      );
-      document.getElementById('gbp-website-clicks')!.textContent = stats.thisMonth.websiteClicks.toLocaleString();
-      document.getElementById('gbp-website-clicks-last')!.textContent = formatGbpDelta(
-        stats.thisMonth.websiteClicks,
-        stats.lastMonth.websiteClicks
-      );
-      document.getElementById('gbp-call-clicks')!.textContent = stats.thisMonth.callClicks.toLocaleString();
-      document.getElementById('gbp-call-clicks-last')!.textContent = formatGbpDelta(stats.thisMonth.callClicks, stats.lastMonth.callClicks);
-      document.getElementById('gbp-direction-requests')!.textContent = stats.thisMonth.directionRequests.toLocaleString();
-      document.getElementById('gbp-direction-requests-last')!.textContent = formatGbpDelta(
-        stats.thisMonth.directionRequests,
-        stats.lastMonth.directionRequests
+      const views = t.mapViews + t.searchViews;
+      set('g-views', views.toLocaleString());
+      set('g-views-last', last(l.mapViews + l.searchViews));
+      set('gbp-map-views', t.mapViews.toLocaleString());
+      set('gbp-search-views', t.searchViews.toLocaleString());
+      set('gbp-map-views-last', last(l.mapViews));
+      set('gbp-search-views-last', last(l.searchViews));
+      const mapsPct = views ? Math.round((t.mapViews / views) * 100) : 50;
+      (document.getElementById('g-split-maps') as HTMLElement).style.flexBasis = `${mapsPct}%`;
+      (document.getElementById('g-split-search') as HTMLElement).style.flexBasis = `${100 - mapsPct}%`;
+
+      set('gbp-call-clicks', t.callClicks.toLocaleString());
+      set('gbp-call-clicks-last', last(l.callClicks));
+      set('gbp-website-clicks', t.websiteClicks.toLocaleString());
+      set('gbp-website-clicks-last', last(l.websiteClicks));
+      set('gbp-direction-requests', t.directionRequests.toLocaleString());
+      set('gbp-direction-requests-last', last(l.directionRequests));
+      const actions = t.callClicks + t.websiteClicks + t.directionRequests;
+      set('g-rate', views ? `${actions.toLocaleString()} actions · ${((actions / views) * 100).toFixed(1)}% of viewers` : '');
+
+      const days = stats.byDay ?? [];
+      const peak = days.reduce<{ date: string; value: number } | null>((m, d) => (!m || d.value > m.value ? d : m), null);
+      set('gbp-chart-peak', peak ? `Busiest: ${peak.value.toLocaleString()} on ${shortDay(peak.date)}` : '');
+      renderAreaChart(
+        document.getElementById('gbp-chart')!,
+        document.getElementById('g-tip')!,
+        document.getElementById('g-axis')!,
+        days,
+        (i) =>
+          `<b>${localDay(days[i].date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</b><span><i class="a-num">${days[i].value.toLocaleString()}</i> profile views</span>`
       );
 
-      // Same sparse-label treatment as the Website Traffic chart (see
-      // CLAUDE.md's "Pageviews-per-day chart" entry) — a label on every
-      // single bar would be unreadable, and an empty label span must
-      // reserve the same fixed height as a populated one or every bar's
-      // bottom lands on a different line.
-      const LABEL_INTERVAL = 5;
-      const maxDayValue = Math.max(1, ...stats.byDay.map((d) => d.value));
-      const peakEl = document.getElementById('gbp-chart-peak')!;
-      peakEl.textContent = maxDayValue > 0 ? `Peak: ${maxDayValue.toLocaleString()}/day` : '';
-      const chartEl = document.getElementById('gbp-chart')!;
-      chartEl.innerHTML = stats.byDay
-        .map((d, i) => {
-          const heightPct = Math.max(Math.round((d.value / maxDayValue) * 100), d.value > 0 ? 4 : 1);
-          const label = d.date
-            ? new Date(d.date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-            : '';
-          const showLabel = i % LABEL_INTERVAL === 0 || i === stats.byDay.length - 1;
-          return `
-      <div class="flex flex-1 flex-col items-center justify-end gap-1" title="${d.value} view${d.value === 1 ? '' : 's'} — ${label}">
-        <span class="flex h-3 items-end text-[10px] font-semibold text-slate-500">${showLabel ? d.value.toLocaleString() : ''}</span>
-        <div class="w-full rounded-t bg-brand-accent" style="height: ${heightPct}%"></div>
-        <span class="flex h-3 items-start whitespace-nowrap text-[9px] text-slate-400">${showLabel ? label : ''}</span>
-      </div>`;
-        })
-        .join('');
-
-      document.getElementById('gbp-empty')!.classList.add('hidden');
-      document.getElementById('gbp-section')!.classList.remove('hidden');
+      document.getElementById('g-loading')!.hidden = true;
+      document.getElementById('gbp-section')!.hidden = false;
     } catch {
-      // Network error, malformed response, etc. — stays on the empty state.
+      // Network error, malformed response, etc.: show the empty state.
+      empty();
     }
   }
 

@@ -68,6 +68,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
 <script>
   import { initAdminAuth, supabase } from '../../../lib/adminAuth';
+  import { localDay, renderAreaChart, shortDay } from '../../../lib/areaChart';
 
   type Day = { date: string; pageviews: number; visits: number };
   type TrafficStats = {
@@ -83,12 +84,8 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     return div.innerHTML;
   }
 
-  // Plain YYYY-MM-DD dates from Cloudflare: parse as local days.
-  const dayOf = (ymd: string) => {
-    const [y, m, d] = ymd.split('-').map(Number);
-    return new Date(y, m - 1, d);
-  };
-  const short = (ymd: string) => dayOf(ymd).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  const dayOf = localDay;
+  const short = shortDay;
 
   // "/counselors/marcus-hill" -> "Marcus hill" with the path kept as a
   // tooltip; the homepage reads as "Home".
@@ -100,73 +97,15 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   }
 
   function renderChart(days: Day[]) {
-    const el = document.getElementById('traffic-chart')!;
-    const tip = document.getElementById('w-tip')!;
-    if (days.length < 2) {
-      el.insertAdjacentHTML('afterbegin', '<p class="i-hint">Not enough days yet to draw a chart.</p>');
-      return;
-    }
-    const W = 800, H = 220, P = 6;
-    const max = Math.max(1, ...days.map((d) => d.visits));
-    const x = (i: number) => P + (i / (days.length - 1)) * (W - 2 * P);
-    const y = (v: number) => H - P - (v / max) * (H - 2 * P - 10);
-    const pts = days.map((d, i) => [x(i), y(d.visits)] as const);
-    // Gentle smoothing (cardinal-ish) so the line reads as a trend.
-    let line = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-    for (let i = 1; i < pts.length; i++) {
-      const [x0, y0] = pts[i - 1];
-      const [x1, y1] = pts[i];
-      const mx = (x0 + x1) / 2;
-      line += ` C${mx.toFixed(1)},${y0.toFixed(1)} ${mx.toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
-    }
-    const area = `${line} L${pts.at(-1)![0].toFixed(1)},${H} L${pts[0][0].toFixed(1)},${H} Z`;
-    // Weekends shaded, since most practices see a weekday rhythm.
-    const band = (W - 2 * P) / (days.length - 1);
-    const weekends = days
-      .map((d, i) => ([0, 6].includes(dayOf(d.date).getDay()) ? `<rect x="${(x(i) - band / 2).toFixed(1)}" y="0" width="${band.toFixed(1)}" height="${H}" class="w-wkd"/>` : ''))
-      .join('');
-    const grid = [0.25, 0.5, 0.75].map((f) => `<line x1="0" x2="${W}" y1="${(P + f * (H - 2 * P)).toFixed(1)}" y2="${(P + f * (H - 2 * P)).toFixed(1)}" class="w-grid"/>`).join('');
-    el.insertAdjacentHTML(
-      'afterbegin',
-      `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
-        <defs><linearGradient id="w-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--a-accent)" stop-opacity="0.32"/><stop offset="1" stop-color="var(--a-accent)" stop-opacity="0"/></linearGradient></defs>
-        ${weekends}${grid}
-        <path d="${area}" fill="url(#w-area)" class="w-area"/>
-        <path d="${line}" class="w-line" pathLength="1"/>
-        <line class="w-cross" id="w-cross" x1="0" x2="0" y1="0" y2="${H}" visibility="hidden"/>
-      </svg><span class="w-dot" id="w-dot" hidden></span>`
+    renderAreaChart(
+      document.getElementById('traffic-chart')!,
+      document.getElementById('w-tip')!,
+      document.getElementById('w-axis')!,
+      days.map((d) => ({ date: d.date, value: d.visits })),
+      (i) =>
+        `<b>${dayOf(days[i].date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</b><span><i class="a-num">${days[i].visits.toLocaleString()}</i> visits</span><span><i class="a-num">${days[i].pageviews.toLocaleString()}</i> pages viewed</span>`,
+      'Today'
     );
-    const mid = Math.floor((days.length - 1) / 2);
-    document.getElementById('w-axis')!.innerHTML = [0, mid, days.length - 1].map((i) => `<span>${i === days.length - 1 ? 'Today' : short(days[i].date)}</span>`).join('');
-
-    // Hover / touch readout for the nearest day.
-    const cross = document.getElementById('w-cross')!;
-    const dot = document.getElementById('w-dot')!;
-    const show = (clientX: number) => {
-      const r = el.getBoundingClientRect();
-      const rel = Math.min(Math.max((clientX - r.left) / r.width, 0), 1);
-      const i = Math.round(rel * (days.length - 1));
-      const d = days[i];
-      const px = (x(i) / W) * r.width;
-      const py = (y(d.visits) / H) * r.height;
-      cross.setAttribute('x1', String(x(i)));
-      cross.setAttribute('x2', String(x(i)));
-      cross.setAttribute('visibility', 'visible');
-      dot.hidden = false;
-      dot.style.transform = `translate(${px}px, ${py}px)`;
-      tip.hidden = false;
-      tip.innerHTML = `<b>${dayOf(d.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</b><span><i class="a-num">${d.visits.toLocaleString()}</i> visits</span><span><i class="a-num">${d.pageviews.toLocaleString()}</i> pages viewed</span>`;
-      const tw = tip.offsetWidth;
-      tip.style.left = `${Math.min(Math.max(px - tw / 2, 0), r.width - tw)}px`;
-    };
-    const hide = () => {
-      cross.setAttribute('visibility', 'hidden');
-      dot.hidden = true;
-      tip.hidden = true;
-    };
-    el.addEventListener('pointermove', (e) => show(e.clientX));
-    el.addEventListener('pointerdown', (e) => show(e.clientX));
-    el.addEventListener('pointerleave', hide);
   }
 
   async function inquiriesThisMonth(): Promise<number | null> {
