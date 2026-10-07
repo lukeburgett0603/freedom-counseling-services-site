@@ -6,7 +6,7 @@ const link = (path: string) => withBase(path);
 ---
 
 <!--
-  Overview: the whole Full Caseload System on one screen (Get Found, Get
+  Monthly report (was "Overview"): the whole Full Caseload System on one screen (Get Found, Get
   Chosen, Get Referred, Get Booked, Watch It Work), plus a "Needs
   attention" list. Doubles as the monthly client report ("Print report";
   the admin sidebar is hidden in print by AdminLayout). Every number comes
@@ -15,119 +15,80 @@ const link = (path: string) => withBase(path);
   leadSource.ts (speed to lead), caseload.ts, adAttribution.ts.
   Website visits come from get-traffic-stats, which only knows this month
   and last month, so the "Last month" view shows visits without a
-  comparison.
+  comparison. Redesigned in phase 3 of the admin redesign (2026-10-07):
+  same numbers, new layout; print uses the light tokens in admin.css.
 -->
-<AdminLayout title="Overview | Admin" current="analytics-overview">
-  <div class="mb-6 flex flex-wrap items-end justify-between gap-3 print:hidden">
-    <div>
-      <label for="period-select" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Report month</label>
-      <select id="period-select" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
+<AdminLayout title="Monthly report | Admin" current="analytics-overview">
+  <div class="m-toolbar">
+    <p class="i-intro m-intro" id="period-label">Your whole Full Caseload System on one page.</p>
+    <div class="i-inline">
+      <div class="i-seg" role="group" aria-label="Report month" id="m-period">
+        <button type="button" data-offset="0" aria-pressed="true">This month</button>
+        <button type="button" data-offset="1" aria-pressed="false">Last month</button>
+      </div>
+      <select id="period-select" hidden aria-hidden="true" tabindex="-1">
         <option value="0">This month (so far)</option>
         <option value="1">Last month</option>
       </select>
+      <button id="print-report" type="button" class="a-btn i-btn">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M7 14h10v7H7z" /></svg>
+        Print
+      </button>
     </div>
-    <button id="print-report" type="button" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print report</button>
   </div>
 
-  <p id="report-title" class="mb-4 hidden font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink print:block"></p>
-  <p id="loading" class="text-sm text-slate-500">Loading...</p>
+  <p id="report-title" class="m-print-title"></p>
 
-  <div id="overview" class="hidden">
-    <p id="period-label" class="mb-4 text-sm text-slate-600"></p>
+  <div class="t-grid m-loading" id="loading" aria-hidden="true">
+    <div class="t-skel t-s12" style="height:120px"></div>
+    <div class="t-skel t-s7" style="height:240px"></div>
+    <div class="t-skel t-s5" style="height:240px"></div>
+  </div>
 
-    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">New clients</p>
-        <p id="h-clients" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p id="h-clients-change" class="mt-1 text-xs"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">New leads</p>
-        <p id="h-leads" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p id="h-leads-change" class="mt-1 text-xs"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Caseload</p>
-        <p id="h-caseload" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p id="h-caseload-sub" class="mt-1 text-xs text-slate-500"></p>
-      </div>
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Median response time</p>
-        <p id="h-speed" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">—</p>
-        <p id="h-speed-sub" class="mt-1 text-xs text-slate-500"></p>
-      </div>
+  <div id="overview" hidden>
+    <div class="m-kpis">
+      <div class="t-kpi"><span class="t-lbl">New clients</span><span id="h-clients" class="t-v a-num">—</span><span id="h-clients-change" class="t-delta"></span></div>
+      <div class="t-kpi"><span class="t-lbl">New inquiries</span><span id="h-leads" class="t-v a-num">—</span><span id="h-leads-change" class="t-delta"></span></div>
+      <div class="t-kpi"><span class="t-lbl">Caseload</span><span id="h-caseload" class="t-v a-num">—</span><span id="h-caseload-sub" class="t-delta"></span></div>
+      <div class="t-kpi"><span class="t-lbl">Median response time</span><span id="h-speed" class="t-v a-num">—</span><span id="h-speed-sub" class="t-delta"></span></div>
     </div>
 
-    <div id="attention" class="mb-8 hidden rounded-lg border border-amber-200 bg-amber-50 p-5 print:hidden">
-      <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-800">Needs attention</p>
-      <ul id="attention-list" class="space-y-2 text-sm"></ul>
-    </div>
+    <section id="attention" class="t-card m-attn" hidden>
+      <h2>Needs attention<span class="t-aside">Right now, whichever month you're viewing</span></h2>
+      <ul id="attention-list" class="m-attn-list"></ul>
+    </section>
 
-    <div class="grid gap-4 lg:grid-cols-2">
-      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <div class="flex items-baseline justify-between gap-2">
-          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">1</span> Get Found</p>
-          <a href={link('/admin/analytics/traffic')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
-        </div>
-        <dl id="found" class="mt-3 space-y-2 text-sm"></dl>
+    <div class="m-steps">
+      <section class="t-card m-step">
+        <h2><span class="m-num">1</span>Get found<a class="t-aside m-more" href={link('/admin/analytics/traffic')}>Website traffic &rarr;</a></h2>
+        <dl id="found" class="m-rows"></dl>
       </section>
-
-      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <div class="flex items-baseline justify-between gap-2">
-          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">2</span> Get Chosen</p>
-          <a href={link('/admin/review-program')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
-        </div>
-        <dl id="chosen" class="mt-3 space-y-2 text-sm"></dl>
+      <section class="t-card m-step">
+        <h2><span class="m-num">2</span>Get chosen<a class="t-aside m-more" href={link('/admin/review-program')}>Reviews &rarr;</a></h2>
+        <dl id="chosen" class="m-rows"></dl>
       </section>
-
-      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <div class="flex items-baseline justify-between gap-2">
-          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">3</span> Get Referred</p>
-          <a href={link('/admin/referral-partners')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
-        </div>
-        <dl id="referred" class="mt-3 space-y-2 text-sm"></dl>
+      <section class="t-card m-step">
+        <h2><span class="m-num">3</span>Get referred<a class="t-aside m-more" href={link('/admin/referral-partners')}>Referral partners &rarr;</a></h2>
+        <dl id="referred" class="m-rows"></dl>
       </section>
-
-      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <div class="flex items-baseline justify-between gap-2">
-          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">4</span> Get Booked</p>
-          <a href={link('/admin/analytics/leads')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
-        </div>
-        <dl id="booked" class="mt-3 space-y-2 text-sm"></dl>
+      <section class="t-card m-step">
+        <h2><span class="m-num">4</span>Get booked<a class="t-aside m-more" href={link('/admin/crm')}>Inquiries &rarr;</a></h2>
+        <dl id="booked" class="m-rows"></dl>
       </section>
-
-      <section class="step-card rounded-lg border border-black/5 bg-white p-5 shadow-sm lg:col-span-2">
-        <div class="flex items-baseline justify-between gap-2">
-          <p class="font-[family-name:var(--font-heading)] text-lg font-extrabold text-brand-ink"><span class="text-brand-accent">5</span> Watch It Work</p>
-          <a href={link('/admin/analytics/caseload')} class="text-xs font-semibold text-brand-primary hover:underline print:hidden">Details</a>
-        </div>
-        <div id="work" class="mt-3 text-sm"></div>
+      <section class="t-card m-step m-wide">
+        <h2><span class="m-num">5</span>Watch it work<a class="t-aside m-more" href={link('/admin/analytics/caseload')}>Caseload &rarr;</a></h2>
+        <div id="work"></div>
       </section>
     </div>
+    <p class="m-print-foot" id="m-print-foot"></p>
   </div>
 </AdminLayout>
-
-<style is:global>
-  @media print {
-    @page {
-      size: letter portrait;
-      margin: 0.5in;
-    }
-    body {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .step-card {
-      break-inside: avoid;
-    }
-  }
-</style>
 
 <script>
   import { supabase, initAdminAuth } from '../../../lib/adminAuth';
   import { withBase } from '../../../lib/url';
   import { formatHours, hoursToFirstContact, leadSourceShortLabel, median, REFERRAL_LEAD_SOURCES } from '../../../lib/leadSource';
-  import { caseloadBarClass, daysSince, percentFull, targetCaseload, type CounselorCaseload } from '../../../lib/caseload';
+  import { ALMOST_FULL_THRESHOLD, daysSince, percentFull, targetCaseload, type CounselorCaseload } from '../../../lib/caseload';
   import { isGoogleAdsLead } from '../../../lib/adAttribution';
 
   const MANUAL_SOURCE = 'Manually added'; // matches admin/crm.astro
@@ -188,7 +149,14 @@ const link = (path: string) => withBase(path);
     const start = new Date(now.getFullYear(), now.getMonth() - offset, 1);
     const end = new Date(now.getFullYear(), now.getMonth() - offset + 1, 1);
     const prevStart = new Date(now.getFullYear(), now.getMonth() - offset - 1, 1);
-    return { start, end, prevStart, prevEnd: start };
+    // A month in progress is compared with the same point last month (Oct
+    // 1-7 vs Sep 1-7), never a whole month, same as Today.
+    let prevEnd = start;
+    if (offset === 0) {
+      const sameDay = new Date(prevStart.getFullYear(), prevStart.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
+      prevEnd = sameDay < start ? sameDay : start;
+    }
+    return { start, end, prevStart, prevEnd };
   }
 
   // Plain local calendar dates (YYYY-MM-DD) for comparing against `date`
@@ -203,20 +171,19 @@ const link = (path: string) => withBase(path);
     return t >= a.getTime() && t < b.getTime();
   };
 
+  let compareLabel = 'the month before';
+
   function change(current: number, previous: number, unit: string): { text: string; cls: string } {
     const diff = current - previous;
-    if (diff === 0) return { text: `Same as the month before (${previous} ${unit})`, cls: 'text-slate-500' };
+    if (diff === 0) return { text: `Same as ${compareLabel} (${previous} ${unit})`, cls: '' };
     return {
-      text: `${diff > 0 ? '+' : ''}${diff} vs the month before (${previous})`,
-      cls: diff > 0 ? 'text-emerald-600' : 'text-red-500',
+      text: `${diff > 0 ? '+' : ''}${diff} vs ${compareLabel} (${previous})`,
+      cls: diff > 0 ? 'up' : 'down',
     };
   }
 
   function row(label: string, value: string, note = ''): string {
-    return `<div class="flex items-baseline justify-between gap-4 border-b border-slate-100 pb-2 last:border-0">
-      <dt class="text-slate-600">${label}</dt>
-      <dd class="text-right"><span class="font-semibold text-brand-ink">${value}</span>${note ? `<span class="block text-xs text-slate-500">${note}</span>` : ''}</dd>
-    </div>`;
+    return `<div class="m-row"><dt>${label}</dt><dd><b>${value}</b>${note ? `<small>${note}</small>` : ''}</dd></div>`;
   }
 
   // Same rules as the Leads dashboard's speed to lead: manual leads are
@@ -236,9 +203,11 @@ const link = (path: string) => withBase(path);
     if (!data) return;
     const { start, end, prevStart, prevEnd } = monthBounds(offset);
     const monthName = start.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-    document.getElementById('period-label')!.textContent =
-      offset === 0 ? `${monthName}, month to date, compared with the month before.` : `${monthName}, compared with the month before.`;
+    compareLabel = offset === 0 ? 'this point last month' : 'the month before';
+    document.getElementById('period-label')!.innerHTML =
+      offset === 0 ? `<b>${monthName}</b> so far, compared with the same point last month.` : `<b>${monthName}</b>, compared with the month before.`;
     document.getElementById('report-title')!.textContent = `${data.business?.display_name ?? ''}: ${monthName} report`;
+    document.getElementById('m-print-foot')!.textContent = `Prepared ${new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}${offset === 0 ? ', partway through the month' : ''}.`;
 
     const realLeads = data.leads.filter((l) => !l.lead_magnet_id);
     const leadsNow = realLeads.filter((l) => inRange(l.created_at, start, end));
@@ -250,10 +219,10 @@ const link = (path: string) => withBase(path);
     // Headline
     document.getElementById('h-clients')!.textContent = String(clientsNow.length);
     const cc = change(clientsNow.length, clientsPrev.length, 'clients');
-    Object.assign(document.getElementById('h-clients-change')!, { textContent: cc.text, className: `mt-1 text-xs ${cc.cls}` });
+    Object.assign(document.getElementById('h-clients-change')!, { textContent: cc.text, className: `t-delta ${cc.cls}` });
     document.getElementById('h-leads')!.textContent = String(leadsNow.length);
-    const lc = change(leadsNow.length, leadsPrev.length, 'leads');
-    Object.assign(document.getElementById('h-leads-change')!, { textContent: lc.text, className: `mt-1 text-xs ${lc.cls}` });
+    const lc = change(leadsNow.length, leadsPrev.length, 'inquiries');
+    Object.assign(document.getElementById('h-leads-change')!, { textContent: lc.text, className: `t-delta ${lc.cls}` });
 
     const complete = data.counselors.filter((c) => {
       const r = data!.caseloads.get(c.id);
@@ -268,7 +237,7 @@ const link = (path: string) => withBase(path);
     }
     document.getElementById('h-caseload')!.textContent = target ? `${Math.round((current / target) * 100)}%` : '—';
     document.getElementById('h-caseload-sub')!.textContent = target
-      ? `${current} of ${target} clients, ${Math.max(0, target - current)} open spots (current)`
+      ? `${current} of ${target} clients, ${Math.max(0, target - current)} open spots now`
       : 'Counselors haven’t set their caseloads yet';
 
     const speedNow = speedStats(leadsNow);
@@ -276,7 +245,7 @@ const link = (path: string) => withBase(path);
     document.getElementById('h-speed')!.textContent = speedNow.median === null ? '—' : formatHours(speedNow.median);
     document.getElementById('h-speed-sub')!.textContent =
       speedNow.median === null
-        ? 'None recorded yet. Timed from form to first move out of New in the CRM.'
+        ? 'None recorded yet. Timed from the form to the first move out of Waiting.'
         : `${speedNow.withinPct ?? 0}% contacted within 24 hours${speedPrev.median !== null ? ` (was ${formatHours(speedPrev.median)})` : ''}`;
 
     // 1. Get Found
@@ -288,14 +257,14 @@ const link = (path: string) => withBase(path);
     const adLeadsNow = leadsNow.filter(isGoogleAdsLead).length;
     const searchLeadsNow = leadsNow.filter((l) => l.lead_source === 'google_search' || l.lead_source === 'google_maps').length;
     document.getElementById('found')!.innerHTML = [
-      row('Website visits', visits === null ? 'Not connected' : visits.toLocaleString(), prevVisits !== null ? `${prevVisits.toLocaleString()} the month before` : ''),
+      row('Website visits', visits === null ? 'Not connected' : visits.toLocaleString(), prevVisits !== null ? `${prevVisits.toLocaleString()} in all of last month` : ''),
       row(
         'Search rankings',
         ranked.length ? `${top3} in the top 3` : 'Tracking starts soon',
         ranked.length ? `${top10} of ${data.keywords.length} tracked searches on page 1` : `${data.keywords.length} target searches chosen`
       ),
-      row('Leads who found you on Google', String(searchLeadsNow), 'Search or Maps, as they told us'),
-      row('Leads from Google Ads', String(adLeadsNow)),
+      row('Inquiries who found you on Google', String(searchLeadsNow), 'Search or Maps, as they told us'),
+      row('Inquiries from Google Ads', String(adLeadsNow)),
     ].join('');
 
     // 2. Get Chosen
@@ -307,7 +276,7 @@ const link = (path: string) => withBase(path);
     const lastBefore = [...snaps].reverse().find((s) => s.recorded_on < startIso);
     const gained = lastInPeriod && lastBefore ? lastInPeriod.review_count - lastBefore.review_count : null;
     document.getElementById('chosen')!.innerHTML = [
-      row('Visits that became leads', visits ? `${((leadsNow.length / visits) * 100).toFixed(1)}%` : '—', visits ? `${leadsNow.length} leads from ${visits.toLocaleString()} visits` : ''),
+      row('Visits that became inquiries', visits ? `${((leadsNow.length / visits) * 100).toFixed(1)}%` : '—', visits ? `${leadsNow.length} inquiries from ${visits.toLocaleString()} visits` : ''),
       row(
         'Google reviews',
         latest ? `${latest.review_count}${latest.average_rating ? ` · ${latest.average_rating}★` : ''}` : 'Not logged yet',
@@ -315,7 +284,7 @@ const link = (path: string) => withBase(path);
           ? `${gained >= 0 ? '+' : ''}${gained} this month`
           : latest
             ? `As of ${new Date(latest.recorded_on + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
-            : 'Log your count on the Review program page'
+            : 'Log your count on the Reviews page'
       ),
     ].join('');
 
@@ -329,7 +298,7 @@ const link = (path: string) => withBase(path);
     document.getElementById('referred')!.innerHTML = [
       row('Active referral partners', String(activePartners), `${inProgress} more in progress`),
       row('Outreach this month', `${touches} touch${touches === 1 ? '' : 'es'}`, 'Emails, calls, visits, thank-yous'),
-      row('Referred leads', String(refLeads)),
+      row('Referred inquiries', String(refLeads)),
       row('Clients from referrals', String(refClients)),
     ].join('');
 
@@ -337,8 +306,8 @@ const link = (path: string) => withBase(path);
     const bookedFromNow = leadsNow.filter((l) => l.status === 'scheduled').length;
     document.getElementById('booked')!.innerHTML = [
       row('Median time to first contact', speedNow.median === null ? '—' : formatHours(speedNow.median), speedNow.withinPct !== null ? `${speedNow.withinPct}% within 24 hours` : ''),
-      row('Booking rate', leadsNow.length ? `${Math.round((bookedFromNow / leadsNow.length) * 100)}%` : '—', `${bookedFromNow} of ${leadsNow.length} leads this month are scheduled`),
-      row('Automatic reply to new leads', data.business?.lead_auto_reply_enabled ? 'On' : 'Off'),
+      row('Booking rate', leadsNow.length ? `${Math.round((bookedFromNow / leadsNow.length) * 100)}%` : '—', `${bookedFromNow} of ${leadsNow.length} inquiries this month are scheduled`),
+      row('Automatic reply to new inquiries', data.business?.lead_auto_reply_enabled ? 'On' : 'Off'),
     ].join('');
 
     // 5. Watch It Work
@@ -348,19 +317,33 @@ const link = (path: string) => withBase(path);
       bySource.set(key, (bySource.get(key) ?? 0) + 1);
     }
     const sources = [...bySource.entries()].sort((a, b) => b[1] - a[1]);
+    const pct = target ? Math.round((current / target) * 100) : 0;
+    // Same bands as the Caseload screen: green when (almost) full, amber
+    // under 60% (send referrals here), accent in between.
+    const ratio = target ? current / target : 0;
+    const tone = ratio >= ALMOST_FULL_THRESHOLD ? ' good' : ratio < 0.6 ? ' low' : '';
+    const top = sources[0]?.[1] ?? 1;
     document.getElementById('work')!.innerHTML = `
-      ${
-        target
-          ? `<div class="mb-1 flex items-baseline justify-between"><span class="font-semibold text-brand-ink">${current} of ${target} clients (${Math.round((current / target) * 100)}% full)</span><span class="text-slate-600">${Math.max(0, target - current)} open spots</span></div>
-             <div class="h-3 rounded-full bg-slate-100"><div class="h-3 rounded-full ${caseloadBarClass(current, target)}" style="width:${percentFull(current, target)}%"></div></div>`
-          : '<p class="text-slate-500">Caseload bar appears once counselors set their numbers on Counselor settings.</p>'
-      }
-      <p class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Where this month's new clients came from</p>
-      ${
-        sources.length
-          ? `<p class="text-slate-700">${sources.map(([s, n]) => `${escapeHtml(s)} <span class="font-semibold">${n}</span>`).join(' · ')}</p>`
-          : '<p class="text-slate-500">No new clients yet this month.</p>'
-      }`;
+      <div class="m-work">
+        <div>
+          ${
+            target
+              ? `<div class="m-cap"><b class="a-num">${pct}%</b><span>full · ${current} of ${target} clients · ${Math.max(0, target - current)} open spots</span></div>
+                 <div class="t-track m-track"><div class="t-fill${tone}" style="width:${percentFull(current, target)}%"></div></div>`
+              : '<p class="i-hint">The caseload bar appears once counselors set their numbers on Counselor settings.</p>'
+          }
+        </div>
+        <div>
+          <p class="m-sub">Where this month's new clients came from</p>
+          ${
+            sources.length
+              ? `<div class="t-bars">${sources
+                  .map(([s, n]) => `<div class="t-bar"><span class="t-lbl">${escapeHtml(s)}</span><div class="t-track"><div class="t-fill" style="width:${Math.round((n / top) * 100)}%"></div></div><span class="a-num">${n}</span></div>`)
+                  .join('')}</div>`
+              : '<p class="i-hint">No new clients yet this month.</p>'
+          }
+        </div>
+      </div>`;
 
     renderAttention();
   }
@@ -371,15 +354,15 @@ const link = (path: string) => withBase(path);
     const items: string[] = [];
     const add = (text: string, href: string | null, label: string) =>
       items.push(
-        `<li class="flex flex-wrap items-baseline justify-between gap-2"><span>${text}</span>${
-          href ? `<a href="${withBase(href)}" class="font-semibold text-amber-900 underline">${label}</a>` : `<span class="text-amber-900">${label}</span>`
+        `<li><span class="m-dot" aria-hidden="true"></span><span class="m-attn-t">${text}</span>${
+          href ? `<a href="${withBase(href)}" class="a-btn i-btn">${label}</a>` : `<span class="i-hint">${label}</span>`
         }</li>`
       );
 
     const waiting = data.leads.filter(
       (l) => !l.lead_magnet_id && !l.archived_at && (l.status ?? 'new') === 'new' && l.source_page !== MANUAL_SOURCE && Date.now() - new Date(l.created_at).getTime() > 86_400_000
     ).length;
-    if (waiting) add(`${waiting} lead${waiting === 1 ? ' has' : 's have'} waited more than 24 hours for a first contact.`, '/admin/crm', 'Open Lead CRM');
+    if (waiting) add(`${waiting} ${waiting === 1 ? 'inquiry has' : 'inquiries have'} waited more than 24 hours for a first contact.`, '/admin/crm', 'Open Inquiries');
 
     const today = localIso(new Date());
     const overdue = data.partners.filter((p) => !p.archived_at && p.status !== 'inactive' && p.next_follow_up && p.next_follow_up < today).length;
@@ -397,21 +380,20 @@ const link = (path: string) => withBase(path);
       data.counselors.length > 1
         ? data.leads.filter((l) => l.status === 'scheduled' && !l.assigned_counselor_page_id && !l.lead_magnet_id).length
         : 0;
-    if (unassigned) add(`${unassigned} new client${unassigned === 1 ? " isn't" : "s aren't"} assigned to a counselor.`, '/admin/crm', 'Open Lead CRM');
+    if (unassigned) add(`${unassigned} new client${unassigned === 1 ? " isn't" : "s aren't"} assigned to a counselor.`, '/admin/crm', 'Open Inquiries');
 
     const lastSnap = [...data.snapshots].sort((a, b) => b.recorded_on.localeCompare(a.recorded_on))[0];
     if (!lastSnap || (Date.now() - new Date(lastSnap.recorded_on).getTime()) / 86_400_000 > STALE_DAYS) {
-      add(lastSnap ? `Google review count hasn't been logged in over ${STALE_DAYS} days.` : 'Google review count has never been logged.', '/admin/review-program', 'Review program');
+      add(lastSnap ? `Google review count hasn't been logged in over ${STALE_DAYS} days.` : 'Google review count has never been logged.', '/admin/review-program', 'Reviews');
     }
     if (data.business && !data.business.lead_auto_reply_enabled) {
-      add('Automatic reply to new leads is off.', '/admin/content/business-info', 'Turn it on');
+      add('Automatic reply to new inquiries is off.', '/admin/content/business-info', 'Turn it on');
     }
     if (data.business && !data.business.collect_lead_source) {
       add(`Your form doesn't ask "How did you hear about us?", so sources can't be measured.`, null, 'Ask your agency to turn it on');
     }
 
-    const box = document.getElementById('attention')!;
-    box.classList.toggle('hidden', items.length === 0);
+    document.getElementById('attention')!.hidden = items.length === 0;
     document.getElementById('attention-list')!.innerHTML = items.join('');
   }
 
@@ -446,7 +428,7 @@ const link = (path: string) => withBase(path);
       fetchTraffic(),
     ]);
     if (leads.error) {
-      document.getElementById('loading')!.textContent = 'Could not load: ' + leads.error.message;
+      showError('Could not load: ' + leads.error.message);
       return;
     }
     // Latest position per keyword (rows arrive newest first).
@@ -466,13 +448,27 @@ const link = (path: string) => withBase(path);
       latestRanks,
       traffic,
     };
-    document.getElementById('loading')!.classList.add('hidden');
-    document.getElementById('overview')!.classList.remove('hidden');
+    document.getElementById('loading')!.hidden = true;
+    document.getElementById('overview')!.hidden = false;
     render(0);
   }
 
+  function showError(message: string) {
+    const el = document.getElementById('loading')!;
+    el.hidden = false;
+    el.innerHTML = `<div class="t-card t-s12"><div class="t-empty"><b>Couldn't build the report.</b>${escapeHtml(message)}</div></div>`;
+  }
+
+  // The month toggle drives the (hidden) select, which owns the value.
   const periodSelect = document.getElementById('period-select') as HTMLSelectElement;
   periodSelect.addEventListener('change', () => render(Number(periodSelect.value)));
+  document.getElementById('m-period')!.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLElement>('[data-offset]');
+    if (!button) return;
+    periodSelect.value = button.dataset.offset!;
+    document.querySelectorAll('#m-period [data-offset]').forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+    render(Number(periodSelect.value));
+  });
   document.getElementById('print-report')!.addEventListener('click', () => window.print());
 
   // Never leave the page stuck on "Loading..." if something unexpected
@@ -482,9 +478,7 @@ const link = (path: string) => withBase(path);
       await load();
     } catch (err) {
       console.error('overview: failed to build dashboard', err);
-      const el = document.getElementById('loading')!;
-      el.classList.remove('hidden');
-      el.textContent = 'Something went wrong building this overview. Try reloading the page.';
+      showError('Something went wrong. Try reloading the page.');
     }
   }
 

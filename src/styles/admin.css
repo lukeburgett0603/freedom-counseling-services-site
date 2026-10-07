@@ -2686,6 +2686,241 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* ------------------------------------------- Monthly report (phase 3) */
+
+.m-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -14px 0 18px;
+}
+.m-intro {
+  margin: 0;
+}
+.m-intro b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.m-print-title,
+.m-print-foot {
+  display: none;
+}
+.m-loading {
+  margin-top: 0;
+}
+.m-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.m-attn {
+  margin-bottom: 14px;
+  border-color: var(--a-warn-line);
+}
+.m-attn h2 {
+  color: var(--a-warn);
+}
+.m-attn-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.m-attn-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--a-line);
+}
+.m-attn-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.m-attn-t {
+  flex: 1;
+  color: var(--a-fg2);
+}
+.m-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--a-warn);
+  box-shadow: 0 0 10px var(--a-warn);
+}
+.m-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.m-wide {
+  grid-column: 1 / -1;
+}
+.m-step h2 {
+  color: var(--a-fg);
+  font-size: 15px;
+}
+.m-num {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--a-accent) 35%, transparent), 0 0 16px -6px var(--a-accent-glow);
+}
+.m-more {
+  white-space: nowrap;
+}
+.m-more:hover {
+  color: var(--a-fg);
+}
+.m-rows {
+  display: grid;
+  margin: 0;
+}
+.m-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--a-line);
+}
+.m-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.m-row dt {
+  color: var(--a-muted);
+}
+.m-row dd {
+  margin: 0;
+  text-align: right;
+}
+.m-row dd b {
+  color: var(--a-fg);
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.m-row dd small {
+  display: block;
+  color: var(--a-faint);
+  font-size: 12px;
+}
+.m-work {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+.m-cap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--a-muted);
+}
+.m-cap b {
+  color: var(--a-fg);
+  font-size: 26px;
+  font-weight: 500;
+}
+.m-track {
+  height: 10px;
+}
+.m-track .t-fill {
+  height: 100%;
+}
+.m-sub {
+  margin: 0 0 10px;
+  color: var(--a-muted);
+  font-size: 13px;
+}
+@media (max-width: 1000px) {
+  .m-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .m-steps,
+  .m-work {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .m-kpis {
+    gap: 8px;
+  }
+  .m-kpis .t-kpi {
+    padding: 12px;
+  }
+  .m-kpis .t-v {
+    font-size: 22px;
+  }
+  .m-attn-list li {
+    flex-wrap: wrap;
+  }
+  .m-attn-list li .a-btn {
+    margin-left: 19px;
+  }
+}
+@media print {
+  @page {
+    size: letter portrait;
+    margin: 0.5in;
+  }
+  .m-toolbar,
+  .m-attn,
+  .m-more,
+  .a-view > h1.a-title {
+    display: none !important;
+  }
+  .m-print-foot {
+    display: block;
+    margin-top: 14px;
+    color: #888;
+    font-size: 11px;
+  }
+  .m-print-title {
+    display: block;
+    margin: 0 0 16px;
+    color: #111;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .m-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .m-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .m-work {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .m-step,
+  .t-kpi {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+  .t-kpi .t-v {
+    color: #111;
+    background: none;
+  }
+  .t-card::before,
+  .t-kpi::before,
+  .t-card::after,
+  .t-kpi::after {
+    display: none;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the
@@ -2914,6 +3149,11 @@ html.cmc-admin [hidden] {
     --a-card-top: #fff;
     --a-card-bot: #fff;
     --a-lift: none;
+    --a-accent: #2447d6;
+    --a-accent-soft: rgba(36, 71, 214, 0.09);
+    --a-good: #1f8a57;
+    --a-warn: #b26b0a;
+    --a-bad: #c23b3b;
     color-scheme: light;
   }
   .a-aura,
