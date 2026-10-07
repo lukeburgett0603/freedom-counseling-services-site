@@ -3128,6 +3128,134 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* ------------------------------------------ Website traffic (phase 3) */
+
+.w-chart {
+  position: relative;
+  height: 220px;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+.w-chart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.w-wkd {
+  fill: var(--a-hover);
+}
+.w-grid {
+  stroke: var(--a-line);
+  stroke-dasharray: 2 4;
+  vector-effect: non-scaling-stroke;
+}
+.w-area {
+  animation: w-fade 1s ease-out both;
+}
+.w-line {
+  fill: none;
+  stroke: var(--a-accent);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 6px var(--a-accent-glow));
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: w-draw 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes w-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes w-fade {
+  from {
+    opacity: 0;
+  }
+}
+.w-cross {
+  stroke: var(--a-line2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.w-dot {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--a-panel);
+  border-radius: 50%;
+  background: var(--a-accent);
+  box-shadow: 0 0 12px var(--a-accent-glow);
+  pointer-events: none;
+}
+.w-tip {
+  position: absolute;
+  top: -8px;
+  z-index: 2;
+  display: grid;
+  gap: 2px;
+  padding: 8px 11px;
+  border: 1px solid var(--a-line2);
+  border-radius: 10px;
+  background: var(--a-raise);
+  box-shadow: var(--a-shadow);
+  color: var(--a-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.w-tip b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.w-tip i {
+  color: var(--a-fg);
+  font-style: normal;
+}
+.w-bars .t-bar {
+  grid-template-columns: minmax(150px, 260px) minmax(0, 1fr) 48px;
+}
+.w-bars .t-lbl {
+  display: grid;
+  line-height: 1.3;
+}
+.w-bars .t-lbl b {
+  overflow: hidden;
+  color: var(--a-fg);
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+.w-bars .t-lbl small {
+  overflow: hidden;
+  color: var(--a-faint);
+  font-size: 11.5px;
+  text-overflow: ellipsis;
+}
+.w-last {
+  margin: 14px 0 0;
+}
+.w-last b {
+  color: var(--a-fg2);
+  font-weight: 500;
+}
+@media (max-width: 640px) {
+  .w-chart {
+    height: 170px;
+  }
+  .w-bars .t-bar {
+    grid-template-columns: minmax(0, 1fr) 90px 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-line {
+    stroke-dasharray: none;
+    animation: none;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the
