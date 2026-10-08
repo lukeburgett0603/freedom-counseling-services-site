@@ -124,7 +124,11 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
     <section class="t-card bi-sec bi-wide">
       <h2 class="bi-h">Testimonials</h2>
-      <p class="bi-sub">A genuine quote, shown on the page you choose. Safe to edit anytime.</p>
+      <p class="bi-sub">
+        A genuine quote from someone who knows your work but isn't a client: a referral partner, a pastor or
+        physician you work with, someone who attended your workshop. Shown on the page you choose.
+      </p>
+      <p class="v-warn bi-warn">Never ask current or former clients for a testimonial (ACA C.3.b), even happy ones.</p>
       <div class="space-y-4">
         <div>
           <label class="mb-1 block text-sm font-semibold text-slate-700">Page</label>
@@ -141,7 +145,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </div>
           <div>
             <label class="mb-1 block text-sm font-semibold text-slate-700">Role (optional)</label>
-            <input id="testimonial-role" type="text" placeholder="Client since 2024" class="w-full rounded-md border border-slate-300 px-4 py-2" />
+            <input id="testimonial-role" type="text" placeholder="Pastor, Grace Community Church" class="w-full rounded-md border border-slate-300 px-4 py-2" />
           </div>
         </div>
         <button

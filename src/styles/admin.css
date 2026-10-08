@@ -4597,6 +4597,10 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
   font-size: 13px;
   line-height: 1.5;
 }
+.bi-warn {
+  margin: -6px 0 18px;
+  font-size: 13px;
+}
 .bi-sec label.block {
   color: var(--a-fg2) !important;
   font-weight: 500 !important;
