@@ -3,19 +3,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout title="Suggestions | Admin" current="suggestions">
-  <div class="max-w-3xl space-y-10">
-    <section>
-      <h2 class="mb-4 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Pending</h2>
-      <p id="pending-empty" class="text-sm text-slate-600">No pending suggestions.</p>
-      <div id="pending-list" class="space-y-4"></div>
-    </section>
-
-    <section>
-      <h2 class="mb-4 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Reviewed</h2>
-      <p id="reviewed-empty" class="text-sm text-slate-600">Nothing reviewed yet.</p>
-      <div id="reviewed-list" class="space-y-3"></div>
-    </section>
-  </div>
+  <!-- Admin redesign phase 3 (2026-10-08): restyled; same review logic. -->
+  <p class="i-intro">Edits the practice suggested for agency-managed fields. Approve to apply, or reject with a note they'll see.</p>
+  <section class="sg-sec">
+    <h2 class="sg-h">Waiting for review<span class="cp-n a-num" id="sg-n"></span></h2>
+    <p id="pending-empty" class="t-card t-empty">Nothing waiting. New suggestions show up here.</p>
+    <div id="pending-list" class="sg-list"></div>
+  </section>
+  <section class="t-card sg-done">
+    <h2>Reviewed</h2>
+    <p id="reviewed-empty" class="i-hint">Nothing reviewed yet.</p>
+    <div id="reviewed-list" class="sg-rev"></div>
+  </section>
 </AdminLayout>
 
 <script>
@@ -103,68 +102,48 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   }
 
   function renderPending(suggestions: ContentSuggestion[]) {
-    pendingEmpty.classList.toggle('hidden', suggestions.length > 0);
+    pendingEmpty.hidden = suggestions.length > 0;
+    document.getElementById('sg-n')!.textContent = suggestions.length ? String(suggestions.length) : '';
     pendingList.innerHTML = suggestions
       .map((s) => {
         const fieldLabel = FIELD_LABELS[s.field_name] ?? s.field_name;
         const canAutoApply = s.field_name in FIELD_COLUMNS;
-        const date = new Date(s.created_at).toLocaleDateString();
+        const date = new Date(s.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         return `
-      <div class="rounded-lg border border-slate-200 bg-white p-4" data-suggestion-id="${s.id}">
-        <div class="flex items-center justify-between text-sm">
-          <span class="font-semibold text-slate-700">${escapeHtml(pageTitle(s.page_id))} — ${escapeHtml(fieldLabel)}</span>
-          <span class="text-xs text-slate-400">Submitted ${date}</span>
+      <article class="t-card sg-card" data-suggestion-id="${s.id}">
+        <div class="sg-top"><b>${escapeHtml(pageTitle(s.page_id))}</b><span class="sg-field">${escapeHtml(fieldLabel)}</span><span class="sg-date">Sent ${date}</span></div>
+        <div class="sg-diff">
+          <div><span>Now</span><p class="sg-was">${escapeHtml(s.current_value ?? '(not set)')}</p></div>
+          <div><span>Suggested${canAutoApply ? ' (you can edit before applying)' : ''}</span>${
+            canAutoApply
+              ? `<textarea class="apply-value-input" rows="3">${escapeHtml(s.suggested_value)}</textarea>`
+              : `<p class="sg-new">${escapeHtml(s.suggested_value)}</p>`
+          }</div>
         </div>
-        <div class="mt-3 grid gap-3 sm:grid-cols-2">
-          <div>
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Current</p>
-            <p class="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">${escapeHtml(s.current_value ?? '(not set)')}</p>
-          </div>
-          <div>
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Suggested</p>
-            ${
-              canAutoApply
-                ? `<textarea class="apply-value-input w-full rounded-md border border-slate-300 px-3 py-2 text-sm" rows="3">${escapeHtml(s.suggested_value)}</textarea>`
-                : `<p class="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">${escapeHtml(s.suggested_value)}</p>`
-            }
-          </div>
+        ${!canAutoApply ? '<p class="i-hint">Image suggestions aren\'t applied automatically. Update the photo in Website pages, then approve this to close it out.</p>' : ''}
+        <label class="sg-note">Note for the practice (required to reject)<textarea class="review-note-input" rows="2"></textarea></label>
+        <div class="i-inline">
+          <button type="button" class="approve-button a-btn a-btn-primary i-btn">Approve${canAutoApply ? ' and apply' : ''}</button>
+          <button type="button" class="reject-button a-btn i-btn">Reject</button>
+          <span class="review-status i-hint"></span>
         </div>
-        ${!canAutoApply ? '<p class="mt-2 text-xs text-slate-500">Image suggestions aren\'t applied automatically — update the photo in Website content, then approve this to close it out.</p>' : ''}
-        <div class="mt-3">
-          <label class="mb-1 block text-xs font-semibold text-slate-700">Note (required if rejecting)</label>
-          <textarea class="review-note-input w-full rounded-md border border-slate-300 px-3 py-2 text-sm" rows="2"></textarea>
-        </div>
-        <div class="mt-3 flex items-center gap-3">
-          <button type="button" class="approve-button rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
-            Approve${canAutoApply ? ' and apply' : ''}
-          </button>
-          <button type="button" class="reject-button rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-            Reject
-          </button>
-          <span class="review-status text-sm"></span>
-        </div>
-      </div>`;
+      </article>`;
       })
       .join('');
   }
 
   function renderReviewed(suggestions: ContentSuggestion[]) {
-    reviewedEmpty.classList.toggle('hidden', suggestions.length > 0);
+    reviewedEmpty.hidden = suggestions.length > 0;
     reviewedList.innerHTML = suggestions
       .map((s) => {
         const fieldLabel = FIELD_LABELS[s.field_name] ?? s.field_name;
-        const statusLabel =
-          s.status === 'approved' ? '<span class="text-emerald-700">Approved</span>' : '<span class="text-red-600">Rejected</span>';
-        const date = s.reviewed_at ? new Date(s.reviewed_at).toLocaleDateString() : '';
+        const pill = s.status === 'approved' ? '<span class="bp-pill bp-pill-p">Approved</span>' : '<span class="bp-pill sg-rej">Rejected</span>';
+        const date = s.reviewed_at ? new Date(s.reviewed_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
         return `
-      <div class="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm">
-        <div class="flex items-center justify-between">
-          <span class="font-semibold text-slate-700">${escapeHtml(pageTitle(s.page_id))} — ${escapeHtml(fieldLabel)}</span>
-          ${statusLabel}
-        </div>
-        <p class="mt-1 text-slate-600">"${escapeHtml(s.suggested_value)}"</p>
-        <p class="mt-1 text-xs text-slate-400">Reviewed ${date}</p>
-        ${s.reviewer_note ? `<p class="mt-2 rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-600"><span class="font-semibold">Note: </span>${escapeHtml(s.reviewer_note)}</p>` : ''}
+      <div class="sg-row">
+        <div><b>${escapeHtml(pageTitle(s.page_id))} · ${escapeHtml(fieldLabel)}</b><small>"${escapeHtml(s.suggested_value)}"</small>${s.reviewer_note ? `<small class="sg-rn">Note: ${escapeHtml(s.reviewer_note)}</small>` : ''}</div>
+        ${pill}
+        <span class="sg-date">${date}</span>
       </div>`;
       })
       .join('');
@@ -173,7 +152,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   async function loadSuggestions() {
     const { data, error } = await supabase.from('content_suggestions').select('*').order('created_at', { ascending: false });
     if (error) {
-      pendingList.innerHTML = `<p class="text-sm text-red-600">Could not load suggestions: ${escapeHtml(error.message)}</p>`;
+      pendingList.innerHTML = `<p class="i-hint r-err">Could not load suggestions: ${escapeHtml(error.message)}</p>`;
       return;
     }
     const suggestions = (data ?? []) as ContentSuggestion[];
@@ -199,7 +178,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
     if (target.classList.contains('approve-button')) {
       statusEl.textContent = 'Applying...';
-      statusEl.className = 'review-status text-sm text-slate-600';
+      statusEl.className = 'review-status i-hint';
 
       // Look up the suggestion's own field_name/page_id fresh, rather than
       // re-deriving it from the DOM — the card's data attribute only
@@ -211,7 +190,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         .single();
       if (!suggestion) {
         statusEl.textContent = 'Could not find this suggestion.';
-        statusEl.className = 'review-status text-sm text-red-600';
+        statusEl.className = 'review-status i-hint r-err';
         return;
       }
 
@@ -223,7 +202,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           .eq('id', suggestion.page_id);
         if (pageError) {
           statusEl.textContent = 'Could not apply: ' + pageError.message;
-          statusEl.className = 'review-status text-sm text-red-600';
+          statusEl.className = 'review-status i-hint r-err';
           return;
         }
       }
@@ -239,7 +218,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         .eq('id', suggestionId);
       if (error) {
         statusEl.textContent = 'Could not save review: ' + error.message;
-        statusEl.className = 'review-status text-sm text-red-600';
+        statusEl.className = 'review-status i-hint r-err';
         return;
       }
 
@@ -257,11 +236,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     if (target.classList.contains('reject-button')) {
       if (!noteInput.value.trim()) {
         statusEl.textContent = 'A note is required when rejecting.';
-        statusEl.className = 'review-status text-sm text-red-600';
+        statusEl.className = 'review-status i-hint r-err';
         return;
       }
       statusEl.textContent = 'Saving...';
-      statusEl.className = 'review-status text-sm text-slate-600';
+      statusEl.className = 'review-status i-hint';
       const { error } = await supabase
         .from('content_suggestions')
         .update({
@@ -273,7 +252,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         .eq('id', suggestionId);
       if (error) {
         statusEl.textContent = 'Could not save review: ' + error.message;
-        statusEl.className = 'review-status text-sm text-red-600';
+        statusEl.className = 'review-status i-hint r-err';
         return;
       }
       await loadSuggestions();
