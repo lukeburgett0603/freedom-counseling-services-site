@@ -6,22 +6,45 @@ import SuggestEdit from '../../../components/SuggestEdit.astro';
 import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
 ---
 
-<AdminLayout title="Page copy | Admin" current="content-page-copy">
-  <div class="max-w-2xl space-y-12">
+<AdminLayout title="Website pages | Admin" current="content-page-copy">
+  <!--
+    Admin redesign phase 3 (2026-10-08): a searchable page list (#p-nav)
+    replaces the long dropdown for owner/agency; it drives the hidden
+    #content-page-select, which still owns the value, so the editor logic
+    below is unchanged. The editor sits beside it under a header card.
+  -->
+  <div class="p-layout">
+  <aside class="t-card p-nav" id="p-nav" hidden>
+    <label class="i-search p-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+      <input id="p-search" type="text" placeholder="Find a page" aria-label="Find a page" />
+    </label>
+    <nav id="p-list" class="p-list" aria-label="Pages"></nav>
+  </aside>
+  <div class="p-editor">
     <section>
-      <p id="content-tier-note" class="mb-4 text-sm text-slate-600"></p>
+      <div class="t-card p-head" id="p-head" hidden>
+        <div>
+          <span class="p-type" id="p-head-type"></span>
+          <h2 id="p-head-title"></h2>
+          <p id="content-tier-note" class="p-tier"></p>
+        </div>
+        <a id="p-head-view" class="a-btn i-btn" target="_blank" rel="noopener">View page
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
+        </a>
+      </div>
 
       <div id="content-not-linked-notice" class="hidden mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         Your login isn't linked to a counselor page yet — ask the site owner to link one from the Team page.
       </div>
 
       <div class="space-y-4">
-        <div id="content-page-select-wrap">
+        <div id="content-page-select-wrap" class="p-select-wrap">
           <label class="mb-1 block text-sm font-semibold text-slate-700">Page</label>
           <select id="content-page-select" class="w-full rounded-md border border-slate-300 px-4 py-2"></select>
         </div>
 
-        <div id="content-fields" class="hidden space-y-6">
+        <div id="content-fields" class="hidden space-y-6 t-card p-fields">
           <!--
             Hidden entirely for Counselor Profile pages — that page type
             never reads page.h1 at all (CounselorProfile.astro's real
@@ -703,6 +726,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       <div id="your-suggestions-list" class="space-y-3"></div>
     </section>
   </div>
+  </div>
 
   <UnsplashSearchModal />
 </AdminLayout>
@@ -716,10 +740,12 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   import { STORYBRAND_SPLIT_PAGE_TYPES } from '../../../lib/pages';
   import { getPersonEntityTerms } from '../../../lib/schema';
   import { VALUE_ADD_ICON_NAMES } from '../../../lib/icons';
+  import { withBase } from '../../../lib/url';
 
   type ContentPage = {
     id: string;
     title: string;
+    slug: string;
     page_type: string;
     nav_placement: 'primary' | 'footer' | 'utility' | 'none';
     h1: string | null;
@@ -836,6 +862,86 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       .map((p) => `<option value="${p.id}">${escapeHtml(p.title)}</option>`)
       .join('');
   }
+
+  // ---------------------------------------------------------------------
+  // Page list + header (admin redesign). The list drives the hidden
+  // select above, so everything downstream still reads the select.
+  // ---------------------------------------------------------------------
+  const PAGE_TYPE_ORDER = [
+    'Homepage',
+    'About',
+    'Services Overview',
+    'Service Hub',
+    'Service Page',
+    'Counselors Overview',
+    'Counselor Profile',
+    'Who We Serve',
+    'Service Areas Overview',
+    'Service Area',
+    'Content Pillar',
+    'Contact',
+  ];
+  const PAGE_TYPE_LABELS: Record<string, string> = {
+    Homepage: 'Home',
+    'Service Hub': 'Service hubs',
+    'Service Page': 'Services',
+    'Services Overview': 'Services overview',
+    'Counselor Profile': 'Counselors',
+    'Counselors Overview': 'Counselors overview',
+    'Service Area': 'Locations',
+    'Service Areas Overview': 'Locations overview',
+    'Content Pillar': 'Guides',
+    'Who We Serve': 'Who we serve',
+  };
+  const typeLabel = (t: string) => PAGE_TYPE_LABELS[t] ?? t;
+  const pageList = document.getElementById('p-list')!;
+  const pageSearch = document.getElementById('p-search') as HTMLInputElement;
+
+  function renderPageNav() {
+    const q = pageSearch.value.trim().toLowerCase();
+    const rank = (t: string) => {
+      const i = PAGE_TYPE_ORDER.indexOf(t);
+      return i === -1 ? PAGE_TYPE_ORDER.length : i;
+    };
+    const groups = new Map<string, ContentPage[]>();
+    for (const p of [...pages].sort((a, b) => rank(a.page_type) - rank(b.page_type) || a.page_type.localeCompare(b.page_type) || a.title.localeCompare(b.title))) {
+      if (q && !p.title.toLowerCase().includes(q) && !(p.slug ?? '').toLowerCase().includes(q)) continue;
+      const g = groups.get(p.page_type) ?? [];
+      g.push(p);
+      groups.set(p.page_type, g);
+    }
+    pageList.innerHTML = groups.size
+      ? [...groups.entries()]
+          .map(
+            ([type, list]) =>
+              `<div class="p-group"><p class="p-group-h">${escapeHtml(typeLabel(type))}<span>${list.length}</span></p>${list
+                .map((p) => `<button type="button" class="p-item" data-page-id="${p.id}" aria-current="${p.id === contentPageSelect.value}">${escapeHtml(p.title)}</button>`)
+                .join('')}</div>`
+          )
+          .join('')
+      : '<p class="i-hint">No pages match.</p>';
+  }
+
+  function renderPageHead() {
+    const page = pages.find((p) => p.id === contentPageSelect.value);
+    const head = document.getElementById('p-head')!;
+    head.hidden = !page;
+    if (!page) return;
+    document.getElementById('p-head-title')!.textContent = page.title;
+    document.getElementById('p-head-type')!.textContent = page.page_type;
+    const view = document.getElementById('p-head-view') as HTMLAnchorElement;
+    view.href = withBase(page.page_type === 'Homepage' ? '/' : `/${(page.slug ?? '').replace(/^\/+/, '')}`);
+    pageList.querySelectorAll<HTMLElement>('.p-item').forEach((b) => b.setAttribute('aria-current', String(b.dataset.pageId === page.id)));
+  }
+
+  pageList.addEventListener('click', (event) => {
+    const item = (event.target as HTMLElement).closest<HTMLElement>('.p-item');
+    if (!item) return;
+    contentPageSelect.value = item.dataset.pageId!;
+    contentPageSelect.dispatchEvent(new Event('change'));
+    document.querySelector('.p-editor')!.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
+  pageSearch.addEventListener('input', renderPageNav);
 
   // ---------------------------------------------------------------------
   // Page copy — H1/meta description/focus keyword are locked on every
@@ -1708,6 +1814,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   }
 
   contentPageSelect.addEventListener('change', loadContentForm);
+  contentPageSelect.addEventListener('change', renderPageHead);
 
   contentHeroStyle.addEventListener('change', () => {
     contentHeroOverlayControls.style.display = contentHeroStyle.value === 'overlay' ? '' : 'none';
@@ -2076,6 +2183,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
       contentPageSelectWrap.classList.add('hidden');
       contentPageSelect.innerHTML = `<option value="${pageData.id}">${escapeHtml(pageData.title)}</option>`;
       loadContentForm();
+      renderPageHead();
       wireSuggestButtons();
       await loadYourSuggestions();
       return;
@@ -2089,7 +2197,14 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     pages = (pagesData ?? []) as ContentPage[];
 
     populatePagePicker(contentPageSelect);
+    // Open the homepage first rather than whichever title sorts first.
+    const home = pages.find((p) => p.page_type === 'Homepage');
+    if (home) contentPageSelect.value = home.id;
+    contentPageSelectWrap.classList.add('hidden');
+    document.getElementById('p-nav')!.hidden = false;
+    renderPageNav();
     loadContentForm();
+    renderPageHead();
     wireSuggestButtons();
     if (adminUser.role === 'owner') {
       await loadYourSuggestions();

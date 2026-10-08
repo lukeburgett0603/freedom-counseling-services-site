@@ -3679,6 +3679,135 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* -------------------------------------------- Website pages (phase 3) */
+
+/* Never give .p-fields or the editor's section wrappers a display rule:
+   the editor toggles them with Tailwind's .hidden. */
+.p-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+.p-layout:has(> .p-nav[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.p-nav {
+  position: sticky;
+  top: 72px;
+  max-height: calc(100vh - 96px);
+  padding: 12px;
+  overflow-y: auto;
+}
+.p-search {
+  display: block;
+  max-width: none;
+  margin-bottom: 12px;
+}
+.p-search input {
+  width: 100%;
+}
+.p-group + .p-group {
+  margin-top: 12px;
+}
+.p-group-h {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 4px;
+  padding: 0 8px;
+  color: var(--a-faint);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.p-item {
+  display: block;
+  width: 100%;
+  padding: 7px 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--a-fg2);
+  font: 13.5px var(--a-font);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.p-item:hover {
+  background: var(--a-hover);
+  color: var(--a-fg);
+}
+.p-item[aria-current='true'] {
+  background: var(--a-sel);
+  color: var(--a-fg);
+  box-shadow: inset 2px 0 0 var(--a-accent);
+}
+.p-editor {
+  min-width: 0;
+}
+.p-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.p-head > .a-btn {
+  flex: none;
+  white-space: nowrap;
+}
+.p-head h2 {
+  margin: 2px 0 4px;
+  color: var(--a-fg);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.p-type {
+  color: var(--a-accent);
+  font-size: 12px;
+  font-weight: 500;
+}
+.p-tier {
+  margin: 0;
+  color: var(--a-muted);
+  font-size: 13px;
+}
+.p-select-wrap {
+  margin-bottom: 14px;
+}
+.p-fields {
+  padding: 22px;
+}
+.p-fields label.block,
+.p-fields h3 {
+  color: var(--a-fg) !important;
+  font-weight: 500 !important;
+}
+.p-fields h3 {
+  font-size: 15px !important;
+}
+.p-fields > #content-page-details-section,
+.p-fields > #content-byline-section {
+  margin-top: 8px;
+  padding-top: 24px;
+  border-color: var(--a-line) !important;
+}
+.p-fields .locked-view {
+  border-color: var(--a-line) !important;
+}
+@media (max-width: 1000px) {
+  .p-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .p-nav {
+    position: static;
+    max-height: 260px;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the
