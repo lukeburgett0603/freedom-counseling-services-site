@@ -6,127 +6,105 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
 ---
 
 <AdminLayout title="Lead magnets | Admin" current="lead-magnets">
+  <!--
+    Admin redesign phase 3 (2026-10-08): guides as cards with downloads and
+    how many follow-up emails are set, and a two-column editor with the
+    follow-up emails as a Day 0 / 3 / 7 / 14 timeline. Same ids and saves.
+  -->
   <div id="magnets-list-view">
-    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div class="rounded-lg border border-black/5 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total leads captured</p>
-        <p id="total-leads-count" class="mt-1 font-[family-name:var(--font-heading)] text-3xl font-extrabold text-brand-ink">0</p>
-      </div>
+    <p class="i-intro">Free guides people download in exchange for their email, and the follow-up emails they get afterward.</p>
+    <div class="r-kpis">
+      <div class="t-kpi"><span class="t-lbl">Downloads</span><span id="total-leads-count" class="t-v a-num">0</span><span class="t-delta">All time, across every guide</span></div>
+      <div class="t-kpi"><span class="t-lbl">Last 30 days</span><span id="lm-recent" class="t-v a-num">—</span><span class="t-delta" id="lm-recent-sub"></span></div>
+      <div class="t-kpi"><span class="t-lbl">Also sent an inquiry</span><span id="lm-conv" class="t-v a-num">—</span><span class="t-delta" id="lm-conv-sub"></span></div>
     </div>
-    <div class="mb-4 flex items-center justify-between">
-      <p id="magnets-count" class="text-sm text-slate-600"></p>
-      <button id="new-magnet-button" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
-        New lead magnet
-      </button>
+    <div class="i-toolbar">
+      <p id="magnets-count" class="i-count lm-count"></p>
+      <button id="new-magnet-button" type="button" class="a-btn a-btn-primary i-btn">+ New guide</button>
     </div>
-    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-      <table class="w-full text-left text-sm">
-        <thead class="border-b border-slate-200 bg-slate-50">
-          <tr>
-            <th class="px-4 py-3 font-semibold">Title</th>
-            <th class="px-4 py-3 font-semibold">Page</th>
-            <th class="px-4 py-3 font-semibold">Leads captured</th>
-            <th class="px-4 py-3 font-semibold"></th>
-          </tr>
-        </thead>
-        <tbody id="magnets-table-body"></tbody>
-      </table>
-    </div>
+    <div id="magnets-table-body" class="lm-grid"></div>
+    <div id="lm-empty" class="t-card t-empty" hidden><b>No guides yet.</b>A short, useful PDF (for example "5 signs it's time to see a counselor") on a matching page turns readers into people you can follow up with.</div>
   </div>
 
-  <div id="magnets-edit-view" class="hidden max-w-2xl">
-    <button id="back-to-list-button" class="mb-4 text-sm text-brand-primary hover:underline">&larr; Back to all lead magnets</button>
-    <h2 id="edit-heading" class="mb-4 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">New lead magnet</h2>
-    <form id="magnet-form" class="space-y-4">
-      <div>
-        <label class="mb-1 block text-sm font-semibold text-slate-700">Title</label>
-        <input id="field-title" type="text" required class="w-full rounded-md border border-slate-300 px-4 py-2" />
-      </div>
-      <div>
-        <label class="mb-1 block text-sm font-semibold text-slate-700">Description</label>
-        <textarea id="field-description" rows="3" required class="w-full rounded-md border border-slate-300 px-4 py-2"></textarea>
-        <p class="mt-1 text-xs text-slate-500">Shown on the page, next to the download form.</p>
-      </div>
-      <div>
-        <label class="mb-1 block text-sm font-semibold text-slate-700">Page</label>
-        <select id="field-page" required class="w-full rounded-md border border-slate-300 px-4 py-2"></select>
-        <p class="mt-1 text-xs text-slate-500">
-          Only pages without a lead magnet already assigned are shown. Pick the page whose topic this download matches.
-        </p>
-      </div>
-      <div>
-        <label class="mb-1 block text-sm font-semibold text-slate-700">File</label>
-        <label
-          for="field-file"
-          class="inline-block cursor-pointer rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          Choose File
-        </label>
-        <input id="field-file" type="file" accept=".pdf,.doc,.docx,.zip" class="sr-only" />
-        <p id="field-file-status" class="mt-1 text-xs text-slate-500"></p>
-      </div>
-      <div>
-        <label class="mb-1 block text-sm font-semibold text-slate-700">Image</label>
-        <div class="flex flex-wrap items-center gap-2">
-          <button
-            id="search-unsplash-button"
-            type="button"
-            class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Search Unsplash
-          </button>
-          <span class="text-xs text-slate-400">or</span>
-          <label
-            for="field-image-file"
-            class="inline-block cursor-pointer rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Choose File
-          </label>
-          <input id="field-image-file" type="file" accept="image/*" class="sr-only" />
-        </div>
-        <p id="field-image-status" class="mt-2 text-xs text-slate-500"></p>
-        <img id="field-image-preview" class="mt-2 hidden h-32 w-auto rounded-md border border-slate-200 object-cover" />
+  <div id="magnets-edit-view" class="hidden">
+    <div class="i-detail-top">
+      <button id="back-to-list-button" type="button" class="a-link">&larr; All guides</button>
+      <h2 id="edit-heading" class="lm-edit-h">New lead magnet</h2>
+    </div>
+    <form id="magnet-form" class="bp-form">
+      <div class="bp-main">
+        <section class="t-card i-fields">
+          <div class="i-field">
+            <label for="field-title">Title</label>
+            <input id="field-title" type="text" required placeholder="e.g. 5 signs it's time to see a counselor" />
+          </div>
+          <div class="i-field">
+            <label for="field-description">Description</label>
+            <textarea id="field-description" rows="3" required class="bp-area"></textarea>
+            <span class="i-hint">Shown on the page, next to the download form.</span>
+          </div>
+        </section>
+
+        <section class="t-card">
+          <h2>Follow-up emails<span class="t-aside">Leave a day blank to skip it</span></h2>
+          <p class="i-hint lm-seq-note">Sent automatically after someone downloads the guide, on top of their instant download link.</p>
+          <ol class="lm-seq">
+            {
+              SEQUENCE_SCHEDULE_DAYS.map((day, index) => {
+                const step = index + 1;
+                return (
+                  <li class="lm-step">
+                    <span class="lm-day">Day {day}</span>
+                    <div class="lm-step-body i-fields">
+                      <div class="i-field">
+                        <label for={`sequence-step-${step}-subject`}>Subject</label>
+                        <input id={`sequence-step-${step}-subject`} type="text" />
+                      </div>
+                      <div class="i-field">
+                        <label>Email</label>
+                        <RichTextEditor id={`sequence-step-${step}-body`} />
+                      </div>
+                    </div>
+                  </li>
+                );
+              })
+            }
+          </ol>
+        </section>
       </div>
 
-      <div class="border-t border-slate-200 pt-4">
-        <h3 class="mb-1 text-sm font-semibold text-slate-700">Nurture email sequence</h3>
-        <p class="mb-4 text-xs text-slate-500">
-          Sent automatically to anyone who downloads this guide, on top of their instant download link — Day 0,
-          Day 3, Day 7, and Day 14 after they sign up. Leave a step's subject and body both blank to skip it.
-          Use <code>{'{{first_name}}'}</code> anywhere in the subject or body to address them by name — e.g.
-          "Hi {'{{first_name}}'}, ..." — it's replaced with what they typed into the download form.
-        </p>
-        <div class="space-y-6">
-          {
-            SEQUENCE_SCHEDULE_DAYS.map((day, index) => {
-              const step = index + 1;
-              return (
-                <div class="rounded-lg border border-slate-200 p-4">
-                  <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Day {day}</p>
-                  <div class="mb-3">
-                    <label class="mb-1 block text-sm font-semibold text-slate-700">Subject</label>
-                    <input
-                      id={`sequence-step-${step}-subject`}
-                      type="text"
-                      class="w-full rounded-md border border-slate-300 px-4 py-2"
-                    />
-                  </div>
-                  <label class="mb-1 block text-sm font-semibold text-slate-700">Body</label>
-                  <RichTextEditor id={`sequence-step-${step}-body`} />
-                </div>
-              );
-            })
-          }
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3 pt-2">
-        <button id="save-button" type="button" class="rounded-md bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90">
-          Save
-        </button>
-        <button id="delete-button" type="button" class="ml-auto hidden text-sm text-red-600 hover:underline">Delete</button>
-      </div>
-      <p id="form-status" class="text-sm" role="status"></p>
+      <aside class="bp-side">
+        <section class="t-card i-fields">
+          <div class="i-field">
+            <label for="field-page">Shown on page</label>
+            <select id="field-page" required></select>
+            <span class="i-hint">Pages that already have a guide aren't listed. Pick the page whose topic this guide matches.</span>
+          </div>
+          <div class="i-field">
+            <span>The guide file</span>
+            <div class="i-inline">
+              <label for="field-file" class="a-btn i-btn">Choose file</label>
+              <input id="field-file" type="file" accept=".pdf,.doc,.docx,.zip" class="sr-only" />
+            </div>
+            <span id="field-file-status" class="i-hint"></span>
+          </div>
+          <div class="bp-actions lm-actions">
+            <button id="save-button" type="button" class="a-btn a-btn-primary">Save</button>
+          </div>
+          <p id="form-status" class="i-hint" role="status"></p>
+          <button id="delete-button" type="button" class="a-link i-danger hidden bp-delete">Delete guide</button>
+        </section>
+        <section class="t-card i-fields">
+          <h2>Cover image</h2>
+          <img id="field-image-preview" class="hidden bp-img" alt="" />
+          <div class="i-inline">
+            <button id="search-unsplash-button" type="button" class="a-btn i-btn">Search Unsplash</button>
+            <label for="field-image-file" class="a-btn i-btn">Upload</label>
+            <input id="field-image-file" type="file" accept="image/*" class="sr-only" />
+          </div>
+          <span id="field-image-status" class="i-hint"></span>
+        </section>
+      </aside>
     </form>
   </div>
 
@@ -188,6 +166,7 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
   let magnets: LeadMagnet[] = [];
   let pages: PageOption[] = [];
   let leadCountsByMagnet = new Map<string, number>();
+  let stepsByMagnet = new Map<string, number>();
   let editingId: string | null = null;
   let uploadedFileUrl: string | null = null;
   let uploadedFileName: string | null = null;
@@ -210,14 +189,33 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
   }
 
   async function loadLeadCounts() {
-    const { data } = await supabase.from('leads').select('lead_magnet_id').not('lead_magnet_id', 'is', null);
+    const [{ data }, { data: inquiries }, { data: steps }] = await Promise.all([
+      supabase.from('leads').select('lead_magnet_id, email, created_at').not('lead_magnet_id', 'is', null),
+      supabase.from('leads').select('email').is('lead_magnet_id', null),
+      supabase.from('lead_magnet_sequence_steps').select('lead_magnet_id'),
+    ]);
     leadCountsByMagnet = new Map();
     for (const row of data ?? []) {
       const id = row.lead_magnet_id as string;
       leadCountsByMagnet.set(id, (leadCountsByMagnet.get(id) ?? 0) + 1);
     }
+    stepsByMagnet = new Map();
+    for (const row of steps ?? []) stepsByMagnet.set(row.lead_magnet_id, (stepsByMagnet.get(row.lead_magnet_id) ?? 0) + 1);
     const total = [...leadCountsByMagnet.values()].reduce((sum, n) => sum + n, 0);
     totalLeadsCount.textContent = String(total);
+
+    const cutoff = Date.now() - 30 * 86_400_000;
+    const recent = (data ?? []).filter((r) => new Date(r.created_at as string).getTime() >= cutoff).length;
+    document.getElementById('lm-recent')!.textContent = String(recent);
+    document.getElementById('lm-recent-sub')!.textContent = total ? `${Math.round((recent / total) * 100)}% of all downloads` : '';
+
+    // Same rule as Inquiry trends: one person per email on both sides.
+    const norm = (e: unknown) => String(e ?? '').trim().toLowerCase();
+    const inquiryEmails = new Set((inquiries ?? []).map((r) => norm(r.email)).filter(Boolean));
+    const people = new Set((data ?? []).map((r) => norm(r.email)).filter(Boolean));
+    const converted = [...people].filter((e) => inquiryEmails.has(e)).length;
+    document.getElementById('lm-conv')!.textContent = people.size ? String(converted) : '—';
+    document.getElementById('lm-conv-sub')!.textContent = people.size ? `${Math.round((converted / people.size) * 100)}% of ${people.size} people who downloaded` : '';
   }
 
   async function loadMagnets() {
@@ -227,18 +225,24 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
       return;
     }
     magnets = data as LeadMagnet[];
-    magnetsCount.textContent = `${magnets.length} lead magnet${magnets.length === 1 ? '' : 's'}`;
+    magnetsCount.textContent = `${magnets.length} guide${magnets.length === 1 ? '' : 's'}`;
+    document.getElementById('lm-empty')!.hidden = magnets.length > 0;
     tableBody.innerHTML = magnets
       .map((magnet) => {
         const page = pages.find((p) => p.id === magnet.page_id);
         const leadCount = leadCountsByMagnet.get(magnet.id) ?? 0;
-        return `
-      <tr class="border-b border-slate-100 last:border-0">
-        <td class="px-4 py-3">${escapeHtml(magnet.title)}</td>
-        <td class="px-4 py-3">${escapeHtml(page?.title ?? '(page not found)')}</td>
-        <td class="px-4 py-3">${leadCount}</td>
-        <td class="px-4 py-3 text-right"><button data-edit-id="${magnet.id}" class="edit-magnet-button text-brand-primary hover:underline">Edit</button></td>
-      </tr>`;
+        const steps = stepsByMagnet.get(magnet.id) ?? 0;
+        return `<button type="button" class="lm-card t-card" data-edit-id="${magnet.id}">
+          <span class="lm-cover">${magnet.image_url ? `<img src="${escapeHtml(magnet.image_url)}" alt="" loading="lazy" />` : '<span>PDF</span>'}</span>
+          <span class="lm-body">
+            <b>${escapeHtml(magnet.title)}</b>
+            <small>On ${escapeHtml(page?.title ?? '(page not found)')}</small>
+            <span class="lm-stats">
+              <span><i class="a-num">${leadCount}</i> download${leadCount === 1 ? '' : 's'}</span>
+              <span class="${steps ? '' : 'lm-none'}">${steps ? `${steps} of ${SEQUENCE_SCHEDULE_DAYS.length} follow-up emails` : 'No follow-up emails yet'}</span>
+            </span>
+          </span>
+        </button>`;
       })
       .join('');
   }
@@ -265,7 +269,7 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
     imagePreview.classList.add('hidden');
     imagePreview.src = '';
     deleteButton.classList.add('hidden');
-    editHeading.textContent = 'New lead magnet';
+    editHeading.textContent = 'New guide';
     formStatus.textContent = '';
     for (const field of sequenceSubjectFields) field.value = '';
     for (const editor of sequenceEditors) editor.setMarkdown('');
@@ -290,7 +294,7 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
       imagePreview.classList.remove('hidden');
       imageStatus.textContent = 'Current image — choose a new one to replace it.';
     }
-    editHeading.textContent = 'Edit lead magnet';
+    editHeading.textContent = magnet.title;
     deleteButton.classList.remove('hidden');
     populatePagePicker();
     pageField.value = magnet.page_id;
@@ -316,12 +320,12 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
   backButton.addEventListener('click', showList);
 
   tableBody.addEventListener('click', async (event) => {
-    const target = event.target as HTMLElement;
-    if (!target.classList.contains('edit-magnet-button')) return;
-    const id = target.dataset.editId!;
-    const magnet = magnets.find((m) => m.id === id);
+    const card = (event.target as HTMLElement).closest<HTMLElement>('[data-edit-id]');
+    if (!card) return;
+    const magnet = magnets.find((m) => m.id === card.dataset.editId);
     if (magnet) {
       showEdit();
+      window.scrollTo(0, 0);
       await loadMagnetIntoForm(magnet);
     }
   });
@@ -381,11 +385,11 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
     const validationError = validate();
     if (validationError) {
       formStatus.textContent = validationError;
-      formStatus.className = 'text-sm text-red-600';
+      formStatus.className = 'i-hint r-err';
       return;
     }
     formStatus.textContent = 'Saving...';
-    formStatus.className = 'text-sm text-slate-600';
+    formStatus.className = 'i-hint';
     saveButton.setAttribute('disabled', 'true');
 
     const payload = {
@@ -407,7 +411,7 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
     if (error || !savedMagnet) {
       saveButton.removeAttribute('disabled');
       formStatus.textContent = 'Could not save: ' + (error?.message ?? 'unknown error');
-      formStatus.className = 'text-sm text-red-600';
+      formStatus.className = 'i-hint r-err';
       return;
     }
 
@@ -431,7 +435,7 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
       if (stepsError) {
         saveButton.removeAttribute('disabled');
         formStatus.textContent = 'Lead magnet saved, but the email sequence failed to save: ' + stepsError.message;
-        formStatus.className = 'text-sm text-red-600';
+        formStatus.className = 'i-hint r-err';
         return;
       }
     }
@@ -450,9 +454,11 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
     formStatus.textContent = result.ok
       ? 'Saved! Your site will update shortly.'
       : "Saved, but the update trigger failed — it will go live on the next rebuild.";
-    formStatus.className = result.ok ? 'text-sm text-emerald-700' : 'text-sm text-amber-700';
+    formStatus.className = result.ok ? 'i-hint r-ok' : 'i-hint r-warn';
 
-    await Promise.all([loadMagnets(), loadLeadCounts()]);
+    // Counts first: the cards read them.
+    await loadLeadCounts();
+    await loadMagnets();
     showList();
   });
 
@@ -465,7 +471,9 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
       return;
     }
     await callPublishFunction({ action: 'publish' });
-    await Promise.all([loadMagnets(), loadLeadCounts()]);
+    // Counts first: the cards read them.
+    await loadLeadCounts();
+    await loadMagnets();
     showList();
   });
 

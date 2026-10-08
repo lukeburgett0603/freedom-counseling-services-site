@@ -379,7 +379,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       conversionEl.textContent = '—';
     } else {
       const pct = Math.round((converted / contactEmails.size) * 100);
-      conversionEl.textContent = `All time: ${contactEmails.size} ${contactEmails.size === 1 ? 'person' : 'people'} downloaded a guide, and ${converted} (${pct}%) later sent an inquiry.`;
+      conversionEl.textContent = `All time: ${contactEmails.size} ${contactEmails.size === 1 ? 'person' : 'people'} downloaded a guide, and ${converted} (${pct}%) also sent an inquiry.`;
     }
   }
 

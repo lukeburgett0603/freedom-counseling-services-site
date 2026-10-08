@@ -4288,6 +4288,140 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
   }
 }
 
+/* --------------------------------------------- Lead magnets (phase 3) */
+
+.lm-count {
+  margin: 0;
+}
+.lm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.lm-card {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s, border-color 0.18s;
+}
+.lm-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--a-line2);
+}
+.lm-cover {
+  display: grid;
+  place-items: center;
+  height: 130px;
+  overflow: hidden;
+  background: radial-gradient(120% 120% at 0% 0%, color-mix(in srgb, var(--a-violet) 30%, transparent), transparent 60%),
+    linear-gradient(135deg, var(--a-accent-soft), var(--a-raise));
+  color: var(--a-accent);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.lm-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.lm-body {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px 16px;
+}
+.lm-body b {
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.lm-body small {
+  color: var(--a-muted);
+  font-size: 12.5px;
+}
+.lm-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--a-line);
+  color: var(--a-muted);
+  font-size: 12.5px;
+}
+.lm-stats i {
+  color: var(--a-fg);
+  font-style: normal;
+}
+.lm-none {
+  color: var(--a-warn);
+}
+.lm-edit-h {
+  margin: 0;
+  color: var(--a-fg);
+  font-size: 15px;
+  font-weight: 500;
+}
+.lm-seq-note {
+  margin: -8px 0 14px;
+}
+.lm-seq {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lm-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  padding-bottom: 22px;
+}
+.lm-step::before {
+  content: '';
+  position: absolute;
+  left: 31px;
+  top: 28px;
+  bottom: 0;
+  width: 1px;
+  background: var(--a-line2);
+}
+.lm-step:last-child::before {
+  display: none;
+}
+.lm-day {
+  display: grid;
+  place-items: center;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--a-accent) 30%, transparent);
+}
+.lm-actions {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 640px) {
+  .lm-step {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .lm-step::before {
+    display: none;
+  }
+  .lm-day {
+    justify-self: start;
+    padding: 0 12px;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the
