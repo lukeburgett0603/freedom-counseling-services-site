@@ -47,7 +47,11 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
 
         <section class="t-card">
           <h2>Follow-up emails<span class="t-aside">Leave a day blank to skip it</span></h2>
-          <p class="i-hint lm-seq-note">Sent automatically after someone downloads the guide, on top of their instant download link.</p>
+          <p class="i-hint lm-seq-note">
+            Sent automatically after someone downloads the guide, on top of their instant download link. Use
+            <code>{'{{first_name}}'}</code> anywhere in a subject or email to address them by name (e.g. "Hi
+            {'{{first_name}}'}, ..."); it's replaced with what they typed into the download form.
+          </p>
           <ol class="lm-seq">
             {
               SEQUENCE_SCHEDULE_DAYS.map((day, index) => {
