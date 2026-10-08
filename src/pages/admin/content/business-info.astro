@@ -2,13 +2,14 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 ---
 
-<AdminLayout title="Business info & testimonials | Admin" current="content-business-info">
-  <div class="max-w-2xl space-y-12">
-    <section>
-      <h2 class="mb-4 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Business info</h2>
-      <p class="mb-4 text-sm text-slate-600">
-        Your contact details and address, shown across your site — safe to edit anytime.
-      </p>
+<AdminLayout title="Business info | Admin" current="content-business-info">
+  <!-- Admin redesign phase 3 (2026-10-08): the three forms as cards.
+       Same ids and save logic. -->
+  <p class="i-intro">The details your website shows everywhere, and the email new inquiries get right away.</p>
+  <div class="bi-wrap">
+    <section class="t-card bi-sec">
+      <h2 class="bi-h">Contact details</h2>
+      <p class="bi-sub">Your phone, email and address, shown across your site. Safe to edit anytime.</p>
       <form id="business-form" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -69,7 +70,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
         <button
           id="business-save-button"
           type="button"
-          class="rounded-md bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+          class="a-btn a-btn-primary"
         >
           Save
         </button>
@@ -84,16 +85,16 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       (supabase/functions/_shared/leadAutoReply.ts, via publish-site), so
       what's shown here is exactly what a lead receives.
     -->
-    <section>
-      <h2 class="mb-2 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Automatic reply to new leads</h2>
-      <p class="mb-4 text-sm text-slate-600">
+    <section class="t-card bi-sec">
+      <h2 class="bi-h">Automatic reply</h2>
+      <p class="bi-sub">
         The moment someone submits your contact form, they get a short email confirming you received it and what
         happens next, so they know their message landed while they wait for a real person to follow up.
       </p>
       <div class="space-y-4">
         <label class="flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2.5">
           <input id="auto-reply-enabled" type="checkbox" />
-          <span class="text-sm font-medium">Send an automatic reply to every new appointment request</span>
+          <span class="text-sm font-medium">Send an automatic reply to every new inquiry</span>
         </label>
         <div>
           <label for="auto-reply-message" class="mb-1 block text-sm font-semibold text-slate-700">Your personal message (optional)</label>
@@ -109,9 +110,9 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button id="auto-reply-save" type="button" class="rounded-md bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90">Save</button>
-          <button id="auto-reply-preview" type="button" class="rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Preview</button>
-          <button id="auto-reply-test" type="button" class="rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Send me a test</button>
+          <button id="auto-reply-save" type="button" class="a-btn a-btn-primary">Save</button>
+          <button id="auto-reply-preview" type="button" class="a-btn">Preview</button>
+          <button id="auto-reply-test" type="button" class="a-btn">Send me a test</button>
         </div>
         <p id="auto-reply-status" class="text-sm" role="status"></p>
         <div id="auto-reply-preview-wrap" class="hidden rounded-md border border-slate-200 bg-white">
@@ -121,9 +122,9 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       </div>
     </section>
 
-    <section>
-      <h2 class="mb-4 font-[family-name:var(--font-heading)] text-xl font-extrabold text-brand-ink">Testimonials</h2>
-      <p class="mb-4 text-sm text-slate-600">A genuine quote from a client, shown on the page you choose — safe to edit anytime.</p>
+    <section class="t-card bi-sec bi-wide">
+      <h2 class="bi-h">Testimonials</h2>
+      <p class="bi-sub">A genuine quote, shown on the page you choose. Safe to edit anytime.</p>
       <div class="space-y-4">
         <div>
           <label class="mb-1 block text-sm font-semibold text-slate-700">Page</label>
@@ -146,7 +147,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
         <button
           id="testimonial-save-button"
           type="button"
-          class="rounded-md bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+          class="a-btn a-btn-primary"
         >
           Save
         </button>
@@ -237,7 +238,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   businessSaveButton.addEventListener('click', async () => {
     if (!business) return;
     businessStatus.textContent = 'Saving...';
-    businessStatus.className = 'text-sm text-slate-600';
+    businessStatus.className = 'i-hint';
     const { error } = await supabase
       .from('business')
       .update({
@@ -254,7 +255,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       .eq('id', business.id);
     if (error) {
       businessStatus.textContent = 'Could not save: ' + error.message;
-      businessStatus.className = 'text-sm text-red-600';
+      businessStatus.className = 'i-hint r-err';
       return;
     }
     businessStatus.textContent = 'Saving your site...';
@@ -262,7 +263,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     businessStatus.textContent = result.ok
       ? 'Saved! Your site will update shortly.'
       : 'Saved, but the update trigger failed — it will go live on the next rebuild.';
-    businessStatus.className = result.ok ? 'text-sm text-emerald-700' : 'text-sm text-amber-700';
+    businessStatus.className = result.ok ? 'i-hint r-ok' : 'i-hint r-warn';
   });
 
   // ---------------------------------------------------------------------
@@ -294,7 +295,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   testimonialSaveButton.addEventListener('click', async () => {
     if (!selectedTestimonialPage) return;
     testimonialStatus.textContent = 'Saving...';
-    testimonialStatus.className = 'text-sm text-slate-600';
+    testimonialStatus.className = 'i-hint';
     const { error } = await supabase
       .from('pages')
       .update({
@@ -305,7 +306,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       .eq('id', selectedTestimonialPage.id);
     if (error) {
       testimonialStatus.textContent = 'Could not save: ' + error.message;
-      testimonialStatus.className = 'text-sm text-red-600';
+      testimonialStatus.className = 'i-hint r-err';
       return;
     }
     selectedTestimonialPage.testimonial_quote = testimonialQuote.value.trim() || null;
@@ -316,7 +317,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     testimonialStatus.textContent = result.ok
       ? 'Saved! Your site will update shortly.'
       : 'Saved, but the update trigger failed — it will go live on the next rebuild.';
-    testimonialStatus.className = result.ok ? 'text-sm text-emerald-700' : 'text-sm text-amber-700';
+    testimonialStatus.className = result.ok ? 'i-hint r-ok' : 'i-hint r-warn';
   });
 
   // ---------------------------------------------------------------------
@@ -330,8 +331,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
   function setAutoReplyStatus(text: string, tone: 'info' | 'ok' | 'error') {
     autoReplyStatus.textContent = text;
-    autoReplyStatus.className =
-      'text-sm ' + (tone === 'ok' ? 'text-emerald-700' : tone === 'error' ? 'text-red-600' : 'text-slate-600');
+    autoReplyStatus.className = 'i-hint' + (tone === 'ok' ? ' r-ok' : tone === 'error' ? ' r-err' : '');
   }
 
   function loadAutoReplyForm() {
@@ -353,7 +353,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       return;
     }
     Object.assign(business, update);
-    setAutoReplyStatus(update.lead_auto_reply_enabled ? 'Saved. New leads will get this reply.' : 'Saved. Automatic replies are off.', 'ok');
+    setAutoReplyStatus(update.lead_auto_reply_enabled ? 'Saved. New inquiries will get this reply.' : 'Saved. Automatic replies are off.', 'ok');
   });
 
   document.getElementById('auto-reply-preview')!.addEventListener('click', async () => {
@@ -366,7 +366,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     document.getElementById('auto-reply-preview-subject')!.textContent = `Subject: ${result.data.subject as string}`;
     autoReplyPreviewFrame.srcdoc = result.data.html as string;
     autoReplyPreviewWrap.classList.remove('hidden');
-    setAutoReplyStatus('Preview shown with a sample name. This is exactly what a new lead receives.', 'info');
+    setAutoReplyStatus('Preview shown with a sample name. This is exactly what someone who sends an inquiry receives.', 'info');
   });
 
   document.getElementById('auto-reply-test')!.addEventListener('click', async () => {
