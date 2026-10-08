@@ -4058,6 +4058,236 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
   }
 }
 
+/* --------------------------------------------- Content plan (phase 3) */
+
+.cp-count {
+  margin: 0;
+}
+#plan-board-view .i-actions {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+#plan-board-view .i-search {
+  flex: 0 1 240px;
+}
+#plan-board-view .i-actions .a-btn {
+  white-space: nowrap;
+}
+.cp-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  gap: 12px;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.cp-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 160px;
+  padding: 12px;
+  border: 1px solid var(--a-line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--a-raise) 70%, transparent);
+  transition: border-color 0.15s, background 0.15s;
+}
+.cp-col.drop {
+  border-color: var(--a-accent);
+  background: var(--a-accent-soft);
+}
+.cp-col h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 2px 2px;
+  color: var(--a-fg);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.cp-col h2 small {
+  flex-basis: 100%;
+  color: var(--a-faint);
+  font-size: 12px;
+  font-weight: 400;
+}
+.cp-n {
+  margin-left: auto;
+  color: var(--a-muted);
+  font-size: 12px;
+}
+.cp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--a-faint);
+}
+.cp-col-assigned .cp-dot {
+  background: var(--a-warn);
+}
+.cp-col-drafted .cp-dot {
+  background: var(--a-accent);
+  box-shadow: 0 0 8px var(--a-accent-glow);
+}
+.cp-col-published .cp-dot {
+  background: var(--a-good);
+  box-shadow: 0 0 8px var(--a-good);
+}
+.cp-cards {
+  display: grid;
+  gap: 8px;
+}
+.cp-none {
+  margin: 0;
+  padding: 18px 8px;
+  border: 1px dashed var(--a-line2);
+  border-radius: 10px;
+  color: var(--a-faint);
+  font-size: 12.5px;
+  text-align: center;
+}
+.cp-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--a-line);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--a-card-top), var(--a-card-bot)), var(--a-panel);
+  box-shadow: var(--a-lift);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.cp-card[draggable='true'] {
+  cursor: grab;
+}
+.cp-card:hover {
+  border-color: var(--a-line2);
+  transform: translateY(-1px);
+}
+.cp-card.dragging {
+  opacity: 0.45;
+}
+.cp-card.cp-high {
+  box-shadow: inset 2px 0 0 var(--a-violet), var(--a-lift);
+}
+.cp-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cp-type {
+  color: var(--a-faint);
+  font-size: 11.5px;
+}
+.cp-title {
+  color: var(--a-fg);
+  font-weight: 500;
+  line-height: 1.35;
+}
+.cp-meta {
+  display: grid;
+  gap: 3px;
+  font-size: 12.5px;
+}
+.cp-kw {
+  color: var(--a-accent);
+}
+.cp-q {
+  color: var(--a-muted);
+  font-style: italic;
+}
+.cp-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--a-muted);
+  font-size: 12px;
+}
+.cp-foot:empty {
+  display: none;
+}
+.cp-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cp-due.late {
+  color: var(--a-bad);
+  font-weight: 500;
+}
+.cp-draft {
+  justify-self: start;
+}
+.cp-move {
+  display: none;
+}
+.cp-card:hover .cp-move,
+.cp-card:focus-within .cp-move {
+  display: block;
+}
+.cp-status {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--a-line2);
+  border-radius: 8px;
+  font: 12.5px var(--a-font);
+}
+.cp-more {
+  align-self: center;
+  font-size: 12.5px;
+}
+.cp-mine {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+.cp-mine .cp-card {
+  cursor: default;
+}
+.cp-mine .cp-top .cp-status {
+  width: auto;
+}
+.cp-notes-l {
+  display: grid;
+  gap: 4px;
+  color: var(--a-muted);
+  font-size: 12px;
+}
+.cp-notes-l textarea {
+  padding: 7px 9px;
+  border: 1px solid var(--a-line2);
+  border-radius: 8px;
+  font: 13px/1.45 var(--a-font);
+}
+@media (hover: none) {
+  .cp-move {
+    display: block;
+  }
+}
+@media (max-width: 640px) {
+  #plan-board-view .i-actions {
+    width: 100%;
+  }
+  #plan-board-view .i-search {
+    flex: 1 1 auto;
+  }
+  .cp-board {
+    grid-template-columns: repeat(4, 82vw);
+    scroll-snap-type: x mandatory;
+  }
+  .cp-col {
+    scroll-snap-align: start;
+  }
+}
+
 /* --------------------------------------------------------------------
  * Compatibility layer for the existing admin screens. Maps the utility
  * classes they already use onto the new tokens. Scoped to .a-view (the
