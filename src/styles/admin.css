@@ -2105,6 +2105,7 @@ html.cmc-admin [hidden] {
   gap: 12px;
 }
 .i-field textarea,
+.i-field input[type='number'],
 .i-field input[type='email'],
 .i-field input[type='tel'],
 .i-field input[type='url'] {
@@ -4602,6 +4603,127 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
 }
 @media (max-width: 1000px) {
   .bi-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --------------------------------------- Counselor settings (phase 3) */
+
+.cs-head {
+  align-items: center;
+}
+.cs-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+.cs-avail .tm-role {
+  align-items: center;
+  padding: 8px 12px;
+}
+.cs-avail .tm-role input {
+  margin-top: 0;
+}
+.cs-tele {
+  padding: 4px 0;
+}
+.cs-mods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  max-height: 240px;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid var(--a-line);
+  border-radius: 10px;
+  background: var(--a-raise);
+}
+.cs-mod {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  color: var(--a-fg2);
+  font-size: 13px;
+  cursor: pointer;
+}
+.cs-mod:hover {
+  background: var(--a-hover);
+}
+.cs-mod:has(input:checked) {
+  color: var(--a-fg);
+}
+.cs-mod.hidden {
+  display: none;
+}
+.cs-private {
+  margin: -8px 0 4px;
+}
+.cs-num {
+  width: 120px !important;
+}
+.cs-target {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--a-line);
+  border-radius: 10px;
+  background: var(--a-raise);
+}
+.cs-target > span {
+  color: var(--a-muted);
+  font-size: 12.5px;
+}
+.cs-target b {
+  color: var(--a-fg);
+  font-size: 20px;
+  font-weight: 500;
+}
+.cs-target small {
+  color: var(--a-faint);
+  font-size: 12px;
+}
+.cs-meter-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: var(--a-fg2);
+  font-size: 13px;
+}
+.cs-hint {
+  margin-top: 10px;
+  font-size: 12.5px;
+  font-weight: 400;
+}
+.cs-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cs-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cs-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+@media (max-width: 1000px) {
+  .cs-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .cs-mods {
     grid-template-columns: minmax(0, 1fr);
   }
 }

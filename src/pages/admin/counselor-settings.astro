@@ -4,80 +4,58 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
 ---
 
 <AdminLayout title="Counselor settings | Admin" current="counselor-settings">
-  <div class="max-w-lg space-y-6">
-    <section>
-      <p class="mb-4 text-sm text-slate-600">
-        Shown on your counselor page — your availability pill, telehealth badge, license number, and
-        training/modalities tags. Update any of these any time.
-      </p>
-
-      <div id="picker-wrap" class="hidden mb-4">
-        <label class="mb-1 block text-sm font-semibold text-slate-700">Counselor</label>
-        <select id="counselor-page-select" class="w-full rounded-md border border-slate-300 px-4 py-2"></select>
-        <p class="mt-1 text-xs text-slate-500">Owner/agency view — pick which counselor's settings to edit.</p>
+  <!--
+    Admin redesign phase 3 (2026-10-08): owners get a counselor list (it
+    drives the hidden #counselor-page-select); the form is two cards,
+    what's shown on the page and the private caseload. Same ids and saves.
+  -->
+  <p class="i-intro">What each counselor's page shows (availability, telehealth, credentials, training) and their private caseload.</p>
+  <div class="p-layout">
+    <aside class="t-card p-nav" id="cs-nav" hidden>
+      <nav id="cs-list" class="p-list" aria-label="Counselors"></nav>
+    </aside>
+    <div class="p-editor">
+      <div id="picker-wrap" class="hidden">
+        <select id="counselor-page-select" hidden aria-hidden="true" tabindex="-1"></select>
       </div>
 
-      <div id="not-linked-notice" class="hidden rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-        Your login isn't linked to a counselor page yet — ask the site owner to link one from the Team page.
+      <div id="not-linked-notice" class="hidden t-card t-empty">
+        <b>Your login isn't linked to a counselor page yet</b>Ask the practice owner to link one from the Team page.
       </div>
 
-      <div id="settings-form" class="hidden space-y-6">
-        <p id="settings-page-name" class="font-semibold text-brand-ink"></p>
-
-        <div class="space-y-2">
-          <label class="mb-1 block text-sm font-semibold text-slate-700">Availability</label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2.5">
-            <input type="radio" name="availability-status" value="accepting" class="availability-radio" />
-            <span class="text-sm font-medium">Accepting New Clients</span>
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2.5">
-            <input type="radio" name="availability-status" value="almost_full" class="availability-radio" />
-            <span class="text-sm font-medium">Almost Full</span>
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2.5">
-            <input type="radio" name="availability-status" value="not_accepting" class="availability-radio" />
-            <span class="text-sm font-medium">Not Accepting New Clients</span>
-          </label>
+      <div id="settings-form" class="hidden">
+        <div class="t-card p-head cs-head">
+          <div>
+            <span class="p-type">Counselor</span>
+            <h2 id="settings-page-name"></h2>
+          </div>
+          <span id="cs-pill" class="r-stage"></span>
         </div>
 
-        <label class="flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2.5">
-          <input type="checkbox" id="telehealth-checkbox" />
-          <span class="text-sm font-medium">Telehealth available</span>
-        </label>
-
-        <div>
-          <label class="mb-1 block text-sm font-semibold text-slate-700">License number</label>
-          <input
-            id="license-input"
-            type="text"
-            placeholder="e.g. LPCA 12345"
-            class="w-full rounded-md border border-slate-300 px-4 py-2"
-          />
-          <p class="mt-1 text-xs text-slate-500">Optional — shown next to your credentials on your page. Leave blank to hide it.</p>
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-semibold text-slate-700">Professional title</label>
-          <input
-            id="professional-title-input"
-            type="text"
-            placeholder="e.g. Licensed Professional Counselor Associate"
-            class="w-full rounded-md border border-slate-300 px-4 py-2"
-          />
-          <p class="mt-1 text-xs text-slate-500">Optional — the spelled-out form of your credentials, shown near your name. Leave blank to hide it.</p>
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-semibold text-slate-700">Education</label>
-          <input
-            id="education-input"
-            type="text"
-            placeholder="e.g. M.A. Clinical Mental Health Counseling, Colorado Christian University"
-            class="w-full rounded-md border border-slate-300 px-4 py-2"
-          />
-          <p class="mt-1 text-xs text-slate-500">Optional — your degree and school, shown near your credentials. Leave blank to hide it.</p>
-        </div>
-
+        <div class="cs-grid">
+          <section class="t-card i-fields">
+            <h2>Shown on your page</h2>
+            <fieldset class="tm-roles cs-avail">
+              <legend>Availability</legend>
+              <label class="tm-role"><input type="radio" name="availability-status" value="accepting" class="availability-radio" /><span><b>Accepting new clients</b></span></label>
+              <label class="tm-role"><input type="radio" name="availability-status" value="almost_full" class="availability-radio" /><span><b>Almost full</b></span></label>
+              <label class="tm-role"><input type="radio" name="availability-status" value="not_accepting" class="availability-radio" /><span><b>Not accepting new clients</b></span></label>
+            </fieldset>
+            <label class="i-check cs-tele"><input type="checkbox" id="telehealth-checkbox" /><span>Telehealth available</span></label>
+            <div class="i-field">
+              <label for="license-input">License number</label>
+              <input id="license-input" type="text" placeholder="e.g. LPCA 12345" />
+              <span class="i-hint">Shown next to your credentials. Leave blank to hide it.</span>
+            </div>
+            <div class="i-field">
+              <label for="professional-title-input">Professional title</label>
+              <input id="professional-title-input" type="text" placeholder="e.g. Licensed Professional Counselor Associate" />
+              <span class="i-hint">The spelled-out form of your credentials. Leave blank to hide it.</span>
+            </div>
+            <div class="i-field">
+              <label for="education-input">Education</label>
+              <input id="education-input" type="text" placeholder="e.g. M.A. Clinical Mental Health Counseling" />
+            </div>
         <div>
           <label class="mb-1 block text-sm font-semibold text-slate-700">Training &amp; modalities</label>
           <input
@@ -86,9 +64,9 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
             placeholder="Search modalities..."
             class="mb-2 w-full rounded-md border border-slate-300 px-4 py-2 text-sm"
           />
-          <div id="modality-options" class="grid max-h-64 grid-cols-1 gap-0.5 overflow-y-auto rounded-md border border-slate-200 p-2 sm:grid-cols-2">
+          <div id="modality-options" class="cs-mods">
             {MODALITY_OPTIONS.map((option) => (
-              <label class="modality-option flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-slate-50" data-modality={option.toLowerCase()}>
+              <label class="modality-option cs-mod" data-modality={option.toLowerCase()}>
                 <input type="checkbox" class="modality-checkbox" value={option} />
                 <span>{option}</span>
               </label>
@@ -109,7 +87,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
               <button
                 type="button"
                 id="add-custom-modality-button"
-                class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                class="a-btn i-btn"
               >
                 Add
               </button>
@@ -117,86 +95,48 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
           </div>
         </div>
 
-        <button
-          id="settings-save-button"
-          type="button"
-          class="rounded-md bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
-        >
-          Save
-        </button>
-        <p id="settings-status-msg" class="text-sm" role="status"></p>
+            <button id="settings-save-button" type="button" class="a-btn a-btn-primary">Save</button>
+            <p id="settings-status-msg" class="i-hint" role="status"></p>
+          </section>
 
-        <!--
-          Caseload lives in its own table (counselor_caseload), not on
-          `pages`, so it has its own Save: it's private, never on the
-          public site, and saving it needs no site rebuild. See
-          0066_caseload_tracking.sql.
-        -->
-        <div class="space-y-4 border-t border-slate-200 pt-6">
-          <div>
-            <p class="font-semibold text-brand-ink">Caseload</p>
-            <p class="mt-1 text-xs text-slate-500">Private. Never shown on your website. Feeds the practice's Caseload dashboard.</p>
-          </div>
-
-          <div>
-            <label for="weekly-target-input" class="mb-1 block text-sm font-semibold text-slate-700">Clients you want to see per week</label>
-            <input
-              id="weekly-target-input"
-              type="number"
-              min="1"
-              max="60"
-              inputmode="numeric"
-              placeholder="e.g. 20"
-              class="w-32 rounded-md border border-slate-300 px-4 py-2"
-            />
-            <p id="weekly-target-guidance" class="mt-1 text-xs text-slate-500"></p>
-          </div>
-
-          <div id="target-caseload-box" class="hidden rounded-md border border-slate-200 bg-white px-4 py-3">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Your full caseload</p>
-            <p class="mt-0.5 text-sm text-slate-700">
-              <span id="target-caseload-value" class="font-[family-name:var(--font-heading)] text-2xl font-extrabold text-brand-ink"></span>
-              clients
-            </p>
-            <p id="target-caseload-explainer" class="mt-1 text-xs text-slate-500"></p>
-          </div>
-
-          <div>
-            <label for="current-clients-input" class="mb-1 block text-sm font-semibold text-slate-700">Current active clients</label>
-            <input
-              id="current-clients-input"
-              type="number"
-              min="0"
-              max="200"
-              inputmode="numeric"
-              placeholder="e.g. 14"
-              class="w-32 rounded-md border border-slate-300 px-4 py-2"
-            />
-            <p class="mt-1 text-xs text-slate-500">Everyone you're currently seeing, however often. Update it whenever it changes.</p>
-          </div>
-
-          <div id="caseload-meter" class="hidden">
-            <div class="mb-1 flex items-baseline justify-between text-sm">
-              <span id="caseload-meter-label" class="font-semibold text-brand-ink"></span>
-              <span id="caseload-meter-open" class="text-slate-600"></span>
+          <!--
+            Caseload lives in its own table (counselor_caseload), not on
+            `pages`, so it has its own Save: it's private, never on the
+            public site, and saving it needs no site rebuild. See
+            0066_caseload_tracking.sql.
+          -->
+          <section class="t-card i-fields cs-caseload">
+            <h2>Caseload<span class="t-aside">Private</span></h2>
+            <p class="i-hint cs-private">Never shown on your website. Feeds the Caseload screen.</p>
+            <div class="i-field">
+              <label for="weekly-target-input">Clients you want to see per week</label>
+              <input id="weekly-target-input" type="number" min="1" max="60" inputmode="numeric" placeholder="e.g. 20" class="cs-num" />
+              <span id="weekly-target-guidance" class="i-hint"></span>
             </div>
-            <div class="h-3 rounded-full bg-slate-100">
-              <div id="caseload-meter-bar" class="h-3 rounded-full" style="width: 0%"></div>
+            <div id="target-caseload-box" class="hidden cs-target">
+              <span>Your full caseload</span>
+              <b><span id="target-caseload-value" class="a-num"></span> clients</b>
+              <small id="target-caseload-explainer"></small>
             </div>
-            <p id="caseload-availability-hint" class="mt-2 hidden rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"></p>
-          </div>
-
-          <button
-            id="caseload-save-button"
-            type="button"
-            class="rounded-md bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
-          >
-            Save caseload
-          </button>
-          <p id="caseload-status-msg" class="text-sm" role="status"></p>
+            <div class="i-field">
+              <label for="current-clients-input">Current active clients</label>
+              <input id="current-clients-input" type="number" min="0" max="200" inputmode="numeric" placeholder="e.g. 14" class="cs-num" />
+              <span class="i-hint">Everyone you're seeing, however often. Booking a client adds one automatically.</span>
+            </div>
+            <div id="caseload-meter" class="hidden">
+              <div class="cs-meter-top">
+                <span id="caseload-meter-label"></span>
+                <span id="caseload-meter-open"></span>
+              </div>
+              <div class="t-track m-track"><div id="caseload-meter-bar" class="t-fill" style="width: 0%"></div></div>
+              <p id="caseload-availability-hint" class="hidden v-warn cs-hint"></p>
+            </div>
+            <button id="caseload-save-button" type="button" class="a-btn a-btn-primary">Save caseload</button>
+            <p id="caseload-status-msg" class="i-hint" role="status"></p>
+          </section>
         </div>
       </div>
-    </section>
+    </div>
   </div>
 </AdminLayout>
 
@@ -208,7 +148,6 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     ALMOST_FULL_THRESHOLD,
     CASELOAD_MULTIPLIER,
     WEEKLY_TARGET_GUIDANCE,
-    caseloadBarClass,
     percentFull,
     targetCaseload,
     type CounselorCaseload,
@@ -291,7 +230,9 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     caseloadMeterOpen.textContent =
       open > 0 ? `${open} open spot${open === 1 ? '' : 's'}` : open === 0 ? 'Full' : `${-open} over full`;
     caseloadMeterBar.style.width = `${percentFull(current, target)}%`;
-    caseloadMeterBar.className = `h-3 rounded-full ${caseloadBarClass(current, target)}`;
+    // Same bands as the Caseload screen.
+    const ratio = current / target;
+    caseloadMeterBar.className = 't-fill' + (ratio >= ALMOST_FULL_THRESHOLD ? ' good' : ratio < 0.6 ? ' low' : '');
 
     // Only a nudge, never an automatic change: the public availability
     // pill stays the counselor's own call.
@@ -314,16 +255,16 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     const current = readIntInput(currentClientsInput);
     if (weekly !== null && (weekly < 1 || weekly > 60)) {
       caseloadStatusMsg.textContent = 'Clients per week should be between 1 and 60.';
-      caseloadStatusMsg.className = 'text-sm text-red-600';
+      caseloadStatusMsg.className = 'i-hint r-err';
       return;
     }
     if (current !== null && (current < 0 || current > 200)) {
       caseloadStatusMsg.textContent = 'Current active clients should be between 0 and 200.';
-      caseloadStatusMsg.className = 'text-sm text-red-600';
+      caseloadStatusMsg.className = 'i-hint r-err';
       return;
     }
     caseloadStatusMsg.textContent = 'Saving...';
-    caseloadStatusMsg.className = 'text-sm text-slate-600';
+    caseloadStatusMsg.className = 'i-hint';
     const row = {
       counselor_page_id: selectedPage.id,
       weekly_client_target: weekly,
@@ -333,12 +274,12 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     const { error } = await supabase.from('counselor_caseload').upsert(row);
     if (error) {
       caseloadStatusMsg.textContent = 'Could not save: ' + error.message;
-      caseloadStatusMsg.className = 'text-sm text-red-600';
+      caseloadStatusMsg.className = 'i-hint r-err';
       return;
     }
     caseloads.set(selectedPage.id, row);
     caseloadStatusMsg.textContent = 'Caseload saved.';
-    caseloadStatusMsg.className = 'text-sm text-emerald-700';
+    caseloadStatusMsg.className = 'i-hint r-ok';
   });
 
   function loadCaseloadForm() {
@@ -433,6 +374,8 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     }
     settingsForm.classList.remove('hidden');
     settingsPageName.textContent = selectedPage.title;
+    renderPill();
+    csList.querySelectorAll<HTMLElement>('.p-item').forEach((b) => b.setAttribute('aria-current', String(b.dataset.pageId === selectedPage!.id)));
     radios.forEach((r) => {
       r.checked = r.value === selectedPage!.availability_status;
     });
@@ -455,6 +398,39 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     loadCaseloadForm();
   }
 
+  // --- Admin redesign: counselor list (owner/agency) and status pill ---
+  const csList = document.getElementById('cs-list')!;
+  const AVAIL: Record<string, { label: string; cls: string }> = {
+    accepting: { label: 'Accepting new clients', cls: 'r-stage-active' },
+    almost_full: { label: 'Almost full', cls: 'r-stage-contacted' },
+    not_accepting: { label: 'Not accepting', cls: 'r-stage-inactive' },
+  };
+  function renderPill() {
+    const value = document.querySelector<HTMLInputElement>('.availability-radio:checked')?.value ?? selectedPage?.availability_status ?? '';
+    const a = AVAIL[value];
+    const pill = document.getElementById('cs-pill')!;
+    pill.hidden = !a;
+    if (a) {
+      pill.className = `r-stage ${a.cls}`;
+      pill.textContent = a.label;
+    }
+  }
+  document.querySelector('.cs-avail')!.addEventListener('change', renderPill);
+  function renderCounselorList() {
+    csList.innerHTML = counselorPages
+      .map((p) => {
+        const a = AVAIL[p.availability_status ?? ''];
+        return `<button type="button" class="p-item cs-item" data-page-id="${p.id}" aria-current="${p.id === selectedPage?.id}"><span>${escapeHtml(p.title)}</span>${a ? `<i class="cs-dot ${a.cls}" title="${a.label}"></i>` : ''}</button>`;
+      })
+      .join('');
+  }
+  csList.addEventListener('click', (event) => {
+    const item = (event.target as HTMLElement).closest<HTMLElement>('.p-item');
+    if (!item) return;
+    pageSelect.value = item.dataset.pageId!;
+    pageSelect.dispatchEvent(new Event('change'));
+  });
+
   pageSelect.addEventListener('change', () => {
     selectedPage = counselorPages.find((p) => p.id === pageSelect.value) ?? null;
     loadForm();
@@ -468,7 +444,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
       .map((cb) => cb.value);
     const modalities = [...pickedModalities, ...customModalities];
     statusMsg.textContent = 'Saving...';
-    statusMsg.className = 'text-sm text-slate-600';
+    statusMsg.className = 'i-hint';
     const payload = {
       availability_status: checked?.value ?? null,
       telehealth_available: telehealthCheckbox.checked,
@@ -480,16 +456,17 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     const { error } = await supabase.from('pages').update(payload).eq('id', selectedPage.id);
     if (error) {
       statusMsg.textContent = 'Could not save: ' + error.message;
-      statusMsg.className = 'text-sm text-red-600';
+      statusMsg.className = 'i-hint r-err';
       return;
     }
     Object.assign(selectedPage, payload);
+    renderCounselorList();
     statusMsg.textContent = 'Saving your site...';
     const result = await triggerRebuild();
     statusMsg.textContent = result.ok
       ? 'Saved! Your site will update shortly.'
       : 'Saved, but the update trigger failed — it will go live on the next rebuild.';
-    statusMsg.className = result.ok ? 'text-sm text-emerald-700' : 'text-sm text-amber-700';
+    statusMsg.className = result.ok ? 'i-hint r-ok' : 'i-hint r-warn';
   });
 
   async function onAuthed(adminUser: AdminUser) {
@@ -503,6 +480,8 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
       pickerWrap.classList.remove('hidden');
       pageSelect.innerHTML = counselorPages.map((p) => `<option value="${p.id}">${escapeHtml(p.title)}</option>`).join('');
       selectedPage = counselorPages[0] ?? null;
+      document.getElementById('cs-nav')!.hidden = counselorPages.length < 2;
+      renderCounselorList();
       await loadCaseloads(counselorPages.map((p) => p.id));
       loadForm();
       return;
