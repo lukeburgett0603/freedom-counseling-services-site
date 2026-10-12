@@ -4554,3 +4554,20 @@ marked applied with `supabase migration repair --status applied` before
 pushing 0073-0075. Always `supabase db push --linked --dry-run` first: if
 it lists migrations you know are live, repair the history rather than
 re-running them.
+
+## Mobile LCP fix (2026-10-12, synced from the template)
+
+CMC's instant audit (PageSpeed mobile, 2026-10-12) scored this homepage
+64 with an 18.2s LCP. The hero photo itself was fine (57 KB WebP); ~5.3 MB
+of other downloads competed with it: three Turnstile widgets loading
+~2.2 MB of challenge files at page load, full-size Supabase headshots in
+the counselor cards (Luke's 2.3 MB JPG shown at 96px), and a
+render-blocking Google Fonts stylesheet. Same fix as the template (see
+its CLAUDE.md "Mobile LCP fix"): `src/lib/turnstile.ts` loads Turnstile
+on first form interaction or 4s after load, headshots go through
+`astro:assets` at 96/192px, hero `fetchpriority="high"`, non-blocking
+fonts, lazy lead-magnet image. Synced as identical targeted patches;
+this repo's other differences in `LeadMagnet.astro`, `Hero.astro`, and
+`OptimizedImage.astro` (its own design) were left untouched.
+Production build, local Lighthouse mobile: score 65 to 100, LCP 15.3s
+to 1.5s, CLS 0.
