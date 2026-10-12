@@ -42,16 +42,31 @@ export function loadTurnstileWhenNeeded() {
   else window.addEventListener('load', startIdleTimer, { once: true });
 }
 
+const RESET_AFTER_MS = 6000;
+
 // A fast visitor can submit before the widget has produced its token.
 // Wait for Cloudflare's hidden input to fill (up to timeoutMs) instead of
-// sending an empty token that submit-lead would reject.
-export async function waitForTurnstileToken(form: HTMLFormElement, timeoutMs = 15000): Promise<string | null> {
+// sending an empty token that submit-lead would reject. With several
+// widgets on one page, one occasionally stalls without ever issuing a
+// token (seen live on Freedom's homepage, 2026-10-12); resetting it once
+// fixes that, so do it automatically if nothing has arrived after 6s.
+export async function waitForTurnstileToken(form: HTMLFormElement, timeoutMs = 20000): Promise<string | null> {
   if (!form.querySelector('.cf-turnstile')) return null;
   loadScript();
   const started = Date.now();
+  let didReset = false;
   while (Date.now() - started < timeoutMs) {
     const input = form.querySelector<HTMLInputElement>('[name="cf-turnstile-response"]');
     if (input?.value) return input.value;
+    const turnstile = (window as unknown as { turnstile?: { reset: (id: string) => void } }).turnstile;
+    if (!didReset && input?.id && turnstile && Date.now() - started > RESET_AFTER_MS) {
+      didReset = true;
+      try {
+        turnstile.reset(input.id.replace(/_response$/, ''));
+      } catch {
+        // Widget not resettable; keep waiting for the timeout.
+      }
+    }
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
   return null;
