@@ -12,6 +12,7 @@ export const EXPORT_TABLES: { table: string; label: string }[] = [
   { table: 'lead_notes', label: 'Lead notes' },
   { table: 'referral_partners', label: 'Referral partners' },
   { table: 'referral_partner_activities', label: 'Referral partner activity' },
+  { table: 'link_opportunities', label: 'Link building tracker' },
   { table: 'counselor_caseload', label: 'Caseload settings' },
   { table: 'review_snapshots', label: 'Google review log' },
   { table: 'business', label: 'Business info and settings' },

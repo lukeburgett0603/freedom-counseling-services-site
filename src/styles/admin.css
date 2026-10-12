@@ -2221,6 +2221,78 @@ html.cmc-admin [hidden] {
   }
 }
 
+/* ------------------------------------------------- Links (link building) */
+
+.lk-stage-todo {
+  color: var(--a-muted);
+}
+.lk-stage-in_progress {
+  border-color: color-mix(in srgb, var(--a-accent) 40%, transparent);
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+}
+.lk-stage-submitted {
+  border-color: var(--a-warn-line);
+  background: var(--a-warn-soft);
+  color: var(--a-warn);
+}
+.lk-stage-live {
+  border-color: var(--a-good-line);
+  background: var(--a-good-soft);
+  color: var(--a-good);
+}
+.lk-stage-live::before {
+  box-shadow: 0 0 8px var(--a-good);
+}
+.lk-stage-skipped {
+  border-color: var(--a-line);
+  color: var(--a-faint);
+}
+.lk-chip-in_progress b {
+  color: var(--a-accent);
+}
+.lk-chip-submitted b {
+  color: var(--a-warn);
+}
+.lk-chip-live b {
+  color: var(--a-good);
+}
+.lk-chip-skipped b {
+  color: var(--a-muted);
+}
+.lk-rules {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--a-fg2);
+  line-height: 1.55;
+}
+.lk-rules li + li {
+  margin-top: 6px;
+}
+.lk-cost {
+  margin: 0 0 10px;
+  color: var(--a-fg2);
+}
+.lk-steps {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--a-fg);
+  line-height: 1.6;
+}
+.lk-steps li + li {
+  margin-top: 6px;
+}
+.lk-quick {
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--a-line);
+}
+.lk-empty-btn {
+  display: inline-flex;
+  margin-top: 12px;
+}
+
 /* -------------------------------------------------- Reviews (phase 3) */
 
 .v-name {
