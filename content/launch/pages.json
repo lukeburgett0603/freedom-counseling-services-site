@@ -737,31 +737,66 @@
       "meta_title": "Tony Gore, LCSW | Counselor in Louisville, KY",
       "meta_description": "Tony Gore, LCSW, is the owner and director of Freedom Counseling Services, working with couples, families, teens, and men in Louisville. $160 per session.",
       "cta_button_text": "Request an appointment",
-      "faqs": []
+      "faqs": [],
+      "images": {
+        "headshot": {
+          "alt": "Tony Gore smiling outdoors in a plaid shirt, with autumn foliage in the background",
+          "url": "https://shxtgmjbfojmwhrebjpr.supabase.co/storage/v1/object/public/site-images/counselors/tony-gore-1788485372.webp",
+          "focus": "45% 5%"
+        }
+      }
     },
     "rhonda-gore": {
       "meta_title": "Rhonda Gore, MFT, Life Coach | Counselor in Louisville, KY",
       "meta_description": "Rhonda Gore helps older teens and women of every age work through shame, anxiety, grief, and questions of worth, in Louisville and online. $100 per session.",
       "cta_button_text": "Request an appointment",
-      "faqs": []
+      "faqs": [],
+      "images": {
+        "headshot": {
+          "alt": "Rhonda Gore smiling indoors in a black cardigan, with a stone fireplace in the background",
+          "url": "https://shxtgmjbfojmwhrebjpr.supabase.co/storage/v1/object/public/site-images/counselors/rhonda-gore-1788485372.webp",
+          "focus": "55% 6%"
+        }
+      }
     },
     "staci-harrub": {
       "meta_title": "Staci Harrub, LPCA | EMDR Counselor in Louisville, KY",
       "meta_description": "Staci Harrub, LPCA, is EMDR-trained and helps adults work through trauma, grief, anxiety, and life transitions, in Louisville and online. $100 per session.",
       "cta_button_text": "Request an appointment",
-      "faqs": []
+      "faqs": [],
+      "images": {
+        "headshot": {
+          "alt": "Staci Harrub smiling outdoors in front of a brick wall, wearing a tan button-up shirt",
+          "url": "https://shxtgmjbfojmwhrebjpr.supabase.co/storage/v1/object/public/site-images/counselors/staci-harrub-1788485372.webp",
+          "focus": "50% 5%"
+        }
+      }
     },
     "luke-burgett": {
       "meta_title": "Luke Burgett, LPCA | Counselor for Men and Boys in Louisville, KY",
       "meta_description": "Luke Burgett, LPCA, helps boys and men age 8 and up work through anxiety, depression, OCD, and trauma, including ERP for OCD. In Louisville and online. $115 per session.",
       "cta_button_text": "Request an appointment",
-      "faqs": []
+      "faqs": [],
+      "images": {
+        "headshot": {
+          "alt": "Luke Burgett Headshot",
+          "url": "https://shxtgmjbfojmwhrebjpr.supabase.co/storage/v1/object/public/site-images/content/1789059493407-Luke_Burgett.jpg",
+          "focus": "48% 18%"
+        }
+      }
     },
     "sophie-bowman": {
       "meta_title": "Sophie Bowman, Student Counselor | Child and Teen Counseling in Louisville, KY",
       "meta_description": "Sophie Bowman, Student Counselor supervised by Tony Gore, LCSW, works with children 8 and up, teens, and young adults, using play and art therapy. $50 per session.",
       "cta_button_text": "Request an appointment",
-      "faqs": []
+      "faqs": [],
+      "images": {
+        "headshot": {
+          "alt": "Sophie Bowman smiling in a graduation cap and gown, seated outdoors among palm trees",
+          "url": "https://shxtgmjbfojmwhrebjpr.supabase.co/storage/v1/object/public/site-images/counselors/sophie-bowman-1788485372.webp",
+          "focus": "60% 28%"
+        }
+      }
     },
     "home": {
       "h1": "Find a therapist in Louisville who understands what you're carrying.",

@@ -20,13 +20,12 @@ const layout = people.length >= 5 ? 'five' : people.length === 4 ? 'four' : 'few
         <Image
           src={p.photo.url}
           alt={p.photo.alt || p.name}
-          width={i === 0 ? 640 : 400}
-          height={i === 0 ? 640 : 400}
+          inferSize
           widths={i === 0 ? [320, 480, 640] : [200, 300, 400]}
           sizes={i === 0 ? '(max-width: 1023px) 66vw, 280px' : '(max-width: 1023px) 33vw, 140px'}
           loading={i === 0 ? 'eager' : 'lazy'}
           fetchpriority={i === 0 ? 'high' : 'auto'}
-          style={p.photo.focus ? `object-position:${p.photo.focus}` : undefined}
+          style={`object-position:${p.photo.focus ?? 'var(--headshot-focus)'}`}
         />
       </figure>
     ))}
@@ -45,5 +44,9 @@ const layout = people.length >= 5 ? 'five' : people.length === 4 ? 'four' : 'few
   .pm-four { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 170px; }
   .pm-few { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 220px; }
   .pm-few .pm-0:last-child { grid-column: 1 / -1; }
-  @media (max-width: 767px) { .pm { grid-auto-rows: 96px; gap: 8px; } .pm-four { grid-auto-rows: 140px; } }
+  /* One column below desktop: keep the mosaic near its desktop shape
+     (tiles close to square) instead of stretching it full width, which
+     turns tiles into thin strips that crop faces. */
+  @media (max-width: 1023px) { .pm { max-width: 440px; grid-auto-rows: 136px; } .pm-four, .pm-few { grid-auto-rows: 190px; } }
+  @media (max-width: 767px) { .pm { grid-auto-rows: 104px; gap: 8px; } .pm-four, .pm-few { grid-auto-rows: 150px; } }
 </style>

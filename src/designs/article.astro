@@ -40,7 +40,7 @@ const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !=
       {service && <a class="ar-cat" href={withBase(`/${service.slug}`)}>{service.title}</a>}
       <h1>{page.h1 ?? page.title}</h1>
       <div class="ar-by">
-        {headshot && <Image src={headshot.url} alt="" width={96} height={96} style={headshot.focus ? `object-position:${headshot.focus}` : undefined} />}
+        {headshot && <Image src={headshot.url} alt="" inferSize widths={[112]} sizes="48px" style={`object-position:${headshot.focus ?? 'var(--headshot-focus)'}`} />}
         <div>
           {page.author_name && (author ? <a href={withBase(`/${author.slug}`)}>{page.author_name}</a> : <span>{page.author_name}</span>)}
           <small>{[author ? readText(allBlocks.get(author.id) ?? new Map(), [], 'card.credential') || credentialLine(author) : page.credentials, dateLabel].filter(Boolean).join(' · ')}</small>

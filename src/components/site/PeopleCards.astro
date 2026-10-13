@@ -38,7 +38,7 @@ const H = headingLevel;
           <li>
             <a class="pc-card" href={p.href}>
               {p.photo ? (
-                <Image src={p.photo.url} alt={p.photo.alt || p.name} width={480} height={600} widths={[240, 360, 480]} sizes="(max-width: 1023px) 72vw, 240px" style={p.photo.focus ? `object-position:${p.photo.focus}` : undefined} />
+                <Image src={p.photo.url} alt={p.photo.alt || p.name} inferSize widths={[240, 360, 480]} sizes="(max-width: 1023px) 72vw, 240px" style={`object-position:${p.photo.focus ?? 'var(--headshot-focus)'}`} />
               ) : <div class="pc-noimg" aria-hidden="true" />}
               <div class="pc-body">
                 <span class="pc-name">{p.name}</span>

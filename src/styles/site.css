@@ -25,6 +25,10 @@
   --max: 1200px;
   --gutter: 24px;
   --section-y: 96px;
+  /* Where to frame headshots when a photo has no focus point of its own
+     (ImageSlot.focus). Portraits usually have the face in the top third,
+     so frame high rather than at the center. */
+  --headshot-focus: 50% 22%;
 }
 
 .site { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 18px; line-height: 1.6; -webkit-font-smoothing: antialiased; }

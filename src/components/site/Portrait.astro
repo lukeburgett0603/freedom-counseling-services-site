@@ -9,7 +9,7 @@ const { photo, name } = Astro.props;
 
 {photo && (
   <figure class="pt">
-    <Image src={photo.url} alt={photo.alt || name} width={720} height={860} widths={[360, 540, 720]} sizes="(max-width: 1023px) 90vw, 420px" loading="eager" fetchpriority="high" style={photo.focus ? `object-position:${photo.focus}` : undefined} />
+    <Image src={photo.url} alt={photo.alt || name} inferSize widths={[360, 540, 720]} sizes="(max-width: 1023px) 90vw, 420px" loading="eager" fetchpriority="high" style={`object-position:${photo.focus ?? 'var(--headshot-focus)'}`} />
   </figure>
 )}
 

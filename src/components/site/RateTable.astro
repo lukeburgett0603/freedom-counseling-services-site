@@ -23,7 +23,7 @@ const shown = rows.filter((r) => r.rate !== null);
         {shown.map((r) => (
           <li>
             <a href={r.href}>
-              {r.photo ? <Image src={r.photo.url} alt="" width={96} height={96} style={r.photo.focus ? `object-position:${r.photo.focus}` : undefined} /> : <span class="rt-ph" />}
+              {r.photo ? <Image src={r.photo.url} alt="" inferSize widths={[112]} sizes="56px" style={`object-position:${r.photo.focus ?? 'var(--headshot-focus)'}`} /> : <span class="rt-ph" />}
               <span class="rt-name"><strong>{r.name}</strong><small>{r.credential}</small></span>
               <span class="rt-rate">${r.rate}<small> per session</small></span>
             </a>
