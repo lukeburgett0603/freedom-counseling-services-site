@@ -32,6 +32,9 @@ export const STORYBRAND_SPLIT_PAGE_TYPES: PageType[] = ['Homepage', 'Service Pag
 export interface ImageSlot {
   url: string;
   alt: string;
+  // Site system v2: CSS object-position for crops ("50% 25%"), so a
+  // headshot keeps the face in frame in every crop shape.
+  focus?: string;
   // Only set for Unsplash-sourced photos — required for their API's
   // attribution guidelines. Absent for client-supplied photos.
   creditName?: string;
@@ -170,6 +173,9 @@ export interface Page {
   // client's own licensing scheme with no code change. Self-service on
   // admin/counselor-settings.astro. See 0037_counselor_education_and_title.sql.
   professional_title: string | null;
+  // Counselor Profile only: per-session rate in whole dollars
+  // (0079_counselor_session_rate.sql). Null = not published.
+  session_rate_usd: number | null;
   // Only meaningful on a 'Counselor Profile' page - an optional
   // persuasive tagline rendered as the literal <h1> instead of the
   // counselor's own name (page.title stays visible elsewhere in the

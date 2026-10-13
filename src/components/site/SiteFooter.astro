@@ -1,0 +1,96 @@
+---
+// Site system v2 footer: practice details (address, hours from the same
+// data as the structured data, phone, email), a neutral "Find us on
+// Google" link (never a review ask), footer pages by column, the client
+// portal link, the crisis line, and the discreet admin login.
+import type { Page, Business } from '../../lib/pages';
+import { withBase } from '../../lib/url';
+import { formatHours, fullAddress } from '../../lib/hours';
+import Ph from './Ph.astro';
+
+interface Props {
+  navPages: Page[];
+  business: Business;
+}
+
+const { navPages, business } = Astro.props;
+const hrefFor = (p: Page) => withBase(p.page_type === 'Homepage' ? '/' : `/${p.slug}`);
+const footerPages = navPages.filter((p) => p.nav_placement === 'footer').sort((a, b) => a.nav_order - b.nav_order);
+const primary = navPages
+  .filter((p) => p.nav_placement === 'primary' && !p.parent_page_id && p.page_type !== 'Homepage')
+  .sort((a, b) => a.nav_order - b.nav_order);
+const legal = footerPages.filter((p) => p.footer_column === 'legal');
+const more = footerPages.filter((p) => p.footer_column !== 'legal');
+const hours = formatHours(business.opening_hours);
+const address = fullAddress(business);
+const tel = business.telephone?.replace(/[^0-9+]/g, '');
+const year = new Date().getFullYear();
+---
+
+<footer class="sf">
+  <div class="s-wrap sf-grid">
+    <div class="sf-brand">
+      {business.logo_url ? <img src={business.logo_url} alt={business.display_name} height="40" loading="lazy" /> : <strong>{business.display_name}</strong>}
+      {address && <p>{address}</p>}
+      {hours.length > 0 && <p>{hours.map((h, i) => <Fragment>{i > 0 && <br />}{h}</Fragment>)}</p>}
+    </div>
+    <div>
+      <h2 class="sf-h">Reach us</h2>
+      <ul>
+        {tel && <li><a href={`tel:${tel}`}>{business.telephone}</a></li>}
+        {business.email && <li><a href={`mailto:${business.email}`}>{business.email}</a></li>}
+        {business.google_maps_url && (
+          <li><a href={business.google_maps_url} target="_blank" rel="noopener">Find us on Google <Ph name="arrow-up-right" /></a></li>
+        )}
+        {business.client_portal_url && (
+          <li><a href={business.client_portal_url} target="_blank" rel="noopener">Client portal <Ph name="arrow-up-right" /></a></li>
+        )}
+      </ul>
+    </div>
+    <div>
+      <h2 class="sf-h">Explore</h2>
+      <ul>{primary.map((p) => <li><a href={hrefFor(p)}>{p.title}</a></li>)}</ul>
+    </div>
+    {more.length > 0 && (
+      <div>
+        <h2 class="sf-h">More</h2>
+        <ul>{more.map((p) => <li><a href={hrefFor(p)}>{p.title}</a></li>)}</ul>
+      </div>
+    )}
+  </div>
+
+  {business.show_crisis_resources && (
+    <div class="s-wrap">
+      <p class="sf-crisis">
+        <Ph name="lifebuoy" />
+        <span>If you're in crisis, call or text <a href="tel:988">988</a> (Suicide &amp; Crisis Lifeline), or call <a href="tel:911">911</a>.</span>
+      </p>
+    </div>
+  )}
+
+  <div class="s-wrap sf-base">
+    <span>© {year} {business.legal_name ?? business.display_name}</span>
+    <span class="sf-legal">
+      {legal.map((p) => <a href={hrefFor(p)}>{p.title}</a>)}
+      <a href={withBase('/admin/analytics/leads')}>Admin login</a>
+    </span>
+  </div>
+</footer>
+
+<style>
+  .sf { margin-top: var(--section-y); border-top: 1px solid var(--line); padding: 56px 0 96px; font-size: 0.95rem; color: var(--muted); }
+  .sf-grid { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr; gap: 32px; }
+  .sf-brand img { height: 40px; width: auto; margin-bottom: 16px; }
+  .sf-brand p + p { margin-top: 10px; }
+  .sf-h { font-size: 0.95rem; font-weight: 700; color: var(--ink); letter-spacing: 0; margin-bottom: 10px; }
+  .sf ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .sf a { text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .sf a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .sf-crisis { margin-top: 32px; max-width: none; display: flex; gap: 10px; align-items: flex-start; padding: 14px 18px; border-radius: var(--radius-card); background: var(--tint); color: var(--ink); }
+  .sf-crisis :global(.ph) { font-size: 1.3rem; color: var(--accent); margin-top: 2px; }
+  .sf-crisis a { font-weight: 700; text-decoration: underline; }
+  .sf-base { margin-top: 28px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 0.85rem; }
+  .sf-legal { display: flex; gap: 18px; flex-wrap: wrap; }
+  @media (max-width: 1023px) { .sf-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 767px) { .sf-grid { grid-template-columns: 1fr; } .sf { padding-bottom: 110px; } }
+</style>

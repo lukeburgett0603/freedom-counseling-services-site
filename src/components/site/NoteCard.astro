@@ -1,0 +1,37 @@
+---
+// A quiet, bordered note for something people should know but that
+// isn't the main story (when we refer out, a policy). Not a banner.
+import { renderCopy } from '../../lib/markdown';
+import Ph from './Ph.astro';
+
+interface Props {
+  heading: string;
+  body: string; // markdown
+  icon?: string;
+}
+
+const { heading, body, icon = 'info' } = Astro.props;
+---
+
+{heading && body && (
+  <section class="s-section nc">
+    <div class="s-wrap s-reveal">
+      <div class="nc-card">
+        <Ph name={icon} />
+        <div>
+          <h2>{heading}</h2>
+          <div class="s-rich" set:html={renderCopy(body)} />
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .nc { padding-top: 0; }
+  .nc-card { display: grid; grid-template-columns: auto 1fr; gap: 18px; padding: 28px 32px; border: 1.5px solid var(--line); border-radius: var(--radius-card); max-width: 900px; }
+  .nc-card > :global(.ph) { font-size: 1.6rem; color: var(--accent); margin-top: 4px; }
+  h2 { font-size: 1.35rem; margin-bottom: 10px; }
+  .s-rich { color: var(--muted); }
+  @media (max-width: 767px) { .nc-card { padding: 22px; grid-template-columns: 1fr; gap: 8px; } }
+</style>

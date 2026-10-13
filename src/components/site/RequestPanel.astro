@@ -1,0 +1,250 @@
+---
+// The appointment request, at the end of every v2 page (id="request";
+// every "Request an appointment" button on the page scrolls here). Copy
+// and phone on the left, the form on the right, the crisis line beside
+// it. Same submit-lead endpoint, Turnstile, honeypot, counselor routing,
+// session format, lead source, and ad attribution as LeadGenerator.astro.
+// Differences, by design: a phone number OR an email is enough (people
+// reaching out to a counselor often prefer a call back), labels sit
+// above fields, and the message box warns against health details.
+import { LEAD_SOURCES, REFERRAL_LEAD_SOURCES } from '../../lib/leadSource';
+import { EXPORT_FORM_ACTION, STATIC_EXPORT } from '../../lib/exportMode';
+import type { Business } from '../../lib/pages';
+import Ph from './Ph.astro';
+
+interface Props {
+  slug: string;
+  business: Business;
+  heading: string;
+  text?: string;
+  counselors?: { id: string; title: string }[];
+  defaultCounselorId?: string;
+  // Shown under the in person / online choice, e.g. who online is for.
+  formatNote?: string;
+  submitText?: string;
+}
+
+const {
+  slug,
+  business,
+  heading,
+  text,
+  counselors = [],
+  defaultCounselorId,
+  formatNote,
+  submitText = 'Request an appointment',
+} = Astro.props;
+
+const tel = business.telephone?.replace(/[^0-9+]/g, '');
+const askCounselor = business.collect_counselor_preference && counselors.length > 0;
+const askFormat = business.collect_session_format_preference;
+const askSource = business.collect_lead_source;
+const responseNote = business.lead_response_time_note;
+---
+
+<section class="rp" id="request">
+  <div class="s-wrap s-reveal">
+    <div class="rp-grid">
+      <div class="rp-copy">
+        <h2>{heading}</h2>
+        {text && <p>{text}</p>}
+        {tel && <p class="rp-call">Prefer to talk? <a href={`tel:${tel}`}><Ph name="phone" />{business.telephone}</a></p>}
+        {business.show_crisis_resources && (
+          <p class="rp-crisis"><Ph name="lifebuoy" /><span>If you're in crisis, call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline), or call <strong>911</strong>. This form isn't monitored around the clock.</span></p>
+        )}
+      </div>
+
+      {!STATIC_EXPORT && (
+        <form class="rp-form" data-source-page={slug} novalidate aria-label={submitText}>
+          <div class="rp-hp" aria-hidden="true"><input type="text" name="hp_website" tabindex="-1" autocomplete="off" /></div>
+          <div class="rp-field">
+            <label for={`rp-name-${slug}`}>Your name</label>
+            <input id={`rp-name-${slug}`} name="name" autocomplete="name" required />
+          </div>
+          <div class="rp-row">
+            <div class="rp-field">
+              <label for={`rp-phone-${slug}`}>Phone</label>
+              <input id={`rp-phone-${slug}`} name="phone" type="tel" autocomplete="tel" />
+            </div>
+            <div class="rp-field">
+              <label for={`rp-email-${slug}`}>Email</label>
+              <input id={`rp-email-${slug}`} name="email" type="email" autocomplete="email" />
+            </div>
+          </div>
+          <p class="rp-help">A phone number or email is enough.</p>
+          {askCounselor && (
+            <div class="rp-field">
+              <label for={`rp-who-${slug}`}>Counselor</label>
+              <select id={`rp-who-${slug}`} name="preferred_counselor_page_id">
+                <option value="" selected={!defaultCounselorId}>Help me choose</option>
+                {counselors.map((c) => <option value={c.id} selected={c.id === defaultCounselorId}>{c.title}</option>)}
+              </select>
+            </div>
+          )}
+          {askFormat && (
+            <fieldset class="rp-field">
+              <legend>How would you like to meet?</legend>
+              <div class="rp-seg">
+                <label><input type="radio" name="preferred_session_format" value="in_person" /> In person</label>
+                <label><input type="radio" name="preferred_session_format" value="telehealth" /> Online</label>
+              </div>
+              {formatNote && <p class="rp-help">{formatNote}</p>}
+            </fieldset>
+          )}
+          <div class="rp-field">
+            <label for={`rp-msg-${slug}`}>Anything you'd like us to know <span class="rp-opt">(optional)</span></label>
+            <textarea id={`rp-msg-${slug}`} name="message" rows="3"></textarea>
+            <p class="rp-help">Please don't include private health details here.</p>
+          </div>
+          {askSource && (
+            <div class="rp-field">
+              <label for={`rp-src-${slug}`}>How did you hear about us? <span class="rp-opt">(optional)</span></label>
+              <select id={`rp-src-${slug}`} name="lead_source" class="rp-source" data-referral-values={REFERRAL_LEAD_SOURCES.join(',')}>
+                <option value="" selected>Choose one</option>
+                {LEAD_SOURCES.map((s) => <option value={s.value}>{s.label}</option>)}
+              </select>
+              <input name="lead_source_detail" class="rp-source-detail" placeholder="Who referred you? (optional)" aria-label="Who referred you? (optional)" maxlength="120" hidden />
+            </div>
+          )}
+          {business.cloudflare_turnstile_site_key && <div class="cf-turnstile" data-sitekey={business.cloudflare_turnstile_site_key}></div>}
+          <button class="s-btn s-btn-primary" type="submit">{submitText}</button>
+          {responseNote && <p class="rp-help">{responseNote}</p>}
+          <p class="rp-status" role="status" aria-live="polite"></p>
+        </form>
+      )}
+
+      {STATIC_EXPORT && (
+        <div class="rp-form">
+          {EXPORT_FORM_ACTION ? (
+            <form method="POST" action={EXPORT_FORM_ACTION} class="rp-form">
+              <div class="rp-field"><label for="x-name">Your name</label><input id="x-name" name="name" required /></div>
+              <div class="rp-field"><label for="x-phone">Phone</label><input id="x-phone" name="phone" type="tel" /></div>
+              <div class="rp-field"><label for="x-email">Email</label><input id="x-email" name="email" type="email" /></div>
+              <button class="s-btn s-btn-primary" type="submit">{submitText}</button>
+            </form>
+          ) : (
+            <Fragment>
+              {tel && <a class="s-btn s-btn-primary" href={`tel:${tel}`}><Ph name="phone" />Call {business.telephone}</a>}
+              {business.email && <a class="s-btn s-btn-ghost" href={`mailto:${business.email}`}>Email {business.email}</a>}
+            </Fragment>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .rp { padding: var(--section-y) 0 0; scroll-margin-top: 88px; }
+  .rp-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: start; padding: 48px; border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--shadow); }
+  h2 { font-size: clamp(2rem, 3.4vw, 2.8rem); font-weight: 800; }
+  .rp-copy p { color: var(--muted); margin-top: 12px; }
+  .rp-call a { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ink); text-decoration: none; }
+  .rp-crisis { margin-top: 28px !important; display: flex; gap: 12px; align-items: flex-start; padding: 18px 20px; border-radius: var(--radius-card); background: var(--tint); font-size: 0.95rem; color: var(--ink) !important; }
+  .rp-crisis :global(.ph) { font-size: 1.4rem; color: var(--accent); margin-top: 1px; }
+  .rp-form { display: grid; gap: 16px; }
+  .rp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .rp-field { display: grid; gap: 6px; border: 0; padding: 0; margin: 0; min-width: 0; }
+  label, legend { font-weight: 600; font-size: 0.95rem; padding: 0; }
+  .rp-seg label { font-weight: 500; }
+  .rp-opt { font-weight: 400; color: var(--muted); }
+  input:not([type='radio']), select, textarea { width: 100%; font: inherit; font-size: 1rem; color: var(--ink); background: #fff; border: 1.5px solid color-mix(in srgb, var(--ink) 35%, transparent); border-radius: var(--radius-input); padding: 0.7rem 0.85rem; }
+  input:focus, select:focus, textarea:focus { outline: 3px solid color-mix(in srgb, var(--accent) 25%, transparent); border-color: var(--accent); }
+  [aria-invalid='true'] { border-color: #b42318 !important; }
+  .rp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .rp-help { font-size: 0.85rem; color: var(--muted); margin-top: -4px; }
+  .rp-seg { display: flex; gap: 10px; flex-wrap: wrap; }
+  .rp-seg label { display: flex; align-items: center; gap: 8px; border: 1.5px solid color-mix(in srgb, var(--ink) 35%, transparent); border-radius: var(--radius-input); padding: 0.6rem 0.9rem; cursor: pointer; }
+  .rp-seg input { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
+  .rp-source-detail { margin-top: 8px; }
+  .rp-form .s-btn { justify-self: start; }
+  .rp-status { font-weight: 600; min-height: 1.2em; }
+  .rp-status.is-error { color: #b42318; }
+  .rp-status.is-ok { color: var(--accent-strong); }
+  @media (max-width: 1023px) { .rp-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; } }
+  @media (max-width: 767px) { .rp-grid { padding: 24px; } .rp-row { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+{!STATIC_EXPORT && (
+<script>
+  // Direct REST call (no Supabase SDK on public pages), same as
+  // LeadGenerator.astro. Class-based so any number of panels can exist.
+  import { readStoredAttribution } from '../../lib/adAttribution';
+  import { loadTurnstileWhenNeeded, waitForTurnstileToken } from '../../lib/turnstile';
+
+  const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  loadTurnstileWhenNeeded();
+
+  document.querySelectorAll<HTMLFormElement>('.rp-form[data-source-page]').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('.rp-status')!;
+    const field = (n: string) => form.querySelector<HTMLInputElement>(`[name="${n}"]`);
+    const source = form.querySelector<HTMLSelectElement>('.rp-source');
+    const sourceDetail = form.querySelector<HTMLInputElement>('.rp-source-detail');
+    if (source && sourceDetail) {
+      const referral = (source.dataset.referralValues ?? '').split(',');
+      source.addEventListener('change', () => {
+        sourceDetail.hidden = !referral.includes(source.value);
+        if (sourceDetail.hidden) sourceDetail.value = '';
+      });
+    }
+
+    const say = (msg: string, kind: 'ok' | 'error' | '') => {
+      status.textContent = msg;
+      status.className = `rp-status${kind ? ` is-${kind}` : ''}`;
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const name = String(data.get('name') ?? '').trim();
+      const phone = String(data.get('phone') ?? '').trim();
+      const email = String(data.get('email') ?? '').trim();
+      const nameInput = field('name')!;
+      const emailInput = field('email')!;
+      [nameInput, field('phone')!, emailInput].forEach((i) => i.removeAttribute('aria-invalid'));
+
+      if (!name) { nameInput.setAttribute('aria-invalid', 'true'); nameInput.focus(); return say('Please add your name.', 'error'); }
+      if (!phone && !email) { field('phone')!.setAttribute('aria-invalid', 'true'); field('phone')!.focus(); return say('Please add a phone number or an email so we can reach you.', 'error'); }
+      if (email && !emailInput.checkValidity()) { emailInput.setAttribute('aria-invalid', 'true'); emailInput.focus(); return say('That email address looks incomplete.', 'error'); }
+
+      say('Sending...', '');
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      button.disabled = true;
+      const payload: Record<string, unknown> = {
+        name,
+        email: email || null,
+        phone: phone || null,
+        message: String(data.get('message') ?? '').trim() || null,
+        source_page: form.dataset.sourcePage,
+        hp_website: data.get('hp_website') || '',
+        turnstile_token: await waitForTurnstileToken(form),
+      };
+      if (field('preferred_counselor_page_id')) payload.preferred_counselor_page_id = data.get('preferred_counselor_page_id') || null;
+      if (form.querySelector('[name="preferred_session_format"]')) payload.preferred_session_format = data.get('preferred_session_format') || null;
+      if (source) {
+        payload.lead_source = data.get('lead_source') || null;
+        payload.lead_source_detail = data.get('lead_source_detail') || null;
+      }
+      const attribution = readStoredAttribution();
+      if (attribution) payload.attribution = attribution;
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-lead`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error(String(response.status));
+        form.reset();
+        if (sourceDetail) sourceDetail.hidden = true;
+        say('Thank you. We received your request and will reach out soon.', 'ok');
+      } catch {
+        say('Something went wrong sending your request. Please try again, or call us.', 'error');
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+</script>
+)}

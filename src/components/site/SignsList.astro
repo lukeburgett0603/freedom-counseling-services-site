@@ -1,0 +1,31 @@
+---
+// "You might be here because": short lines in the reader's own words,
+// in a two-column checklist beside an optional heading. Recognition
+// before explanation.
+import Ph from './Ph.astro';
+
+interface Props {
+  heading: string;
+  items: string[];
+}
+
+const { heading, items } = Astro.props;
+---
+
+{items.length > 0 && (
+  <section class="s-section sg">
+    <div class="s-wrap s-reveal">
+      <h2>{heading}</h2>
+      <ul>
+        {items.map((i) => <li><Ph name="check-circle" /><span>{i}</span></li>)}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  ul { list-style: none; padding: 0; margin-top: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 32px; }
+  li { display: flex; gap: 12px; align-items: flex-start; font-size: 1.08rem; padding: 14px 18px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); }
+  li :global(.ph) { font-size: 1.35rem; color: var(--accent); margin-top: 2px; }
+  @media (max-width: 767px) { ul { grid-template-columns: minmax(0, 1fr); } }
+</style>

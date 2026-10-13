@@ -1,0 +1,49 @@
+---
+// Every counselor's rate in one place (price transparency), from the
+// Counselor Profile pages' session_rate_usd. Not a long spec table:
+// one row per counselor with the photo, so it stays scannable.
+import { Image } from 'astro:assets';
+import type { ImageSlot } from '../../lib/pages';
+
+interface Props {
+  heading: string;
+  note?: string;
+  rows: { name: string; credential: string; href: string; rate: number | null; photo: ImageSlot | null }[];
+}
+
+const { heading, note, rows } = Astro.props;
+const shown = rows.filter((r) => r.rate !== null);
+---
+
+{shown.length > 0 && (
+  <section class="s-section rt">
+    <div class="s-wrap s-reveal">
+      <h2>{heading}</h2>
+      <ul>
+        {shown.map((r) => (
+          <li>
+            <a href={r.href}>
+              {r.photo ? <Image src={r.photo.url} alt="" width={96} height={96} style={r.photo.focus ? `object-position:${r.photo.focus}` : undefined} /> : <span class="rt-ph" />}
+              <span class="rt-name"><strong>{r.name}</strong><small>{r.credential}</small></span>
+              <span class="rt-rate">${r.rate}<small> per session</small></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      {note && <p class="rt-note">{note}</p>}
+    </div>
+  </section>
+)}
+
+<style>
+  ul { list-style: none; padding: 0; margin-top: 28px; display: grid; gap: 12px; max-width: 820px; }
+  a { display: grid; grid-template-columns: 56px 1fr auto; gap: 16px; align-items: center; padding: 14px 18px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); text-decoration: none; }
+  img, .rt-ph { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: var(--tint); }
+  .rt-name { display: grid; }
+  .rt-name small { color: var(--muted); font-size: 0.88rem; }
+  .rt-rate { font-weight: 800; font-size: 1.35rem; white-space: nowrap; }
+  .rt-rate small { font-weight: 500; font-size: 0.85rem; color: var(--muted); }
+  .rt-note { margin-top: 18px; color: var(--muted); }
+  a:hover strong { color: var(--accent); }
+  @media (max-width: 480px) { a { grid-template-columns: 44px 1fr; } img, .rt-ph { width: 44px; height: 44px; } .rt-rate { grid-column: 2; } }
+</style>

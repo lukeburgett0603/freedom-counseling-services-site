@@ -1,0 +1,32 @@
+---
+// Phosphor icon (regular weight), inlined at build time from
+// @phosphor-icons/core, so there's no icon font or script on the page.
+// The site system's one icon family (taste skill: no hand-drawn SVGs).
+// Decorative by default; pass `label` only for an icon with no visible
+// text next to it.
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+
+interface Props {
+  name: string;
+  class?: string;
+  label?: string;
+}
+
+const { name, class: className, label } = Astro.props;
+const require = createRequire(import.meta.url);
+let svg = '';
+try {
+  svg = readFileSync(require.resolve(`@phosphor-icons/core/assets/regular/${name}.svg`), 'utf8');
+} catch {
+  throw new Error(`Ph.astro: unknown Phosphor icon "${name}"`);
+}
+const a11y = label ? `role="img" aria-label="${label.replace(/"/g, '&quot;')}"` : 'aria-hidden="true" focusable="false"';
+const html = svg.replace('<svg ', `<svg class="ph ${className ?? ''}" ${a11y} `);
+---
+
+<Fragment set:html={html} />
+
+<style is:global>
+  .ph { width: 1em; height: 1em; flex: none; }
+</style>

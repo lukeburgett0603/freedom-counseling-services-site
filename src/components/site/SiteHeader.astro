@@ -1,0 +1,118 @@
+---
+// Site system v2 header. Same nav data as the older Header.astro (pages
+// with nav_placement 'primary', children by parent_page_id, nav_order),
+// so the admin's Website pages settings still drive it. Desktop: one
+// line, dropdowns open on hover or keyboard focus. Phones: a <details>
+// menu that works without JavaScript.
+import type { Page, Business } from '../../lib/pages';
+import { withBase } from '../../lib/url';
+import Ph from './Ph.astro';
+
+interface Props {
+  navPages: Page[];
+  business: Business;
+  requestHref?: string;
+  requestLabel?: string;
+}
+
+const { navPages, business, requestHref = '#request', requestLabel = 'Request an appointment' } = Astro.props;
+
+const primary = navPages
+  .filter((p) => p.nav_placement === 'primary' && !p.parent_page_id && p.page_type !== 'Homepage')
+  .sort((a, b) => a.nav_order - b.nav_order);
+const children = (id: string) =>
+  navPages.filter((p) => p.parent_page_id === id && p.nav_placement !== 'none').sort((a, b) => a.nav_order - b.nav_order);
+const hrefFor = (p: Page) => withBase(p.page_type === 'Homepage' ? '/' : `/${p.slug}`);
+const tel = business.telephone?.replace(/[^0-9+]/g, '');
+const current = Astro.url.pathname.replace(/\/$/, '');
+const isCurrent = (p: Page) => current === hrefFor(p).replace(/\/$/, '');
+---
+
+<header class="sh">
+  <div class="s-wrap sh-bar">
+    <a href={withBase('/')} class="sh-logo" aria-label={`${business.display_name} home`}>
+      {business.logo_url ? <img src={business.logo_url} alt={business.display_name} height="48" /> : <span>{business.display_name}</span>}
+    </a>
+
+    <nav class="sh-nav" aria-label="Main">
+      <ul>
+        {primary.map((p) => {
+          const kids = children(p.id);
+          return (
+            <li class:list={[{ 'has-kids': kids.length > 0 }]}>
+              <a href={hrefFor(p)} aria-current={isCurrent(p) ? 'page' : undefined}>
+                {p.title}
+                {kids.length > 0 && <Ph name="caret-down" class="sh-caret" />}
+              </a>
+              {kids.length > 0 && (
+                <ul class="sh-drop">
+                  <li class="sh-drop-parent"><a href={hrefFor(p)}>All {p.title.toLowerCase()}</a></li>
+                  {kids.map((k) => <li><a href={hrefFor(k)}>{k.title}</a></li>)}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+
+    <div class="sh-cta">
+      {tel && <a class="sh-phone" href={`tel:${tel}`}>{business.telephone}</a>}
+      <a class="s-btn s-btn-primary sh-request" href={requestHref}>{requestLabel}</a>
+      <details class="sh-menu">
+        <summary aria-label="Menu"><Ph name="list" class="sh-open" /><Ph name="x" class="sh-close" /></summary>
+        <div class="sh-panel">
+          <ul>
+            {primary.map((p) => (
+              <li>
+                <a href={hrefFor(p)}>{p.title}</a>
+                {children(p.id).length > 0 && (
+                  <ul>{children(p.id).map((k) => <li><a href={hrefFor(k)}>{k.title}</a></li>)}</ul>
+                )}
+              </li>
+            ))}
+          </ul>
+          {tel && <a class="s-btn s-btn-ghost" href={`tel:${tel}`}><Ph name="phone" />{business.telephone}</a>}
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .sh { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: saturate(1.4) blur(8px); border-bottom: 1px solid var(--line); }
+  .sh-bar { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .sh-logo img { height: 48px; width: auto; }
+  .sh-logo span { font-weight: 800; font-size: 1.15rem; text-decoration: none; }
+  .sh-logo { text-decoration: none; flex: none; }
+  .sh-nav > ul { display: flex; gap: 26px; list-style: none; padding: 0; margin: 0; }
+  .sh-nav li { position: relative; }
+  .sh-nav a { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; color: var(--muted); font-size: 0.95rem; font-weight: 500; padding: 8px 0; }
+  .sh-nav a:hover, .sh-nav a[aria-current='page'] { color: var(--ink); }
+  :global(.sh-caret) { font-size: 0.8rem; }
+  .sh-drop { position: absolute; left: -16px; top: 100%; min-width: 240px; list-style: none; margin: 0; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; }
+  .has-kids:hover .sh-drop, .has-kids:focus-within .sh-drop { opacity: 1; visibility: visible; transform: none; }
+  .sh-drop a { display: block; padding: 8px 12px; border-radius: 8px; color: var(--ink); }
+  .sh-drop a:hover { background: var(--tint); }
+  .sh-drop-parent { border-bottom: 1px solid var(--line); margin-bottom: 4px; padding-bottom: 4px; }
+  .sh-drop-parent a { font-weight: 600; }
+  .sh-cta { display: flex; align-items: center; gap: 18px; }
+  .sh-phone { font-weight: 600; font-size: 0.95rem; text-decoration: none; white-space: nowrap; }
+  .sh-request { padding: 0.6rem 1.1rem; font-size: 0.95rem; }
+  .sh-menu { display: none; }
+  .sh-menu summary { list-style: none; font-size: 1.7rem; cursor: pointer; display: grid; place-items: center; width: 44px; height: 44px; }
+  .sh-menu summary::-webkit-details-marker { display: none; }
+  :global(.sh-close) { display: none; }
+  .sh-menu[open] :global(.sh-open) { display: none; }
+  .sh-menu[open] :global(.sh-close) { display: block; }
+  .sh-panel { position: absolute; left: 0; right: 0; top: 72px; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: var(--shadow); padding: 12px var(--gutter) 24px; max-height: calc(100dvh - 72px); overflow-y: auto; }
+  .sh-panel ul { list-style: none; padding: 0; margin: 0; }
+  .sh-panel > ul > li { border-bottom: 1px solid var(--line); }
+  .sh-panel a { display: block; padding: 12px 0; text-decoration: none; font-weight: 600; }
+  .sh-panel ul ul { padding: 0 0 8px 12px; }
+  .sh-panel ul ul a { font-weight: 500; color: var(--muted); padding: 8px 0; }
+  .sh-panel .s-btn { margin-top: 16px; width: 100%; }
+  @media (max-width: 1100px) { .sh-nav > ul { gap: 18px; } .sh-phone { display: none; } }
+  @media (max-width: 1023px) { .sh-nav { display: none; } .sh-menu { display: block; } }
+  @media (max-width: 767px) { .sh-request { display: none; } .sh-logo img { height: 42px; } }
+</style>

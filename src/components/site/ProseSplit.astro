@@ -1,0 +1,49 @@
+---
+// One or more short text sections, each a heading and a body. Layouts:
+// 'stack' (heading over body, narrow column), 'split' (heading left,
+// body right), 'aside' (body left, a photo or note in the `aside` slot).
+// Use different layouts for consecutive sections (taste: no repeated
+// layout family, no 3 image/text splits in a row).
+import { renderCopy } from '../../lib/markdown';
+
+interface Props {
+  heading: string;
+  body: string; // markdown
+  layout?: 'stack' | 'split' | 'aside';
+  surface?: boolean;
+  id?: string;
+}
+
+const { heading, body, layout = 'stack', surface = false, id } = Astro.props;
+---
+
+{heading && body && (
+  <section class:list={['s-section', 'ps', `ps-${layout}`, { 'ps-surface': surface, 's-band': surface }]} id={id}>
+    <div class="s-wrap ps-grid s-reveal">
+      {layout === 'aside' ? (
+        <Fragment>
+          <div><h2>{heading}</h2><div class="s-rich ps-body ps-gap" set:html={renderCopy(body)} /></div>
+          <div class="ps-side"><slot name="aside" /></div>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <h2>{heading}</h2>
+          <div class="s-rich ps-body" set:html={renderCopy(body)} />
+        </Fragment>
+      )}
+    </div>
+  </section>
+)}
+
+<style>
+  .ps-surface { background: var(--surface); }
+  .ps-stack .ps-grid > * { max-width: 760px; }
+  .ps-stack .ps-body { margin-top: 18px; }
+  .ps-split .ps-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: start; }
+  .ps-aside .ps-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: start; }
+  .ps-gap { margin-top: 18px; }
+  .ps-body { font-size: 1.08rem; }
+  @media (max-width: 1023px) {
+    .ps-split .ps-grid, .ps-aside .ps-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  }
+</style>

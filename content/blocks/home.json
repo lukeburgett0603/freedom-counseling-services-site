@@ -1,0 +1,111 @@
+{
+  "slug": "",
+  "blocks": {
+    "hero.eyebrow": "Christian counseling in Louisville, KY",
+    "hero.subhead": "The best of clinical care and a biblical worldview, with a counselor for every part of your family's life.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "house-line",
+        "text": "20+ years serving Louisville"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown, or online anywhere in Kentucky"
+      },
+      {
+        "icon": "receipt",
+        "text": "{rate_range} per session,",
+        "link_text": "posted up front",
+        "href": "/fees"
+      }
+    ],
+    "brings.heading": "What brings you here?",
+    "brings.lede": "However you'd put it, you're in the right place. Start with what feels closest.",
+    "brings.items": [
+      {
+        "quote": "Our marriage isn't working the way it used to.",
+        "label": "Couples and marriage counseling",
+        "href": "/couples-marriage-counseling"
+      },
+      {
+        "quote": "My teenager won't talk to me.",
+        "label": "Child and teen counseling",
+        "href": "/child-teen-counseling"
+      },
+      {
+        "quote": "I can't turn my mind off.",
+        "label": "Anxiety and depression counseling",
+        "href": "/anxiety-depression-counseling"
+      },
+      {
+        "quote": "It's been months, and it isn't getting easier.",
+        "label": "Grief counseling",
+        "href": "/grief-counseling"
+      },
+      {
+        "quote": "I keep reliving something I can't get past.",
+        "label": "Trauma and EMDR",
+        "href": "/trauma-emdr-counseling"
+      },
+      {
+        "quote": "Our family keeps having the same fight.",
+        "label": "Family counseling",
+        "href": "/family-counseling"
+      },
+      {
+        "quote": "I feel stuck, and I'm not sure why.",
+        "label": "Individual therapy",
+        "href": "/individual-counseling"
+      },
+      {
+        "quote": "I want a counselor who shares my faith.",
+        "label": "Christian counseling",
+        "href": "/christian-counseling"
+      }
+    ],
+    "empathy.heading": "Reaching out is the hardest part. We'll make the rest easier.",
+    "empathy.body": "Maybe you've been pushing through for a while, telling yourself it will get better on its own. Maybe someone you love is struggling, and you're not sure how to help. However you got here, it took courage to start looking.\n\nFreedom has been helping people in Louisville for more than 20 years. Our counselors work with individuals, couples, families, and kids as young as 8, so if more than one person in your home is hurting, you can find help in one place, with counselors who know each other's work.",
+    "faith.heading": "Faith at the center. Never forced.",
+    "faith.body": "Faith is central to how we work. Our counselors bring together a biblical worldview, Christian theology, and the best clinical practice.\n\nIf you'd rather not bring faith into your counseling, that's completely okay. You'll get the same excellent clinical care, and you decide which parts of faith and worldview, if any, you want to talk about. We follow your lead.",
+    "faith.link_label": "About Christian counseling at Freedom",
+    "faith.link_href": "/christian-counseling",
+    "team.heading": "Find the counselor who fits",
+    "team.lede": "Choose the counselor who sounds right for you, or let us match you. Either way, you can always switch.",
+    "team.note": "Every counselor meets in person or online, and every counselor is accepting new clients.",
+    "team.all_label": "Meet all our counselors",
+    "start.heading": "Getting started is simple",
+    "start.steps": [
+      {
+        "icon": "chat-circle-text",
+        "title": "Reach out",
+        "text": "Request an appointment online, or call {phone}. Share as much or as little as you'd like."
+      },
+      {
+        "icon": "users-three",
+        "title": "Get matched",
+        "text": "Choose your counselor, or tell us what's going on and we'll suggest the best fit. Most people are seen the same week."
+      },
+      {
+        "icon": "door-open",
+        "title": "Begin",
+        "text": "Meet in our Middletown office or online, whichever fits your life."
+      }
+    ],
+    "cost.heading": "What it costs, up front",
+    "cost.note": "per 50-minute session, depending on your counselor",
+    "cost.body": "Student sessions with Sophie are $50. We don't bill insurance, but we'll give you a superbill, a receipt you can submit to your insurance for possible out-of-network reimbursement. Many plans cover part of the cost.",
+    "cost.link_label": "See every counselor's rate",
+    "vision.heading": "Imagine the weight getting lighter",
+    "vision.body": "Picture a marriage where you talk again instead of bracing for the next argument. A teenager who opens the door. Evenings when your mind finally slows down. Grief you can carry without it carrying you.\n\nCounseling doesn't make life easy. It gives you a steady place, and a steady person, to work through what's hard.",
+    "elsewhere.heading": "When another kind of care fits better",
+    "elsewhere.body": "We'll always tell you honestly if we're not the right fit. We refer to other providers for severe mental illness that needs psychiatric care or medication management, and for children younger than 8. If that's you, call us anyway, and we'll help you find the right next step.",
+    "faq.heading": "Common questions",
+    "request.heading": "Ready when you are.",
+    "request.text": "Request an appointment in about a minute. Most people are seen the same week.",
+    "request.format_note": "Online sessions are for clients in Kentucky. Indiana clients meet in person."
+  }
+}

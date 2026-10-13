@@ -1,0 +1,48 @@
+---
+// Where the office is: address, plain directions, hours (from the same
+// data as the structured data), parking, and a neutral directions link
+// to the Google profile. A map image is optional (keyless: no embed
+// script on the page; the link opens Google Maps).
+import type { Business } from '../../lib/pages';
+import { formatHours, fullAddress } from '../../lib/hours';
+import { renderCopy } from '../../lib/markdown';
+import Ph from './Ph.astro';
+
+interface Props {
+  business: Business;
+  heading: string;
+  directions?: string; // markdown
+}
+
+const { business, heading, directions } = Astro.props;
+const address = fullAddress(business);
+const hours = formatHours(business.opening_hours);
+---
+
+{address && (
+  <section class="s-section oc">
+    <div class="s-wrap oc-grid s-reveal">
+      <div>
+        <h2>{heading}</h2>
+        {directions && <div class="s-rich oc-dir" set:html={renderCopy(directions)} />}
+      </div>
+      <div class="oc-card">
+        <p class="oc-row"><Ph name="map-pin" /><span><strong>{business.display_name}</strong><br />{address}</span></p>
+        {hours.length > 0 && <p class="oc-row"><Ph name="clock" /><span>{hours.map((h, i) => <Fragment>{i > 0 && <br />}{h}</Fragment>)}</span></p>}
+        {business.google_maps_url && (
+          <a class="s-btn s-btn-ghost" href={business.google_maps_url} target="_blank" rel="noopener"><Ph name="navigation-arrow" />Get directions</a>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .oc-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; align-items: start; }
+  .oc-dir { margin-top: 18px; }
+  .oc-card { background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); padding: 28px; display: grid; gap: 18px; }
+  .oc-row { display: flex; gap: 12px; align-items: flex-start; }
+  .oc-row :global(.ph) { font-size: 1.35rem; color: var(--accent); margin-top: 3px; }
+  .oc-card .s-btn { justify-self: start; }
+  @media (max-width: 1023px) { .oc-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+</style>

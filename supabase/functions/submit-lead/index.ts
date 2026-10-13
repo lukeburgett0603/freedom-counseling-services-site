@@ -105,8 +105,16 @@ Deno.serve(async (req: Request) => {
 
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const email = typeof body.email === 'string' ? body.email.trim() : '';
-  if (!name || !email) {
-    return jsonResponse({ error: 'Name and email are required' }, 400);
+  const phone = typeof body.phone === 'string' ? body.phone.trim() : '';
+  // An appointment request needs a name and a way to reach the person: a
+  // phone number OR an email (site system v2's RequestPanel; people
+  // reaching out to a counselor often prefer a call back). A guide
+  // download still needs an email, since the guide is emailed.
+  if (!name || (!email && !phone)) {
+    return jsonResponse({ error: 'Name and a phone number or email are required' }, 400);
+  }
+  if ('lead_magnet_id' in body && !email) {
+    return jsonResponse({ error: 'Email is required to send the guide' }, 400);
   }
 
   // Honeypot: a real visitor never sees or fills this field (see
@@ -160,8 +168,8 @@ Deno.serve(async (req: Request) => {
   // elsewhere in this app degrading to a warning, never a rollback).
   const insertPayload: Record<string, unknown> = {
     name,
-    email,
-    phone: typeof body.phone === 'string' && body.phone.trim() ? body.phone.trim() : null,
+    email: email || null,
+    phone: phone || null,
     message: typeof body.message === 'string' && body.message.trim() ? body.message.trim() : null,
     source_page: typeof body.source_page === 'string' ? body.source_page : null,
   };
@@ -256,7 +264,7 @@ Deno.serve(async (req: Request) => {
 
       const rows: [string, string | null][] = [
         ['Name', name],
-        ['Email', email],
+        ['Email', email || null],
         ['Phone', insertPayload.phone as string | null],
         [
           'Preferred counselor',
@@ -301,9 +309,9 @@ Deno.serve(async (req: Request) => {
         body: JSON.stringify({
           from: fromHeader,
           to: notificationRecipients,
-          reply_to: email,
+          ...(email ? { reply_to: email } : {}),
           subject: `New appointment request from ${name}`,
-          html: `${rowsHtml}\n${messageHtml}\n<hr style="border:none;border-top:1px solid #ddd;margin:20px 0;">\n<p style="font-size:12px;color:#888;">Reply directly to this email to respond to ${escapeHtml(name)}.</p>`,
+          html: `${rowsHtml}\n${messageHtml}\n<hr style="border:none;border-top:1px solid #ddd;margin:20px 0;">\n<p style="font-size:12px;color:#888;">${email ? `Reply directly to this email to respond to ${escapeHtml(name)}.` : `${escapeHtml(name)} left a phone number only. Call them back.`}</p>`,
         }),
       });
       // fetch() only rejects on a network-level failure — a non-2xx from

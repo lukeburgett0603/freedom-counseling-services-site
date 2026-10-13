@@ -1,0 +1,26 @@
+---
+// Renders a page with its v2 design (src/designs/site.ts decides which),
+// loading its text blocks. Warns in the build log about blocks that have
+// no stored text yet, so a missing seed never fails silently.
+import { DESIGN_COMPONENTS } from './components';
+import { designIdFor, blocksFor } from './site';
+import { loadAllBlocks, missingBlocks } from '../lib/blocks';
+import type { Page, Business } from '../lib/pages';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+}
+
+const { page, allPages, business } = Astro.props;
+const id = designIdFor(page)!;
+const Design = DESIGN_COMPONENTS[id];
+if (!Design) throw new Error(`No design component registered for "${id}" (page ${page.slug})`);
+const allBlocks = await loadAllBlocks();
+const blocks = allBlocks.get(page.id) ?? new Map();
+const missing = missingBlocks(blocks, blocksFor(page));
+if (missing.length) console.warn(`[blocks] ${page.slug || 'home'} (${id}) has no text yet for: ${missing.join(', ')}`);
+---
+
+<Design page={page} allPages={allPages} business={business} blocks={blocks} allBlocks={allBlocks} />

@@ -1,0 +1,55 @@
+---
+// Split hero: text left (eyebrow, H1, short subhead, up to two actions),
+// visual right (the `media` slot: a PeopleMosaic or a single photo).
+// Taste rules built in: max 4 text elements, no tagline under the
+// buttons (put it in a FactsStrip right below), headline sized to stay
+// within 2 lines on desktop for the approved copy.
+import Ph from './Ph.astro';
+
+interface Action { label: string; href: string; icon?: string }
+interface Props {
+  eyebrow?: string;
+  headline: string;
+  subhead?: string;
+  primary?: Action;
+  secondary?: Action;
+  // 'wide' gives the text 2/3 of the row (long headlines); 'even' splits.
+  balance?: 'wide' | 'even';
+}
+
+const { eyebrow, headline, subhead, primary, secondary, balance = 'wide' } = Astro.props;
+---
+
+<section class:list={['hs', `hs-${balance}`]}>
+  <div class="s-wrap hs-grid">
+    <div class="hs-text">
+      {eyebrow && <p class="hs-eyebrow">{eyebrow}</p>}
+      <h1>{headline}</h1>
+      {subhead && <p class="hs-sub">{subhead}</p>}
+      {(primary || secondary) && (
+        <div class="hs-ctas">
+          {primary && <a class="s-btn s-btn-primary" href={primary.href}>{primary.icon && <Ph name={primary.icon} />}{primary.label}</a>}
+          {secondary && <a class="s-btn s-btn-ghost" href={secondary.href}>{secondary.icon && <Ph name={secondary.icon} />}{secondary.label}</a>}
+        </div>
+      )}
+    </div>
+    {Astro.slots.has('media') && <div class="hs-media"><slot name="media" /></div>}
+  </div>
+</section>
+
+<style>
+  .hs { padding: 64px 0 56px; }
+  .hs-grid { display: grid; gap: 48px; align-items: center; }
+  .hs-wide .hs-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  .hs-even .hs-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hs-grid:not(:has(.hs-media)) { grid-template-columns: minmax(0, 1fr); }
+  .hs-eyebrow { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px; }
+  h1 { font-size: clamp(2rem, 3vw, 2.5rem); font-weight: 800; line-height: 1.1; max-width: 26ch; }
+  .hs-sub { font-size: 1.2rem; color: var(--muted); margin-top: 22px; max-width: 46ch; }
+  .hs-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  @media (max-width: 1023px) {
+    .hs-wide .hs-grid, .hs-even .hs-grid { grid-template-columns: minmax(0, 1fr); }
+    h1 { font-size: clamp(2rem, 6vw, 2.5rem); }
+  }
+  @media (max-width: 767px) { .hs { padding: 36px 0 40px; } .hs-grid { gap: 32px; } }
+</style>

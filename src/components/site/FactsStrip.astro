@@ -1,0 +1,44 @@
+---
+// A full-width strip of 2 to 4 short facts directly under the hero
+// (where hero taglines and proof go instead of crowding the hero).
+// Facts only: no star ratings, review counts, or client quotes.
+import Ph from './Ph.astro';
+
+interface Props {
+  items: { icon: string; text: string; href?: string; linkText?: string }[];
+}
+
+const items = Astro.props.items.filter((i) => i.text).slice(0, 4);
+---
+
+{items.length > 0 && (
+  <section class="fs" aria-label="At a glance">
+    <ul class="s-wrap" style={`--n:${items.length}`}>
+      {items.map((i) => (
+        <li>
+          <Ph name={i.icon} />
+          <span>{i.text}{i.href && i.linkText && <Fragment>{' '}<a href={i.href}>{i.linkText}</a></Fragment>}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .fs { background: var(--surface); border-block: 1px solid var(--line); }
+  ul { list-style: none; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+  li { padding: 22px 24px; display: flex; gap: 12px; align-items: flex-start; font-weight: 500; font-size: 0.98rem; line-height: 1.4; }
+  li + li { border-left: 1px solid var(--line); }
+  li :global(.ph) { font-size: 1.5rem; color: var(--accent); margin-top: -1px; }
+  a { text-decoration-color: color-mix(in srgb, var(--ink) 35%, transparent); text-underline-offset: 3px; }
+  @media (max-width: 1023px) {
+    ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    li:nth-child(3) { border-left: 0; }
+    li:nth-child(n + 3) { border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 767px) {
+    ul { grid-template-columns: minmax(0, 1fr); padding: 0; }
+    li { border-left: 0 !important; padding: 18px var(--gutter); }
+    li + li { border-top: 1px solid var(--line); }
+  }
+</style>

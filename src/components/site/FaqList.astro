@@ -1,0 +1,42 @@
+---
+// Common questions as an accessible <details> list. Reads the page's
+// `faqs` column (the same data buildPageSchemas turns into FAQPage
+// structured data), so the visible answers and Google's always match.
+import Ph from './Ph.astro';
+import { renderCopy } from '../../lib/markdown';
+
+interface Props {
+  heading?: string;
+  faqs: { question: string; answer: string }[];
+}
+
+const { heading = 'Common questions', faqs } = Astro.props;
+---
+
+{faqs.length > 0 && (
+  <section class="s-section fq">
+    <div class="s-wrap fq-grid s-reveal">
+      <h2>{heading}</h2>
+      <div class="fq-list">
+        {faqs.map((f) => (
+          <details>
+            <summary><span>{f.question}</span><Ph name="plus" /></summary>
+            <div class="s-rich" set:html={renderCopy(f.answer)} />
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .fq-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 48px; align-items: start; }
+  details { border-top: 1px solid var(--line); }
+  details:last-child { border-bottom: 1px solid var(--line); }
+  summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 0; cursor: pointer; font-weight: 600; font-size: 1.08rem; }
+  summary::-webkit-details-marker { display: none; }
+  summary :global(.ph) { font-size: 1.2rem; color: var(--accent); transition: transform 0.2s; }
+  details[open] summary :global(.ph) { transform: rotate(45deg); }
+  details > div { padding: 0 0 22px; color: var(--muted); }
+  @media (max-width: 1023px) { .fq-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+</style>

@@ -18,6 +18,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 </AdminLayout>
 
 <script>
+  import { DESIGN_BLOCKS } from '../../designs/site';
   import { supabase, initAdminAuth, type AdminUser } from '../../lib/adminAuth';
   import { triggerRebuild } from '../../lib/publishFunction';
 
@@ -97,6 +98,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     return div.innerHTML;
   }
 
+  // 'block:hero.subhead' -> the block's label from its design.
+  function blockLabel(fieldName: string): string | null {
+    if (!fieldName.startsWith('block:')) return null;
+    const key = fieldName.slice(6);
+    for (const defs of Object.values(DESIGN_BLOCKS)) {
+      const d = defs.find((b) => b.key === key);
+      if (d) return `Page text: ${d.section}, ${d.label}`;
+    }
+    return `Page text: ${key}`;
+  }
+
   function pageTitle(pageId: string): string {
     return pagesById.get(pageId)?.title ?? 'Page';
   }
@@ -106,8 +118,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     document.getElementById('sg-n')!.textContent = suggestions.length ? String(suggestions.length) : '';
     pendingList.innerHTML = suggestions
       .map((s) => {
-        const fieldLabel = FIELD_LABELS[s.field_name] ?? s.field_name;
-        const canAutoApply = s.field_name in FIELD_COLUMNS;
+        const fieldLabel = FIELD_LABELS[s.field_name] ?? blockLabel(s.field_name) ?? s.field_name;
+        // Page text blocks (site system v2) apply too: the value is JSON.
+        const canAutoApply = s.field_name in FIELD_COLUMNS || s.field_name.startsWith('block:');
         const date = new Date(s.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         return `
       <article class="t-card sg-card" data-suggestion-id="${s.id}">
@@ -136,7 +149,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     reviewedEmpty.hidden = suggestions.length > 0;
     reviewedList.innerHTML = suggestions
       .map((s) => {
-        const fieldLabel = FIELD_LABELS[s.field_name] ?? s.field_name;
+        const fieldLabel = FIELD_LABELS[s.field_name] ?? blockLabel(s.field_name) ?? s.field_name;
         const pill = s.status === 'approved' ? '<span class="bp-pill bp-pill-p">Approved</span>' : '<span class="bp-pill sg-rej">Rejected</span>';
         const date = s.reviewed_at ? new Date(s.reviewed_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
         return `
@@ -195,7 +208,24 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       }
 
       const column = FIELD_COLUMNS[suggestion.field_name];
-      if (column && applyInput) {
+      if (suggestion.field_name.startsWith('block:') && applyInput) {
+        let value: unknown;
+        try {
+          value = JSON.parse(applyInput.value);
+        } catch {
+          statusEl.textContent = 'Could not apply: the suggested text isn\'t valid (keep the quotes and brackets as they are).';
+          statusEl.className = 'review-status i-hint r-err';
+          return;
+        }
+        const { error: blockError } = await supabase
+          .from('content_blocks')
+          .upsert({ page_id: suggestion.page_id, block_key: suggestion.field_name.slice(6), value }, { onConflict: 'page_id,block_key' });
+        if (blockError) {
+          statusEl.textContent = 'Could not apply: ' + blockError.message;
+          statusEl.className = 'review-status i-hint r-err';
+          return;
+        }
+      } else if (column && applyInput) {
         const { error: pageError } = await supabase
           .from('pages')
           .update({ [column]: applyInput.value.trim() || null })
@@ -222,7 +252,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         return;
       }
 
-      if (column) {
+      if (column || suggestion.field_name.startsWith('block:')) {
         statusEl.textContent = 'Applied — updating your site...';
         const result = await triggerRebuild();
         if (!result.ok) {

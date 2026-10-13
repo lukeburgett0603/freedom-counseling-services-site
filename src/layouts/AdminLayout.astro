@@ -14,6 +14,7 @@ import '../styles/global.css';
 import '../styles/admin.css';
 import { withBase } from '../lib/url';
 import { getBusiness } from '../lib/pages';
+import { DESIGN_BY_PAGE_TYPE, DESIGN_BY_SLUG } from '../designs/site';
 
 interface Props {
   title: string;
@@ -36,6 +37,7 @@ interface Props {
     | 'blog'
     | 'content-business-info'
     | 'content-page-copy'
+    | 'content-page-text'
     | 'lead-magnets'
     | 'team'
     | 'suggestions'
@@ -112,6 +114,10 @@ const groups: { label?: string; items: NavItem[] }[] = [
     label: 'Get chosen',
     items: [
       { key: 'content-page-copy', label: 'Website pages', href: '/admin/content/page-copy', icon: 'pages' },
+      // Site system v2: only once this site has pages with a v2 design.
+      ...(Object.keys(DESIGN_BY_PAGE_TYPE).length || Object.keys(DESIGN_BY_SLUG).length
+        ? [{ key: 'content-page-text', label: 'Page text', href: '/admin/content/page-text', icon: 'pages' }]
+        : []),
       { key: 'review-program', label: 'Reviews', href: '/admin/review-program', icon: 'reviews' },
     ],
   },

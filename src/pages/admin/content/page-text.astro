@@ -1,0 +1,281 @@
+---
+// Site system v2: edit a designed page's text, block by block
+// (content_blocks, migration 0078). The design decides the layout; this
+// screen only changes words, so a practice can't break the page.
+//
+// Each design's form is built here at build time from its block list
+// (src/designs/*.blocks.ts), so rich-text blocks get the same editor as
+// Website pages. Search settings (H1, title, description) and FAQs stay
+// on Website pages. Who can save: CMC always; the practice owner on the
+// 'full' plan tier; otherwise "Suggest this change" files a suggestion
+// (field_name 'block:<key>') for CMC to review.
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import RichTextEditor from '../../../components/RichTextEditor.astro';
+import { DESIGN_BLOCKS } from '../../../designs/site';
+import type { BlockDef } from '../../../lib/blocks';
+
+const fieldId = (design: string, key: string) => `bk-${design}-${key.replace(/[^a-z0-9]/gi, '-')}`;
+const sections = (defs: BlockDef[]) => {
+  const out: { name: string; defs: BlockDef[] }[] = [];
+  for (const d of defs) {
+    const last = out[out.length - 1];
+    if (last && last.name === d.section) last.defs.push(d);
+    else out.push({ name: d.section, defs: [d] });
+  }
+  return out;
+};
+---
+
+<AdminLayout title="Page text | Admin" current="content-page-text">
+  <div class="p-layout">
+    <aside class="t-card p-nav" id="pt-nav">
+      <nav id="pt-list" class="p-list" aria-label="Pages"></nav>
+    </aside>
+    <div class="p-editor">
+      <div class="t-card p-head" id="pt-head" hidden>
+        <div>
+          <span class="p-type" id="pt-type"></span>
+          <h2 id="pt-title"></h2>
+          <p class="p-tier" id="pt-tier"></p>
+        </div>
+        <a id="pt-view" class="a-btn i-btn" target="_blank" rel="noopener">View page</a>
+      </div>
+      <p id="pt-empty" class="t-card pt-empty" hidden>No pages use a designed layout yet.</p>
+
+      {Object.entries(DESIGN_BLOCKS).map(([design, defs]) => (
+        <form class="pt-form" data-design={design} hidden>
+          {sections(defs).map((sec) => (
+            <section class="t-card pt-sec">
+              <h3>{sec.name}</h3>
+              {sec.defs.map((d) => (
+                <div class="pt-field" data-key={d.key} data-kind={d.kind} data-max={d.maxLength ?? ''}>
+                  <label for={fieldId(design, d.key)}>{d.label}</label>
+                  {d.kind === 'text' && (d.maxLength ?? 999) > 140 ? (
+                    <textarea id={fieldId(design, d.key)} rows="3" class="pt-input"></textarea>
+                  ) : d.kind === 'text' ? (
+                    <input id={fieldId(design, d.key)} class="pt-input" />
+                  ) : d.kind === 'rich' ? (
+                    <RichTextEditor id={fieldId(design, d.key)} />
+                  ) : d.kind === 'image' ? (
+                    <div class="pt-image" id={fieldId(design, d.key)}>
+                      <input class="pt-input" data-part="url" placeholder="Image URL" aria-label="Image URL" />
+                      <input class="pt-input" data-part="alt" placeholder="Describe the photo (alt text)" aria-label="Alt text" />
+                      <input class="pt-input" data-part="focus" placeholder="Crop focus, e.g. 50% 25% (optional)" aria-label="Crop focus" />
+                    </div>
+                  ) : (
+                    <div class="pt-list" id={fieldId(design, d.key)} data-fields={JSON.stringify(d.fields ?? [])}>
+                      <div class="pt-rows"></div>
+                      <button type="button" class="a-btn i-btn pt-add">+ Add</button>
+                    </div>
+                  )}
+                  {d.help && <p class="pt-help">{d.help}</p>}
+                  <p class="pt-warn" hidden></p>
+                </div>
+              ))}
+            </section>
+          ))}
+        </form>
+      ))}
+
+      <div class="t-card pt-actions" id="pt-actions" hidden>
+        <button type="button" id="pt-save" class="a-btn a-btn-primary i-btn">Save and publish</button>
+        <span id="pt-status" role="status"></span>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .pt-sec { margin-top: 14px; display: grid; gap: 18px; }
+  .pt-sec h3 { font-size: 1rem; font-weight: 700; }
+  .pt-field { display: grid; gap: 6px; }
+  .pt-field > label { font-weight: 600; font-size: 0.9rem; }
+  .pt-input { width: 100%; border: 1px solid var(--a-line, #cbd5e1); border-radius: 8px; padding: 8px 10px; background: var(--a-input, #fff); color: inherit; font: inherit; }
+  .pt-help { font-size: 0.8rem; opacity: 0.75; }
+  .pt-warn { font-size: 0.8rem; color: #b45309; }
+  .pt-image { display: grid; gap: 6px; }
+  .pt-rows { display: grid; gap: 10px; }
+  :global(.pt-row) { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--a-line, #cbd5e1); border-radius: 10px; }
+  :global(.pt-row-tools) { display: flex; gap: 6px; justify-content: flex-end; }
+  :global(.pt-row label) { font-size: 0.8rem; font-weight: 600; }
+  .pt-add { margin-top: 8px; justify-self: start; }
+  .pt-actions { margin-top: 14px; display: flex; gap: 14px; align-items: center; position: sticky; bottom: 12px; }
+  .pt-empty { margin-top: 0; }
+</style>
+
+<script>
+  import { supabase, initAdminAuth, type AdminUser } from '../../../lib/adminAuth';
+  import { initRichTextEditor, type RichTextEditorHandle } from '../../../lib/richTextEditor';
+  import { triggerRebuild } from '../../../lib/publishFunction';
+  import { designIdFor, DESIGN_BLOCKS } from '../../../designs/site';
+  import type { BlockDef, ListFieldDef } from '../../../lib/blocks';
+  import { withBase } from '../../../lib/url';
+
+  interface PageRow { id: string; title: string; slug: string; page_type: string }
+
+  const list = document.getElementById('pt-list')!;
+  const head = document.getElementById('pt-head')!;
+  const actions = document.getElementById('pt-actions')!;
+  const status = document.getElementById('pt-status')!;
+  const saveButton = document.getElementById('pt-save') as HTMLButtonElement;
+  const fieldId = (design: string, key: string) => `bk-${design}-${key.replace(/[^a-z0-9]/gi, '-')}`;
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+  const editors = new Map<string, RichTextEditorHandle>();
+  let pages: PageRow[] = [];
+  let current: PageRow | null = null;
+  let stored = new Map<string, unknown>();
+  let canEdit = false;
+
+  function editorFor(design: string, key: string) {
+    const id = fieldId(design, key);
+    if (!editors.has(id)) editors.set(id, initRichTextEditor(id));
+    return editors.get(id)!;
+  }
+
+  // --- list blocks: one row per item, fields from the definition
+  function addRow(container: HTMLElement, item: Record<string, string> = {}) {
+    const fields = JSON.parse(container.dataset.fields || '[]') as ListFieldDef[];
+    const row = document.createElement('div');
+    row.className = 'pt-row';
+    row.innerHTML =
+      fields.map((f) => `<label>${esc(f.label)}${f.kind === 'rich' ? `<textarea class="pt-input" rows="3" data-f="${f.key}"></textarea>` : `<input class="pt-input" data-f="${f.key}" />`}</label>`).join('') +
+      `<div class="pt-row-tools"><button type="button" class="a-btn i-btn" data-act="up">Move up</button><button type="button" class="a-btn i-btn" data-act="down">Move down</button><button type="button" class="a-btn i-btn i-danger" data-act="remove">Remove</button></div>`;
+    fields.forEach((f) => { (row.querySelector(`[data-f="${f.key}"]`) as HTMLInputElement).value = item[f.key] ?? ''; });
+    row.querySelector('.pt-row-tools')!.addEventListener('click', (e) => {
+      const act = (e.target as HTMLElement).dataset.act;
+      if (act === 'remove') row.remove();
+      if (act === 'up' && row.previousElementSibling) row.parentElement!.insertBefore(row, row.previousElementSibling);
+      if (act === 'down' && row.nextElementSibling) row.parentElement!.insertBefore(row.nextElementSibling, row);
+    });
+    container.querySelector('.pt-rows')!.appendChild(row);
+  }
+  document.querySelectorAll<HTMLElement>('.pt-list').forEach((c) => c.querySelector('.pt-add')!.addEventListener('click', () => addRow(c)));
+
+  function readValue(design: string, d: BlockDef): unknown {
+    const el = document.getElementById(fieldId(design, d.key))!;
+    if (d.kind === 'text') return (el as HTMLInputElement).value.trim();
+    if (d.kind === 'rich') return editorFor(design, d.key).getMarkdown().trim();
+    if (d.kind === 'image') {
+      const part = (p: string) => (el.querySelector(`[data-part="${p}"]`) as HTMLInputElement).value.trim();
+      return part('url') ? { url: part('url'), alt: part('alt'), ...(part('focus') ? { focus: part('focus') } : {}) } : null;
+    }
+    return [...el.querySelectorAll('.pt-row')].map((row) => {
+      const item: Record<string, string> = {};
+      row.querySelectorAll<HTMLInputElement>('[data-f]').forEach((i) => { item[i.dataset.f!] = i.value.trim(); });
+      return item;
+    }).filter((item) => Object.values(item).some(Boolean));
+  }
+
+  function writeValue(design: string, d: BlockDef, v: unknown) {
+    const el = document.getElementById(fieldId(design, d.key))!;
+    if (d.kind === 'text') (el as HTMLInputElement).value = typeof v === 'string' ? v : '';
+    else if (d.kind === 'rich') editorFor(design, d.key).setMarkdown(typeof v === 'string' ? v : '');
+    else if (d.kind === 'image') {
+      const img = (v ?? {}) as Record<string, string>;
+      (['url', 'alt', 'focus'] as const).forEach((p) => { (el.querySelector(`[data-part="${p}"]`) as HTMLInputElement).value = img[p] ?? ''; });
+    } else {
+      el.querySelector('.pt-rows')!.innerHTML = '';
+      (Array.isArray(v) ? v : []).forEach((item) => addRow(el, item as Record<string, string>));
+    }
+  }
+
+  function same(a: unknown, b: unknown) { return JSON.stringify(a ?? null) === JSON.stringify(b ?? null); }
+
+  function renderNav() {
+    list.innerHTML = pages.map((p) => `<button type="button" class="p-item" data-id="${p.id}" aria-current="${p.id === current?.id}">${esc(p.title)}</button>`).join('');
+  }
+  list.addEventListener('click', (e) => {
+    const id = (e.target as HTMLElement).closest<HTMLElement>('[data-id]')?.dataset.id;
+    if (id) openPage(id);
+  });
+
+  async function openPage(id: string) {
+    current = pages.find((p) => p.id === id) ?? null;
+    if (!current) return;
+    renderNav();
+    const design = designIdFor(current as never)!;
+    document.querySelectorAll<HTMLFormElement>('.pt-form').forEach((f) => { f.hidden = f.dataset.design !== design; });
+    document.getElementById('pt-title')!.textContent = current.title;
+    document.getElementById('pt-type')!.textContent = current.page_type;
+    (document.getElementById('pt-view') as HTMLAnchorElement).href = withBase(current.page_type === 'Homepage' ? '/' : `/${current.slug}`);
+    head.hidden = false;
+    actions.hidden = false;
+    status.textContent = '';
+    const { data } = await supabase.from('content_blocks').select('block_key, value').eq('page_id', id);
+    stored = new Map((data ?? []).map((r) => [r.block_key, r.value]));
+    for (const d of DESIGN_BLOCKS[design]) writeValue(design, d, stored.get(d.key) ?? d.fallback);
+  }
+
+  // Soft length warnings, so a long edit doesn't quietly break a layout.
+  document.addEventListener('input', (e) => {
+    const field = (e.target as HTMLElement).closest<HTMLElement>('.pt-field');
+    const max = Number(field?.dataset.max);
+    if (!field || !max) return;
+    const len = ((e.target as HTMLInputElement).value ?? '').length;
+    const warn = field.querySelector<HTMLElement>('.pt-warn')!;
+    warn.hidden = len <= max;
+    warn.textContent = `${len} characters. The design is tuned for about ${max}; longer text may not fit well.`;
+  });
+
+  saveButton.addEventListener('click', async () => {
+    if (!current) return;
+    const design = designIdFor(current as never)!;
+    const changed = DESIGN_BLOCKS[design]
+      .map((d) => ({ d, v: readValue(design, d) }))
+      .filter(({ d, v }) => !same(v, stored.get(d.key) ?? d.fallback));
+    if (!changed.length) { status.textContent = 'No changes to save.'; return; }
+    saveButton.disabled = true;
+    status.textContent = 'Saving...';
+
+    if (!canEdit) {
+      const { data: userData } = await supabase.auth.getUser();
+      const rows = changed.map(({ d, v }) => ({
+        page_id: current!.id,
+        field_name: `block:${d.key}`,
+        current_value: JSON.stringify(stored.get(d.key) ?? null),
+        suggested_value: JSON.stringify(v),
+        submitted_by: userData.user?.id ?? null,
+      }));
+      const { error } = await supabase.from('content_suggestions').insert(rows);
+      saveButton.disabled = false;
+      status.textContent = error ? `Could not send: ${error.message}` : `Sent ${rows.length} suggested change${rows.length > 1 ? 's' : ''} to Counselor Marketing Co. for review.`;
+      return;
+    }
+
+    const upserts = changed.filter(({ v }) => v !== null && v !== '').map(({ d, v }) => ({ page_id: current!.id, block_key: d.key, value: v }));
+    const removals = changed.filter(({ v }) => v === null || v === '').map(({ d }) => d.key);
+    if (upserts.length) {
+      const { error } = await supabase.from('content_blocks').upsert(upserts, { onConflict: 'page_id,block_key' });
+      if (error) { saveButton.disabled = false; status.textContent = `Could not save: ${error.message}`; return; }
+    }
+    if (removals.length) {
+      const { error } = await supabase.from('content_blocks').delete().eq('page_id', current.id).in('block_key', removals);
+      if (error) { saveButton.disabled = false; status.textContent = `Could not save: ${error.message}`; return; }
+    }
+    changed.forEach(({ d, v }) => stored.set(d.key, v));
+    status.textContent = 'Saved. Publishing your site...';
+    const result = await triggerRebuild();
+    saveButton.disabled = false;
+    status.textContent = result.ok ? 'Saved. Your site will update in a few minutes.' : 'Saved, but publishing failed. It will go live on the next update.';
+  });
+
+  async function onAuthed(user: AdminUser) {
+    const [{ data: biz }, { data: rows }] = await Promise.all([
+      supabase.from('business').select('content_permission_level').single(),
+      supabase.from('pages').select('id, title, slug, page_type').not('page_type', 'in', '("Blog Post","Blog Index")').order('nav_order'),
+    ]);
+    canEdit = user.role === 'agency' || (user.role === 'owner' && biz?.content_permission_level === 'full');
+    document.getElementById('pt-tier')!.textContent = canEdit
+      ? 'Your changes publish when you save.'
+      : 'Your plan sends text changes to Counselor Marketing Co. as suggestions; we review and publish them.';
+    saveButton.textContent = canEdit ? 'Save and publish' : 'Suggest these changes';
+    pages = ((rows ?? []) as PageRow[]).filter((p) => designIdFor(p as never));
+    if (!pages.length) { document.getElementById('pt-empty')!.hidden = false; return; }
+    const requested = new URLSearchParams(location.search).get('page');
+    const home = pages.find((p) => p.page_type === 'Homepage');
+    await openPage(pages.find((p) => p.id === requested)?.id ?? home?.id ?? pages[0].id);
+  }
+
+  initAdminAuth(onAuthed, { allowedRoles: ['owner', 'agency'] });
+</script>

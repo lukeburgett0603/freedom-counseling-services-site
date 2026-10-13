@@ -1,0 +1,57 @@
+---
+// Site system v2 page frame (see src/designs/README.md). Same <head> as
+// the older BaseLayout (PageHead), so canonical, social tags, structured
+// data, and analytics behave identically; a new header, footer, and
+// phone bar; the theme's self-hosted fonts instead of Google Fonts.
+import PageHead from '../components/PageHead.astro';
+import AdAttributionCapture from '../components/AdAttributionCapture.astro';
+import SiteHeader from '../components/site/SiteHeader.astro';
+import SiteFooter from '../components/site/SiteFooter.astro';
+import SiteMobileBar from '../components/site/SiteMobileBar.astro';
+import { STATIC_EXPORT } from '../lib/exportMode';
+import { THEME_FONT_PRELOADS } from '../designs/site';
+import type { Page, Business } from '../lib/pages';
+import { withBase } from '../lib/url';
+import '../styles/site.css';
+import '../styles/theme.css';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+}
+
+const { page, allPages, business } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <PageHead page={page} allPages={allPages} business={business} googleFonts={false}>
+      {THEME_FONT_PRELOADS.map((f) => <link rel="preload" as="font" type="font/woff2" href={withBase(f)} crossorigin />)}
+      <script is:inline>document.documentElement.classList.remove('no-js');</script>
+    </PageHead>
+  </head>
+  <body class="site">
+    <a class="s-skip" href="#main">Skip to content</a>
+    <SiteHeader navPages={allPages} business={business} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter navPages={allPages} business={business} />
+    <SiteMobileBar business={business} />
+    {!STATIC_EXPORT && <AdAttributionCapture />}
+    <script>
+      const io = new IntersectionObserver(
+        (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }),
+        { threshold: 0.12 },
+      );
+      document.querySelectorAll('.s-reveal').forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .s-skip { position: absolute; left: -9999px; top: 8px; z-index: 100; padding: 10px 14px; background: var(--surface); border-radius: 8px; }
+  .s-skip:focus { left: 8px; }
+</style>

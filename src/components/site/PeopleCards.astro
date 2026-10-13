@@ -1,0 +1,77 @@
+---
+// Counselor cards: photo, name, credential, who they help, rate. A row
+// on desktop; a swipeable row on tablets and phones. Built from the
+// Counselor Profile pages themselves (headshot, credentials, rate), so
+// a new counselor appears everywhere once their profile exists.
+import { Image } from 'astro:assets';
+import { withBase } from '../../lib/url';
+import type { PersonCard } from '../../designs/shared';
+
+interface Props {
+  heading?: string;
+  lede?: string;
+  people: PersonCard[];
+  note?: string;
+  allLink?: { label: string; href: string };
+  // 'h2' when the cards are their own section; 'h3' inside another.
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { heading, lede, people, note, allLink, headingLevel = 'h2' } = Astro.props;
+const H = headingLevel;
+---
+
+{people.length > 0 && (
+  <section class="s-section pc">
+    <div class="s-wrap s-reveal">
+      {heading && (
+        <div class="pc-head">
+          <div>
+            <H class="pc-h">{heading}</H>
+            {lede && <p class="s-lede">{lede}</p>}
+          </div>
+          {allLink && <a class="s-btn s-btn-ghost" href={withBase(allLink.href)}>{allLink.label}</a>}
+        </div>
+      )}
+      <ul class="pc-row" style={`--n:${people.length}`}>
+        {people.map((p) => (
+          <li>
+            <a class="pc-card" href={p.href}>
+              {p.photo ? (
+                <Image src={p.photo.url} alt={p.photo.alt || p.name} width={480} height={600} widths={[240, 360, 480]} sizes="(max-width: 1023px) 72vw, 240px" style={p.photo.focus ? `object-position:${p.photo.focus}` : undefined} />
+              ) : <div class="pc-noimg" aria-hidden="true" />}
+              <div class="pc-body">
+                <span class="pc-name">{p.name}</span>
+                {p.credential && <span class="pc-cred">{p.credential}</span>}
+                {p.summary && <span class="pc-who">{p.summary}</span>}
+                {p.rate !== null && <span class="pc-rate">${p.rate} per session</span>}
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+      {note && <p class="pc-note">{note}</p>}
+    </div>
+  </section>
+)}
+
+<style>
+  .pc-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 36px; }
+  .pc-h { font-size: clamp(1.75rem, 2.6vw, 2.4rem); }
+  .pc-row { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 18px; }
+  .pc-card { height: 100%; background: var(--surface); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; text-decoration: none; transition: transform 0.2s; }
+  .pc-card:hover { transform: translateY(-3px); }
+  .pc-card img, .pc-noimg { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: var(--tint); }
+  .pc-body { padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .pc-name { font-weight: 700; font-size: 1.05rem; line-height: 1.25; }
+  .pc-cred { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+  .pc-who { font-size: 0.9rem; line-height: 1.45; color: var(--muted); flex: 1; }
+  .pc-rate { font-weight: 700; font-size: 0.95rem; }
+  .pc-note { margin-top: 22px; color: var(--muted); font-size: 0.95rem; }
+  @media (min-width: 1024px) { .pc-row:has(> li:nth-child(6)) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 1023px) {
+    .pc-row { grid-template-columns: repeat(var(--n), 72%); overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
+    .pc-row > li { scroll-snap-align: start; }
+    .pc-head { flex-direction: column; align-items: start; }
+  }
+</style>

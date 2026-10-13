@@ -1,0 +1,31 @@
+---
+// Phones only: call and request, always in reach (local searches skew
+// mobile, and calling is often the real conversion). Keeps the
+// `mobile-cta-bar-call` class the older bar used, so existing click
+// tracking keeps counting calls.
+import type { Business } from '../../lib/pages';
+import Ph from './Ph.astro';
+
+interface Props {
+  business: Business;
+  requestHref?: string;
+  requestLabel?: string;
+}
+
+const { business, requestHref = '#request', requestLabel = 'Request an appointment' } = Astro.props;
+const tel = business.telephone?.replace(/[^0-9+]/g, '');
+---
+
+<div class="smb">
+  {tel && <a class="mobile-cta-bar-call smb-call" href={`tel:${tel}`}><Ph name="phone" />Call</a>}
+  <a class="s-btn s-btn-primary smb-req" href={requestHref}>{requestLabel}</a>
+</div>
+
+<style>
+  .smb { display: none; }
+  @media (max-width: 767px) {
+    .smb { position: fixed; inset: auto 0 0 0; z-index: 45; display: flex; gap: 10px; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -4px 16px rgb(0 0 0 / 0.06); }
+    .smb-call { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 18px; border-radius: var(--radius-button); border: 1.5px solid color-mix(in srgb, var(--ink) 30%, transparent); font-weight: 600; text-decoration: none; }
+    .smb-req { flex: 1; }
+  }
+</style>

@@ -17,6 +17,7 @@ export const EXPORT_TABLES: { table: string; label: string }[] = [
   { table: 'review_snapshots', label: 'Google review log' },
   { table: 'business', label: 'Business info and settings' },
   { table: 'pages', label: 'Website pages and blog posts' },
+  { table: 'content_blocks', label: 'Page text (designed pages)' },
   { table: 'lead_magnets', label: 'Guides (lead magnets)' },
   { table: 'lead_magnet_sequence_steps', label: 'Guide follow-up emails' },
   { table: 'content_plan_items', label: 'Content plan' },

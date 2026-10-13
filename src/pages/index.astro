@@ -1,6 +1,8 @@
 ---
 import { getHomepage, getPublishedPages, getBusiness } from '../lib/pages';
 import Homepage from '../templates/Homepage.astro';
+import DesignedPage from '../designs/DesignedPage.astro';
+import { designIdFor } from '../designs/site';
 
 const page = await getHomepage();
 const allPages = await getPublishedPages();
@@ -14,4 +16,8 @@ if (!page) {
 }
 ---
 
-<Homepage page={page} allPages={allPages} business={business} />
+{designIdFor(page) ? (
+  <DesignedPage page={page} allPages={allPages} business={business} />
+) : (
+  <Homepage page={page} allPages={allPages} business={business} />
+)}

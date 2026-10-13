@@ -1,0 +1,53 @@
+---
+// A short set of links to other pages (services, areas, related
+// articles): title, one plain line, arrow. 2 to 8 items. Use for "how we
+// can help" hubs and "related articles".
+import Ph from './Ph.astro';
+import { withBase } from '../../lib/url';
+
+interface Props {
+  heading: string;
+  lede?: string;
+  items: { title: string; text?: string; href: string; meta?: string }[];
+  columns?: 2 | 3;
+}
+
+const { heading, lede, items, columns = 2 } = Astro.props;
+const resolve = (h: string) => (/^\/(?!\/)/.test(h) ? withBase(h) : h);
+---
+
+{items.length > 0 && (
+  <section class="s-section lc">
+    <div class="s-wrap s-reveal">
+      <h2>{heading}</h2>
+      {lede && <p class="s-lede">{lede}</p>}
+      <ul style={`--c:${columns}`}>
+        {items.map((i) => (
+          <li>
+            <a href={resolve(i.href)}>
+              <span>
+                {i.meta && <small>{i.meta}</small>}
+                <strong>{i.title}</strong>
+                {i.text && <span class="lc-text">{i.text}</span>}
+              </span>
+              <Ph name="arrow-right" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  ul { list-style: none; padding: 0; margin-top: 32px; display: grid; grid-template-columns: repeat(var(--c), minmax(0, 1fr)); gap: 14px; }
+  a { height: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 22px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); text-decoration: none; transition: transform 0.2s; }
+  a:hover { transform: translateY(-2px); }
+  a > span { display: grid; gap: 4px; }
+  strong { font-size: 1.1rem; }
+  small { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+  .lc-text { color: var(--muted); font-size: 0.95rem; line-height: 1.45; }
+  a :global(.ph) { font-size: 1.2rem; color: var(--accent); flex: none; }
+  @media (max-width: 1023px) { ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 767px) { ul { grid-template-columns: minmax(0, 1fr); } }
+</style>

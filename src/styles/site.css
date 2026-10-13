@@ -1,0 +1,82 @@
+/*
+ * Site system v2: base styles for pages built from src/designs/ and the
+ * section library (src/components/site/). Every color, font, and shape
+ * comes from the tokens below; a client's look lives entirely in
+ * src/styles/theme.css (loaded after this file), set from its approved
+ * design direction. Pages on the older templates don't load this file.
+ */
+:root {
+  --bg: #f6f7f7;
+  --surface: #ffffff;
+  --ink: #1b2124;
+  --muted: #4d575c;
+  --line: #dde2e3;
+  --tint: #eceff0;
+  --accent: #2f5d50;
+  --accent-strong: #234638;
+  --accent-tint: #e9f0ed;
+  --accent-ink: #ffffff;
+  --font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-heading: var(--font-body);
+  --radius-card: 16px;
+  --radius-input: 10px;
+  --radius-button: 999px;
+  --shadow: 0 1px 2px rgb(27 33 36 / 0.05), 0 8px 24px rgb(27 33 36 / 0.06);
+  --max: 1200px;
+  --gutter: 24px;
+  --section-y: 96px;
+}
+
+.site { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 18px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.site *, .site *::before, .site *::after { box-sizing: border-box; }
+.site :where(h1, h2, h3, p, ul, ol, figure, blockquote) { margin: 0; }
+.site :where(h1, h2, h3) { font-family: var(--font-heading); letter-spacing: -0.02em; line-height: 1.12; font-weight: 700; }
+.site :where(h2) { font-size: clamp(1.75rem, 2.6vw, 2.4rem); }
+.site :where(p) { max-width: 65ch; }
+.site :where(img) { display: block; max-width: 100%; }
+.site :where(a) { color: inherit; }
+.site :focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; border-radius: 4px; }
+html:has(.site) { scroll-behavior: smooth; scroll-padding-top: 88px; }
+
+.s-wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.s-section { padding: var(--section-y) 0; }
+/* Two plain sections in a row share one gap, not two. Tinted or
+   surface sections (.s-band) keep their own padding. */
+.s-section:not(.s-band) + .s-section:not(.s-band),
+.s-section:not(.s-band) + .rp { padding-top: 0; }
+.s-muted { color: var(--muted); }
+.s-lede { color: var(--muted); font-size: 1.1rem; margin-top: 10px; }
+
+/* Buttons: one primary action color, pill shape (theme can change it). */
+.s-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; white-space: nowrap; border-radius: var(--radius-button); padding: 0.85rem 1.4rem; font: inherit; font-weight: 600; font-size: 1rem; line-height: 1.2; text-decoration: none; cursor: pointer; border: 0; transition: background-color 0.2s, border-color 0.2s, transform 0.1s; }
+.s-btn:active { transform: translateY(1px); }
+.s-btn-primary { background: var(--accent); color: var(--accent-ink); }
+.s-btn-primary:hover { background: var(--accent-strong); }
+.s-btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid color-mix(in srgb, var(--ink) 30%, transparent); }
+.s-btn-ghost:hover { border-color: var(--ink); }
+.s-btn .ph { font-size: 1.15rem; }
+.s-link { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--accent-strong); text-underline-offset: 3px; }
+.s-link .ph { transition: transform 0.2s; }
+.s-link:hover .ph { transform: translateX(3px); }
+
+/* Rich text from blocks (markdown) */
+.s-rich > * + * { margin-top: 14px; }
+.s-rich ul { padding-left: 1.2em; }
+.s-rich li + li { margin-top: 6px; }
+.s-rich a { color: var(--accent-strong); text-underline-offset: 3px; }
+
+/* One gentle reveal as sections enter; nothing loops. */
+.s-reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.s-reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  html:has(.site) { scroll-behavior: auto; }
+  .s-reveal { opacity: 1; transform: none; transition: none; }
+  .site * { transition: none !important; }
+}
+/* No JavaScript: show everything. */
+.no-js .s-reveal { opacity: 1; transform: none; }
+
+@media (max-width: 767px) {
+  .site { font-size: 17px; }
+  :root { --gutter: 16px; --section-y: 64px; }
+}

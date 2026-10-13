@@ -1,0 +1,52 @@
+---
+// "What brings you here?": each line is what a visitor might say, in
+// their own words, linking to the page that helps. Two columns on
+// desktop, one on phones. Lets people recognize themselves before they
+// see a services list.
+import Ph from './Ph.astro';
+import { withBase } from '../../lib/url';
+
+interface Props {
+  heading: string;
+  lede?: string;
+  items: { quote: string; label: string; href: string }[];
+}
+
+const { heading, lede, items } = Astro.props;
+const resolve = (h: string) => (/^\/(?!\/)/.test(h) ? withBase(h) : h);
+---
+
+{items.length > 0 && (
+  <section class="s-section ql">
+    <div class="s-wrap s-reveal">
+      <h2>{heading}</h2>
+      {lede && <p class="s-lede">{lede}</p>}
+      <ul>
+        {items.map((i) => (
+          <li>
+            <a href={resolve(i.href)}>
+              <span><q>{i.quote}</q><small>{i.label}</small></span>
+              <Ph name="arrow-right" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  ul { list-style: none; margin-top: 36px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; padding: 0; }
+  li { border-top: 1px solid var(--line); }
+  li:nth-last-child(-n + 2) { border-bottom: 1px solid var(--line); }
+  a { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 0; text-decoration: none; }
+  q { display: block; font-size: 1.2rem; font-weight: 500; quotes: '\201C' '\201D'; }
+  small { display: block; font-size: 0.88rem; color: var(--muted); margin-top: 2px; }
+  a :global(.ph) { font-size: 1.25rem; color: var(--accent); transition: transform 0.2s; }
+  a:hover q { color: var(--accent); }
+  a:hover :global(.ph) { transform: translateX(4px); }
+  @media (max-width: 767px) {
+    ul { grid-template-columns: minmax(0, 1fr); }
+    li:nth-last-child(2) { border-bottom: 0; }
+  }
+</style>
