@@ -81,7 +81,11 @@ const cta = page.cta_button_text ?? 'Request an appointment';
 
   <FaqList heading={t('faq.heading')} faqs={page.faqs} />
 
-  <LinkCards heading={t('related.heading')} items={relatedArticles(allPages, page.category)} />
+  <LinkCards
+    heading={t('related.heading')}
+    items={relatedArticles(allPages, page.category)}
+    more={relatedArticles(allPages, page.category, 99).length > 4 ? { label: `All ${page.title.toLowerCase()} articles`, href: `/blog?topic=${page.slug}` } : undefined}
+  />
 
   <RequestPanel
     slug={page.slug}

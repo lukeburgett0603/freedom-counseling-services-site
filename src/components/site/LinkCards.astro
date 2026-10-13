@@ -10,9 +10,10 @@ interface Props {
   lede?: string;
   items: { title: string; text?: string; href: string; meta?: string }[];
   columns?: 2 | 3;
+  more?: { label: string; href: string };
 }
 
-const { heading, lede, items, columns = 2 } = Astro.props;
+const { heading, lede, items, columns = 2, more } = Astro.props;
 const resolve = (h: string) => (/^\/(?!\/)/.test(h) ? withBase(h) : h);
 ---
 
@@ -35,19 +36,21 @@ const resolve = (h: string) => (/^\/(?!\/)/.test(h) ? withBase(h) : h);
           </li>
         ))}
       </ul>
+      {more && <a class="s-link lc-more" href={resolve(more.href)}>{more.label} <Ph name="arrow-right" /></a>}
     </div>
   </section>
 )}
 
 <style>
   ul { list-style: none; padding: 0; margin-top: 32px; display: grid; grid-template-columns: repeat(var(--c), minmax(0, 1fr)); gap: 14px; }
-  a { height: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 22px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); text-decoration: none; transition: transform 0.2s; }
-  a:hover { transform: translateY(-2px); }
-  a > span { display: grid; gap: 4px; }
+  li > a { height: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 22px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); text-decoration: none; transition: transform 0.2s; }
+  li > a:hover { transform: translateY(-2px); }
+  li > a > span { display: grid; gap: 4px; }
   strong { font-size: 1.1rem; }
   small { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
   .lc-text { color: var(--muted); font-size: 0.95rem; line-height: 1.45; }
-  a :global(.ph) { font-size: 1.2rem; color: var(--accent); flex: none; }
+  li > a :global(.ph) { font-size: 1.2rem; color: var(--accent); flex: none; }
+  .lc-more { margin-top: 20px; }
   @media (max-width: 1023px) { ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 767px) { ul { grid-template-columns: minmax(0, 1fr); } }
 </style>
