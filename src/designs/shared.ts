@@ -60,3 +60,40 @@ export function counselorOptions(allPages: Page[]): { id: string; title: string 
 export function fill(text: string, vars: Record<string, string | null | undefined>): string {
   return text.replace(/\{(\w+)\}/g, (m, k) => vars[k] ?? m);
 }
+
+// Articles in a service's category (the service page's own `category`),
+// newest first: the "Related articles" list builds itself as posts are
+// published.
+export function relatedArticles(allPages: Page[], category: string | null, limit = 4) {
+  if (!category) return [];
+  return allPages
+    .filter((p) => p.page_type === 'Blog Post' && p.category === category)
+    .sort((a, b) => (b.date_published ?? '').localeCompare(a.date_published ?? ''))
+    .slice(0, limit)
+    .map((p) => ({ title: p.h1 || p.title, href: withBase(`/${p.slug}`), meta: p.author_name ? `By ${p.author_name}` : undefined }));
+}
+
+// A service page lists its counselors with service-specific wording
+// (block list `team.items`: {slug, text}); photo, credential line and
+// rate still come from each counselor's own page.
+export function teamCards(
+  items: { slug: string; text: string }[],
+  allPages: Page[],
+  allBlocks: Map<string, BlockValues>,
+): PersonCard[] {
+  const all = personCards(allPages, allBlocks);
+  return items
+    .map((i) => {
+      const card = all.find((c) => c.href === withBase(`/${i.slug}`));
+      return card ? { ...card, summary: i.text || card.summary } : null;
+    })
+    .filter((c): c is PersonCard => c !== null);
+}
+
+export function rangeOf(cards: PersonCard[]): string | null {
+  const rates = cards.map((c) => c.rate).filter((r): r is number => r !== null);
+  if (!rates.length) return null;
+  const lo = Math.min(...rates);
+  const hi = Math.max(...rates);
+  return lo === hi ? `$${lo}` : `$${lo} to $${hi}`;
+}

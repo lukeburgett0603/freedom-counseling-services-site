@@ -2,6 +2,75 @@
   "slug": "luke-burgett",
   "blocks": {
     "card.credential": "LPCA",
-    "card.summary": "Boys and men, 8 and up, with anxiety, depression, or OCD."
+    "card.summary": "Boys and men, 8 and up, with anxiety, depression, or OCD.",
+    "hero.subhead": "Helps boys and men who feel stuck, overwhelmed, anxious, depressed, or trapped by unwanted thoughts find peace, reconnect with purpose, and take steady steps toward the life they want.",
+    "quote": "Counseling with me is a collaborative experience. At every turn, you help direct our work toward what is most important to you.",
+    "specialties": [
+      {
+        "text": "Men and boys (8 and up)"
+      },
+      {
+        "text": "Anxiety"
+      },
+      {
+        "text": "Depression"
+      },
+      {
+        "text": "OCD and intrusive thoughts"
+      },
+      {
+        "text": "Trauma"
+      },
+      {
+        "text": "Parent and child"
+      },
+      {
+        "text": "Christian counseling"
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Who Luke works with",
+        "body": "Luke works with boys and men from age 8 through adulthood. Many feel like anxiety, depression, OCD, or unwanted thoughts are keeping them from the life they want. Anxiety may keep them avoiding things. Depression may make it hard to engage. OCD may leave them feeling trapped by thoughts and habits they wish they could stop. Underneath, most aren't just looking for symptom relief. They want peace, steadiness, and a sense of purpose. Luke also works with parents and children together when the relationship between them is part of the work."
+      },
+      {
+        "heading": "Luke's approach",
+        "body": "Luke draws on acceptance and commitment therapy (ACT), cognitive behavioral therapy (CBT), and internal family systems (IFS), and he offers exposure and response prevention (ERP), the leading treatment for OCD. He also works with trauma using ACT and IFS. His approach is collaborative: together you build a clear path forward and the skills to make progress toward your goals."
+      }
+    ],
+    "practical.body": "In person in Middletown or online. Usually seen the same week.",
+    "faith.heading": "Faith",
+    "faith.body": "For Christian clients who want it, Luke offers thoughtful Christian integration, including deeper questions about God, identity, calling, and what a flourishing life looks like. If you'd rather not bring faith in, he follows your lead.",
+    "approaches": [
+      {
+        "text": "ACT"
+      },
+      {
+        "text": "CBT"
+      },
+      {
+        "text": "ERP for OCD"
+      },
+      {
+        "text": "IFS"
+      },
+      {
+        "text": "Behavioral activation"
+      },
+      {
+        "text": "Schema therapy"
+      },
+      {
+        "text": "Existential therapy"
+      },
+      {
+        "text": "Mindfulness-based stress reduction"
+      },
+      {
+        "text": "Christian/faith-based counseling"
+      }
+    ],
+    "request.heading": "Ready to start with Luke?",
+    "request.text": "Request an appointment with Luke, or call (502) 523-2970."
   }
 }

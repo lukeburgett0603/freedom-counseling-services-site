@@ -1,0 +1,65 @@
+{
+  "slug": "grief-counseling",
+  "blocks": {
+    "hero.eyebrow": "Grief counseling · Louisville, KY and online",
+    "hero.subhead": "Grief doesn't move in a straight line, and it rarely follows anyone else's timeline. Grief counseling gives you a safe, unhurried place to carry your loss, whenever you're ready.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "check-circle",
+        "text": "At your pace, always"
+      }
+    ],
+    "request.heading": "You don't have to carry this alone",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "It's been months, and it isn't getting easier."
+      },
+      {
+        "text": "Everyone else seems to have moved on, and you haven't."
+      },
+      {
+        "text": "You feel numb, and you don't understand why."
+      },
+      {
+        "text": "The grief comes in waves, sometimes when you least expect it."
+      },
+      {
+        "text": "Your loss is one other people don't always recognize: a divorce, a pregnancy, a diagnosis, a pet, a job."
+      },
+      {
+        "text": "A loss from years ago has come back up."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "For many people, grief raises hard questions about God and suffering. If you want faith to be part of your counseling, those questions are welcome here, held with the same care as the rest of your grief. If you don't, that's entirely your call.",
+    "sections": [
+      {
+        "heading": "Your grief doesn't have to look a certain way",
+        "body": "There's no schedule for grief, and no loss too big or too small to deserve care. Some people come in days after a loss. Others come years later, when something reopens it. Both are the right time."
+      },
+      {
+        "heading": "What grief counseling at Freedom looks like",
+        "body": "Your counselor follows your pace. Some people want to talk through the loss right away; others need time before they're ready. Together you'll make room for the grief, understand what you're feeling, and find ways to carry it so it doesn't carry you. When a loss was traumatic, Staci's EMDR training can help with memories that won't settle."
+      }
+    ],
+    "team.heading": "Counselors who walk with people through grief",
+    "team.items": [
+      {
+        "slug": "staci-harrub",
+        "text": "Grief, life transitions, and trauma. EMDR-trained."
+      },
+      {
+        "slug": "rhonda-gore",
+        "text": "Women and older teens working through grief and life transitions."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "You'll talk about your loss as much or as little as you want to. There's no pressure to revisit painful memories before you're ready. Sessions are in our Middletown office or online.",
+    "cost.body": "$100 per session with Staci or Rhonda. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

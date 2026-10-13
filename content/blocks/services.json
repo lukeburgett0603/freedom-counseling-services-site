@@ -1,0 +1,73 @@
+{
+  "slug": "services",
+  "blocks": {
+    "hero.subhead": "Whatever brought you here, there's likely a Freedom counselor who has helped someone through something close to it. Find the kind of counseling that fits, or tell us what's going on and we'll point you to the right person.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown, or online anywhere in Kentucky"
+      }
+    ],
+    "request.heading": "Ready to take the first step?",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "links.heading": "How we can help",
+    "links.items": [
+      {
+        "title": "Individual counseling",
+        "text": "For anxiety, depression, OCD, or a season of feeling stuck.",
+        "href": "/individual-counseling"
+      },
+      {
+        "title": "Couples and marriage counseling",
+        "text": "For couples who keep having the same fight, feel like roommates, or want a strong start before the wedding. Gottman Method with Tony.",
+        "href": "/couples-marriage-counseling"
+      },
+      {
+        "title": "Family counseling",
+        "text": "For families caught in conflict or change, including parent and child relationships.",
+        "href": "/family-counseling"
+      },
+      {
+        "title": "Child and teen counseling",
+        "text": "For kids 8 and up and teens, with play and art therapy for younger children.",
+        "href": "/child-teen-counseling"
+      },
+      {
+        "title": "Anxiety and depression counseling",
+        "text": "Practical tools for worry, panic, low mood, and intrusive thoughts, including ERP for OCD.",
+        "href": "/anxiety-depression-counseling"
+      },
+      {
+        "title": "Trauma and EMDR counseling",
+        "text": "EMDR with Staci, in person or online, or trauma work with ACT and IFS with Luke.",
+        "href": "/trauma-emdr-counseling"
+      },
+      {
+        "title": "Grief counseling",
+        "text": "A steady place to carry loss, at your own pace.",
+        "href": "/grief-counseling"
+      },
+      {
+        "title": "Christian counseling",
+        "text": "Faith at the center of your counseling, whenever you want it.",
+        "href": "/christian-counseling"
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Not sure which one you need?",
+        "body": "You don't have to know. Many people come in with more than one thing going on: anxiety and a strained marriage, or grief that's touching the whole family. Tell us a little about what's happening, and we'll suggest a counselor and a place to start. You can always switch later."
+      },
+      {
+        "heading": "What every service has in common",
+        "body": "- **The best clinical care.** Our counselors use well-researched approaches, including CBT, ACT, EMDR, IFS, ERP, the Gottman Method, family systems, DBT skills, and play and art therapy.\n- **Faith at the center, never forced.** Freedom brings together a biblical worldview, Christian theology, and the best clinical practice. If you'd rather not bring faith in, you'll get the same excellent care, and your counselor will follow your lead.\n- **Seen soon.** Usually the same week, sometimes the next day.\n- **Prices posted up front.** $50 to $160 per 50-minute session, depending on your counselor."
+      }
+    ],
+    "note.heading": "When another kind of care fits better",
+    "note.body": "We want you to get the right help, even when it isn't with us. Freedom doesn't provide psychiatric care or medication management, so for severe mental illness that needs it, we'll help you find the right next step. We also see children 8 and up; for younger children, we'll gladly point you toward someone who specializes in early childhood."
+  }
+}

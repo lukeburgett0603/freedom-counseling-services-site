@@ -61,7 +61,8 @@ html:has(.site) { scroll-behavior: smooth; scroll-padding-top: 88px; }
 
 /* Rich text from blocks (markdown) */
 .s-rich > * + * { margin-top: 14px; }
-.s-rich ul { padding-left: 1.2em; }
+.s-rich ul { padding-left: 1.2em; list-style: disc; }
+.s-rich ol { padding-left: 1.4em; list-style: decimal; }
 .s-rich li + li { margin-top: 6px; }
 .s-rich a { color: var(--accent-strong); text-underline-offset: 3px; }
 

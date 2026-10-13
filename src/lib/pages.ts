@@ -1,5 +1,11 @@
 import { supabase } from './supabase';
 
+// Launch preview overlay (lib/launchOverlay.ts), loaded only at build
+// time: the admin's browser code imports this file too, and the overlay
+// reads files from disk.
+const overlay = () => import('./launchOverlay');
+const isLaunchPreview = () => typeof process !== 'undefined' && process.env?.LAUNCH_PREVIEW === '1';
+
 export type PageType =
   | 'Homepage'
   | 'About'
@@ -339,6 +345,13 @@ export interface Business {
 // yet, and frontend-site-builder-supabase should never invent copy to fill
 // the gap (same rule as the original Wix skill).
 export async function getPublishedPages(): Promise<Page[]> {
+  // Launch preview: read every row, apply content/launch/pages.json (which
+  // can publish draft pages), then keep the published ones.
+  if (isLaunchPreview()) {
+    const { data, error } = await supabase.from('pages').select('*');
+    if (error) throw error;
+    return (await overlay()).applyPageOverlay(data as Page[]).filter((p) => p.status === 'content-complete');
+  }
   const { data, error } = await supabase
     .from('pages')
     .select('*')
@@ -359,6 +372,7 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
 }
 
 export async function getHomepage(): Promise<Page | null> {
+  if (isLaunchPreview()) return (await getPublishedPages()).find((p) => p.page_type === 'Homepage') ?? null;
   const { data, error } = await supabase
     .from('pages')
     .select('*')
@@ -372,7 +386,7 @@ export async function getHomepage(): Promise<Page | null> {
 export async function getBusiness(): Promise<Business> {
   const { data, error } = await supabase.from('business').select('*').single();
   if (error) throw error;
-  return data as Business;
+  return isLaunchPreview() ? (await overlay()).applyBusinessOverlay(data as Business) : (data as Business);
 }
 
 // The "Select a Counselor" dropdown's option list — derived live from

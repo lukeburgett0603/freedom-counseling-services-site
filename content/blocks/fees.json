@@ -1,0 +1,28 @@
+{
+  "slug": "fees",
+  "blocks": {
+    "hero.subhead": "No guessing and no surprise bills. Here is every counselor's rate, how payment works, and how you may be able to get part of it back from your insurance.",
+    "request.heading": "Ready to get started?",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "rates.heading": "Rates by counselor",
+    "rates.note": "Every session is 50 minutes. Each name links to that counselor's profile. The rate is the same in person or online.",
+    "more": [
+      {
+        "heading": "Looking for a lower cost?",
+        "body": "Sessions with Sophie Bowman, our Student Counselor, are $50. Sophie works with children 8 and up, teens, and young adults, and her work is supervised by Tony Gore, LCSW. [Meet Sophie](/sophie-bowman)\n\n**If cost is a concern,** talk with us before you rule counseling out. We consider financial hardship case by case."
+      },
+      {
+        "heading": "Do you take insurance?",
+        "body": "We don't bill insurance directly. You pay for each session, and we'll give you a superbill: a receipt with the details your insurance company needs. If your plan has out-of-network mental health benefits, you can submit it to be reimbursed for part of the cost.\n\n**How to find out what you'd get back:** call the number on your insurance card and ask:\n\n1. Do I have out-of-network benefits for outpatient mental health?\n2. What's my deductible, and how much of it have I met?\n3. What percentage do you reimburse for an out-of-network session?\n4. How do I submit a superbill?"
+      },
+      {
+        "heading": "How payment works",
+        "body": "We accept credit and debit cards, HSA and FSA cards, cash, and checks. Payment is taken after each session. You can keep a card on file to be charged automatically after each session, or pay at the front desk each time if you'd rather.\n\n**Cancellations:** please give at least 24 hours' notice if you need to cancel or reschedule. A cancellation with less than 24 hours' notice is charged 50% of your session fee. A missed session without notice is charged the full session fee."
+      },
+      {
+        "heading": "Your right to a Good Faith Estimate",
+        "body": "Under federal law, if you don't use insurance (or pay on your own), you have the right to receive a Good Faith Estimate of what your care will cost. You'll receive one before your first session, and you can ask for one anytime. [cms.gov/nosurprises](https://www.cms.gov/nosurprises)"
+      }
+    ]
+  }
+}

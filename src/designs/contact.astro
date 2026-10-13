@@ -1,0 +1,61 @@
+---
+// Contact page design (site system v2): a short hero, then the request
+// form right away (the reason people come here), other ways to reach
+// the office, what happens next beside the cost, and honest limits.
+import SiteLayout from '../layouts/SiteLayout.astro';
+import HeroSplit from '../components/site/HeroSplit.astro';
+import RequestPanel from '../components/site/RequestPanel.astro';
+import OfficeCard from '../components/site/OfficeCard.astro';
+import StepsCost from '../components/site/StepsCost.astro';
+import NoteCard from '../components/site/NoteCard.astro';
+import { blockReader, type BlockValues } from '../lib/blocks';
+import type { Page, Business } from '../lib/pages';
+import { CONTACT_BLOCKS } from './contact.blocks';
+import { counselorOptions, rateRange, fill } from './shared';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+  blocks: BlockValues;
+  allBlocks: Map<string, BlockValues>;
+}
+
+const { page, allPages, business, blocks } = Astro.props;
+const { t, list } = blockReader(blocks, CONTACT_BLOCKS);
+const vars = { rate_range: rateRange(allPages), phone: business.telephone };
+const f = (s: string) => fill(s, vars);
+const steps = list('next.steps');
+---
+
+<SiteLayout page={page} allPages={allPages} business={business}>
+  <HeroSplit headline={page.h1 ?? page.title} subhead={f(t('hero.subhead'))} />
+  <div class="ct-form">
+    <RequestPanel
+      slug={page.slug}
+      business={business}
+      heading={t('request.heading') === (page.h1 ?? page.title) ? '' : t('request.heading')}
+      text={f(t('request.text'))}
+      counselors={counselorOptions(allPages)}
+      formatNote={t('request.format_note')}
+      submitText={page.cta_button_text ?? undefined}
+    />
+  </div>
+  <OfficeCard business={business} heading={t('office.heading')} directions={f(t('office.directions'))} />
+  {steps.length > 0 && (
+    <StepsCost
+      stepsHeading={t('next.heading')}
+      steps={steps.map((s) => ({ icon: s.icon, title: s.title, text: f(s.text) }))}
+      costHeading={t('cost.heading')}
+      costFigure={vars.rate_range ?? ''}
+      costNote="per 50-minute session, depending on your counselor"
+      costBody={f(t('cost.body'))}
+      costLink={{ label: "See every counselor's rate", href: '/fees' }}
+    />
+  )}
+  <NoteCard heading={t('note.heading')} body={f(t('note.body'))} icon="signpost" />
+</SiteLayout>
+
+<style>
+  .ct-form :global(.rp) { padding-top: 0; }
+</style>

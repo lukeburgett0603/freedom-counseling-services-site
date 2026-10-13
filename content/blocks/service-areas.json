@@ -1,0 +1,27 @@
+{
+  "slug": "service-areas",
+  "blocks": {
+    "hero.subhead": "One office in Louisville's Middletown area, serving Louisville, Elizabethtown, and Southern Indiana. Choose your area to see how it works for you.",
+    "request.heading": "Ready to get started?",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "links.heading": "Choose your area",
+    "links.items": [
+      {
+        "title": "Louisville, KY",
+        "text": "In person at our Middletown office, or online anywhere in Kentucky. Switch between the two whenever you need to.",
+        "href": "/louisville-counseling"
+      },
+      {
+        "title": "Elizabethtown, KY",
+        "text": "Online with any Freedom counselor, or in person at our Louisville office, under an hour away. Many E-town clients do both.",
+        "href": "/elizabethtown-counseling"
+      },
+      {
+        "title": "Southern Indiana",
+        "text": "About 20 minutes from New Albany, Jeffersonville, and Clarksville. Indiana clients meet in person at our Louisville office.",
+        "href": "/southern-indiana-counseling"
+      }
+    ],
+    "office.heading": "Our office"
+  }
+}

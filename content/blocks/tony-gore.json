@@ -2,6 +2,72 @@
   "slug": "tony-gore",
   "blocks": {
     "card.credential": "LCSW, Owner and Director",
-    "card.summary": "Couples, families, teens, and men who feel stuck or overwhelmed."
+    "card.summary": "Couples, families, teens, and men who feel stuck or overwhelmed.",
+    "hero.subhead": "Helps couples, families, teens, young adults, and men who feel stuck or overwhelmed move toward hope, clarity, and stronger relationships.",
+    "quote": "Counseling with me is a relationship, not a lecture. You get to show up exactly as you are, and we figure out the next step together.",
+    "specialties": [
+      {
+        "text": "Couples and marriage"
+      },
+      {
+        "text": "Pre-marital"
+      },
+      {
+        "text": "Families"
+      },
+      {
+        "text": "Teens and young adults"
+      },
+      {
+        "text": "Men"
+      },
+      {
+        "text": "Christian counseling"
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Who Tony works with",
+        "body": "Tony especially enjoys working with couples and marriages, teens and young adults and their families, and men working through personal, relational, or spiritual struggles. The people he works with often don't have everything figured out, but they want to understand what's happening and take real steps forward."
+      },
+      {
+        "heading": "Tony's approach",
+        "body": "Tony is a Licensed Clinical Social Worker and the owner and director of Freedom Counseling Services. His style is relational and spiritually informed. He sees counseling as a real, two-way relationship: you come as you are, without judgment, and you work it out together. With couples, he uses the Gottman Method, an approach built on decades of research into what makes relationships last."
+      }
+    ],
+    "practical.body": "In person in Middletown or online. Usually seen the same week. Tony also supervises Sophie Bowman, Student Counselor.",
+    "faith.heading": "Faith",
+    "faith.body": "When you want it, Tony brings prayer, spiritual reflection, and biblical insight into your work together, in ways that are respectful and fit you. When you don't, you get the same clinical care. You lead.",
+    "approaches": [
+      {
+        "text": "Gottman Method"
+      },
+      {
+        "text": "Cognitive behavioral therapy (CBT)"
+      },
+      {
+        "text": "Family systems therapy"
+      },
+      {
+        "text": "Internal family systems (IFS)"
+      },
+      {
+        "text": "Motivational interviewing"
+      },
+      {
+        "text": "Narrative therapy (in training)"
+      },
+      {
+        "text": "Solution-focused brief therapy"
+      },
+      {
+        "text": "Mindfulness-based approaches"
+      },
+      {
+        "text": "Christian/faith-based counseling"
+      }
+    ],
+    "request.heading": "Ready to start with Tony?",
+    "request.text": "Request an appointment with Tony, or call (502) 523-2970."
   }
 }

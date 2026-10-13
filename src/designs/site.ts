@@ -8,16 +8,41 @@
 import type { Page, PageType } from '../lib/pages';
 import type { BlockDef } from '../lib/blocks';
 import { HOME_BLOCKS } from './home.blocks';
+import { SERVICE_BLOCKS } from './service.blocks';
+import { PAGE_BLOCKS } from './page.blocks';
+import { PROFILE_BLOCKS } from './profile.blocks';
+import { CONTACT_BLOCKS } from './contact.blocks';
+import { ARTICLE_BLOCKS } from './article.blocks';
 
 export const DESIGN_BY_PAGE_TYPE: Partial<Record<PageType, string>> = {
   Homepage: 'home',
+  'Service Hub': 'service',
+  'Services Overview': 'page',
+  'Service Areas Overview': 'page',
+  'Service Area': 'page',
+  'Counselors Overview': 'page',
+  'Counselor Profile': 'profile',
+  About: 'page',
+  Contact: 'contact',
+  'Blog Post': 'article',
+  'Blog Index': 'articles',
+  Other: 'legal',
 };
 
-export const DESIGN_BY_SLUG: Record<string, string> = {};
+export const DESIGN_BY_SLUG: Record<string, string> = {
+  fees: 'page',
+};
 
 // Every design's block definitions, by design id.
 export const DESIGN_BLOCKS: Record<string, BlockDef[]> = {
   home: HOME_BLOCKS,
+  service: SERVICE_BLOCKS,
+  page: PAGE_BLOCKS,
+  profile: PROFILE_BLOCKS,
+  contact: CONTACT_BLOCKS,
+  article: ARTICLE_BLOCKS,
+  articles: [],
+  legal: [],
 };
 
 // Self-hosted font files to preload (paths under public/), from theme.css.

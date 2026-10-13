@@ -2,6 +2,57 @@
   "slug": "staci-harrub",
   "blocks": {
     "card.credential": "LPCA, EMDR-trained",
-    "card.summary": "Adults working through trauma, grief, anxiety, and perfectionism."
+    "card.summary": "Adults working through trauma, grief, anxiety, and perfectionism.",
+    "hero.subhead": "Helps emerging adults, young adults, and adults stuck in anxiety, grief, life transitions, or hard relationships find a safe place to be seen, heal, and take practical steps toward peace.",
+    "quote": "Healing happens one small step at a time, and I'll be right there with you.",
+    "specialties": [
+      {
+        "text": "EMDR and trauma"
+      },
+      {
+        "text": "Grief and life transitions"
+      },
+      {
+        "text": "Anxiety"
+      },
+      {
+        "text": "Perfectionism"
+      },
+      {
+        "text": "Couples and family"
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Who Staci works with",
+        "body": "Staci works with emerging adults, young adults, and adults, especially those walking through trauma, grief, life transitions, spiritual questions, perfectionism, or relationship struggles. She works well with people open to looking at the whole person: body, mind, relationships, and faith."
+      },
+      {
+        "heading": "Staci's approach",
+        "body": "Staci is a Licensed Professional Counselor Associate with a Master of Arts in Counseling. She's EMDR-trained and a Prepare and Enrich facilitator for couples preparing for marriage. Her style is trauma-informed, holistic, and person-centered. Counseling with Staci is judgment-free and pressure-free, and you move at a pace that respects your readiness."
+      }
+    ],
+    "practical.body": "In person in Middletown or online, including EMDR. Usually seen the same week.",
+    "faith.heading": "Faith",
+    "faith.body": "When you want it, Staci brings prayer, Scripture, mindfulness, and spiritual reflection into your work together, in line with your values. When you don't, she follows your lead.",
+    "approaches": [
+      {
+        "text": "EMDR"
+      },
+      {
+        "text": "Cognitive behavioral therapy (CBT)"
+      },
+      {
+        "text": "Acceptance and commitment therapy (ACT)"
+      },
+      {
+        "text": "Prepare and Enrich (pre-marital)"
+      },
+      {
+        "text": "Christian/faith-based counseling"
+      }
+    ],
+    "request.heading": "Ready to start with Staci?",
+    "request.text": "Request an appointment with Staci, or call (502) 523-2970."
   }
 }

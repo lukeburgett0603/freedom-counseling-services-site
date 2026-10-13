@@ -1,0 +1,96 @@
+---
+// Service page design (site system v2). Recognition (signs), then the
+// page's own sections, faith, who you'd work with (real faces and
+// rates), the first session beside the cost, honest notes, questions,
+// related articles, and the request form. Main sections alternate
+// between a split layout and a stacked band so no layout repeats back
+// to back.
+import SiteLayout from '../layouts/SiteLayout.astro';
+import HeroSplit from '../components/site/HeroSplit.astro';
+import PeopleMosaic from '../components/site/PeopleMosaic.astro';
+import FactsStrip from '../components/site/FactsStrip.astro';
+import SignsList from '../components/site/SignsList.astro';
+import ProseSplit from '../components/site/ProseSplit.astro';
+import StatementBand from '../components/site/StatementBand.astro';
+import PeopleCards from '../components/site/PeopleCards.astro';
+import InfoPair from '../components/site/InfoPair.astro';
+import NoteCard from '../components/site/NoteCard.astro';
+import FaqList from '../components/site/FaqList.astro';
+import LinkCards from '../components/site/LinkCards.astro';
+import RequestPanel from '../components/site/RequestPanel.astro';
+import { blockReader, type BlockValues } from '../lib/blocks';
+import type { Page, Business } from '../lib/pages';
+import { SERVICE_BLOCKS } from './service.blocks';
+import { teamCards, rangeOf, counselorOptions, relatedArticles, rateRange, fill } from './shared';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+  blocks: BlockValues;
+  allBlocks: Map<string, BlockValues>;
+}
+
+const { page, allPages, business, blocks, allBlocks } = Astro.props;
+const { t, list } = blockReader(blocks, SERVICE_BLOCKS);
+const team = teamCards(list('team.items') as { slug: string; text: string }[], allPages, allBlocks);
+const vars = { rate_range: rateRange(allPages), service_range: rangeOf(team), phone: business.telephone };
+const f = (s: string) => fill(s, vars);
+const sections = list('sections');
+const before = sections.slice(0, 2);
+const after = sections.slice(2);
+const tel = business.telephone?.replace(/[^0-9+]/g, '');
+const cta = page.cta_button_text ?? 'Request an appointment';
+---
+
+<SiteLayout page={page} allPages={allPages} business={business}>
+  <HeroSplit
+    eyebrow={t('hero.eyebrow')}
+    headline={page.h1 ?? page.title}
+    subhead={f(t('hero.subhead'))}
+    primary={{ label: cta, href: '#request' }}
+    secondary={tel ? { label: business.telephone!, href: `tel:${tel}`, icon: 'phone' } : undefined}
+    balance="wide"
+  >
+    <PeopleMosaic slot="media" people={team.filter((p) => p.photo).map((p) => ({ name: p.name, photo: p.photo! }))} />
+  </HeroSplit>
+
+  <FactsStrip items={list('facts').map((i) => ({ icon: i.icon || 'check-circle', text: f(i.text) }))} />
+
+  <SignsList heading={t('signs.heading')} items={list('signs.items').map((i) => i.text).filter(Boolean)} />
+
+  {before.map((s, i) => <ProseSplit heading={s.heading} body={f(s.body)} layout={i % 2 === 0 ? 'split' : 'stack'} surface={i % 2 === 1} />)}
+
+  <StatementBand heading={t('faith.heading')} body={t('faith.body')} />
+
+  {after.map((s, i) => <ProseSplit heading={s.heading} body={f(s.body)} layout={i % 2 === 0 ? 'split' : 'stack'} surface={i % 2 === 1} />)}
+
+  <PeopleCards heading={t('team.heading')} people={team} note={t('team.note')} allLink={{ label: 'Meet all our counselors', href: '/counselors' }} />
+
+  <InfoPair
+    leftHeading={t('expect.heading')}
+    leftBody={f(t('expect.body'))}
+    rightHeading={t('cost.heading')}
+    figure={vars.service_range}
+    figureNote="per 50-minute session"
+    rightBody={f(t('cost.body'))}
+    link={{ label: "See every counselor's rate", href: '/fees' }}
+  />
+
+  <NoteCard heading={t('note.heading')} body={f(t('note.body'))} icon="info" />
+
+  <FaqList heading={t('faq.heading')} faqs={page.faqs} />
+
+  <LinkCards heading={t('related.heading')} items={relatedArticles(allPages, page.category)} />
+
+  <RequestPanel
+    slug={page.slug}
+    business={business}
+    heading={t('request.heading')}
+    text={f(t('request.text'))}
+    counselors={counselorOptions(allPages)}
+    formatNote={t('request.format_note')}
+    crisisText={t('request.crisis') || undefined}
+    submitText={cta}
+  />
+</SiteLayout>

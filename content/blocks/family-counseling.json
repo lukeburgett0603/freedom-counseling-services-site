@@ -1,0 +1,69 @@
+{
+  "slug": "family-counseling",
+  "blocks": {
+    "hero.eyebrow": "Family counseling · Louisville, KY and online",
+    "hero.subhead": "When the same conflicts keep resurfacing, between parents and kids, siblings, or generations under one roof, it can start to feel like your family is simply built this way. It isn't. Patterns can change.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "check-circle",
+        "text": "Start with whoever is willing to come"
+      }
+    ],
+    "request.heading": "Your family doesn't have to stay stuck",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most families are seen the same week.",
+    "signs.items": [
+      {
+        "text": "Every conversation with your teen turns into an argument."
+      },
+      {
+        "text": "You're blending two families, and it's harder than you expected."
+      },
+      {
+        "text": "Siblings can't be in the same room without it escalating."
+      },
+      {
+        "text": "A divorce, a loss, or a move has shaken everyone."
+      },
+      {
+        "text": "Everyone's going through the motions, and nobody really talks."
+      },
+      {
+        "text": "You're worried about one person, and it's affecting all of you."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "If your family wants faith to be part of counseling, your counselor will bring it in. If family members see faith differently, your counselor can help you hold that too. You lead.",
+    "sections": [
+      {
+        "heading": "No one is the problem. The pattern is.",
+        "body": "Families often come in hoping one person will be \"fixed.\" Family therapy looks at something more useful: the pattern between you, how each person's reactions shape everyone else's. When the pattern changes, everyone gets some relief."
+      },
+      {
+        "heading": "What family counseling at Freedom looks like",
+        "body": "Your counselor will recommend a structure that fits your family. Some sessions include everyone, some focus on one relationship (like a parent and a teen), and some may include individual time with a child as part of the family's work. Our counselors draw on family systems therapy, which focuses on how a family works as a whole, along with practical tools for communication and repair."
+      }
+    ],
+    "team.heading": "Counselors who work with families",
+    "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Families, parents and teens, and couples, using family systems therapy."
+      },
+      {
+        "slug": "staci-harrub",
+        "text": "Families working through conflict, grief, and life transitions."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Parent and child relationships, especially with boys and teens, when family sessions are part of the work."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session is about understanding your family: what's happening, who's affected, and what you'd each like to be different. Children in family sessions are 8 and older. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

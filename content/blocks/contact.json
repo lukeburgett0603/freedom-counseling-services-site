@@ -1,0 +1,30 @@
+{
+  "slug": "contact",
+  "blocks": {
+    "hero.subhead": "Reaching out is often the hardest part. Tell us a little about what's going on, and we'll help you take the next step. Most people are seen the same week.",
+    "request.heading": "Request an appointment",
+    "office.heading": "Prefer to call?",
+    "office.directions": "- **Call or text:** (502) 523-2970\n- **Email:** info@freedomcounselingservices.org",
+    "next.heading": "What happens after you reach out",
+    "next.steps": [
+      {
+        "icon": "chat-circle-text",
+        "title": "We get back to you",
+        "text": "Within one business day."
+      },
+      {
+        "icon": "users-three",
+        "title": "We help you choose",
+        "text": "Our office administrator listens to what you're looking for and suggests the counselor who fits best, or books you with the counselor you picked."
+      },
+      {
+        "icon": "door-open",
+        "title": "Your first session",
+        "text": "Usually the same week, in our office or online, 50 minutes. Your first session is mostly a conversation, with nothing to prepare."
+      }
+    ],
+    "cost.body": "",
+    "note.heading": "When another kind of care fits better",
+    "note.body": "Freedom doesn't provide psychiatric care or medication management. If that's what you need, or if you're reaching out for a child under 8, we'll still help you find the right next step."
+  }
+}

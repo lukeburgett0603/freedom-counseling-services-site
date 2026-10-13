@@ -1,0 +1,67 @@
+{
+  "slug": "counselors",
+  "blocks": {
+    "hero.subhead": "Five counselors with different strengths, one shared commitment: the best clinical care, with faith at the center and never forced. Choose the counselor who sounds right for you, or let us match you.",
+    "facts": [
+      {
+        "icon": "user-circle-check",
+        "text": "Every counselor is accepting new clients and meets in person or online"
+      },
+      {
+        "icon": "check-circle",
+        "text": "You can always switch"
+      }
+    ],
+    "request.heading": "Ready to meet your counselor?",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "team.mode": "top",
+    "chooser.heading": "Not sure who to choose? Start here.",
+    "chooser.lede": "Tell us a little about what's going on, and we'll suggest the best fit. You can always switch later.",
+    "chooser.items": [
+      {
+        "quote": "For your marriage or relationship",
+        "label": "Tony",
+        "href": "/tony-gore"
+      },
+      {
+        "quote": "For a child or teen",
+        "label": "Sophie or Luke (boys), or Rhonda (older teen girls)",
+        "href": "/sophie-bowman"
+      },
+      {
+        "quote": "For a family or parent and child",
+        "label": "Tony, Staci, or Luke",
+        "href": "/tony-gore"
+      },
+      {
+        "quote": "For trauma or EMDR",
+        "label": "Staci (EMDR) or Luke (ACT and IFS)",
+        "href": "/staci-harrub"
+      },
+      {
+        "quote": "For grief",
+        "label": "Staci or Rhonda",
+        "href": "/staci-harrub"
+      },
+      {
+        "quote": "For women working through shame, worth, or identity",
+        "label": "Rhonda",
+        "href": "/rhonda-gore"
+      },
+      {
+        "quote": "For anxiety, depression, or OCD",
+        "label": "Luke, Staci, or Rhonda",
+        "href": "/luke-burgett"
+      },
+      {
+        "quote": "For the lowest cost",
+        "label": "Sophie, $50 per session",
+        "href": "/sophie-bowman"
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "Every Freedom counselor brings together a biblical worldview, Christian theology, and the best clinical practice. If you'd rather not bring faith into your counseling, you'll get the same excellent care, and your counselor will follow your lead.",
+    "cost.heading": "What it costs",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

@@ -1,0 +1,34 @@
+---
+// Legal pages (privacy, terms) in the site system's look: the page's
+// own copy, in a readable column. No request form.
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { renderCopy } from '../lib/markdown';
+import type { Page, Business } from '../lib/pages';
+import type { BlockValues } from '../lib/blocks';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+  blocks: BlockValues;
+  allBlocks: Map<string, BlockValues>;
+}
+
+const { page, allPages, business } = Astro.props;
+---
+
+<SiteLayout page={page} allPages={allPages} business={business}>
+  <div class="s-wrap lg">
+    <h1>{page.h1 ?? page.title}</h1>
+    <div class="s-rich lg-body" set:html={renderCopy(page.copy)} />
+  </div>
+</SiteLayout>
+
+<style>
+  .lg { padding-top: 56px; }
+  .lg > * { max-width: 760px; }
+  h1 { font-size: clamp(2rem, 3.4vw, 2.6rem); font-weight: 800; }
+  .lg-body { margin-top: 24px; }
+  .lg-body :global(h2) { font-size: 1.4rem; margin-top: 32px; }
+  .lg-body :global(h3) { font-size: 1.15rem; margin-top: 24px; }
+</style>

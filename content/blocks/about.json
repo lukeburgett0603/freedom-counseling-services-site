@@ -1,0 +1,33 @@
+{
+  "slug": "about",
+  "blocks": {
+    "hero.subhead": "For more than 20 years, Freedom has helped people across Louisville find the best clinical counseling, with faith at the center for everyone who wants it.",
+    "request.heading": "Ready to take the next step?",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "hero.media": "team",
+    "sections": [
+      {
+        "heading": "You shouldn't have to choose between good counseling and your faith",
+        "body": "Many people feel stuck between two options: counseling that treats their faith as beside the point, or faith-based support without real clinical training. Freedom exists to close that gap, so you can get excellent, evidence-based care from counselors who also understand and respect what you believe."
+      },
+      {
+        "heading": "20+ years in Louisville",
+        "body": "Freedom Counseling Services has served Louisville for more than two decades. It's owned and directed by Tony Gore, LCSW, and has grown into a team of counselors with a wide range of strengths: marriage and family work, children and teens, grief, trauma and EMDR, anxiety, depression, and OCD. Whatever brought you here, there's likely someone on our team who has helped with something close to it."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "Faith is central to Freedom's services, but never forced or required. Freedom fully integrates a biblical worldview, Christian theology, and the best clinical practice to serve our clients. When clients do not want to discuss faith as part of their treatment, we proceed with the best clinical counseling and psychotherapy, taking the client's lead on what elements of faith and worldview they want to address.",
+    "team.mode": "all",
+    "team.heading": "Meet the counselors",
+    "more": [
+      {
+        "heading": "What you can count on",
+        "body": "- **Choose your counselor, or let us match you.** And you can always switch.\n- **Seen soon.** Usually the same week, sometimes the next day.\n- **Prices posted up front.** $50 to $160 per session, with a superbill for possible out-of-network reimbursement.\n- **In person or online.** Our Middletown office, or online anywhere in Kentucky. *(Southern Indiana clients meet in person.)*\n- **You help set the goals.** Your counselor works with you on what matters most to you, rather than handing you a plan."
+      },
+      {
+        "heading": "Who we see",
+        "body": "Individuals, couples, and families; children 8 and up, teens, adults, and older adults. We serve Louisville, Elizabethtown, and Southern Indiana."
+      }
+    ]
+  }
+}

@@ -58,7 +58,8 @@ const H = headingLevel;
 <style>
   .pc-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 36px; }
   .pc-h { font-size: clamp(1.75rem, 2.6vw, 2.4rem); }
-  .pc-row { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 18px; }
+  /* Five columns at most, and cards keep that width with fewer people. */
+  .pc-row { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; }
   .pc-card { height: 100%; background: var(--surface); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; text-decoration: none; transition: transform 0.2s; }
   .pc-card:hover { transform: translateY(-3px); }
   .pc-card img, .pc-noimg { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: var(--tint); }

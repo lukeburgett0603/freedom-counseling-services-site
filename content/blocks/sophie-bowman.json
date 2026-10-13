@@ -2,6 +2,63 @@
   "slug": "sophie-bowman",
   "blocks": {
     "card.credential": "Student Counselor, supervised by Tony Gore, LCSW",
-    "card.summary": "Children, teens, and young adults, with play and art therapy."
+    "card.summary": "Children, teens, and young adults, with play and art therapy.",
+    "hero.subhead": "Helps children, teens, and young adults, especially adolescent girls, who feel anxious, overwhelmed, or disconnected learn to express what's going on inside and build tools for confidence and connection.",
+    "quote": "You don't have to have the right words yet. We can draw, play a game, or just talk. We'll find what works for you.",
+    "specialties": [
+      {
+        "text": "Children (8 and up)"
+      },
+      {
+        "text": "Teens and adolescents"
+      },
+      {
+        "text": "Anxiety and self-esteem"
+      },
+      {
+        "text": "Identity"
+      },
+      {
+        "text": "Play and art therapy"
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Who Sophie works with",
+        "body": "Sophie works with children 8 and up, teens, and young adults, especially girls and young women working through anxiety, identity, stress, low mood, and self-esteem. Many are in a season of change: a new school, a hard season at home, or wanting more say in their own lives."
+      },
+      {
+        "heading": "Sophie's approach",
+        "body": "Sophie is a Student Counselor, and her clinical work is supervised by Tony Gore, LCSW. Her style is warm, down-to-earth, and collaborative. Sessions may include conversation, drawing, card games, or creative homework, adapted to how each young person learns and expresses themselves."
+      }
+    ],
+    "practical.body": "In person in Middletown or online. Usually seen the same week.",
+    "faith.heading": "Faith",
+    "faith.body": "When a family wants Christian integration, Sophie is glad to pray with or for her clients and include Scripture and faith reflection where it fits. When a family doesn't, she follows their lead.",
+    "approaches": [
+      {
+        "text": "Play therapy"
+      },
+      {
+        "text": "Art and expressive arts therapy"
+      },
+      {
+        "text": "Dialectical behavior therapy (DBT)"
+      },
+      {
+        "text": "Internal family systems (IFS)"
+      },
+      {
+        "text": "Mindfulness-based approaches"
+      },
+      {
+        "text": "Person-centered therapy"
+      },
+      {
+        "text": "Christian/faith-based counseling"
+      }
+    ],
+    "request.heading": "Ready to start with Sophie?",
+    "request.text": "Request an appointment with Sophie, or call (502) 523-2970."
   }
 }

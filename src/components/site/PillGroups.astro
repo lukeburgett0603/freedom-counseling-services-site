@@ -1,0 +1,27 @@
+---
+// Two or three short groups of labels (specialties, approaches), as
+// pills. For lists of single words or phrases, not sentences.
+interface Props { groups: { heading: string; items: string[] }[] }
+const groups = Astro.props.groups.filter((g) => g.items.length);
+---
+
+{groups.length > 0 && (
+  <section class="s-section pg">
+    <div class="s-wrap pg-grid s-reveal" style={`--n:${groups.length}`}>
+      {groups.map((g) => (
+        <div>
+          <h2>{g.heading}</h2>
+          <ul>{g.items.map((i) => <li>{i}</li>)}</ul>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .pg-grid { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 48px; }
+  h2 { font-size: 1.5rem; }
+  ul { list-style: none; padding: 0; margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+  li { padding: 8px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 0.95rem; font-weight: 500; }
+  @media (max-width: 767px) { .pg-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
+</style>

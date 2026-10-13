@@ -1,0 +1,56 @@
+---
+// Two cards side by side: what to expect (light) and what it costs
+// (dark, with the price range for the counselors who offer this
+// service). A different layout family from StepsCost's step list.
+import Ph from './Ph.astro';
+import { renderCopy } from '../../lib/markdown';
+import { withBase } from '../../lib/url';
+
+interface Props {
+  leftHeading: string;
+  leftBody: string; // markdown
+  rightHeading: string;
+  figure?: string | null;
+  figureNote?: string;
+  rightBody?: string; // markdown
+  link?: { label: string; href: string };
+}
+
+const { leftHeading, leftBody, rightHeading, figure, figureNote, rightBody, link } = Astro.props;
+---
+
+{(leftBody || rightBody) && (
+  <section class="s-section ip">
+    <div class="s-wrap ip-grid s-reveal">
+      {leftBody && (
+        <div class="ip-left">
+          <h2>{leftHeading}</h2>
+          <div class="s-rich" set:html={renderCopy(leftBody)} />
+        </div>
+      )}
+      <div class="ip-right">
+        <h2>{rightHeading}</h2>
+        {figure && <p class="ip-fig">{figure}</p>}
+        {figure && figureNote && <p class="ip-note">{figureNote}</p>}
+        {rightBody && <div class="s-rich ip-body" set:html={renderCopy(rightBody)} />}
+        {link && <a class="ip-link" href={withBase(link.href)}>{link.label} <Ph name="arrow-right" /></a>}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .ip-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+  .ip-left { background: var(--surface); border-radius: var(--radius-card); padding: 40px; box-shadow: var(--shadow); }
+  .ip-left .s-rich { margin-top: 16px; }
+  .ip-right { background: var(--ink); color: #eef1f2; border-radius: var(--radius-card); padding: 40px; display: flex; flex-direction: column; }
+  .ip-right h2 { color: #fff; }
+  .ip-fig { font-size: clamp(2.4rem, 4vw, 3.2rem); font-weight: 800; letter-spacing: -0.03em; margin-top: 18px; color: #fff; line-height: 1.1; }
+  .ip-note { color: #c3ccce; font-size: 0.95rem; margin-top: 4px; }
+  .ip-body { color: #d5dcdd; margin-top: 16px; font-size: 1rem; }
+  .ip-body :global(a) { color: #fff; }
+  .ip-link { margin-top: auto; padding-top: 24px; color: #fff; font-weight: 600; display: inline-flex; gap: 6px; align-items: center; }
+  .ip-grid:not(:has(.ip-left)) { grid-template-columns: minmax(0, 1fr); }
+  @media (max-width: 1023px) { .ip-grid { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 767px) { .ip-left, .ip-right { padding: 28px; } }
+</style>

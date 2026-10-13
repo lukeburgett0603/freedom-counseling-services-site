@@ -1,0 +1,97 @@
+---
+// Counselor profile design (site system v2): the counselor's photo and
+// who they help, facts from their own settings (rate, availability,
+// telehealth), their own words, specialties and approaches, their
+// sections, faith, practical details beside their rate, and a request
+// form with them already selected.
+import SiteLayout from '../layouts/SiteLayout.astro';
+import HeroSplit from '../components/site/HeroSplit.astro';
+import Portrait from '../components/site/Portrait.astro';
+import FactsStrip from '../components/site/FactsStrip.astro';
+import PullQuote from '../components/site/PullQuote.astro';
+import PillGroups from '../components/site/PillGroups.astro';
+import ProseSplit from '../components/site/ProseSplit.astro';
+import StatementBand from '../components/site/StatementBand.astro';
+import InfoPair from '../components/site/InfoPair.astro';
+import RequestPanel from '../components/site/RequestPanel.astro';
+import { blockReader, readText, type BlockValues } from '../lib/blocks';
+import type { Page, Business } from '../lib/pages';
+import { PROFILE_BLOCKS } from './profile.blocks';
+import { counselorOptions, credentialLine, fill, rateRange } from './shared';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+  blocks: BlockValues;
+  allBlocks: Map<string, BlockValues>;
+}
+
+const { page, allPages, business, blocks } = Astro.props;
+const { t, list } = blockReader(blocks, PROFILE_BLOCKS);
+const first = page.title.split(' ')[0];
+const cred = readText(blocks, PROFILE_BLOCKS, 'card.credential') || credentialLine(page);
+const rate = page.session_rate_usd;
+const vars = { rate_range: rateRange(allPages), rate: rate !== null ? `$${rate}` : null, phone: business.telephone };
+const f = (s: string) => fill(s, vars);
+const facts = [
+  rate !== null ? { icon: 'receipt', text: `$${rate} per 50-minute session` } : null,
+  page.availability_status === 'accepting' ? { icon: 'calendar-check', text: 'Accepting new clients' }
+    : page.availability_status === 'almost_full' ? { icon: 'calendar-dots', text: 'Limited openings' }
+    : page.availability_status === 'not_accepting' ? { icon: 'calendar-x', text: 'Not taking new clients right now' } : null,
+  { icon: page.telehealth_available ? 'video-camera' : 'house-line', text: page.telehealth_available ? 'In person or online' : 'In person' },
+].filter(Boolean) as { icon: string; text: string }[];
+const sections = list('sections');
+const tel = business.telephone?.replace(/[^0-9+]/g, '');
+const cta = `Request an appointment with ${first}`;
+---
+
+<SiteLayout page={page} allPages={allPages} business={business}>
+  <HeroSplit
+    eyebrow={t('hero.eyebrow') || cred}
+    headline={page.h1 || `${page.title}${page.credentials ? `, ${page.credentials.split(',')[0]}` : ''}`}
+    subhead={f(t('hero.subhead'))}
+    primary={{ label: cta, href: '#request' }}
+    secondary={tel ? { label: business.telephone!, href: `tel:${tel}`, icon: 'phone' } : undefined}
+    balance="even"
+  >
+    <Portrait slot="media" photo={page.images.headshot ?? null} name={page.title} />
+  </HeroSplit>
+
+  <FactsStrip items={facts} />
+
+  <PullQuote quote={t('quote')} name={page.title} />
+
+  {sections.slice(0, 1).map((s) => <ProseSplit heading={s.heading} body={f(s.body)} layout="split" />)}
+
+  <PillGroups groups={[
+    { heading: 'Specialties', items: list('specialties').map((i) => i.text).filter(Boolean) },
+    { heading: 'Approaches', items: list('approaches').map((i) => i.text).filter(Boolean) },
+  ]} />
+
+  {sections.slice(1).map((s, i) => <ProseSplit heading={s.heading} body={f(s.body)} layout={i % 2 === 0 ? 'stack' : 'split'} surface={i % 2 === 0} />)}
+
+  <StatementBand heading={t('faith.heading')} body={t('faith.body')} />
+
+  <InfoPair
+    leftHeading="Practical details"
+    leftBody={f(t('practical.body'))}
+    rightHeading={`Sessions with ${first}`}
+    figure={rate !== null ? `$${rate}` : null}
+    figureNote="per 50-minute session"
+    rightBody="Private pay, with a superbill you can submit for possible out-of-network reimbursement."
+    link={{ label: "See every counselor's rate", href: '/fees' }}
+  />
+
+
+  <RequestPanel
+    slug={page.slug}
+    business={business}
+    heading={t('request.heading')}
+    text={f(t('request.text'))}
+    counselors={counselorOptions(allPages)}
+    defaultCounselorId={page.id}
+    formatNote={t('request.format_note')}
+    submitText={cta}
+  />
+</SiteLayout>

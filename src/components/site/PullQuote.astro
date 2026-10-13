@@ -1,0 +1,24 @@
+---
+// A person's own words, large, with attribution. Max 3 lines of quote
+// (taste). Never a client quote: counselors and staff only.
+interface Props { quote: string; name: string; role?: string }
+const { quote, name, role } = Astro.props;
+---
+
+{quote && (
+  <section class="s-section pq">
+    <div class="s-wrap s-reveal">
+      <figure>
+        <blockquote>“{quote.replace(/^["“]|["”]$/g, '')}”</blockquote>
+        <figcaption>{name}{role && <span>, {role}</span>}</figcaption>
+      </figure>
+    </div>
+  </section>
+)}
+
+<style>
+  figure { max-width: 900px; border-left: 4px solid var(--accent); padding-left: 28px; }
+  blockquote { font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-weight: 600; line-height: 1.35; letter-spacing: -0.01em; }
+  figcaption { margin-top: 16px; font-weight: 600; color: var(--muted); }
+  figcaption span { font-weight: 500; }
+</style>

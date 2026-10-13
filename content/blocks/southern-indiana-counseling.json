@@ -1,0 +1,79 @@
+{
+  "slug": "southern-indiana-counseling",
+  "blocks": {
+    "hero.eyebrow": "Southern Indiana · In person in Louisville",
+    "hero.subhead": "Freedom Counseling Services is just across the river in Louisville's Middletown area, about a 20-minute drive from New Albany, Jeffersonville, and Clarksville. Southern Indiana clients meet with us in person at our office.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "user-circle-check",
+        "text": "Choose your counselor, or let us match you"
+      }
+    ],
+    "request.heading": "Ready to start, just across the river?",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "sections": [
+      {
+        "heading": "Closer than you might think",
+        "body": "A Kentucky counselor doesn't have to mean a long trip. Our office sits just off I-64 near Blankenbaker Parkway, about 20 minutes from New Albany, Jeffersonville, Clarksville, and Watson. For many Southern Indiana clients, it's an easy drive after work or on a lunch break."
+      },
+      {
+        "heading": "Why sessions are in person for Indiana clients",
+        "body": "Our counselors are licensed in Kentucky. The law requires a counselor to be licensed in the state where you are during a session, so we can't meet with Indiana clients online. When you come to our Louisville office, you're in Kentucky, and we can work with you fully, with the same counselors and the same care as every client."
+      }
+    ],
+    "links.heading": "What Southern Indiana clients come to us for",
+    "links.items": [
+      {
+        "title": "Individual counseling",
+        "text": "For anxiety, depression, OCD, or a season of feeling stuck",
+        "href": "/individual-counseling"
+      },
+      {
+        "title": "Couples and marriage counseling",
+        "text": "Including pre-marital",
+        "href": "/couples-marriage-counseling"
+      },
+      {
+        "title": "Family counseling",
+        "text": "Including parent and child relationships",
+        "href": "/family-counseling"
+      },
+      {
+        "title": "Child and teen counseling",
+        "text": "For kids 8 and up",
+        "href": "/child-teen-counseling"
+      },
+      {
+        "title": "Grief counseling",
+        "text": "After a loss",
+        "href": "/grief-counseling"
+      },
+      {
+        "title": "Trauma counseling and EMDR",
+        "text": "",
+        "href": "/trauma-emdr-counseling"
+      },
+      {
+        "title": "Christian counseling",
+        "text": "For anyone who wants faith at the center",
+        "href": "/christian-counseling"
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "Freedom brings together a biblical worldview, Christian theology, and the best clinical practice. If you'd rather not bring faith into your counseling, you'll get the same excellent care, and your counselor will follow your lead.",
+    "team.mode": "all",
+    "team.heading": "Choose your counselor",
+    "team.note": "Every counselor is accepting new clients.",
+    "more": [],
+    "office.heading": "Finding our office",
+    "office.directions": "Just off Blankenbaker Parkway, across from Southeast Christian Church, in the office complex behind Heine Brothers Coffee. Parking is right outside.",
+    "expect.heading": "Your first visit",
+    "expect.body": "Your first session is mostly a conversation: your counselor getting to know you and what brought you in. There's nothing to prepare. Sessions are 50 minutes.",
+    "cost.heading": "What it costs",
+    "cost.body": "$50 to $160 per session, depending on your counselor, the same as for every client. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

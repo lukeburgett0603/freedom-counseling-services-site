@@ -1,0 +1,80 @@
+{
+  "slug": "child-teen-counseling",
+  "blocks": {
+    "hero.eyebrow": "Child and teen counseling · Louisville, KY and online",
+    "hero.subhead": "Kids and teens don't always have the words for what's going on inside them, and even when they do, they don't always want to say it to a parent. A counselor who knows how to reach them can help them find their way, and help you understand what's happening.",
+    "facts": [
+      {
+        "icon": "check-circle",
+        "text": "For kids 8 and up and teens"
+      },
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      }
+    ],
+    "request.heading": "Help for your child, and for you",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most families are seen the same week.",
+    "request.crisis": "If your child or teen is in crisis, call or text 988 (Suicide & Crisis Lifeline), or call 911.",
+    "signs.items": [
+      {
+        "text": "Your child seems anxious, worried, or easily overwhelmed."
+      },
+      {
+        "text": "Your teen has gone quiet and won't let you in."
+      },
+      {
+        "text": "Big feelings turn into meltdowns, anger, or shutting down."
+      },
+      {
+        "text": "Grades, friendships, or sleep have changed, and you don't know why."
+      },
+      {
+        "text": "There's been a divorce, a loss, or a move."
+      },
+      {
+        "text": "You're not sure if it's a phase, and you'd rather not wait to find out."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "If your family wants faith to be part of your child's counseling, it's brought in at a level that fits their age. If not, sessions stay clinically focused. Either way, the clinical care is the same.",
+    "sections": [
+      {
+        "heading": "Is it a phase, or something more?",
+        "body": "It isn't always obvious, and it's fair to be unsure. A few sessions with a counselor trained to work with kids is a low-pressure way to find out, and it's easier to help early, before patterns settle in."
+      },
+      {
+        "heading": "What counseling for kids and teens looks like",
+        "body": "Counselors meet kids where they are. With younger children, that often means play and art: drawing, games, and creative activities that let a child show what they can't yet say. With teens, it means building enough trust that therapy feels like their space, not a punishment.\n\nOur counselors use approaches including play therapy, art and expressive arts therapy, and dialectical behavior therapy (DBT) skills for managing big emotions."
+      },
+      {
+        "heading": "How we keep you involved",
+        "body": "Kids do best when the adults around them are supported too. Depending on what's going on, a parent may join every session, or your child may meet one on one with their counselor. We often also recommend sessions with just the parents: most of what a child faces has roots in the family, and counseling works best when you have tools to help your child at home between sessions.\n\nWith teens, counselors balance confidentiality, so your teen has room to be honest, with keeping you informed about safety and general progress. Your counselor will explain exactly how this works for your child."
+      }
+    ],
+    "team.heading": "Counselors who work with kids and teens",
+    "team.items": [
+      {
+        "slug": "sophie-bowman",
+        "text": "Children, teens, and young adults, especially adolescent girls, using play and art therapy."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and young men, age 8 and up, working through anxiety, depression, and OCD."
+      },
+      {
+        "slug": "rhonda-gore",
+        "text": "Older teen girls and young women working through anxiety, shame, and identity."
+      },
+      {
+        "slug": "tony-gore",
+        "text": "Teens, young adults, and families."
+      }
+    ],
+    "expect.heading": "The first session",
+    "expect.body": "The first session usually includes a parent, so the counselor can hear what's been happening and what you're hoping for. From there, your counselor will recommend what fits: sessions together, one on one with your child, sessions with just the parents, or a mix. Sessions are in our Middletown office or online.",
+    "cost.body": "Student sessions with Sophie are $50. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement.",
+    "note.heading": "Who we see",
+    "note.body": "Freedom works with children 8 and older. For younger children, we'll gladly help you find the right next step."
+  }
+}

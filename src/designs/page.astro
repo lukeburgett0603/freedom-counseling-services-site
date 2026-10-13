@@ -1,0 +1,106 @@
+---
+// General page design (site system v2): services and locations hubs,
+// location pages, counselors overview, fees, about. A fixed order of
+// optional sections; each renders only when its text exists, so one
+// design fits many pages without empty boxes.
+import SiteLayout from '../layouts/SiteLayout.astro';
+import HeroSplit from '../components/site/HeroSplit.astro';
+import PeopleMosaic from '../components/site/PeopleMosaic.astro';
+import FactsStrip from '../components/site/FactsStrip.astro';
+import LinkCards from '../components/site/LinkCards.astro';
+import QuoteLinks from '../components/site/QuoteLinks.astro';
+import ProseSplit from '../components/site/ProseSplit.astro';
+import StatementBand from '../components/site/StatementBand.astro';
+import PeopleCards from '../components/site/PeopleCards.astro';
+import RateTable from '../components/site/RateTable.astro';
+import OfficeCard from '../components/site/OfficeCard.astro';
+import InfoPair from '../components/site/InfoPair.astro';
+import NoteCard from '../components/site/NoteCard.astro';
+import FaqList from '../components/site/FaqList.astro';
+import RequestPanel from '../components/site/RequestPanel.astro';
+import { blockReader, type BlockValues } from '../lib/blocks';
+import type { Page, Business } from '../lib/pages';
+import { PAGE_BLOCKS } from './page.blocks';
+import { personCards, counselorOptions, rateRange, fill } from './shared';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+  blocks: BlockValues;
+  allBlocks: Map<string, BlockValues>;
+}
+
+const { page, allPages, business, blocks, allBlocks } = Astro.props;
+const { t, list } = blockReader(blocks, PAGE_BLOCKS);
+const vars = { rate_range: rateRange(allPages), phone: business.telephone };
+const f = (s: string) => fill(s, vars);
+const people = personCards(allPages, allBlocks);
+const sections = list('sections');
+const more = list('more');
+const tel = business.telephone?.replace(/[^0-9+]/g, '');
+const cta = page.cta_button_text ?? 'Request an appointment';
+const teamMode = t('team.mode');
+const showTeam = teamMode === 'all';
+---
+
+<SiteLayout page={page} allPages={allPages} business={business}>
+  <HeroSplit
+    eyebrow={t('hero.eyebrow')}
+    headline={page.h1 ?? page.title}
+    subhead={f(t('hero.subhead'))}
+    primary={{ label: cta, href: '#request' }}
+    secondary={tel ? { label: business.telephone!, href: `tel:${tel}`, icon: 'phone' } : undefined}
+  >
+    {t('hero.media') === 'team' && <PeopleMosaic slot="media" people={people.filter((p) => p.photo).map((p) => ({ name: p.name, photo: p.photo! }))} />}
+  </HeroSplit>
+
+  <FactsStrip items={list('facts').map((i) => ({ icon: i.icon || 'check-circle', text: f(i.text) }))} />
+
+  {teamMode === 'top' && <PeopleCards heading={t('team.heading')} lede={t('team.lede')} people={people} note={t('team.note')} />}
+
+  {t('links.heading') && <LinkCards heading={t('links.heading')} lede={t('links.lede')} items={list('links.items').map((i) => ({ title: i.title, text: f(i.text), href: i.href }))} />}
+
+  {t('chooser.heading') && <QuoteLinks heading={t('chooser.heading')} lede={t('chooser.lede')} items={list('chooser.items').map((i) => ({ quote: i.quote, label: i.label, href: i.href }))} />}
+
+  {sections.slice(0, 2).map((s, i) => <ProseSplit heading={s.heading} body={f(s.body)} layout={i === 0 ? 'split' : 'stack'} surface={i === 1} />)}
+
+  <StatementBand heading={t('faith.heading')} body={t('faith.body')} />
+
+  {sections.slice(2).map((s, i) => <ProseSplit heading={s.heading} body={f(s.body)} layout={i % 2 === 0 ? 'split' : 'stack'} surface={i % 2 === 1} />)}
+
+  {showTeam && <PeopleCards heading={t('team.heading')} lede={t('team.lede')} people={people} note={t('team.note')} />}
+
+  {t('rates.heading') && (
+    <RateTable heading={t('rates.heading')} note={f(t('rates.note'))} rows={people.map((p) => ({ name: p.name, credential: p.credential, href: p.href, rate: p.rate, photo: p.photo }))} />
+  )}
+
+  {more.map((s, i) => <ProseSplit heading={s.heading} body={f(s.body)} layout={i % 2 === 0 ? 'split' : 'stack'} surface={i % 2 === 1} />)}
+
+  {t('office.heading') && <OfficeCard business={business} heading={t('office.heading')} directions={t('office.directions')} />}
+
+  <InfoPair
+    leftHeading={t('expect.heading')}
+    leftBody={f(t('expect.body'))}
+    rightHeading={t('cost.heading') || 'What it costs'}
+    figure={t('cost.body') ? vars.rate_range : null}
+    figureNote="per 50-minute session"
+    rightBody={f(t('cost.body'))}
+    link={t('cost.body') ? { label: "See every counselor's rate", href: '/fees' } : undefined}
+  />
+
+  <NoteCard heading={t('note.heading')} body={f(t('note.body'))} icon="info" />
+
+  <FaqList heading={t('faq.heading')} faqs={page.faqs} />
+
+  <RequestPanel
+    slug={page.slug}
+    business={business}
+    heading={t('request.heading')}
+    text={f(t('request.text'))}
+    counselors={counselorOptions(allPages)}
+    formatNote={t('request.format_note')}
+    crisisText={t('request.crisis') || undefined}
+    submitText={cta}
+  />
+</SiteLayout>

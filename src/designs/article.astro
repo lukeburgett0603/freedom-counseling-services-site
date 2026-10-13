@@ -1,0 +1,91 @@
+---
+// Article design (site system v2): readable column, byline with the
+// counselor's photo and credential, the post body, a link to the
+// service it relates to, then the request form. Body text is the post's
+// own markdown (Blog posts screen).
+import SiteLayout from '../layouts/SiteLayout.astro';
+import RequestPanel from '../components/site/RequestPanel.astro';
+import LinkCards from '../components/site/LinkCards.astro';
+import Ph from '../components/site/Ph.astro';
+import { Image } from 'astro:assets';
+import { renderCopy } from '../lib/markdown';
+import { getAuthorHeadshot, type Page, type Business } from '../lib/pages';
+import { withBase } from '../lib/url';
+import { readText, type BlockValues } from '../lib/blocks';
+import { counselorOptions, counselorPages, credentialLine, relatedArticles } from './shared';
+
+interface Props {
+  page: Page;
+  allPages: Page[];
+  business: Business;
+  blocks: BlockValues;
+  allBlocks: Map<string, BlockValues>;
+}
+
+const { page, allPages, business, allBlocks } = Astro.props;
+const service = allPages.find((p) => p.page_type === 'Service Hub' && p.category && p.category === page.category);
+const author = counselorPages(allPages).find((p) => p.title.trim().toLowerCase() === (page.author_name ?? '').trim().toLowerCase());
+const headshot = getAuthorHeadshot(page.author_name, allPages);
+const date = page.date_modified ?? page.date_published;
+const dateLabel = date ? new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
+// The post's own H1 is the page title; drop a leading "# " or "## " title
+// line in the body if it repeats it.
+const body = (page.copy ?? '').replace(/^#{1,2}\s+.*\n+/, (m) => (m.replace(/[#*\s]/g, '').toLowerCase().startsWith((page.h1 ?? page.title).replace(/[\s*?!.,'"]/g, '').toLowerCase().slice(0, 20)) ? '' : m));
+const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !== withBase(`/${page.slug}`)).slice(0, 3);
+---
+
+<SiteLayout page={page} allPages={allPages} business={business}>
+  <article class="ar">
+    <header class="s-wrap ar-head">
+      {service && <a class="ar-cat" href={withBase(`/${service.slug}`)}>{service.title}</a>}
+      <h1>{page.h1 ?? page.title}</h1>
+      <div class="ar-by">
+        {headshot && <Image src={headshot.url} alt="" width={96} height={96} style={headshot.focus ? `object-position:${headshot.focus}` : undefined} />}
+        <div>
+          {page.author_name && (author ? <a href={withBase(`/${author.slug}`)}>{page.author_name}</a> : <span>{page.author_name}</span>)}
+          <small>{[author ? readText(allBlocks.get(author.id) ?? new Map(), [], 'card.credential') || credentialLine(author) : page.credentials, dateLabel].filter(Boolean).join(' · ')}</small>
+        </div>
+      </div>
+    </header>
+    <div class="s-wrap">
+      <div class="ar-body s-rich" set:html={renderCopy(body)} />
+      {service && (
+        <aside class="ar-cta">
+          <div>
+            <strong>Looking for help with this?</strong>
+            <p>{author ? `${author.title.split(' ')[0]} and our counselors` : 'Our counselors'} offer {service.title.toLowerCase()} in Louisville and online in Kentucky. Most people are seen the same week.</p>
+          </div>
+          <a class="s-btn s-btn-primary" href={withBase(`/${service.slug}`)}>About {service.title.toLowerCase()} <Ph name="arrow-right" /></a>
+        </aside>
+      )}
+    </div>
+  </article>
+  <LinkCards heading="More articles" items={more} columns={3} />
+  <RequestPanel
+    slug={page.slug}
+    business={business}
+    heading="Ready when you are."
+    text="Request an appointment in about a minute. Most people are seen the same week."
+    counselors={counselorOptions(allPages)}
+    defaultCounselorId={author?.id}
+    formatNote="Online sessions are for clients in Kentucky. Indiana clients meet in person."
+  />
+</SiteLayout>
+
+<style>
+  .ar-head { padding-top: 56px; padding-bottom: 32px; }
+  .ar-head > * { max-width: 760px; }
+  .ar-cat { display: inline-block; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); text-decoration: none; margin-bottom: 16px; }
+  h1 { font-size: clamp(2rem, 3.4vw, 2.75rem); font-weight: 800; line-height: 1.12; }
+  .ar-by { display: flex; gap: 14px; align-items: center; margin-top: 24px; }
+  .ar-by img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+  .ar-by a, .ar-by span { font-weight: 600; text-decoration: none; display: block; }
+  .ar-by small { color: var(--muted); font-size: 0.9rem; }
+  .ar-body { max-width: 720px; font-size: 1.12rem; line-height: 1.75; }
+  .ar-body :global(h2) { font-size: 1.6rem; margin-top: 40px; }
+  .ar-body :global(h3) { font-size: 1.3rem; margin-top: 32px; }
+  .ar-body :global(blockquote) { border-left: 4px solid var(--accent); padding-left: 20px; color: var(--muted); }
+  .ar-cta { max-width: 720px; margin-top: 48px; display: grid; gap: 16px; padding: 28px; border-radius: var(--radius-card); background: var(--accent-tint); }
+  .ar-cta p { color: var(--muted); margin-top: 6px; }
+  .ar-cta .s-btn { justify-self: start; }
+</style>

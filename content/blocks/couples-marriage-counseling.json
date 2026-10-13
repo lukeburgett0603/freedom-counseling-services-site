@@ -1,0 +1,66 @@
+{
+  "slug": "couples-marriage-counseling",
+  "blocks": {
+    "hero.eyebrow": "Couples and marriage counseling · Louisville, KY and online",
+    "hero.subhead": "When your marriage isn't working the way it used to, it can feel like the only choices are to keep white-knuckling through it or to give up. There's another option: real help, for both of you, before things get harder.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "check-circle",
+        "text": "You can start even if your partner isn't ready yet"
+      }
+    ],
+    "request.heading": "Take the first step together, or on your own",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most couples are seen the same week.",
+    "request.crisis": "If you're in crisis, call or text 988 (Suicide & Crisis Lifeline), or call 911. If you're not safe at home, call the National Domestic Violence Hotline at 1-800-799-7233.",
+    "signs.items": [
+      {
+        "text": "You keep having the same argument, and it never really ends."
+      },
+      {
+        "text": "You feel more like roommates than partners."
+      },
+      {
+        "text": "Trust was broken, and you don't know how to rebuild it."
+      },
+      {
+        "text": "One of you wants to work on it, and the other isn't sure."
+      },
+      {
+        "text": "A big change (a baby, a move, a loss) knocked you off balance."
+      },
+      {
+        "text": "You're engaged and want a strong start."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "For many couples, faith is part of what holds their marriage together. If you want it in your counseling, your counselor will bring it in. If the two of you see faith differently, that's common, and your counselor can help you hold both. You lead.",
+    "sections": [
+      {
+        "heading": "You don't have to wait until it's falling apart",
+        "body": "Some couples come in after a rupture, like an affair. Just as many come in because a slow drift or a cycle of circular arguments has gone on long enough. Counseling works best before resentment hardens, and it isn't about deciding who's to blame. It's about understanding the pattern between you, and changing it together."
+      },
+      {
+        "heading": "What couples counseling at Freedom looks like",
+        "body": "You'll work with a counselor who helps you both feel heard, slows the conversations that usually go wrong, and gives you practical tools for the ones that matter most: how you fight, how you repair, and how you reconnect.\n\nTony Gore uses the Gottman Method, an approach to couples work built on decades of research into what makes relationships last. Most sessions include both of you together. Occasionally your counselor may suggest an individual session, always talked through with you first."
+      }
+    ],
+    "team.heading": "Counselors who work with couples",
+    "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Couples, marriage, and pre-marital counseling, using the Gottman Method."
+      },
+      {
+        "slug": "staci-harrub",
+        "text": "Couples and families working through conflict, grief, and life transitions."
+      }
+    ],
+    "expect.heading": "Your first session together",
+    "expect.body": "Your first session is about understanding where things stand: what brought you in, what's working, and what each of you hopes will change. Nobody gets put on trial. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

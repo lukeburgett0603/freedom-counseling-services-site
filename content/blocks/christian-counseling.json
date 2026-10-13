@@ -1,0 +1,73 @@
+{
+  "slug": "christian-counseling",
+  "blocks": {
+    "hero.eyebrow": "Christian counseling · Louisville, KY and online",
+    "hero.subhead": "For many people, faith is part of how they understand what they're going through, and part of what they hope will carry them through it. At Freedom, a biblical worldview, Christian theology, and the best clinical practice work together, always at your pace.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown or online"
+      }
+    ],
+    "request.heading": "Bring your whole self",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "You want a counselor who won't treat your faith as part of the problem."
+      },
+      {
+        "text": "You also want real, clinical help, not just encouragement."
+      },
+      {
+        "text": "Your faith feels shaken by what you're going through."
+      },
+      {
+        "text": "You're carrying questions about God, suffering, or where He was."
+      },
+      {
+        "text": "You and your spouse want counseling that honors your shared faith."
+      },
+      {
+        "text": "You've been hurt by church, and you're not sure what you believe now."
+      }
+    ],
+    "faith.heading": "Never forced",
+    "faith.body": "Faith is never a requirement here, and never pushed. You decide how much of your faith and worldview you want to bring in, and you can change your mind at any point. Some people start with a clinical focus and add faith later. Others start with more and dial it back. Your counselor follows your lead.\n\nDoubt, anger at God, and hard questions are welcome. You won't be judged or rushed toward easy answers.",
+    "sections": [
+      {
+        "heading": "Faith and good clinical care, together",
+        "body": "Some people worry they'll have to choose: a counselor who shares their faith, or one with real clinical training. At Freedom you don't have to. Our counselors are trained in approaches with strong research behind them, and faith is central to how we work.\n\nThat isn't the same as pastoral counseling. It's clinical counseling, with Scripture, prayer, and spiritual reflection woven in when you want them."
+      }
+    ],
+    "team.heading": "Counselors who integrate faith and clinical care",
+    "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Couples, families, teens, and men."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and men, age 8 and up, working through anxiety, depression, and OCD."
+      },
+      {
+        "slug": "rhonda-gore",
+        "text": "Women and older teens working through shame, anxiety, identity, and faith."
+      },
+      {
+        "slug": "staci-harrub",
+        "text": "Young adults and adults working through trauma, grief, and anxiety. EMDR-trained."
+      },
+      {
+        "slug": "sophie-bowman",
+        "text": "Children, teens, and young adults."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session is a conversation about what brought you in, what you'd like to be different, and how much you'd like faith to be part of your counseling. There's no wrong answer. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

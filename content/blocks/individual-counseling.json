@@ -1,0 +1,78 @@
+{
+  "slug": "individual-counseling",
+  "blocks": {
+    "hero.eyebrow": "Individual therapy · Louisville, KY and online",
+    "hero.subhead": "Some struggles happen entirely inside your own head: worry you can't reason away, a heaviness you can't name, a feeling of being stuck you can't explain. Individual therapy gives you a steady place, and a steady person, to work it through.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown or online"
+      }
+    ],
+    "request.heading": "Ready to talk with someone?",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "You're still getting through the day, but privately running on empty."
+      },
+      {
+        "text": "Your thoughts won't slow down, especially at night."
+      },
+      {
+        "text": "You feel stuck, and you're not sure what would help."
+      },
+      {
+        "text": "Something from the past keeps showing up in the present."
+      },
+      {
+        "text": "You're facing a big change and want someone to think it through with."
+      },
+      {
+        "text": "You don't have a name for it. You just know something needs to change."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "If you'd like your faith to be part of your counseling, through prayer, Scripture, or talking through where God fits in what you're facing, your counselor will bring it in. If you'd rather not, you'll get the same excellent clinical care. You lead.",
+    "sections": [
+      {
+        "heading": "You don't need a diagnosis to start",
+        "body": "Many people wait until things fall apart before reaching out. You don't have to. You don't need a diagnosis, a clear problem, or the right words. Figuring out what's going on is part of the work, and it's a lot easier with someone beside you."
+      },
+      {
+        "heading": "What individual therapy at Freedom looks like",
+        "body": "Your counselor starts by understanding you: what brought you in, what you've already tried, and what you'd like to be different. From there, you work together on it, with practical tools, not just a place to talk.\n\nOur counselors draw on approaches with strong research behind them, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), and internal family systems (IFS), and they match the approach to you rather than the other way around."
+      }
+    ],
+    "team.heading": "Counselors who see individuals",
+    "team.items": [
+      {
+        "slug": "staci-harrub",
+        "text": "Young adults and adults working through anxiety, grief, life transitions, and perfectionism. EMDR-trained."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Men and boys, age 8 and up, working through anxiety, depression, and unwanted thoughts."
+      },
+      {
+        "slug": "rhonda-gore",
+        "text": "Women and older teens working through shame, anxiety, and identity."
+      },
+      {
+        "slug": "tony-gore",
+        "text": "Men, young adults, and anyone feeling stuck or overwhelmed."
+      },
+      {
+        "slug": "sophie-bowman",
+        "text": "Teens and young adults working through anxiety and self-esteem."
+      }
+    ],
+    "team.note": "Choose the counselor who sounds right, or tell us what's going on and we'll suggest the best fit. You can always switch.",
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session is mostly a conversation. You'll talk about what brought you in now and what you'd like to be different. There's no pressure to share everything at once. Sessions are in our Middletown office or online, whichever fits your life.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}
