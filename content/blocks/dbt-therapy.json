@@ -1,0 +1,69 @@
+{
+  "slug": "dbt-therapy",
+  "blocks": {
+    "hero.eyebrow": "DBT-informed counseling · Louisville, KY and online",
+    "hero.subhead": "Dialectical behavior therapy (DBT) skills help you ride out intense emotions, handle distress, and keep relationships steady. We teach them in individual counseling.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown or online"
+      }
+    ],
+    "request.heading": "You can learn to ride the wave",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "Your emotions go from zero to a hundred, fast."
+      },
+      {
+        "text": "You react in ways you regret, then feel ashamed."
+      },
+      {
+        "text": "Small things feel unbearable in the moment."
+      },
+      {
+        "text": "Relationships feel intense, or keep falling apart."
+      },
+      {
+        "text": "You've heard DBT skills can help, and you want to learn them."
+      },
+      {
+        "text": "You want practical tools you can use the same day."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "If you want faith to be part of your counseling, your counselor will bring it in. If not, you'll get the same clinical care. You lead.",
+    "sections": [
+      {
+        "heading": "Skills for big emotions",
+        "body": "DBT was developed to help people who feel emotions intensely. It teaches four sets of skills: mindfulness (staying present), distress tolerance (getting through a crisis without making it worse), emotion regulation (understanding and calming strong feelings), and interpersonal effectiveness (asking for what you need while keeping relationships intact)."
+      },
+      {
+        "heading": "DBT-informed counseling, not a full DBT program",
+        "body": "Our counselors are DBT-informed: they teach and practice DBT skills within individual counseling, alongside other approaches. Freedom doesn't offer comprehensive DBT, which includes a weekly skills group, phone coaching between sessions, and a DBT consultation team, and neither counselor is DBT-certified.\n\nDBT-informed counseling can be a good fit if you want skills for handling emotions and relationships."
+      },
+      {
+        "heading": "When you need more than we offer",
+        "body": "If you're dealing with frequent self-harm, repeated suicidal crises, or your provider has recommended comprehensive DBT, a full program is the better fit. Call us anyway, and we'll help you find one."
+      }
+    ],
+    "team.heading": "DBT-informed counselors",
+    "team.items": [
+      {
+        "slug": "staci-harrub",
+        "text": "Emerging adults and adults working through intense emotions, trauma, and grief."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and men, age 8 and up, working through big emotions, anxiety, and depression."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session is about understanding what's been happening and what you'd like to handle differently. If you're in crisis or need a higher level of care, your counselor will help you find it. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

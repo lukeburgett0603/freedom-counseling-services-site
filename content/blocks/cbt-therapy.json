@@ -1,0 +1,77 @@
+{
+  "slug": "cbt-therapy",
+  "blocks": {
+    "hero.eyebrow": "Cognitive behavioral therapy · Louisville, KY and online",
+    "hero.subhead": "Cognitive behavioral therapy (CBT) helps you notice the thought patterns that keep you stuck, and practice new ways of thinking and acting that make real change possible.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown or online"
+      }
+    ],
+    "request.heading": "Practical help, starting this week",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "Your thoughts spiral to the worst case."
+      },
+      {
+        "text": "You're hard on yourself in ways you'd never be with a friend."
+      },
+      {
+        "text": "You want structure and clear goals, not just talking."
+      },
+      {
+        "text": "Anxiety, low mood, or stress keeps getting in the way."
+      },
+      {
+        "text": "You've heard CBT works and want to try it."
+      },
+      {
+        "text": "You like having something to practice between sessions."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "CBT's work of examining beliefs can sit naturally alongside faith, including what you believe about God and about yourself. If you want faith to be part of your counseling, your counselor will bring it in. If not, you'll get the same clinical care. You lead.",
+    "sections": [
+      {
+        "heading": "How thoughts, feelings, and actions connect",
+        "body": "CBT is built on a simple idea: how you think, how you feel, and what you do all affect each other. When thoughts get stuck in unhelpful patterns, feelings and actions follow. CBT helps you spot those patterns, test them against what's actually true, and try new responses. It's one of the most widely researched forms of counseling, with strong evidence for anxiety, depression, and stress."
+      },
+      {
+        "heading": "Structured, collaborative, and goal-focused",
+        "body": "You and your counselor set clear goals together. Sessions often include learning a skill, practicing it, and choosing something small to try before next time. Many people find CBT helpful because they can see progress."
+      }
+    ],
+    "team.heading": "Counselors who use CBT",
+    "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Couples, families, teens, young adults, and men."
+      },
+      {
+        "slug": "rhonda-gore",
+        "text": "Women and older teens working through shame, anxiety, and grief."
+      },
+      {
+        "slug": "staci-harrub",
+        "text": "Emerging adults and adults working through anxiety, grief, trauma, and perfectionism."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and men, age 8 and up, working through anxiety, depression, OCD, and trauma."
+      },
+      {
+        "slug": "sophie-bowman",
+        "text": "Children, teens, and young adults working through anxiety and self-esteem."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session is about understanding what's been hard and what you'd like to change, so you and your counselor can set goals together. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

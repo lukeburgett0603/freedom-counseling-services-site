@@ -61,6 +61,8 @@ const showTeam = teamMode === 'all';
 
   {t('links.heading') && <LinkCards heading={t('links.heading')} lede={t('links.lede')} items={list('links.items').map((i) => ({ title: i.title, text: f(i.text), href: i.href }))} />}
 
+  {t('links2.heading') && <LinkCards heading={t('links2.heading')} lede={t('links2.lede')} items={list('links2.items').map((i) => ({ title: i.title, text: f(i.text), href: i.href }))} />}
+
   {t('chooser.heading') && <QuoteLinks heading={t('chooser.heading')} lede={t('chooser.lede')} items={list('chooser.items').map((i) => ({ quote: i.quote, label: i.label, href: i.href }))} />}
 
   {sections.slice(0, 2).map((s, i) => <ProseSplit heading={s.heading} body={f(s.body)} layout={i === 0 ? 'split' : 'stack'} surface={i === 1} />)}

@@ -1,0 +1,65 @@
+{
+  "slug": "ifs-therapy",
+  "blocks": {
+    "hero.eyebrow": "Internal family systems · Louisville, KY and online",
+    "hero.subhead": "Internal family systems (IFS) helps you understand the different parts of you, like the inner critic or the part that shuts down, and heal what they've been protecting.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown or online"
+      }
+    ],
+    "request.heading": "Every part of you is welcome here",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "Part of you wants to change, and part of you keeps pulling back."
+      },
+      {
+        "text": "You have a harsh inner critic you can't seem to quiet."
+      },
+      {
+        "text": "Old hurts still shape how you react today."
+      },
+      {
+        "text": "You feel split between who you are and who you think you should be."
+      },
+      {
+        "text": "You've heard of IFS and want to know what it's like."
+      },
+      {
+        "text": "Other approaches helped, but something deeper still feels stuck."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "Some Christians wonder how IFS fits with their faith. Your counselor brings together a biblical worldview, Christian theology, and the best clinical practice, and can talk through any questions you have. If you'd rather not bring faith in, you'll get the same clinical care. You lead.",
+    "sections": [
+      {
+        "heading": "Every part of you has a reason",
+        "body": "IFS sees the mind as made up of parts, each trying to help in its own way. Some parts protect you, like the critic, the worrier, or the part that numbs out. Others carry old pain. In IFS, you get to know these parts with curiosity instead of fighting them, so the protective ones can relax and the hurting ones can heal."
+      },
+      {
+        "heading": "Curious, compassionate, and at your pace",
+        "body": "Your counselor helps you notice a part, get to know what it's worried about, and understand what it's protecting. It's a gentle, conversational process, and nothing is forced. IFS is often used for trauma, anxiety, depression, shame, and inner conflict, and a growing body of research is studying its benefits."
+      }
+    ],
+    "team.heading": "Counselors who use IFS",
+    "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Couples, families, teens, young adults, and men who feel stuck or overwhelmed."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and men, age 8 and up, including trauma work with IFS and ACT."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session is about getting to know you and what's been hard. You won't be pushed into anything before you're ready. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

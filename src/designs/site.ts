@@ -45,6 +45,21 @@ export const DESIGN_BLOCKS: Record<string, BlockDef[]> = {
   legal: [],
 };
 
+// Services menu in two groups (Luke, 2026-10-13).
+export const MENU_GROUPS: Record<string, { label: string; slugs: string[] }[]> = {
+  services: [
+    {
+      label: "What you're facing",
+      slugs: [
+        'individual-counseling', 'couples-marriage-counseling', 'family-counseling', 'child-teen-counseling',
+        'christian-counseling', 'grief-counseling', 'anxiety-depression-counseling', 'depression-counseling',
+        'ocd-treatment', 'trauma-counseling',
+      ],
+    },
+    { label: 'Approaches', slugs: ['trauma-emdr-counseling', 'cbt-therapy', 'act-therapy', 'dbt-therapy', 'ifs-therapy'] },
+  ],
+};
+
 // Self-hosted font files to preload (paths under public/), from theme.css.
 // Preload only the one or two weights used above the fold.
 export const THEME_FONT_PRELOADS: string[] = ['/fonts/figtree-latin.woff2'];

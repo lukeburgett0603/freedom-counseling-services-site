@@ -1,0 +1,86 @@
+{
+  "slug": "depression-counseling",
+  "blocks": {
+    "hero.eyebrow": "Depression counseling · Louisville, KY and online",
+    "hero.subhead": "When getting out of bed takes everything you have, and the things you used to enjoy feel far away, you don't have to wait until it gets worse to get help.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown or online"
+      }
+    ],
+    "request.heading": "You don't have to feel this way alone",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "request.crisis": "If you're thinking about suicide or are in crisis, call or text 988 (Suicide & Crisis Lifeline), or call 911.",
+    "signs.items": [
+      {
+        "text": "You feel flat, tired, or hopeless, and you're not sure why."
+      },
+      {
+        "text": "You've lost interest in things you used to enjoy."
+      },
+      {
+        "text": "Small tasks feel impossible, and you're falling behind."
+      },
+      {
+        "text": "You're sleeping too much, or not enough."
+      },
+      {
+        "text": "You've pulled away from people who care about you."
+      },
+      {
+        "text": "You've been \"fine\" on the outside for a long time."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "If you want faith to be part of how you work through depression, including hard questions about where God is in it, your counselor will bring it in. If not, you'll get the same excellent clinical care. You lead.",
+    "sections": [
+      {
+        "heading": "It's not a lack of willpower",
+        "body": "Depression can show up as sadness, but also as numbness, irritability, exhaustion, or a sense that nothing matters. It isn't a character flaw, and pushing harder usually doesn't make it lift. It's real, it's common, and it's treatable."
+      },
+      {
+        "heading": "Small, steady steps back toward your life",
+        "body": "Counseling for depression at Freedom is practical. Our counselors use approaches with strong research behind them, including cognitive behavioral therapy (CBT), behavioral activation, acceptance and commitment therapy (ACT), and internal family systems (IFS). Together, you'll look at what's keeping you stuck and take small, doable steps back toward the people and things that matter to you.\n\nYour counselor tracks progress with you along the way, so you can both see what's helping."
+      },
+      {
+        "heading": "Will I need medication?",
+        "body": "Not necessarily. Counseling alone helps many people. For others, medication from a physician works well alongside counseling. Your counselor can talk through what makes sense and refer you for a medication evaluation if it's worth exploring. Freedom doesn't prescribe medication."
+      },
+      {
+        "heading": "If you've had thoughts of not wanting to be here",
+        "body": "Thoughts like that are more common with depression than most people realize, and they're worth talking about. Our counselors take them seriously and talk about them openly, without judgment. If you're thinking about suicide right now, call or text 988 (Suicide & Crisis Lifeline), or call 911."
+      }
+    ],
+    "team.heading": "Counselors who work with depression",
+    "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Teens, young adults, and men, and couples when depression is weighing on a marriage."
+      },
+      {
+        "slug": "rhonda-gore",
+        "text": "Women and older teens, especially when depression comes with shame or grief."
+      },
+      {
+        "slug": "staci-harrub",
+        "text": "Emerging adults and adults, including depression tied to grief, trauma, or life transitions."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and men, age 8 and up, working through depression and anxiety."
+      },
+      {
+        "slug": "sophie-bowman",
+        "text": "Children, teens, and young adults working through low mood and self-esteem."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "You don't need energy or answers to start. Your first session is mostly a conversation about what you've been experiencing and what you'd like to be different, at whatever pace feels okay. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

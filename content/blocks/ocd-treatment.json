@@ -1,0 +1,62 @@
+{
+  "slug": "ocd-treatment",
+  "blocks": {
+    "hero.eyebrow": "OCD treatment · Louisville, KY and online",
+    "hero.subhead": "OCD can make you feel trapped by thoughts you don't want and rituals you can't stop. Exposure and response prevention (ERP) helps you take your life back, one step at a time.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "check-circle",
+        "text": "You set the pace"
+      }
+    ],
+    "request.heading": "You don't have to keep living by OCD's rules",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "Unwanted thoughts keep coming back, and they scare you."
+      },
+      {
+        "text": "You check, wash, count, or repeat things until it feels \"just right.\""
+      },
+      {
+        "text": "You mentally review, pray, or seek reassurance over and over."
+      },
+      {
+        "text": "You worry you've done something wrong, even when you know you haven't."
+      },
+      {
+        "text": "The rituals take up more and more of your day."
+      },
+      {
+        "text": "You've researched OCD and thought, \"That's it.\""
+      }
+    ],
+    "faith.heading": "When OCD shows up in your faith",
+    "faith.body": "For some people, OCD attaches to faith: fear of having sinned, of offending God, or of not believing \"enough,\" with compulsions like repeated confession, prayer, or reassurance seeking. This is sometimes called scrupulosity. Your counselor understands how OCD can show up in faith, and can help you tell the difference between OCD and your convictions. If you'd rather not bring faith in, you'll get the same clinical care. You lead.",
+    "sections": [
+      {
+        "heading": "OCD isn't about being neat",
+        "body": "OCD is a cycle of obsessions (unwanted, distressing thoughts, images, or urges) and compulsions (things you do, or think, to make the distress go away). Compulsions bring relief for a moment, but they teach your brain the thought was dangerous, so it comes back stronger. Some people's compulsions are mostly mental, sometimes called \"Pure O.\" It's common, it has a name, and it can be treated."
+      },
+      {
+        "heading": "Exposure and response prevention, at a pace you choose",
+        "body": "ERP is the most studied therapy for OCD. With your counselor, you build a list of situations that trigger your OCD, from easiest to hardest. Then, step by step, you practice facing them without doing the compulsion. Over time, your brain learns the thought isn't an emergency, and the urge to ritualize fades.\n\nYou're never forced into anything. You and your counselor choose each step together, and acceptance and commitment therapy (ACT) skills help you make room for discomfort along the way. Afraid to start? Read [What is ERP therapy?](/what-is-erp-therapy-a-gentler-look-for-anyone-afraid-to-start)"
+      }
+    ],
+    "team.heading": "Your OCD therapist",
+    "team.items": [
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and men, age 8 and up, with OCD and intrusive thoughts, using ERP and ACT."
+      }
+    ],
+    "team.note": "Luke works with boys and men. If you're looking for OCD treatment for a woman or girl, call us and we'll help you find the right fit.",
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session is about understanding your OCD: what the thoughts are, what you do in response, and how it's affecting your life. You won't be asked to face anything before you're ready. Sessions are in our Middletown office or online.",
+    "cost.body": "$115 per session. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

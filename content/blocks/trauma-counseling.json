@@ -1,0 +1,69 @@
+{
+  "slug": "trauma-counseling",
+  "blocks": {
+    "hero.eyebrow": "Trauma counseling · Louisville, KY and online",
+    "hero.subhead": "Trauma can leave you on edge, stuck, or disconnected from yourself long after it happened. Trauma counseling helps you feel safe in your own life again.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "check-circle",
+        "text": "You stay in control of the pace"
+      }
+    ],
+    "request.heading": "Healing can start at your pace",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "Something from the past still feels present, in your body or your reactions."
+      },
+      {
+        "text": "You startle easily, or you're always on guard."
+      },
+      {
+        "text": "You avoid places, people, or reminders."
+      },
+      {
+        "text": "You feel numb or disconnected from yourself."
+      },
+      {
+        "text": "Hard experiences piled up over years, and you're tired of carrying them."
+      },
+      {
+        "text": "Part of you wants to heal, and part of you would rather not go near it."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "If you want faith to be part of your healing, including hard questions about safety, trust, and where God was in what happened, your counselor will bring it in. If not, that's entirely your call.",
+    "sections": [
+      {
+        "heading": "It doesn't have to be one big event",
+        "body": "Trauma isn't only a single dramatic event. A difficult childhood, a painful relationship, or many smaller hard experiences add up too. If your body is still reacting as though something isn't safe, that's reason enough to get support."
+      },
+      {
+        "heading": "More than one path to healing",
+        "body": "There's no single right way to heal from trauma, so our counselors work in different ways:\n\n- **EMDR** helps painful memories lose their emotional charge, without describing everything in detail. [About EMDR](/trauma-emdr-counseling)\n- **Internal family systems (IFS)** helps you understand the parts of you still protecting against what happened, with compassion instead of force.\n- **Acceptance and commitment therapy (ACT)** helps you relate differently to painful memories and feelings so they stop running your life.\n- **Psychodynamic, trauma-focused counseling** looks at how what happened still shapes your relationships and reactions today."
+      },
+      {
+        "heading": "You stay in control",
+        "body": "Before any deep work begins, your counselor helps you build safety and steadiness: tools to calm your body and stay grounded. You set the pace, and you can pause at any time. The goal is healing, never re-living the trauma."
+      }
+    ],
+    "team.heading": "Counselors who work with trauma",
+    "team.items": [
+      {
+        "slug": "staci-harrub",
+        "text": "Psychodynamic, trauma-focused counseling and EMDR, in person or online."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and men, age 8 and up, working through trauma with internal family systems (IFS) and acceptance and commitment therapy (ACT)."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session focuses on getting to know you and building safety, not on the trauma itself. You won't be asked to go into detail before you're ready. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "slug": "act-therapy",
+  "blocks": {
+    "hero.eyebrow": "Acceptance and commitment therapy · Louisville, KY and online",
+    "hero.subhead": "Acceptance and commitment therapy (ACT) helps you stop fighting painful thoughts and feelings, so you can put your energy into the life you actually want.",
+    "facts": [
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "In person in Middletown or online"
+      }
+    ],
+    "request.heading": "Move toward what matters",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "signs.items": [
+      {
+        "text": "You've tried to think your way out of anxiety, and it hasn't worked."
+      },
+      {
+        "text": "Painful thoughts or memories keep pulling you off course."
+      },
+      {
+        "text": "You're stuck, and you're not sure what you even want anymore."
+      },
+      {
+        "text": "You avoid things that matter because of how they make you feel."
+      },
+      {
+        "text": "You've heard of ACT and want to know if it fits you."
+      },
+      {
+        "text": "You want practical tools, not just talk."
+      }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "ACT's focus on values fits naturally with faith for many people: living by what you believe matters, even when it's hard. If you want faith to be part of your counseling, your counselor will bring it in. If not, you'll get the same clinical care. You lead.",
+    "sections": [
+      {
+        "heading": "Less fighting, more living",
+        "body": "Most of us try to get rid of painful thoughts and feelings. ACT takes a different approach: learning to notice them without being pushed around by them, getting clear on what matters most to you, and taking steps in that direction, even when it's uncomfortable. ACT has strong research behind it for anxiety, depression, OCD, chronic stress, and more."
+      },
+      {
+        "heading": "Practical, and built around your values",
+        "body": "ACT sessions are active. You'll practice skills like stepping back from sticky thoughts, making room for hard feelings, and staying present. You'll also name your values, the kind of person you want to be, and turn them into small, concrete steps between sessions."
+      }
+    ],
+    "team.heading": "Counselors who use ACT",
+    "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Couples, families, teens, young adults, and men who feel stuck or overwhelmed."
+      },
+      {
+        "slug": "staci-harrub",
+        "text": "Emerging adults and adults working through anxiety, grief, trauma, and perfectionism."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Boys and men, age 8 and up, working through anxiety, depression, OCD, and trauma."
+      }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "Your first session is about getting to know you: what's been hard, and what you'd want your life to look like if it weren't in the way. Sessions are in our Middletown office or online.",
+    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+  }
+}

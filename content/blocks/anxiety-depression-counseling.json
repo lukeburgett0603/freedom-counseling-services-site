@@ -1,8 +1,8 @@
 {
   "slug": "anxiety-depression-counseling",
   "blocks": {
-    "hero.eyebrow": "Anxiety and depression counseling · Louisville, KY and online",
-    "hero.subhead": "When anxious thoughts won't quiet down, or depression makes even small things feel impossible, you don't have to keep pushing through on your own. Counseling gives you practical tools, and someone in your corner.",
+    "hero.eyebrow": "Anxiety counseling · Louisville, KY and online",
+    "hero.subhead": "When anxious thoughts won't quiet down, you don't have to keep pushing through on your own. Counseling gives you practical tools, and someone in your corner.",
     "facts": [
       {
         "icon": "calendar-check",
@@ -23,28 +23,28 @@
         "text": "You're getting things done, but it feels like a full-time job just to hold it together."
       },
       {
-        "text": "You've lost interest in things you used to enjoy."
+        "text": "Worry jumps from one thing to the next, and it's exhausting."
       },
       {
-        "text": "Unwanted thoughts keep coming back, and you can't make them stop."
+        "text": "Your heart races or your chest tightens, and you're not sure why."
       },
       {
         "text": "You avoid places or people because of how anxious they make you."
       },
       {
-        "text": "You feel flat, tired, or hopeless, and you're not sure why."
+        "text": "You've been told to \"just relax,\" and it hasn't helped."
       }
     ],
     "faith.heading": "Faith at the center, never forced",
-    "faith.body": "If you want faith to be part of how you work through anxiety or depression, your counselor will bring it in. If not, you'll get the same excellent clinical care. You lead.",
+    "faith.body": "If you want faith to be part of how you work through anxiety, your counselor will bring it in. If not, you'll get the same excellent clinical care. You lead.",
     "sections": [
       {
         "heading": "It doesn't have to make sense yet",
-        "body": "Anxiety and depression can be hard to put into words. You don't need to have it figured out before you start. Early sessions are about building a clear picture of what's happening for you, and that's part of the work."
+        "body": "Anxiety can be hard to put into words. You don't need to have it figured out before you start. Early sessions are about building a clear picture of what's happening for you, and that's part of the work."
       },
       {
         "heading": "Practical tools, not just a place to talk",
-        "body": "Counseling for anxiety and depression at Freedom is active and practical. Our counselors use approaches with strong research behind them, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), behavioral activation, and mindfulness-based approaches. For OCD and intrusive thoughts, Luke Burgett offers exposure and response prevention (ERP), the leading treatment for OCD.\n\nYour counselor tracks progress with you along the way, so you can both see what's helping."
+        "body": "Counseling for anxiety at Freedom is active and practical. Our counselors use approaches with strong research behind them, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), and mindfulness-based approaches. You'll learn what keeps anxiety going for you, and practice ways to respond that loosen its grip.\n\nIf unwanted, repeating thoughts are a big part of what you're facing, that may be OCD, which has a specific, effective treatment. See [OCD treatment](/ocd-treatment).\n\nYour counselor tracks progress with you along the way, so you can both see what's helping."
       },
       {
         "heading": "Will I need medication?",
@@ -55,11 +55,11 @@
         "body": "If your symptoms are severe and need psychiatric care or medication management, we'll help you find the right provider."
       }
     ],
-    "team.heading": "Counselors who work with anxiety and depression",
+    "team.heading": "Counselors who work with anxiety",
     "team.items": [
       {
         "slug": "luke-burgett",
-        "text": "Boys and men, age 8 and up, working through anxiety, depression, and OCD or unwanted thoughts, including ERP for OCD."
+        "text": "Boys and men, age 8 and up, working through anxiety, worry, and panic."
       },
       {
         "slug": "staci-harrub",

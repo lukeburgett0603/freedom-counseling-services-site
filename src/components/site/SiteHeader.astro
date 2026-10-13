@@ -7,6 +7,7 @@
 import type { Page, Business } from '../../lib/pages';
 import { withBase } from '../../lib/url';
 import Ph from './Ph.astro';
+import { MENU_GROUPS } from '../../designs/site';
 
 interface Props {
   navPages: Page[];
@@ -23,6 +24,19 @@ const primary = navPages
 const children = (id: string) =>
   navPages.filter((p) => p.parent_page_id === id && p.nav_placement !== 'none').sort((a, b) => a.nav_order - b.nav_order);
 const hrefFor = (p: Page) => withBase(p.page_type === 'Homepage' ? '/' : `/${p.slug}`);
+// Dropdown sections: the parent's MENU_GROUPS (in order), then any
+// children not in a group.
+function sectionsFor(parent: Page): { label: string | null; pages: Page[] }[] {
+  const kids = children(parent.id);
+  const groups = MENU_GROUPS[parent.slug] ?? [];
+  const used = new Set(groups.flatMap((g) => g.slugs));
+  const out: { label: string | null; pages: Page[] }[] = groups
+    .map((g) => ({ label: g.label as string | null, pages: g.slugs.map((s) => kids.find((k) => k.slug === s)).filter((k): k is Page => !!k) }))
+    .filter((g) => g.pages.length);
+  const rest = kids.filter((k) => !used.has(k.slug));
+  if (rest.length) out.push({ label: out.length ? 'More' : null, pages: rest });
+  return out;
+}
 const tel = business.telephone?.replace(/[^0-9+]/g, '');
 const current = Astro.url.pathname.replace(/\/$/, '');
 const isCurrent = (p: Page) => current === hrefFor(p).replace(/\/$/, '');
@@ -45,10 +59,17 @@ const isCurrent = (p: Page) => current === hrefFor(p).replace(/\/$/, '');
                 {kids.length > 0 && <Ph name="caret-down" class="sh-caret" />}
               </a>
               {kids.length > 0 && (
-                <ul class="sh-drop">
-                  <li class="sh-drop-parent"><a href={hrefFor(p)}>All {p.title.toLowerCase()}</a></li>
-                  {kids.map((k) => <li><a href={hrefFor(k)}>{k.title}</a></li>)}
-                </ul>
+                <div class:list={['sh-drop', { 'sh-drop-cols': sectionsFor(p).length > 1 }]}>
+                  <a class="sh-drop-parent" href={hrefFor(p)}>All {p.title.toLowerCase()}</a>
+                  <div class="sh-drop-groups">
+                    {sectionsFor(p).map((g) => (
+                      <div>
+                        {g.label && <p class="sh-drop-label">{g.label}</p>}
+                        <ul>{g.pages.map((k) => <li><a href={hrefFor(k)}>{k.title}</a></li>)}</ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </li>
           );
@@ -66,9 +87,12 @@ const isCurrent = (p: Page) => current === hrefFor(p).replace(/\/$/, '');
             {primary.map((p) => (
               <li>
                 <a href={hrefFor(p)}>{p.title}</a>
-                {children(p.id).length > 0 && (
-                  <ul>{children(p.id).map((k) => <li><a href={hrefFor(k)}>{k.title}</a></li>)}</ul>
-                )}
+                {sectionsFor(p).map((g) => (
+                  <Fragment>
+                    {g.label && <p class="sh-panel-label">{g.label}</p>}
+                    <ul>{g.pages.map((k) => <li><a href={hrefFor(k)}>{k.title}</a></li>)}</ul>
+                  </Fragment>
+                ))}
               </li>
             ))}
           </ul>
@@ -90,12 +114,16 @@ const isCurrent = (p: Page) => current === hrefFor(p).replace(/\/$/, '');
   .sh-nav a { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; color: var(--muted); font-size: 0.95rem; font-weight: 500; padding: 8px 0; }
   .sh-nav a:hover, .sh-nav a[aria-current='page'] { color: var(--ink); }
   :global(.sh-caret) { font-size: 0.8rem; }
-  .sh-drop { position: absolute; left: -16px; top: 100%; min-width: 240px; list-style: none; margin: 0; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; }
+  .sh-drop { position: absolute; left: -16px; top: 100%; min-width: 240px; margin: 0; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; }
+  .sh-drop ul { list-style: none; margin: 0; padding: 0; }
+  .sh-drop-cols { min-width: 520px; }
+  .sh-drop-cols .sh-drop-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+  .sh-drop-label { margin: 6px 12px 2px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); }
+  .sh-panel-label { margin: 4px 0 0 12px; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
   .has-kids:hover .sh-drop, .has-kids:focus-within .sh-drop { opacity: 1; visibility: visible; transform: none; }
-  .sh-drop a { display: block; padding: 8px 12px; border-radius: 8px; color: var(--ink); }
+  .sh-drop a { display: block; padding: 7px 12px; border-radius: 8px; color: var(--ink); }
   .sh-drop a:hover { background: var(--tint); }
-  .sh-drop-parent { border-bottom: 1px solid var(--line); margin-bottom: 4px; padding-bottom: 4px; }
-  .sh-drop-parent a { font-weight: 600; }
+  .sh-drop .sh-drop-parent { font-weight: 600; border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0; margin-bottom: 4px; }
   .sh-cta { display: flex; align-items: center; gap: 18px; }
   .sh-phone { font-weight: 600; font-size: 0.95rem; text-decoration: none; white-space: nowrap; }
   .sh-request { padding: 0.6rem 1.1rem; font-size: 0.95rem; }

@@ -1,8 +1,8 @@
 {
   "slug": "trauma-emdr-counseling",
   "blocks": {
-    "hero.eyebrow": "Trauma and EMDR counseling · Louisville, KY and online",
-    "hero.subhead": "Trauma can leave you on edge, stuck, or disconnected from yourself long after the event itself. Trauma counseling, including EMDR, helps your mind and body stop reacting as though the danger is still happening.",
+    "hero.eyebrow": "EMDR therapy · Louisville, KY and online",
+    "hero.subhead": "Some memories keep hitting with the same force, no matter how long ago they happened. EMDR helps your mind and body stop reacting as though the danger is still here.",
     "facts": [
       {
         "icon": "calendar-check",
@@ -17,31 +17,27 @@
     "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
     "signs.items": [
       {
-        "text": "Something from the past still feels present, in your body or your reactions."
+        "text": "A memory still feels present, in your body or your reactions."
       },
       {
-        "text": "You startle easily, or you're always on guard."
-      },
-      {
-        "text": "You avoid places, people, or reminders."
+        "text": "Reminders bring back the same fear, shame, or panic every time."
       },
       {
         "text": "Memories or nightmares come back without warning."
       },
       {
-        "text": "You feel numb or disconnected from yourself."
+        "text": "Talking about it hasn't made it lose its grip."
       },
       {
-        "text": "Hard experiences piled up over years, and you're tired of carrying them."
+        "text": "You've heard of EMDR and want to know if it could help."
+      },
+      {
+        "text": "You'd rather not have to describe everything in detail."
       }
     ],
     "faith.heading": "Faith at the center, never forced",
     "faith.body": "If you want faith to be part of your healing, including hard questions about safety, trust, and where God was in what happened, your counselor will bring it in. If not, that's entirely your call.",
     "sections": [
-      {
-        "heading": "It doesn't have to be one big event",
-        "body": "Trauma isn't only a single dramatic event. A difficult childhood, a painful relationship, or many smaller hard experiences add up too. If your body is still reacting as though something isn't safe, that's reason enough to get support."
-      },
       {
         "heading": "How EMDR therapy works",
         "body": "EMDR (eye movement desensitization and reprocessing) is a structured, well-researched therapy for trauma. While you briefly bring a painful memory to mind, your counselor guides you through eye movements or another back-and-forth rhythm. Over time, the memory tends to lose its emotional charge. It stays a memory, but it stops running your present.\n\nYou don't have to describe everything that happened in detail, the way some talk therapy asks you to."
@@ -49,22 +45,21 @@
       {
         "heading": "You stay in control",
         "body": "Before any memory work begins, your counselor helps you build safety and steadiness: tools to calm your body and stay grounded. You set the pace, and you can pause at any time. The goal is healing, never re-living the trauma."
+      },
+      {
+        "heading": "If EMDR isn't the right fit",
+        "body": "EMDR is one way to heal from trauma, not the only one. Our counselors also work with trauma through other approaches, including internal family systems and acceptance and commitment therapy. See [trauma counseling](/trauma-counseling)."
       }
     ],
-    "team.heading": "Counselors who work with trauma",
+    "team.heading": "Counselors who offer EMDR",
     "team.items": [
       {
         "slug": "staci-harrub",
-        "text": "Trauma, grief, anxiety, and life transitions. EMDR in person or online."
-      },
-      {
-        "slug": "luke-burgett",
-        "text": "Boys and men, age 8 and up, working through trauma with acceptance and commitment therapy (ACT) and internal family systems (IFS), approaches that help you relate differently to painful memories and the parts of you still protecting against them."
+        "text": "EMDR in person or online, for trauma, grief, and painful memories, with a psychodynamic, trauma-focused approach."
       }
     ],
-    "team.note": "EMDR is offered by Staci. If EMDR isn't the right fit for you, or you'd rather work with Luke, trauma counseling with ACT and IFS is another path.",
     "expect.heading": "Your first session",
-    "expect.body": "Your first session focuses on getting to know you and building safety, not on the trauma itself. You won't be asked to go into detail before you're ready. Sessions, including EMDR, are in our Middletown office or online.",
-    "cost.body": "$100 per session with Staci, $115 with Luke. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "expect.body": "Your first session focuses on getting to know you and building safety, not on the trauma itself. You won't be asked to go into detail before you're ready. EMDR sessions are in our Middletown office or online.",
+    "cost.body": "$100 per session. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

@@ -14,7 +14,7 @@
     ],
     "request.heading": "Ready to take the first step?",
     "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
-    "links.heading": "How we can help",
+    "links.heading": "What you're facing",
     "links.items": [
       {
         "title": "Individual counseling",
@@ -37,14 +37,24 @@
         "href": "/child-teen-counseling"
       },
       {
-        "title": "Anxiety and depression counseling",
-        "text": "Practical tools for worry, panic, low mood, and intrusive thoughts, including ERP for OCD.",
+        "title": "Anxiety counseling",
+        "text": "Practical tools for worry, panic, and a mind that won't slow down.",
         "href": "/anxiety-depression-counseling"
       },
       {
-        "title": "Trauma and EMDR counseling",
-        "text": "EMDR with Staci, in person or online, or trauma work with ACT and IFS with Luke.",
-        "href": "/trauma-emdr-counseling"
+        "title": "Depression counseling",
+        "text": "Small, steady steps back toward your life, with any of our five counselors.",
+        "href": "/depression-counseling"
+      },
+      {
+        "title": "OCD treatment",
+        "text": "Exposure and response prevention (ERP) for boys and men 8 and up.",
+        "href": "/ocd-treatment"
+      },
+      {
+        "title": "Trauma counseling",
+        "text": "More than one path to healing, at a pace that feels safe.",
+        "href": "/trauma-counseling"
       },
       {
         "title": "Grief counseling",
@@ -55,6 +65,34 @@
         "title": "Christian counseling",
         "text": "Faith at the center of your counseling, whenever you want it.",
         "href": "/christian-counseling"
+      }
+    ],
+    "links2.heading": "Approaches we use",
+    "links2.items": [
+      {
+        "title": "EMDR therapy",
+        "text": "Helps painful memories lose their charge, in person or online.",
+        "href": "/trauma-emdr-counseling"
+      },
+      {
+        "title": "Cognitive behavioral therapy (CBT)",
+        "text": "Practical tools for the thought patterns that keep you stuck.",
+        "href": "/cbt-therapy"
+      },
+      {
+        "title": "Acceptance and commitment therapy (ACT)",
+        "text": "Less fighting your thoughts, more living by your values.",
+        "href": "/act-therapy"
+      },
+      {
+        "title": "DBT-informed counseling",
+        "text": "Skills for big emotions, distress, and relationships.",
+        "href": "/dbt-therapy"
+      },
+      {
+        "title": "Internal family systems (IFS)",
+        "text": "Understand the parts of you that feel stuck, with compassion.",
+        "href": "/ifs-therapy"
       }
     ],
     "sections": [
