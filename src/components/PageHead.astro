@@ -47,6 +47,11 @@ const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbChain, siteUrl);
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonicalUrl} />
+{/* Per-client icon files in public/ (favicon.ico, icon-512.png,
+    apple-touch-icon.png), made from the practice's logo mark. */}
+<link rel="icon" href={withBase('/favicon.ico')} sizes="48x48" />
+<link rel="icon" href={withBase('/icon-512.png')} type="image/png" />
+<link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
 
 {googleFonts && business.google_fonts_url && (
   <>
