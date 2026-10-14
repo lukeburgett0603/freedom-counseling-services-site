@@ -44,6 +44,13 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
           <select id="content-page-select" class="w-full rounded-md border border-slate-300 px-4 py-2"></select>
         </div>
 
+        <!-- Site system v2: shown for pages with a new design, whose words
+             live in Page text (content_blocks), not in this screen's old
+             template fields. -->
+        <div id="content-v2-notice" class="t-card pt-v2-notice" hidden>
+          <p><b>This page uses the new design.</b> Its words (headline area, sections, counselor lines) are edited in <a id="content-v2-link" class="a-link" href="#">Page text</a>. This screen keeps the page's search settings, FAQs, and menu details.</p>
+        </div>
+
         <div id="content-fields" class="hidden space-y-6 t-card p-fields">
           <!--
             Hidden entirely for Counselor Profile pages — that page type
@@ -741,6 +748,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   import { getPersonEntityTerms } from '../../../lib/schema';
   import { VALUE_ADD_ICON_NAMES } from '../../../lib/icons';
   import { withBase } from '../../../lib/url';
+  import { designIdFor } from '../../../designs/site';
 
   type ContentPage = {
     id: string;
@@ -1548,6 +1556,29 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentStorybrandFields.appendChild(contentExplanatoryWrap);
   }
 
+  // Site system v2: a page with a new design (src/designs/site.ts) shows
+  // its text from Page text (content_blocks), not from the old template
+  // fields below. Hide those fields so nobody edits text that no longer
+  // appears anywhere, and point to Page text. Kept: the H1 (the new
+  // designs read it on every page type, profiles included), title, meta
+  // description, focus keyword, FAQs, footer column, and, for legal pages,
+  // the page copy.
+  const V2_HIDDEN = [
+    'content-hero-headline-wrap', 'content-hero-subhead-wrap', 'content-storybrand-fields', 'content-value-add-wrap',
+    'content-testimonial-wrap', 'content-images-wrap', 'content-hero-style-wrap', 'content-plan-steps-wrap',
+    'content-concerns-wrap', 'content-cta-wrap', 'content-featured-wrap',
+  ];
+  function applyDesignedPageView(page: ContentPage) {
+    const design = designIdFor(page as never);
+    const notice = document.getElementById('content-v2-notice')!;
+    notice.hidden = !design || design === 'legal';
+    if (!design) return;
+    (document.getElementById('content-v2-link') as HTMLAnchorElement).href = withBase(`/admin/content/page-text?page=${page.id}`);
+    for (const id of V2_HIDDEN) document.getElementById(id)?.classList.add('hidden');
+    document.getElementById('content-plain-copy-wrap')!.classList.toggle('hidden', design !== 'legal');
+    contentH1Wrap.classList.remove('hidden');
+  }
+
   function loadContentForm() {
     selectedContentPage = pages.find((p) => p.id === contentPageSelect.value) ?? null;
     if (!selectedContentPage) {
@@ -1697,6 +1728,8 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentFooterColumn.value = selectedContentPage.footer_column ?? 'explore';
 
     contentCounselorGuidance.classList.toggle('hidden', !isLinkedCounselorSession());
+    applyDesignedPageView(selectedContentPage);
+
     if (isLinkedCounselorSession()) {
       const keyword = selectedContentPage.focus_keyword;
       contentCounselorKeywordTip.textContent = keyword
@@ -2213,3 +2246,8 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
 
   initAdminAuth(onAuthed, { allowedRoles: ['owner', 'agency', 'staff'] });
 </script>
+
+<style>
+  .pt-v2-notice { margin-bottom: 14px; border-left: 3px solid var(--a-accent, #7fb19a); }
+  .pt-v2-notice p { margin: 0; font-size: 0.9rem; line-height: 1.5; }
+</style>
