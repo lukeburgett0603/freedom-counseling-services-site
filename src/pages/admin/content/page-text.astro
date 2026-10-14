@@ -79,6 +79,7 @@ const sections = (defs: BlockDef[]) => {
 
       <div class="t-card pt-actions" id="pt-actions" hidden>
         <button type="button" id="pt-save" class="a-btn a-btn-primary i-btn">Save and publish</button>
+        <span id="pt-dirty" class="pt-dirty" hidden>You have unsaved changes</span>
         <span id="pt-status" role="status"></span>
       </div>
     </div>
@@ -86,20 +87,29 @@ const sections = (defs: BlockDef[]) => {
 </AdminLayout>
 
 <style>
-  .pt-sec { margin-top: 14px; display: grid; gap: 18px; }
+  /* Fields use the admin's own field tokens (styles/admin.css), so they
+     match every other screen in dark and light mode. :global because list
+     rows are added by script and don't carry this component's scope. */
+  .pt-sec { margin-top: 14px; display: grid; gap: 20px; }
   .pt-sec h3 { font-size: 1rem; font-weight: 700; }
   .pt-field { display: grid; gap: 6px; }
-  .pt-field > label { font-weight: 600; font-size: 0.9rem; }
-  .pt-input { width: 100%; border: 1px solid var(--a-line, #cbd5e1); border-radius: 8px; padding: 8px 10px; background: var(--a-input, #fff); color: inherit; font: inherit; }
-  .pt-help { font-size: 0.8rem; opacity: 0.75; }
-  .pt-warn { font-size: 0.8rem; color: #b45309; }
-  .pt-image { display: grid; gap: 6px; }
+  .pt-field > label { font-weight: 600; font-size: 0.9rem; color: var(--a-fg); }
+  :global(.a-view .pt-input) { display: block; width: 100%; box-sizing: border-box; border: 1px solid var(--a-line2); border-radius: 8px; padding: 9px 11px; background: var(--a-field); color: var(--a-fg); font: 14px/1.5 var(--a-font); }
+  :global(.a-view textarea.pt-input) { min-height: 76px; resize: vertical; }
+  :global(.a-view .pt-input:hover) { border-color: var(--a-edge); }
+  :global(.a-view .pt-input:focus) { outline: none; border-color: var(--a-accent); box-shadow: 0 0 0 3px var(--a-accent-soft); }
+  .pt-help { font-size: 0.8rem; color: var(--a-muted); }
+  .pt-warn { font-size: 0.8rem; color: var(--a-warn); }
+  .pt-image { display: grid; gap: 8px; }
   .pt-rows { display: grid; gap: 10px; }
-  :global(.pt-row) { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--a-line, #cbd5e1); border-radius: 10px; }
-  :global(.pt-row-tools) { display: flex; gap: 6px; justify-content: flex-end; }
-  :global(.pt-row label) { font-size: 0.8rem; font-weight: 600; }
+  :global(.pt-row) { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--a-line2); border-radius: 10px; background: var(--a-raise); }
+  :global(.pt-row-field) { display: grid; gap: 6px; }
+  :global(.pt-row-field > span) { font-size: 0.8rem; font-weight: 600; color: var(--a-muted); }
+  :global(.pt-row-tools) { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
   .pt-add { margin-top: 8px; justify-self: start; }
-  .pt-actions { margin-top: 14px; display: flex; gap: 14px; align-items: center; position: sticky; bottom: 12px; }
+  .pt-actions { margin-top: 14px; display: flex; gap: 14px; align-items: center; position: sticky; bottom: 12px; z-index: 5; }
+  .pt-actions.is-dirty { border-color: var(--a-accent); box-shadow: 0 0 0 1px var(--a-accent), var(--a-lift); }
+  .pt-dirty { color: var(--a-accent); font-weight: 600; font-size: 0.9rem; }
   .pt-empty { margin-top: 0; }
 </style>
 
@@ -139,7 +149,7 @@ const sections = (defs: BlockDef[]) => {
     const row = document.createElement('div');
     row.className = 'pt-row';
     row.innerHTML =
-      fields.map((f) => `<label>${esc(f.label)}${f.kind === 'rich' ? `<textarea class="pt-input" rows="3" data-f="${f.key}"></textarea>` : `<input class="pt-input" data-f="${f.key}" />`}</label>`).join('') +
+      fields.map((f) => `<label class="pt-row-field"><span>${esc(f.label)}:</span>${f.kind === 'rich' ? `<textarea class="pt-input" rows="3" data-f="${f.key}"></textarea>` : `<input class="pt-input" type="text" data-f="${f.key}" />`}</label>`).join('') +
       `<div class="pt-row-tools"><button type="button" class="a-btn i-btn" data-act="up">Move up</button><button type="button" class="a-btn i-btn" data-act="down">Move down</button><button type="button" class="a-btn i-btn i-danger" data-act="remove">Remove</button></div>`;
     fields.forEach((f) => { (row.querySelector(`[data-f="${f.key}"]`) as HTMLInputElement).value = item[f.key] ?? ''; });
     row.querySelector('.pt-row-tools')!.addEventListener('click', (e) => {
@@ -191,6 +201,7 @@ const sections = (defs: BlockDef[]) => {
   });
 
   async function openPage(id: string) {
+    if (dirty && current && id !== current.id && !confirm('You have unsaved changes on this page. Leave without saving?')) return;
     current = pages.find((p) => p.id === id) ?? null;
     if (!current) return;
     renderNav();
@@ -205,7 +216,22 @@ const sections = (defs: BlockDef[]) => {
     const { data } = await supabase.from('content_blocks').select('block_key, value').eq('page_id', id);
     stored = new Map((data ?? []).map((r) => [r.block_key, r.value]));
     for (const d of DESIGN_BLOCKS[design]) writeValue(design, d, stored.get(d.key) ?? d.fallback);
+    setDirty(false);
   }
+
+  // Unsaved changes: highlight the save bar the moment anything changes,
+  // and warn before leaving the page with edits that weren't saved.
+  let dirty = false;
+  function setDirty(on: boolean) {
+    dirty = on;
+    document.getElementById('pt-dirty')!.hidden = !on;
+    actions.classList.toggle('is-dirty', on);
+    if (on) status.textContent = '';
+  }
+  const markDirty = (e: Event) => { if ((e.target as HTMLElement).closest('.pt-form')) setDirty(true); };
+  document.addEventListener('input', markDirty);
+  document.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('.pt-add, .pt-row-tools')) setDirty(true); });
+  window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 
   // Soft length warnings, so a long edit doesn't quietly break a layout.
   document.addEventListener('input', (e) => {
@@ -239,6 +265,7 @@ const sections = (defs: BlockDef[]) => {
       }));
       const { error } = await supabase.from('content_suggestions').insert(rows);
       saveButton.disabled = false;
+      if (!error) setDirty(false);
       status.textContent = error ? `Could not send: ${error.message}` : `Sent ${rows.length} suggested change${rows.length > 1 ? 's' : ''} to Counselor Marketing Co. for review.`;
       return;
     }
@@ -257,6 +284,7 @@ const sections = (defs: BlockDef[]) => {
     status.textContent = 'Saved. Publishing your site...';
     const result = await triggerRebuild();
     saveButton.disabled = false;
+    setDirty(false);
     status.textContent = result.ok ? 'Saved. Your site will update in a few minutes.' : 'Saved, but publishing failed. It will go live on the next update.';
   });
 
