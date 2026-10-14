@@ -7,6 +7,7 @@ import type { Page, Business } from '../../lib/pages';
 import { withBase } from '../../lib/url';
 import { formatHours, fullAddress } from '../../lib/hours';
 import Ph from './Ph.astro';
+import { Image } from 'astro:assets';
 
 interface Props {
   navPages: Page[];
@@ -30,7 +31,7 @@ const year = new Date().getFullYear();
 <footer class="sf">
   <div class="s-wrap sf-grid">
     <div class="sf-brand">
-      {business.logo_url ? <img src={business.logo_url} alt={business.display_name} height="40" loading="lazy" /> : <strong>{business.display_name}</strong>}
+      {business.logo_url ? <Image src={business.logo_url} alt={business.display_name} inferSize widths={[140, 280]} sizes="140px" /> : <strong>{business.display_name}</strong>}
       {address && <p>{address}</p>}
       {hours.length > 0 && <p>{hours.map((h, i) => <Fragment>{i > 0 && <br />}{h}</Fragment>)}</p>}
     </div>

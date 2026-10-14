@@ -38,6 +38,11 @@ export default defineConfig({
   site: 'https://www.freedomcounselingservices.org',
   base: '/',
   trailingSlash: 'never',
+  // Inline each page's CSS into its HTML: no render-blocking stylesheet
+  // requests before the first paint (measured 2026-10-13 on Freedom: two
+  // blocking stylesheets pushed the phone LCP past 2.5s). Pages are small,
+  // so the extra HTML costs less than the round trips.
+  build: { inlineStylesheets: 'always' },
   // Astro 7 changed the default to 'jsx' (React-style whitespace stripping),
   // which drops the space between adjacent inline elements (e.g. a word
   // and a following <a>/<strong>). `true` keeps Astro 5's HTML-aware

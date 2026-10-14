@@ -31,6 +31,9 @@ const dateLabel = date ? new Date(`${date}T12:00:00`).toLocaleDateString('en-US'
 // The post's own H1 is the page title; drop a leading "# " or "## " title
 // line in the body if it repeats it.
 const body = (page.copy ?? '').replace(/^#{1,2}\s+.*\n+/, (m) => (m.replace(/[#*\s]/g, '').toLowerCase().startsWith((page.h1 ?? page.title).replace(/[\s*?!.,'"]/g, '').toLowerCase().slice(0, 20)) ? '' : m));
+// Heading order for accessibility: an article whose sections start at
+// "###" (no "##") would jump from the H1 to H3, so lift them a level.
+const leveled = /^## /m.test(body) ? body : body.replace(/^###(#?) /gm, '##$1 ');
 const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !== withBase(`/${page.slug}`)).slice(0, 3);
 ---
 
@@ -48,7 +51,7 @@ const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !=
       </div>
     </header>
     <div class="s-wrap">
-      <div class="ar-body s-rich" set:html={renderCopy(body)} />
+      <div class="ar-body s-rich" set:html={renderCopy(leveled)} />
       {service && (
         <aside class="ar-cta">
           <div>

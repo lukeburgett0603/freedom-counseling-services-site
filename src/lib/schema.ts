@@ -276,7 +276,10 @@ export function buildPageSchemas(
   page: Page,
   business: Business,
   siteUrl: string,
-  options: { hasBlog?: boolean } = {}
+  // serviceDesign: the page renders with the site system v2 service design
+  // (src/designs/service.astro), so a 'Service Hub' row is a real service
+  // page and gets Service markup, not Article.
+  options: { hasBlog?: boolean; serviceDesign?: boolean } = {}
 ): Record<string, unknown>[] {
   const schemas = ((): Record<string, unknown>[] => {
     switch (page.page_type) {
@@ -284,8 +287,10 @@ export function buildPageSchemas(
         return [buildBusinessSchema(business, siteUrl), buildWebsiteSchema(business, siteUrl)];
       case 'Service Page':
         return [buildServiceSchema(page, siteUrl)];
-      case 'Content Pillar':
       case 'Service Hub':
+        if (options.serviceDesign) return [buildServiceSchema(page, siteUrl)];
+        return [buildArticleSchema(page, siteUrl, options.hasBlog ?? false)];
+      case 'Content Pillar':
       case 'Blog Post':
         return [buildArticleSchema(page, siteUrl, options.hasBlog ?? false)];
       case 'Counselor Profile':
