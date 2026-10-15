@@ -1,0 +1,37 @@
+{
+  "slug": "kasie-secrest",
+  "blocks": {
+    "card.credential": "LPCA, EMDRIA Certified",
+    "card.summary": "Couples, and adults healing from trauma with EMDR.",
+    "hero.eyebrow": "EMDR, trauma, couples",
+    "hero.subhead": "Helps couples find their way back to each other, and adults heal from trauma, including EMDR for memories that still feel present.",
+    "specialties": [
+      {
+        "text": "EMDR and trauma"
+      },
+      {
+        "text": "Couples and marriage"
+      }
+    ],
+    "approaches": [
+      {
+        "text": "EMDR"
+      }
+    ],
+    "sections": [
+      {
+        "body": "Kasie works with couples, and with adults healing from trauma, including painful memories that still feel present. Her full profile is coming soon. In the meantime, our office administrator can tell you more about working with Kasie and help you get scheduled.",
+        "heading": "Who Kasie works with"
+      },
+      {
+        "body": "Kasie is a Licensed Professional Counselor Associate and is EMDRIA Certified in EMDR, which takes supervised EMDR experience and ongoing training beyond a basic EMDR course. She offers EMDR in our Middletown office or online.",
+        "heading": "Kasie's approach"
+      }
+    ],
+    "faith.heading": "Faith",
+    "faith.body": "When you want it, faith can be part of your counseling with Kasie. When you don't, she follows your lead.",
+    "practical.body": "In person in Middletown or online, including EMDR. Accepting new clients, usually seen the same week.",
+    "request.heading": "Ready to start with Kasie?",
+    "request.text": "Request an appointment with Kasie, or call (502) 523-2970."
+  }
+}

@@ -56,10 +56,15 @@
       {
         "slug": "staci-harrub",
         "text": "EMDR in person or online, for trauma, grief, and painful memories, with a psychodynamic, trauma-focused approach."
+      },
+      {
+        "slug": "kasie-secrest",
+        "text": "EMDR in person or online, for trauma and painful memories."
       }
     ],
     "expect.heading": "Your first session",
     "expect.body": "Your first session focuses on getting to know you and building safety, not on the trauma itself. You won't be asked to go into detail before you're ready. EMDR sessions are in our Middletown office or online.",
-    "cost.body": "$100 per session. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "$100 per session. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement.",
+    "team.note": "EMDR is offered by Staci and Kasie, both EMDRIA Certified. If EMDR isn't the right fit for you, trauma counseling with ACT and IFS is another path."
   }
 }

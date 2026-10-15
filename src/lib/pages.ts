@@ -41,6 +41,9 @@ export interface ImageSlot {
   // Site system v2: CSS object-position for crops ("50% 25%"), so a
   // headshot keeps the face in frame in every crop shape.
   focus?: string;
+  // A stand-in image ("Photo coming soon") until the real one arrives.
+  // Cards and profiles show it; the hero photo grid skips it.
+  placeholder?: boolean;
   // Only set for Unsplash-sourced photos — required for their API's
   // attribution guidelines. Absent for client-supplied photos.
   creditName?: string;

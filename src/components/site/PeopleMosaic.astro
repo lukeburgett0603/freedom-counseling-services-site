@@ -14,7 +14,8 @@ interface Props {
   people: { name: string; photo: ImageSlot }[];
 }
 
-const people = Astro.props.people.filter((p) => p.photo?.url).slice(0, 5);
+// Placeholder photos ("Photo coming soon") never go in the hero grid.
+const people = Astro.props.people.filter((p) => p.photo?.url && !p.photo.placeholder).slice(0, 5);
 const layout = people.length >= 5 ? 'five' : people.length === 4 ? 'four' : people.length === 1 ? 'one' : 'few';
 ---
 
