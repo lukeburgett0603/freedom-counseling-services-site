@@ -399,8 +399,8 @@
       "status": "content-complete"
     },
     "act-therapy": {
-      "h1": "An ACT therapist in Louisville, for a life that isn't run by your thoughts",
-      "meta_title": "ACT Therapist in Louisville, KY | Freedom Counseling",
+      "h1": "Acceptance and commitment therapy (ACT) in Louisville, for a life that isn't run by your thoughts",
+      "meta_title": "ACT Therapy in Louisville, KY | Acceptance and Commitment Therapy",
       "meta_description": "Acceptance and commitment therapy (ACT) in Louisville. Stop fighting your thoughts and move toward what matters. In person or online, usually seen the same week.",
       "faqs": [
         {
@@ -428,17 +428,17 @@
           "answer": "Yes, if you want it."
         }
       ],
-      "focus_keyword": "act therapist near me",
+      "focus_keyword": "act therapy",
       "cta_button_text": "Request an appointment",
       "nav_placement": "primary",
       "nav_order": 13,
-      "title": "ACT",
+      "title": "Acceptance and Commitment Therapy (ACT)",
       "category": "ACT",
       "status": "content-complete"
     },
     "dbt-therapy": {
-      "h1": "DBT-informed therapy in Louisville for when emotions feel too big",
-      "meta_title": "DBT-Informed Therapy in Louisville, KY | Freedom Counseling",
+      "h1": "DBT-informed therapy in Louisville: dialectical behavior therapy skills for when emotions feel too big",
+      "meta_title": "Dialectical Behavior Therapy (DBT) Skills in Louisville, KY",
       "meta_description": "DBT-informed counseling in Louisville: skills for big emotions, distress, and relationships, in individual sessions. In person or online, usually seen the same week.",
       "faqs": [
         {
@@ -470,13 +470,13 @@
       "cta_button_text": "Request an appointment",
       "nav_placement": "primary",
       "nav_order": 14,
-      "title": "DBT-Informed",
+      "title": "Dialectical Behavior Therapy (DBT) Skills",
       "category": "DBT-Informed",
       "status": "content-complete"
     },
     "cbt-therapy": {
-      "h1": "A cognitive behavioral therapist in Louisville, with practical tools you can use",
-      "meta_title": "Cognitive Behavioral Therapist in Louisville, KY | Freedom Counseling",
+      "h1": "Cognitive behavioral therapy (CBT) in Louisville, with practical tools you can use",
+      "meta_title": "Cognitive Behavioral Therapist (CBT) in Louisville, KY | Freedom",
       "meta_description": "Cognitive behavioral therapy (CBT) in Louisville: practical tools for anxiety, depression, and stress. Five counselors, in person or online, usually seen the same week.",
       "faqs": [
         {
@@ -508,13 +508,13 @@
       "cta_button_text": "Request an appointment",
       "nav_placement": "primary",
       "nav_order": 12,
-      "title": "CBT",
+      "title": "Cognitive Behavioral Therapy (CBT)",
       "category": "CBT",
       "status": "content-complete"
     },
     "ifs-therapy": {
-      "h1": "An IFS therapist in Louisville, for the parts of you that feel stuck",
-      "meta_title": "IFS Therapist in Louisville, KY | Freedom Counseling",
+      "h1": "Internal family systems (IFS) therapy in Louisville, for the parts of you that feel stuck",
+      "meta_title": "IFS Therapy in Louisville, KY | Internal Family Systems Therapy",
       "meta_description": "Internal family systems (IFS) therapy in Louisville: understand the parts of you that feel stuck, with compassion instead of force. In person or online, usually seen the same week.",
       "faqs": [
         {
@@ -542,11 +542,11 @@
           "answer": "Yes, if you want it."
         }
       ],
-      "focus_keyword": "ifs therapist near me",
+      "focus_keyword": "ifs therapy",
       "cta_button_text": "Request an appointment",
       "nav_placement": "primary",
       "nav_order": 15,
-      "title": "IFS",
+      "title": "Internal Family Systems (IFS)",
       "category": "IFS",
       "status": "content-complete"
     },
