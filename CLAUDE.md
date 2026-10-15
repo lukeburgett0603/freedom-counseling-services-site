@@ -4579,3 +4579,13 @@ to 1.5s, CLS 0.
 Google Business Profile and Psychology Today. Stored as
 `business.street_address` = `800 Lily Creek Road` and `street_address_2`
 = `Suite 202`. Any new page, directory listing or citation uses this form.
+
+## Trailing slashes (fixed 2026-10-14, `cb8fd97`)
+
+Every page address ends in a slash (`/christian-counseling/`). Pages build
+as folders and GitHub Pages redirects `/slug` to `/slug/`; the old
+`trailingSlash: 'never'` made every canonical tag, sitemap entry, schema
+URL and link point at a redirect that pointed back (a loop on every page,
+found while investigating the late-September ranking drop). Now
+`trailingSlash: 'always'`, `withBase()` / `pageUrl()` add the slash. Never
+build a page URL by hand. Old no-slash links still 301 to the slash form.
