@@ -2544,7 +2544,7 @@ template`'s CLAUDE.md for the full technical writeup of the new
   `supabase db push` failed with a stale-migration-history error
   unrelated to this change — same "raw SQL session" pattern this file
   already uses elsewhere for agency-authorized direct writes) into
-  `street_address = "800 Lily Creek Rd"` / `street_address_2 = "Suite
+  `street_address = "800 Lily Creek Road"` / `street_address_2 = "Suite
   202"` — also fixing the `#202` → `Suite 202` mismatch at the same
   time, so both citation-matching issues found in the same review are
   closed together.
@@ -2556,7 +2556,7 @@ template`'s CLAUDE.md for the full technical writeup of the new
 - **Verification pattern**: `astro check` (0 errors), a real `npm run
   build` against this site's live Supabase project confirming `/contact`,
   the footer, and the homepage's JSON-LD `streetAddress` all recombine to
-  `"800 Lily Creek Rd, Suite 202"`, and a real browser pass with a
+  `"800 Lily Creek Road, Suite 202"`, and a real browser pass with a
   temporary throwaway owner login — the admin form correctly loaded the
   split values into their own two fields (not the old combined string),
   a live edit round-tripped to the database correctly, then was reverted
@@ -4571,3 +4571,11 @@ this repo's other differences in `LeadMagnet.astro`, `Hero.astro`, and
 `OptimizedImage.astro` (its own design) were left untouched.
 Production build, local Lighthouse mobile: score 65 to 100, LCP 15.3s
 to 1.5s, CLS 0.
+
+## NAP: the exact address (Luke, 2026-10-14)
+
+**800 Lily Creek Road, Suite 202, Louisville, KY 40243** · (502) 523-2970.
+"Road" spelled out and "Suite" (not "Rd", "Unit" or "#"), matching the
+Google Business Profile and Psychology Today. Stored as
+`business.street_address` = `800 Lily Creek Road` and `street_address_2`
+= `Suite 202`. Any new page, directory listing or citation uses this form.

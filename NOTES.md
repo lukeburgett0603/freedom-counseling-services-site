@@ -730,7 +730,7 @@ site first, not just the titles/summaries already gathered.
   and blog post titles/summaries were sourced from — go back to this URL
   (not the `.org` domain) for any future content-porting work (blog
   posts, counselor profiles, Service Areas, etc.).
-- Address: 800 Lily Creek Rd Unit 202, Louisville, KY 40243. Phone:
+- Address: 800 Lily Creek Road, Suite 202, Louisville, KY 40243. Phone:
   (502) 523-2970. Office near Southeast Christian Church, off
   Blankenbaker Parkway, behind Heine Brothers Coffee.
 - Serves Louisville, KY (physical office, in-person + telehealth) and
