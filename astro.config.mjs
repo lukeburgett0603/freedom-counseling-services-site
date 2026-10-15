@@ -37,7 +37,9 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://www.freedomcounselingservices.org',
   base: '/',
-  trailingSlash: 'never',
+  // Pages are folders (slug/index.html) and GitHub Pages redirects /slug
+  // to /slug/, so every address ends in a slash. See src/lib/url.ts.
+  trailingSlash: 'always',
   // Inline each page's CSS into its HTML: no render-blocking stylesheet
   // requests before the first paint (measured 2026-10-13 on Freedom: two
   // blocking stylesheets pushed the phone LCP past 2.5s). Pages are small,
@@ -51,18 +53,18 @@ export default defineConfig({
   compressHTML: true,
   redirects: {
     '/home': '/',
-    '/our-counselors': '/counselors',
-    '/services-and-fees': '/services',
-    '/schedule-an-appointment': '/contact',
-    '/appointment-inquiry': '/contact',
-    '/location': '/contact',
-    '/careers': '/contact',
+    '/our-counselors': '/counselors/',
+    '/services-and-fees': '/services/',
+    '/schedule-an-appointment': '/contact/',
+    '/appointment-inquiry': '/contact/',
+    '/location': '/contact/',
+    '/careers': '/contact/',
     '/read-me-five': '/',
     // This one blog post's slug had a stray "blog/" prefix baked into it
     // (every other Blog Post row is a bare slug — see CLAUDE.md's "Blog
     // post slug typo" entry) — fixed at the data level, this redirect
     // just protects the ~2 months this URL was already live/indexable.
-    '/blog/repairing-after-a-fight': '/repairing-after-a-fight',
+    '/blog/repairing-after-a-fight': '/repairing-after-a-fight/',
     // Retired 2026-10-03 with the waiting-room review sign whose QR code
     // pointed here (see admin/review-program.astro). A sign still up in
     // the office lands on the homepage, with no review ask, instead of a
