@@ -97,7 +97,7 @@ const isCurrent = (p: Page) => current === hrefFor(p).replace(/\/$/, '');
               </li>
             ))}
           </ul>
-          {tel && <a class="s-btn s-btn-ghost" href={`tel:${tel}`}><Ph name="phone" />{business.telephone}</a>}
+          {tel && <a class="s-btn s-btn-ghost sh-panel-call" href={`tel:${tel}`}><Ph name="phone" />{business.telephone}</a>}
         </div>
       </details>
     </div>
@@ -135,12 +135,18 @@ const isCurrent = (p: Page) => current === hrefFor(p).replace(/\/$/, '');
   .sh-menu[open] :global(.sh-open) { display: none; }
   .sh-menu[open] :global(.sh-close) { display: block; }
   .sh-panel { position: absolute; left: 0; right: 0; top: 72px; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: var(--shadow); padding: 12px var(--gutter) 24px; max-height: calc(100dvh - 72px); overflow-y: auto; }
+  /* Two classes so it beats `.sh-panel a` (which made it display:block,
+     stacking the icon over the number). */
+  .sh-panel .sh-panel-call { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; width: 100%; }
+  /* Phones: the fixed Call / Request bar (SiteMobileBar) covers the bottom
+     of the screen, so leave room for it, and skip the menu's call button
+     (the bar already has one). Tablets have no bar, so they keep it. */
+  @media (max-width: 767px) { .sh-panel { padding-bottom: calc(96px + env(safe-area-inset-bottom)); } .sh-panel .sh-panel-call { display: none; } }
   .sh-panel ul { list-style: none; padding: 0; margin: 0; }
   .sh-panel > ul > li { border-bottom: 1px solid var(--line); }
   .sh-panel a { display: block; padding: 12px 0; text-decoration: none; font-weight: 600; }
   .sh-panel ul ul { padding: 0 0 8px 12px; }
   .sh-panel ul ul a { font-weight: 500; color: var(--muted); padding: 8px 0; }
-  .sh-panel .s-btn { margin-top: 16px; width: 100%; }
   @media (max-width: 1100px) { .sh-nav > ul { gap: 18px; } .sh-phone { display: none; } }
   @media (max-width: 1023px) { .sh-nav { display: none; } .sh-menu { display: block; } }
   @media (max-width: 767px) { .sh-request { display: none; } .sh-logo img { height: 42px; } }
