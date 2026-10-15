@@ -24,9 +24,10 @@ export function withBase(path: string): string {
 // Fixed 2026-10-14: the site said "never" while the server added the
 // slash, so canonical X redirected to Y, which pointed back to X.
 export function withTrailingSlash(path: string): string {
-  if (!path || path.endsWith('/')) return path;
-  const last = path.split('/').pop() ?? '';
-  return last.includes('.') ? path : `${path}/`;
+  const [, pathPart, suffix] = path.match(/^([^?#]*)(.*)$/)!;
+  if (!pathPart || pathPart.endsWith('/')) return path;
+  const last = pathPart.split('/').pop() ?? '';
+  return last.includes('.') ? path : `${pathPart}/${suffix}`;
 }
 
 // Absolute URL of a page, for canonical tags and structured data.
