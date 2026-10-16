@@ -20,6 +20,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changes.outputs.urls }}
+      keyloc: ${{ steps.changes.outputs.keyloc }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -41,6 +44,14 @@ jobs:
           # if unset. Set once per Unsplash API application, reused across
           # every client site built from this template (see .env.example).
           PUBLIC_UNSPLASH_APP_NAME: ${{ secrets.PUBLIC_UNSPLASH_APP_NAME }}
+          # IndexNow key (repository variable, not secret): served at
+          # /indexnow-key.txt. Unset = IndexNow off.
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
+      # Which pages changed versus the live site (sitemap <lastmod>), for
+      # the IndexNow notice the deploy job sends.
+      - id: changes
+        if: ${{ vars.INDEXNOW_KEY != '' }}
+        run: node scripts/indexnow-changes.mjs > /dev/null
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -55,3 +66,22 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      # Tell IndexNow search engines (Bing, Yandex, and others; Bing also
+      # feeds Copilot and ChatGPT search) which pages just changed, so they
+      # re-crawl them now instead of on their own schedule. Google doesn't
+      # use IndexNow; it reads the sitemap's <lastmod> dates instead. A
+      # failed notice never fails the deploy.
+      - name: Notify IndexNow
+        if: ${{ vars.INDEXNOW_KEY != '' && needs.build.outputs.changed != '' && needs.build.outputs.changed != '[]' }}
+        continue-on-error: true
+        env:
+          KEY: ${{ vars.INDEXNOW_KEY }}
+          URLS: ${{ needs.build.outputs.changed }}
+          KEYLOC: ${{ needs.build.outputs.keyloc }}
+        run: |
+          HOST=$(echo "$KEYLOC" | awk -F/ '{print $3}')
+          jq -n --arg host "$HOST" --arg key "$KEY" --arg loc "$KEYLOC" --argjson urls "$URLS" \
+            '{host: $host, key: $key, keyLocation: $loc, urlList: $urls}' > body.json
+          echo "Sending $(jq '.urlList | length' body.json) changed pages to IndexNow"
+          curl -sS -o /dev/null -w "IndexNow responded %{http_code}\n" -X POST https://api.indexnow.org/indexnow \
+            -H 'Content-Type: application/json; charset=utf-8' --data @body.json

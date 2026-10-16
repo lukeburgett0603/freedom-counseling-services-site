@@ -1,6 +1,11 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import { loadEnv } from 'vite';
+import { loadSitemapDates } from './src/lib/sitemapDates.mjs';
+
+// Real last-edited dates for the sitemap's <lastmod> (see the module).
+const sitemapDates = await loadSitemapDates({ ...loadEnv(process.env.NODE_ENV ?? 'production', process.cwd(), 'PUBLIC_'), ...process.env });
 
 // `site` gets overwritten per client repo once a domain is known
 // (site: 'https://clientdomain.com'). Needed for correct canonical URLs,
@@ -77,6 +82,11 @@ export default defineConfig({
       // public/indexable pages. /share-your-experience is a redirect (see
       // `redirects` below), kept out explicitly in case a build lists it.
       filter: (page) => !page.includes('/admin') && !page.includes('/share-your-experience'),
+      serialize(item) {
+        const lastmod = sitemapDates.get(new URL(item.url).pathname);
+        if (lastmod) item.lastmod = lastmod;
+        return item;
+      },
     }),
   ],
   image: {
