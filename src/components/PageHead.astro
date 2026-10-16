@@ -18,9 +18,12 @@ interface Props {
   // v2 sites self-host fonts (theme.css); the old templates load
   // business.google_fonts_url.
   googleFonts?: boolean;
+  // Extra structured data a design adds for this page (e.g. an ItemList
+  // of the services a hub page links to).
+  extraSchemas?: Record<string, unknown>[];
 }
 
-const { page, allPages, business, googleFonts = true } = Astro.props;
+const { page, allPages, business, googleFonts = true, extraSchemas = [] } = Astro.props;
 // siteUrl is the site's real root including any GitHub Pages project-page
 // base path (e.g. https://user.github.io/repo-name) — every schema/canonical
 // URL below is built from this so they stay correct with or without a
@@ -86,7 +89,7 @@ const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbChain, siteUrl);
 <meta name="twitter:description" content={description} />
 {ogImage && <meta name="twitter:image" content={ogImage} />}
 
-<SchemaScript schemas={[...pageSchemas, breadcrumbSchema]} />
+<SchemaScript schemas={[...pageSchemas, breadcrumbSchema, ...extraSchemas]} />
 
 {business.cloudflare_beacon_token && !STATIC_EXPORT && (
   // Cloudflare Web Analytics — cookieless, privacy-respecting page-view

@@ -19,15 +19,16 @@ interface Props {
   page: Page;
   allPages: Page[];
   business: Business;
+  extraSchemas?: Record<string, unknown>[];
 }
 
-const { page, allPages, business } = Astro.props;
+const { page, allPages, business, extraSchemas = [] } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <PageHead page={page} allPages={allPages} business={business} googleFonts={false}>
+    <PageHead page={page} allPages={allPages} business={business} googleFonts={false} extraSchemas={extraSchemas}>
       {THEME_FONT_PRELOADS.map((f) => <link rel="preload" as="font" type="font/woff2" href={withBase(f)} crossorigin />)}
       <script is:inline>document.documentElement.classList.remove('no-js');</script>
     </PageHead>

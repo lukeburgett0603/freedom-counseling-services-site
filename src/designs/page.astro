@@ -22,6 +22,7 @@ import { blockReader, type BlockValues } from '../lib/blocks';
 import type { Page, Business } from '../lib/pages';
 import { PAGE_BLOCKS } from './page.blocks';
 import { personCards, counselorOptions, rateRange, fill } from './shared';
+import { withBase } from '../lib/url';
 
 interface Props {
   page: Page;
@@ -42,9 +43,27 @@ const tel = business.telephone?.replace(/[^0-9+]/g, '');
 const cta = page.cta_button_text ?? 'Request an appointment';
 const teamMode = t('team.mode');
 const showTeam = teamMode === 'all';
+
+// The pages this hub links to, as an ItemList, so search engines can read
+// the whole set of services (added 2026-10-15; the services page had only
+// WebPage markup).
+const linked = [...list('links.items'), ...list('links2.items')].filter((it) => it.title && it.href);
+const extraSchemas = linked.length
+  ? [{
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: page.h1 ?? page.title,
+      itemListElement: linked.map((it, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: it.title,
+        url: new URL(withBase(it.href), Astro.site ?? Astro.url).toString(),
+      })),
+    }]
+  : [];
 ---
 
-<SiteLayout page={page} allPages={allPages} business={business}>
+<SiteLayout page={page} allPages={allPages} business={business} extraSchemas={extraSchemas}>
   <HeroSplit
     eyebrow={t('hero.eyebrow')}
     headline={page.h1 ?? page.title}
