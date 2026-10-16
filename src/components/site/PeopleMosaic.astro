@@ -1,6 +1,7 @@
 ---
 // Real faces as the hero visual: an asymmetric photo grid of the team.
-// Five people: one tall tile plus a 2x2 grid. Fewer: a simpler grid. Each
+// Six people: two rows of three squares. Five: one tall tile plus a 2x2
+// grid. Fewer: a simpler grid. Each
 // photo keeps the face in frame via its ImageSlot `focus`.
 //
 // Rule (Luke, 2026-10-14): no tile is ever wider than it is tall.
@@ -15,8 +16,8 @@ interface Props {
 }
 
 // Placeholder photos ("Photo coming soon") never go in the hero grid.
-const people = Astro.props.people.filter((p) => p.photo?.url && !p.photo.placeholder).slice(0, 5);
-const layout = people.length >= 5 ? 'five' : people.length === 4 ? 'four' : people.length === 1 ? 'one' : 'few';
+const people = Astro.props.people.filter((p) => p.photo?.url && !p.photo.placeholder).slice(0, 6);
+const layout = people.length >= 6 ? 'six' : people.length === 5 ? 'five' : people.length === 4 ? 'four' : people.length === 1 ? 'one' : 'few';
 ---
 
 {people.length > 0 && (
@@ -42,6 +43,8 @@ const layout = people.length >= 5 ? 'five' : people.length === 4 ? 'four' : peop
   .pm { display: grid; gap: 10px; max-width: 460px; }
   figure { position: relative; margin: 0; border-radius: var(--radius-card); overflow: hidden; background: var(--tint); aspect-ratio: 1; }
   img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* Six: three by two, all squares. */
+  .pm-six { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   /* Five: a tall tile on the left, four squares on the right. */
   .pm-five { grid-template-columns: 1.2fr 1fr 1fr; }
   .pm-five .pm-0 { grid-column: 1; grid-row: 1 / 3; aspect-ratio: auto; }
