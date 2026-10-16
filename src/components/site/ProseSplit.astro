@@ -14,7 +14,10 @@ interface Props {
   id?: string;
 }
 
-const { heading, body, layout = 'stack', surface = false, id } = Astro.props;
+const { heading, body, layout = 'stack', surface = false } = Astro.props;
+// Every section gets an anchor from its heading, so other pages can link
+// straight to it (e.g. /christian-counseling/#christian-counseling-or-biblical-counseling).
+const id = Astro.props.id ?? heading?.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 ---
 
 {heading && body && (
