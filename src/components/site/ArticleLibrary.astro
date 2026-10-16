@@ -8,6 +8,9 @@
 // The featured article sits above the filter while "All articles" is
 // chosen (and isn't repeated in the grid); choosing a topic hides it and
 // shows every matching article, the featured one included.
+// Four cards across on desktop (two on tablets, one on phones), and 20
+// per page: past 20, page links appear and the page is kept in the
+// address (?page=2) along with the topic.
 import { Image } from 'astro:assets';
 import Ph from './Ph.astro';
 
@@ -18,14 +21,15 @@ interface Props {
   topics: Topic[];
   articles: Article[];
   featured?: string;
+  perPage?: number;
 }
 
-const { topics, articles, featured } = Astro.props;
+const { topics, articles, featured, perPage = 20 } = Astro.props;
 const lead = featured ? articles.find((a) => a.slug === featured) : undefined;
 const fmtDate = (d?: string) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : undefined;
 ---
 
-<section class="s-section al" data-library>
+<section class="s-section al" data-library data-per-page={perPage}>
   <div class="s-wrap">
     {lead && (
       <a class="al-feature" href={lead.href} data-featured>
@@ -55,7 +59,7 @@ const fmtDate = (d?: string) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLoc
           <a href={a.href}>
             {a.image && (
               <div class="al-img">
-                <Image src={a.image.url} alt={a.image.alt} inferSize widths={[360, 540, 720]} sizes="(max-width: 767px) 100vw, 400px" loading="lazy" />
+                <Image src={a.image.url} alt={a.image.alt} inferSize widths={[320, 480, 640]} sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 300px" loading="lazy" />
               </div>
             )}
             <span class="al-meta">{a.topicLabel}{a.topicLabel && a.author && ' · '}{a.author}</span>
@@ -66,6 +70,7 @@ const fmtDate = (d?: string) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLoc
         </li>
       ))}
     </ul>
+    <nav class="al-pages" aria-label="Article pages" hidden></nav>
   </div>
 </section>
 
@@ -77,11 +82,11 @@ const fmtDate = (d?: string) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLoc
   .al-chip[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .al-chip[aria-pressed='true'] span { color: color-mix(in srgb, var(--accent-ink) 80%, transparent); }
   .al-count { margin-top: 18px; color: var(--muted); font-size: 0.95rem; min-height: 1.4em; }
-  .al-list { list-style: none; padding: 0; margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .al-list { list-style: none; padding: 0; margin-top: 12px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
   .al-list li[hidden] { display: none; }
-  .al-list a { height: 100%; display: grid; gap: 8px; align-content: start; padding: 0 24px 22px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); text-decoration: none; transition: transform 0.2s; overflow: hidden; }
-  .al-list a > :first-child:not(.al-img) { margin-top: 22px; }
-  .al-img { margin: 0 -24px 6px; aspect-ratio: 16 / 9; background: var(--tint); overflow: hidden; }
+  .al-list a { height: 100%; display: grid; gap: 8px; align-content: start; padding: 0 20px 20px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); text-decoration: none; transition: transform 0.2s; overflow: hidden; }
+  .al-list a > :first-child:not(.al-img) { margin-top: 20px; }
+  .al-img { margin: 0 -20px 6px; aspect-ratio: 16 / 9; background: var(--tint); overflow: hidden; }
   .al-img img, .al-feature-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .al-feature { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); margin-bottom: 36px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); overflow: hidden; text-decoration: none; transition: transform 0.2s; }
   .al-feature:hover { transform: translateY(-2px); }
@@ -93,8 +98,15 @@ const fmtDate = (d?: string) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLoc
   .al-date { color: var(--muted); font-size: 0.88rem; }
   .al-list a:hover { transform: translateY(-2px); }
   .al-meta { font-size: 0.82rem; font-weight: 600; color: var(--accent); }
-  strong { font-size: 1.15rem; line-height: 1.3; }
-  .al-text { color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+  strong { font-size: 1.05rem; line-height: 1.3; }
+  .al-text { color: var(--muted); font-size: 0.9rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .al-feature .al-text { -webkit-line-clamp: unset; display: block; font-size: 0.98rem; }
+  .al-pages { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 28px; }
+  .al-pages[hidden] { display: none; }
+  .al-pages button { font: inherit; font-weight: 600; min-width: 44px; height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .al-pages button[aria-current='page'] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .al-pages button:disabled { opacity: 0.4; cursor: default; }
+  @media (max-width: 1023px) { .al-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .al-read { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; font-size: 0.92rem; margin-top: 4px; }
   @media (max-width: 767px) {
     .al-list { grid-template-columns: minmax(0, 1fr); }
@@ -110,21 +122,50 @@ const fmtDate = (d?: string) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLoc
     const items = [...lib.querySelectorAll<HTMLElement>('.al-list li')];
     const count = lib.querySelector<HTMLElement>('.al-count')!;
     const feature = lib.querySelector<HTMLElement>('[data-featured]');
-    const show = (topic: string, push: boolean) => {
+    const nav = lib.querySelector<HTMLElement>('.al-pages')!;
+    const perPage = Number(lib.dataset.perPage) || 20;
+    let topic = '';
+    let page = 1;
+    const render = (push: boolean, scroll = false) => {
       if (topic && !chips.some((c) => c.dataset.topic === topic)) topic = '';
       chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.topic === topic)));
-      let n = 0;
-      items.forEach((li) => { const on = topic ? li.dataset.topic === topic : !('lead' in li.dataset); li.hidden = !on; if (on) n++; });
-      if (feature) feature.hidden = !!topic;
+      const matching = items.filter((li) => (topic ? li.dataset.topic === topic : !('lead' in li.dataset)));
+      const pages = Math.max(1, Math.ceil(matching.length / perPage));
+      page = Math.min(Math.max(1, page), pages);
+      const shown = new Set(matching.slice((page - 1) * perPage, page * perPage));
+      items.forEach((li) => { li.hidden = !shown.has(li); });
+      if (feature) feature.hidden = !!topic || page > 1;
       const label = chips.find((c) => c.dataset.topic === topic)?.firstChild?.textContent?.trim();
-      count.textContent = topic ? `${n} article${n === 1 ? '' : 's'} on ${label?.toLowerCase()}` : '';
+      count.textContent = topic ? `${matching.length} article${matching.length === 1 ? '' : 's'} on ${label?.toLowerCase()}` : '';
+      nav.hidden = pages < 2;
+      nav.innerHTML = '';
+      if (pages > 1) {
+        const btn = (text: string, to: number, opts: { current?: boolean; disabled?: boolean; label?: string } = {}) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = text;
+          if (opts.label) b.setAttribute('aria-label', opts.label);
+          if (opts.current) b.setAttribute('aria-current', 'page');
+          b.disabled = !!opts.disabled;
+          b.addEventListener('click', () => { page = to; render(true, true); });
+          nav.append(b);
+        };
+        btn('Previous', page - 1, { disabled: page === 1 });
+        for (let i = 1; i <= pages; i++) btn(String(i), i, { current: i === page, label: `Page ${i}` });
+        btn('Next', page + 1, { disabled: page === pages });
+      }
       if (push) {
         const url = new URL(location.href);
         if (topic) url.searchParams.set('topic', topic); else url.searchParams.delete('topic');
+        if (page > 1) url.searchParams.set('page', String(page)); else url.searchParams.delete('page');
         history.replaceState(null, '', url);
       }
+      if (scroll) lib.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
-    chips.forEach((c) => c.addEventListener('click', () => show(c.dataset.topic ?? '', true)));
-    show(new URLSearchParams(location.search).get('topic') ?? '', false);
+    chips.forEach((c) => c.addEventListener('click', () => { topic = c.dataset.topic ?? ''; page = 1; render(true); }));
+    const params = new URLSearchParams(location.search);
+    topic = params.get('topic') ?? '';
+    page = Number(params.get('page')) || 1;
+    render(false);
   });
 </script>
