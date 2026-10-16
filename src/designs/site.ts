@@ -52,7 +52,7 @@ export const MENU_GROUPS: Record<string, { label: string; slugs: string[] }[]> =
       label: "What you're facing",
       slugs: [
         'individual-counseling', 'couples-marriage-counseling', 'family-counseling', 'child-teen-counseling',
-        'christian-counseling', 'grief-counseling', 'anxiety-depression-counseling', 'depression-counseling',
+        'christian-counseling', 'counseling-for-pastors', 'grief-counseling', 'anxiety-depression-counseling', 'depression-counseling',
         'ocd-treatment', 'trauma-counseling',
       ],
     },

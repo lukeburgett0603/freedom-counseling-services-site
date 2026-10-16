@@ -1,0 +1,54 @@
+{
+  "slug": "counseling-for-pastors",
+  "blocks": {
+    "hero.eyebrow": "Counseling for pastors · Online across Kentucky or in Louisville",
+    "hero.subhead": "You carry everyone else's burdens. It's okay to need a place to set yours down. Confidential counseling with licensed Christian counselors who understand ministry, and who won't treat your faith as the problem.",
+    "facts": [
+      { "icon": "calendar-check", "text": "Usually seen the same week" },
+      { "icon": "video-camera", "text": "Online from home, anywhere in Kentucky" }
+    ],
+    "request.heading": "You don't have to carry this alone",
+    "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
+    "request.crisis": "If you're thinking about suicide or are in crisis, call or text 988 (Suicide & Crisis Lifeline), or call 911.",
+    "signs.items": [
+      { "text": "You're exhausted in a way a day off doesn't fix." },
+      { "text": "You've started to dread Sundays, or the phone ringing." },
+      { "text": "You give to everyone, and there's no one you can be honest with." },
+      { "text": "You feel more cynical than you want to admit." },
+      { "text": "Ministry is straining your marriage or your family." },
+      { "text": "Your faith has started to feel like work." }
+    ],
+    "faith.heading": "Faith at the center, never forced",
+    "faith.body": "We share your faith, and we'll take it seriously, including the parts that feel tired, dry, or confused right now. You won't be preached at, and you won't be judged for doubt. Your counselor will follow your lead.",
+    "sections": [
+      {
+        "heading": "Needing help isn't a failure of faith",
+        "body": "Pastors and ministry leaders are often the last people to ask for help. You're expected to have answers, to be steady, to be fine. But burnout isn't a lack of faithfulness. It's what happens when a person carries too much for too long without a place to put it down. Even Elijah sat under a tree and asked for it to be over.\n\nSenior and associate pastors, ministry staff, worship and youth leaders, missionaries, and other ministry leaders are all welcome."
+      },
+      {
+        "heading": "Signs of ministry burnout",
+        "body": "- Exhaustion that sleep and time off don't touch\n- Cynicism or irritation toward the people you serve\n- Pulling away from friends, family, or God\n- Losing the joy you once had in your calling\n- Trouble concentrating, sleeping, or slowing down\n- Escaping into work, screens, food, or drinking\n\nIf any of this sounds familiar, you don't have to wait for it to get worse."
+      },
+      {
+        "heading": "What counseling looks like here",
+        "body": "Your counselor is a licensed clinician, not your supervisor, your denomination, or a member of your church. Together you'll look at what's draining you, what you've been carrying alone, and what needs to change, in your schedule, your boundaries, your relationships, and your walk with God. You'll leave with practical tools, not just a place to vent."
+      },
+      {
+        "heading": "Confidential, and close to home",
+        "body": "What you share stays between you and your counselor, within the limits the law sets (like safety), which your counselor will explain at the start. You can meet online from home, anywhere in Kentucky, so no one needs to see you walk into a counseling office. Or come to our Middletown office if you prefer."
+      },
+      {
+        "heading": "For the ministry family",
+        "body": "Ministry rarely strains just one person. Tony also sees pastors' spouses, and works with ministry couples when the marriage is feeling it."
+      }
+    ],
+    "team.heading": "Counselors who work with pastors and ministry leaders",
+    "team.items": [
+      { "slug": "tony-gore", "text": "Pastors and ministry leaders, and their marriages and families, including pastors' spouses." },
+      { "slug": "luke-burgett", "text": "Pastors and ministry leaders working through burnout, anxiety, and depression." }
+    ],
+    "expect.heading": "Your first session",
+    "expect.body": "You don't need to have it figured out. Your first session is a conversation about what's been weighing on you and what you'd like to be different, at whatever pace feels okay. Meet online from home or at our Middletown office.",
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement. Many churches pay their pastor's counseling fees. Paying for sessions never gives a church access to anything you share."
+  }
+}
