@@ -53,7 +53,7 @@ export const MENU_GROUPS: Record<string, { label: string; slugs: string[] }[]> =
       slugs: [
         'individual-counseling', 'couples-marriage-counseling', 'family-counseling', 'child-teen-counseling',
         'christian-counseling', 'counseling-for-pastors', 'grief-counseling', 'anxiety-depression-counseling', 'depression-counseling',
-        'ocd-treatment', 'trauma-counseling',
+        'ocd-treatment', 'porn-addiction-counseling', 'trauma-counseling',
       ],
     },
     { label: 'Approaches', slugs: ['trauma-emdr-counseling', 'cbt-therapy', 'act-therapy', 'dbt-therapy', 'ifs-therapy'] },

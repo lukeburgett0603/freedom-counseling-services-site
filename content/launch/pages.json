@@ -790,8 +790,8 @@
           "question": "Do you treat OCD with ERP?"
         },
         {
-          "answer": "Yes. Luke works with men who want to get free of pornography use, without shame and at a pace that works for you.",
-          "question": "Can you help with pornography use?"
+          "answer": "Yes. Luke works with men breaking free of porn addiction, without shame and at a pace that works for you. See our porn addiction counseling page for how it works.",
+          "question": "Can you help with porn addiction?"
         },
         {
           "answer": "Usually, yes, for part of the time. Luke almost always invites parents of minor clients in, and parent-only sessions are available.",
@@ -1018,6 +1018,48 @@
       "nav_order": 16,
       "title": "Counseling for Pastors",
       "category": "Pastor Burnout",
+      "status": "content-complete"
+    },
+    "porn-addiction-counseling": {
+      "h1": "Porn addiction counseling for men who want real peace",
+      "meta_title": "Porn Addiction Therapist in Louisville, KY | Freedom Counseling",
+      "meta_description": "Porn addiction counseling for men, online anywhere in Kentucky or in Louisville. Shame-free, faith-integrated help to break the cycle. $115 per session.",
+      "faqs": [
+        {
+          "question": "Is porn addiction real?",
+          "answer": "Many men find they can't stop even when they want to, and that it's hurting their life, faith, and relationships. Whatever label you use, that's worth getting help for, and it's what we work on."
+        },
+        {
+          "question": "Why can't I just stop with willpower?",
+          "answer": "Because porn is meeting a real emotional need, in a false way. Until you learn to recognize that need and meet it through real connection with God, yourself, and others, the pull keeps coming back."
+        },
+        {
+          "question": "Is Luke a certified sex addiction therapist?",
+          "answer": "No. Luke is a Licensed Professional Counselor Associate (LPCA) in Kentucky who works with men breaking free of porn addiction, using an approach built on understanding the cycle and building real intimacy with God, self, and others."
+        },
+        {
+          "question": "Will you shame me?",
+          "answer": "No. Shame keeps the cycle going, so we actively work against it."
+        },
+        {
+          "question": "Can my wife come to sessions?",
+          "answer": "Luke works with men individually. Tony Gore, LCSW, works with wives and with couples who want help for their marriage."
+        },
+        {
+          "question": "Is it confidential?",
+          "answer": "Yes, within the limits the law sets (like safety), which your counselor explains at the start. You can meet online from home anywhere in Kentucky."
+        },
+        {
+          "question": "What does it cost?",
+          "answer": "$115 per 50-minute session with Luke. HSA and FSA cards work, and we give you a superbill for possible out-of-network reimbursement."
+        }
+      ],
+      "focus_keyword": "porn addiction therapist",
+      "cta_button_text": "Request an appointment",
+      "nav_placement": "primary",
+      "nav_order": 17,
+      "title": "Porn Addiction Counseling",
+      "category": "Porn Addiction",
       "status": "content-complete"
     }
   },
