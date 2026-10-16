@@ -73,7 +73,7 @@ const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !=
       {takeaways.length > 0 && (
         <section class="ar-kt" aria-labelledby="ar-kt-h">
           <h2 id="ar-kt-h">Key takeaways</h2>
-          <ul>{takeaways.map((t) => <li>{t}</li>)}</ul>
+          <ol>{takeaways.map((t) => <li>{t}</li>)}</ol>
         </section>
       )}
       {toc.length > 1 && (
@@ -131,9 +131,14 @@ const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !=
   .ar-cta .s-btn { justify-self: start; }
   .ar-layout { display: grid; grid-template-columns: minmax(0, 1fr); }
   .ar-main { min-width: 0; }
-  .ar-kt { max-width: 720px; margin-bottom: 32px; padding: 24px 28px; border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--shadow); border-left: 4px solid var(--ink); }
-  .ar-kt h2 { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
-  .ar-kt ul { list-style: disc; margin: 0; padding-left: 1.2em; display: grid; gap: 8px; font-size: 1.02rem; line-height: 1.55; }
+  /* Takeaways read like an editorial "in brief": a heavy rule, a plain
+     heading, and numbered points split by hairlines. No card, no shadow,
+     no colored side stripe. */
+  .ar-kt { max-width: 720px; margin-bottom: 40px; border-top: 3px solid var(--ink); padding-top: 16px; counter-reset: kt; }
+  .ar-kt h2 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 6px; }
+  .ar-kt ol { list-style: none; margin: 0; padding: 0; }
+  .ar-kt li { counter-increment: kt; display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 1.04rem; line-height: 1.55; }
+  .ar-kt li::before { content: counter(kt); color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }
   .ar-toc-m { max-width: 720px; margin-bottom: 28px; border: 1.5px solid var(--line); border-radius: var(--radius-card); padding: 14px 20px; background: var(--surface); }
   .ar-toc-m summary { font-weight: 700; cursor: pointer; }
   .ar-toc-m ol { list-style: decimal; margin: 12px 0 2px; padding-left: 1.4em; display: grid; gap: 6px; }
