@@ -34,6 +34,15 @@ const hubFor = (category: string | null) => hubs.find((h) => h.category === cate
 const topics = hubs
   .map((h) => ({ slug: h.slug, label: h.title, count: posts.filter((p) => p.category === h.category).length }))
   .filter((t) => t.count > 0);
+// What the search box looks through, beyond the title and topic: the
+// summary, search phrase, author, section headings, and the opening of
+// the article (kept short so the page stays light as the library grows).
+function searchText(p: Page, topic?: string): string {
+  const copy = p.copy ?? '';
+  const headings = [...copy.matchAll(/^#{2,4}\s+(.+)$/gm)].map((m) => m[1]);
+  const opening = copy.replace(/^#{1,6}\s+.*$/gm, ' ').replace(/[*_`>#\[\]()]/g, ' ').split(/\s+/).slice(0, 150).join(' ');
+  return [p.meta_description, p.focus_keyword, p.author_name, topic, ...headings, opening].filter(Boolean).join(' ').toLowerCase();
+}
 const articles = posts.map((p) => {
   const hub = hubFor(p.category);
   return {
@@ -46,6 +55,7 @@ const articles = posts.map((p) => {
     slug: p.slug,
     date: p.date_published ?? undefined,
     image: p.images.hero?.url ? { url: p.images.hero.url, alt: p.images.hero.alt || '' } : undefined,
+    search: searchText(p, hub?.title),
   };
 });
 // The featured article: the one named in the page text, or else the newest.
