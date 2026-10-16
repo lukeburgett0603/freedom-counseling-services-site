@@ -39,16 +39,28 @@
     "faith.body": "If you want faith to be part of your healing, including hard questions about safety, trust, and where God was in what happened, your counselor will bring it in. If not, that's entirely your call.",
     "sections": [
       {
-        "heading": "How EMDR therapy works",
-        "body": "EMDR (eye movement desensitization and reprocessing) is a structured, well-researched therapy for trauma. While you briefly bring a painful memory to mind, your counselor guides you through eye movements or another back-and-forth rhythm. Over time, the memory tends to lose its emotional charge. It stays a memory, but it stops running your present.\n\nYou don't have to describe everything that happened in detail, the way some talk therapy asks you to."
+        "body": "EMDR (eye movement desensitization and reprocessing) is a structured, well-researched therapy for trauma. While you briefly bring a painful memory to mind, your counselor guides you through eye movements or another back-and-forth rhythm. Over time, the memory tends to lose its emotional charge. It stays a memory, but it stops running your present.\n\nYou don't have to describe everything that happened in detail, the way some talk therapy asks you to.",
+        "heading": "How EMDR therapy works"
       },
       {
-        "heading": "You stay in control",
-        "body": "Before any memory work begins, your counselor helps you build safety and steadiness: tools to calm your body and stay grounded. You set the pace, and you can pause at any time. The goal is healing, never re-living the trauma."
+        "body": "1. **Getting to know you.** Your counselor learns your story and what you'd like to change, and you plan together which memories to work on.\n2. **Building steadiness first.** You learn tools to calm your body and stay grounded, so you feel ready before any memory work.\n3. **Choosing a memory to work on.** You notice the image, the belief about yourself that goes with it, and where you feel it in your body.\n4. **Reprocessing.** While you briefly hold the memory in mind, your counselor guides you through eye movements or another back-and-forth rhythm. Over several sets, the memory tends to lose its charge.\n5. **Strengthening a healthier belief.** For example, \"I'm safe now\" in place of \"I'm in danger.\"\n6. **Checking your body.** Noticing any tension that's left, and working with it.\n7. **Closing every session steady.** Each session ends with grounding, whether or not the memory is finished.\n8. **Checking in next time.** You look at what's changed and decide together what's next.",
+        "heading": "The EMDR process, step by step"
       },
       {
-        "heading": "If EMDR isn't the right fit",
-        "body": "EMDR is one way to heal from trauma, not the only one. Our counselors also work with trauma through other approaches, including internal family systems and acceptance and commitment therapy. See [trauma counseling](/trauma-counseling)."
+        "body": "Sessions are 50 minutes. How many you'll need depends on what you're working on: a single upsetting memory often takes fewer sessions than trauma that built up over years. The first few sessions focus on getting to know you and building steadiness, and your counselor will talk with you about a realistic plan once you've started.",
+        "heading": "How long it takes"
+      },
+      {
+        "heading": "After an EMDR session",
+        "body": "It's common to feel tired, emotional, or a little stirred up for a day or two, and some people have vivid dreams. What helps: rest, gentle movement, the grounding tools you've practiced, and noticing (not analyzing) what comes up. Jot it down for your next session. If you feel unsafe at any point, call or text 988."
+      },
+      {
+        "body": "Before any memory work begins, your counselor helps you build safety and steadiness: tools to calm your body and stay grounded. You set the pace, and you can pause at any time. The goal is healing, never re-living the trauma.",
+        "heading": "You stay in control"
+      },
+      {
+        "body": "EMDR is one way to heal from trauma, not the only one. Our counselors also work with trauma through other approaches, including internal family systems and acceptance and commitment therapy. See [trauma counseling](/trauma-counseling).",
+        "heading": "If EMDR isn't the right fit"
       }
     ],
     "team.heading": "Counselors who offer EMDR",
@@ -59,12 +71,12 @@
       },
       {
         "slug": "kasie-secrest",
-        "text": "EMDR in person or online, for trauma and painful memories."
+        "text": "EMDR in person or online, for women and older teens working through trauma, grief, and painful memories."
       }
     ],
     "expect.heading": "Your first session",
     "expect.body": "Your first session focuses on getting to know you and building safety, not on the trauma itself. You won't be asked to go into detail before you're ready. EMDR sessions are in our Middletown office or online.",
-    "cost.body": "$100 per session. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement.",
-    "team.note": "EMDR is offered by Staci and Kasie, both EMDR-trained. If EMDR isn't the right fit for you, trauma counseling with ACT and IFS is another path."
+    "cost.body": "$100 per session with either counselor. We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement.",
+    "team.note": "EMDR is offered by Staci and Kasie, both EMDR-trained. If EMDR isn't the right fit for you, trauma counseling with Tony or Luke is another path."
   }
 }

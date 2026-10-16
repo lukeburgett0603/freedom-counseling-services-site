@@ -17,46 +17,84 @@
     "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
     "sections": [
       {
-        "heading": "Counseling that fits into a Louisville week",
-        "body": "The best counselor for you won't help much if getting there is a struggle. Our office is a short drive for most of eastern Louisville, and on the weeks you can't make the drive, you can meet online instead. You never have to choose between the counselor you want and a schedule that works.\n\nClients come to us from Middletown, St. Matthews, Jeffersontown, Anchorage, Lyndon, Prospect, and across eastern Louisville."
+        "body": "The best counselor for you won't help much if getting there is a struggle. Our office is a short drive for most of eastern Louisville, and on the weeks you can't make the drive, you can meet online instead. You never have to choose between the counselor you want and a schedule that works.\n\nClients come to us from Middletown, St. Matthews, Jeffersontown, Anchorage, Lyndon, Prospect, and across eastern Louisville.",
+        "heading": "Counseling that fits into a Louisville week"
+      },
+      {
+        "body": "- **LCSW** (Tony Gore): Licensed Clinical Social Worker, a fully licensed clinician who can practice independently and supervise others.\n- **LPCA** (Staci Harrub, Luke Burgett, Kasie Secrest): Licensed Professional Counselor Associate, a licensed counselor with a master's degree in counseling who practices under a board-approved supervisor while completing the hours for full licensure (LPCC).\n- **Marriage and Family Therapy Life Coach** (Rhonda Gore): a life coach trained in marriage and family work. Rhonda isn't a licensed clinician, and her work with you is coaching.\n- **Student Counselor, supervised by Tony Gore, LCSW** (Sophie Bowman): a graduate counseling student seeing clients under Tony's supervision, at a lower rate.\n\nIn Kentucky, the title \"psychologist\" is reserved for licensed psychologists, who hold a doctoral degree. None of our counselors are psychologists, and none prescribe medication.",
+        "heading": "What the letters after our names mean"
+      },
+      {
+        "body": "- **Start with what you're facing.** Look for someone who works with it often. Our [services](/services) list who does what.\n- **Think about fit.** Age, gender, and style matter. Read a few [counselor profiles](/counselors) and notice who sounds like someone you could talk to.\n- **Check the price.** We post every counselor's rate, from $50 to $165 per session.\n- **Decide in person or online.** Both work, and you can mix them.\n- **Decide on faith.** If you want faith in your counseling, say so. If you don't, that's fine too.\n- **Know you can switch.** If the first counselor isn't the right fit, you can change, no hard feelings.",
+        "heading": "How to choose a counselor in Louisville"
       }
     ],
     "links.heading": "What Louisville clients come to us for",
     "links.items": [
       {
-        "title": "Individual counseling",
+        "href": "/individual-counseling",
         "text": "For anxiety, depression, OCD, or a season of feeling stuck",
-        "href": "/individual-counseling"
+        "title": "Individual counseling"
       },
       {
-        "title": "Couples and marriage counseling",
+        "title": "Anxiety counseling",
+        "text": "Worry, panic, and a mind that won't slow down",
+        "href": "/anxiety-depression-counseling"
+      },
+      {
+        "title": "Depression counseling",
+        "text": "Including postpartum and seasonal depression",
+        "href": "/depression-counseling"
+      },
+      {
+        "title": "OCD treatment",
+        "text": "For boys and men, 8 and up",
+        "href": "/ocd-treatment"
+      },
+      {
+        "href": "/couples-marriage-counseling",
         "text": "Including pre-marital",
-        "href": "/couples-marriage-counseling"
+        "title": "Couples and marriage counseling"
       },
       {
-        "title": "Family counseling",
+        "href": "/family-counseling",
         "text": "Including parent and child relationships",
-        "href": "/family-counseling"
+        "title": "Family counseling"
       },
       {
-        "title": "Child and teen counseling",
+        "href": "/child-teen-counseling",
         "text": "For kids 8 and up",
-        "href": "/child-teen-counseling"
+        "title": "Child and teen counseling"
       },
       {
-        "title": "Grief counseling",
+        "href": "/grief-counseling",
         "text": "After a loss",
-        "href": "/grief-counseling"
+        "title": "Grief counseling"
       },
       {
-        "title": "Trauma counseling and EMDR",
-        "text": "",
-        "href": "/trauma-counseling"
+        "href": "/trauma-counseling",
+        "text": "Including spiritual and church hurt",
+        "title": "Trauma counseling"
       },
       {
-        "title": "Christian counseling",
+        "title": "EMDR therapy",
+        "text": "With two EMDR-trained counselors",
+        "href": "/trauma-emdr-counseling"
+      },
+      {
+        "href": "/christian-counseling",
         "text": "For anyone who wants faith at the center",
-        "href": "/christian-counseling"
+        "title": "Christian counseling"
+      },
+      {
+        "title": "Counseling for pastors",
+        "text": "Confidential help for ministry burnout",
+        "href": "/counseling-for-pastors"
+      },
+      {
+        "title": "Porn addiction counseling",
+        "text": "Shame-free help for men",
+        "href": "/porn-addiction-counseling"
       }
     ],
     "faith.heading": "Faith at the center, never forced",
@@ -75,6 +113,6 @@
     "expect.heading": "Your first visit",
     "expect.body": "Your first session is mostly a conversation: your counselor getting to know you and what brought you in. There's nothing to prepare. Sessions are 50 minutes.",
     "cost.heading": "What it costs",
-    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

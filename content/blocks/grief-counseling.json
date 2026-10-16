@@ -33,18 +33,54 @@
       },
       {
         "text": "A loss from years ago has come back up."
+      },
+      {
+        "text": "A death was sudden, and the memories won't settle."
+      },
+      {
+        "text": "The life you thought you'd have by now feels out of reach."
+      },
+      {
+        "text": "You've lost your sense of meaning or purpose."
+      },
+      {
+        "text": "Your teenager hasn't been the same since a loss."
       }
     ],
     "faith.heading": "Faith at the center, never forced",
-    "faith.body": "For many people, grief raises hard questions about God and suffering. If you want faith to be part of your counseling, those questions are welcome here, held with the same care as the rest of your grief. If you don't, that's entirely your call.",
+    "faith.body": "For many people, grief raises hard questions about God and suffering. Where was God? Why didn't He stop it? Is it wrong to be angry at Him? If you want faith to be part of your counseling, those questions are welcome here, held with the same care as the rest of your grief. If you don't, that's entirely your call.",
     "sections": [
       {
-        "heading": "Your grief doesn't have to look a certain way",
-        "body": "There's no schedule for grief, and no loss too big or too small to deserve care. Some people come in days after a loss. Others come years later, when something reopens it. Both are the right time."
+        "body": "There's no schedule for grief, and no loss too big or too small to deserve care. Some people come in days after a loss. Others come years later, when something reopens it. Both are the right time.",
+        "heading": "Your grief doesn't have to look a certain way"
       },
       {
-        "heading": "What grief counseling at Freedom looks like",
-        "body": "Your counselor follows your pace. Some people want to talk through the loss right away; others need time before they're ready. Together you'll make room for the grief, understand what you're feeling, and find ways to carry it so it doesn't carry you. When a loss was traumatic, Staci's EMDR training can help with memories that won't settle."
+        "body": "Grief isn't only sadness. It can show up as trouble sleeping, anger that surprises you, a hard time focusing at work, pulling away from people, drinking more than you used to, or feeling like nothing matters. For some people, it brings thoughts of not wanting to be here. If that's you, please call or text 988 now. You don't have to wait for an appointment.",
+        "heading": "How grief can show up"
+      },
+      {
+        "body": "No loss is outside what we work with. People come to us after:\n\n- the death of a spouse, a parent, a child, a sibling, or a friend\n- a sudden or traumatic death, including suicide, overdose, or violence\n- a pregnancy loss or infertility\n- a divorce or the end of a relationship\n- a diagnosis, for you or someone you love\n- the loss of a job or a career\n- the life you expected, when you've ended up somewhere else entirely\n- a lost sense of meaning and purpose",
+        "heading": "Every kind of loss"
+      },
+      {
+        "body": "Grief can shrink your world. You might avoid the places, people, and memories that hurt, or get stuck replaying what happened and what you should have done. You might feel like moving forward means leaving the person behind. Bit by bit, life narrows to getting through the day.\n\nWe help you loosen that grip. You'll learn to let the pain be there without fighting it or being run by it, to notice painful thoughts without getting pulled under by them, and to come back to the people and things that still matter to you. Grief doesn't have to go away for life to open up again. You can carry your love for who you lost and keep living a life that means something. This work comes from acceptance and commitment therapy (ACT), an approach our counselors use with grief.\n\nYour counselor follows your pace. Some people want to talk through the loss right away; others need time before they're ready. When a loss was traumatic, Staci's and Kasie's EMDR training can help with memories that won't settle.",
+        "heading": "What grief counseling at Freedom looks like"
+      },
+      {
+        "body": "A sudden death, a suicide, an overdose, or a violent loss can leave more than grief. Images that replay, guilt that won't let go, and a body that stays on alert are common. Counseling can address both: the trauma of how the loss happened, and the grief of who you lost. Eye movement desensitization and reprocessing ([EMDR](/trauma-emdr-counseling)) is one way we help with memories that keep coming back.",
+        "heading": "When a loss was sudden or traumatic"
+      },
+      {
+        "body": "Grief often looks different in children, teenagers, boys, and men. It can come out as anger, silence, staying busy, or acting like everything's fine. Sophie Bowman works with grieving children and teens. Luke Burgett has real experience helping grieving teens, and works with grief in boys and men at every stage of life. If your child or teen is struggling after a loss and won't talk about it, that's a good reason to call.",
+        "heading": "Grieving children, teens, boys, and men"
+      },
+      {
+        "body": "Grief has no deadline. But if a long time has passed and the loss still takes over most days, or you can't function the way you need to, it may be time for more focused help. That isn't a sign you grieved wrong. It means your grief needs more support, and counseling can give it.",
+        "heading": "When grief becomes something more"
+      },
+      {
+        "heading": "Counseling and support groups",
+        "body": "Both can help, and many people use both.\n\n- **A support group** gives you people who've been through a similar loss and understand without explanation.\n- **Grief counseling** gives you one-on-one time at your pace, help with what's specific to you, and support for anything the loss stirred up, like anxiety, trauma, or depression.\n\nThere are good free and community groups in Louisville:\n\n- **[Hosparus Health](https://hosparushealth.org/grief-counseling/community-grief-support/):** community grief support groups for specific losses.\n- **[First Hour Grief Response](https://firsthourgrief.org/):** faith-based peer grief mentoring and groups.\n- **[GriefShare](https://www.griefshare.org/findagroup):** grief groups hosted by local churches.\n- **[The Compassionate Friends](https://www.compassionatefriends.org/find-support/chapters/chapter-locator/):** support after the death of a child, grandchild, or sibling."
       }
     ],
     "team.heading": "Counselors who walk with people through grief",
@@ -60,10 +96,18 @@
       {
         "slug": "kasie-secrest",
         "text": "Women and couples carrying grief and endings, holding the hard alongside the healing."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Grieving teens, and grief in boys and men at every stage of life."
+      },
+      {
+        "slug": "sophie-bowman",
+        "text": "Grieving children and teens, using art interventions."
       }
     ],
     "expect.heading": "Your first session",
     "expect.body": "You'll talk about your loss as much or as little as you want to. There's no pressure to revisit painful memories before you're ready. Sessions are in our Middletown office or online.",
-    "cost.body": "$100 per session with Staci, $110 with Rhonda. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

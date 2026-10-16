@@ -2,7 +2,7 @@
   "slug": "southern-indiana-counseling",
   "blocks": {
     "hero.eyebrow": "Southern Indiana · In person in Louisville",
-    "hero.subhead": "Freedom Counseling Services is just across the river in Louisville's Middletown area, about a 20-minute drive from New Albany, Jeffersonville, and Clarksville. Southern Indiana clients meet with us in person at our office.",
+    "hero.subhead": "Freedom Counseling Services is just across the river in Louisville's Middletown area, about a 20-minute drive from New Albany, Jeffersonville, and Clarksville, and close to Sellersburg, Floyds Knobs, and Charlestown. Southern Indiana clients meet with us in person at our office.",
     "facts": [
       {
         "icon": "calendar-check",
@@ -17,50 +17,84 @@
     "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
     "sections": [
       {
-        "heading": "Closer than you might think",
-        "body": "A Kentucky counselor doesn't have to mean a long trip. Our office sits just off I-64 near Blankenbaker Parkway, about 20 minutes from New Albany, Jeffersonville, Clarksville, and Watson. For many Southern Indiana clients, it's an easy drive after work or on a lunch break."
+        "body": "A Kentucky counselor doesn't have to mean a long trip. Our office sits just off I-64 near Blankenbaker Parkway, about 20 minutes from New Albany, Jeffersonville, Clarksville, and Watson. For many Southern Indiana clients, it's an easy drive after work or on a lunch break.",
+        "heading": "Closer than you might think"
       },
       {
-        "heading": "Why sessions are in person for Indiana clients",
-        "body": "Our counselors are licensed in Kentucky. The law requires a counselor to be licensed in the state where you are during a session, so we can't meet with Indiana clients online. When you come to our Louisville office, you're in Kentucky, and we can work with you fully, with the same counselors and the same care as every client."
+        "heading": "Getting here from Southern Indiana",
+        "body": "- **From New Albany:** take I-64 East across the Sherman Minton Bridge (no toll) and stay on I-64 East to the Blankenbaker Parkway exit.\n- **From Jeffersonville and Clarksville:** the Clark Memorial (Second Street) Bridge is also toll-free. The I-65 bridges (Lincoln and Kennedy) and the Lewis and Clark (East End) Bridge charge a RiverLink toll; see RiverLink.com for current rates.\n- **Then:** we're just off Blankenbaker Parkway, across from Southeast Christian Church, in the office complex behind Heine Brothers Coffee."
+      },
+      {
+        "body": "Our counselors are licensed in Kentucky. The law requires a counselor to be licensed in the state where you are during a session, so we can't meet with Indiana clients online. When you come to our Louisville office, you're in Kentucky, and we can work with you fully, with the same counselors and the same care as every client.",
+        "heading": "Why sessions are in person for Indiana clients"
       }
     ],
     "links.heading": "What Southern Indiana clients come to us for",
     "links.items": [
       {
-        "title": "Individual counseling",
+        "href": "/individual-counseling",
         "text": "For anxiety, depression, OCD, or a season of feeling stuck",
-        "href": "/individual-counseling"
+        "title": "Individual counseling"
       },
       {
-        "title": "Couples and marriage counseling",
+        "title": "Anxiety counseling",
+        "text": "Worry, panic, and a mind that won't slow down",
+        "href": "/anxiety-depression-counseling"
+      },
+      {
+        "title": "Depression counseling",
+        "text": "Including postpartum and seasonal depression",
+        "href": "/depression-counseling"
+      },
+      {
+        "title": "OCD treatment",
+        "text": "For boys and men, 8 and up",
+        "href": "/ocd-treatment"
+      },
+      {
+        "href": "/couples-marriage-counseling",
         "text": "Including pre-marital",
-        "href": "/couples-marriage-counseling"
+        "title": "Couples and marriage counseling"
       },
       {
-        "title": "Family counseling",
+        "href": "/family-counseling",
         "text": "Including parent and child relationships",
-        "href": "/family-counseling"
+        "title": "Family counseling"
       },
       {
-        "title": "Child and teen counseling",
+        "href": "/child-teen-counseling",
         "text": "For kids 8 and up",
-        "href": "/child-teen-counseling"
+        "title": "Child and teen counseling"
       },
       {
-        "title": "Grief counseling",
+        "href": "/grief-counseling",
         "text": "After a loss",
-        "href": "/grief-counseling"
+        "title": "Grief counseling"
       },
       {
-        "title": "Trauma counseling and EMDR",
-        "text": "",
-        "href": "/trauma-counseling"
+        "href": "/trauma-counseling",
+        "text": "Including spiritual and church hurt",
+        "title": "Trauma counseling"
       },
       {
-        "title": "Christian counseling",
+        "title": "EMDR therapy",
+        "text": "With two EMDR-trained counselors",
+        "href": "/trauma-emdr-counseling"
+      },
+      {
+        "href": "/christian-counseling",
         "text": "For anyone who wants faith at the center",
-        "href": "/christian-counseling"
+        "title": "Christian counseling"
+      },
+      {
+        "title": "Counseling for pastors",
+        "text": "Confidential help for ministry burnout",
+        "href": "/counseling-for-pastors"
+      },
+      {
+        "title": "Porn addiction counseling",
+        "text": "Shame-free help for men",
+        "href": "/porn-addiction-counseling"
       }
     ],
     "faith.heading": "Faith at the center, never forced",
@@ -74,6 +108,6 @@
     "expect.heading": "Your first visit",
     "expect.body": "Your first session is mostly a conversation: your counselor getting to know you and what brought you in. There's nothing to prepare. Sessions are 50 minutes.",
     "cost.heading": "What it costs",
-    "cost.body": "$50 to $165 per session, depending on your counselor, the same as for every client. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "$50 to $165 per session, depending on your counselor, the same as for every client. We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

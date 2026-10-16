@@ -3,31 +3,35 @@
     "individual-counseling": {
       "h1": "Individual therapy in Louisville for when you can't keep carrying it alone",
       "meta_title": "Individual Therapy in Louisville, KY | Freedom Counseling",
-      "meta_description": "Individual therapy in Louisville for anxiety, stress, depression, and feeling stuck. In person or online, usually seen the same week. $50 to $165 per session.",
+      "meta_description": "Individual therapy in Louisville for anxiety, depression, grief, trauma, and feeling stuck, with room for faith. $50 to $165 a session, usually seen the same week.",
       "faqs": [
         {
-          "question": "Do I need a diagnosis or a specific problem to start?",
-          "answer": "No. Many people start knowing only that something needs to change. Figuring out what's going on is part of the work."
+          "answer": "No. Many people start knowing only that something needs to change. Figuring out what's going on is part of the work.",
+          "question": "Do I need a diagnosis or a specific problem to start?"
         },
         {
-          "question": "What if I don't know what I want to work on?",
-          "answer": "That's a normal way to begin. Your counselor will help you find it."
+          "answer": "That's a normal way to begin. Your counselor will help you find it.",
+          "question": "What if I don't know what I want to work on?"
         },
         {
-          "question": "How do I know if I need individual, couples, or family counseling?",
-          "answer": "You don't have to sort that out alone. Tell us what's going on, and we'll help you choose."
+          "answer": "You don't have to sort that out alone. Tell us what's going on, and we'll help you choose.",
+          "question": "How do I know if I need individual, couples, or family counseling?"
         },
         {
-          "question": "Is therapy only for people in crisis?",
-          "answer": "No. Many people come in while they're still managing on the surface but running on empty underneath."
+          "answer": "No. Many people come in while they're still managing on the surface but running on empty underneath.",
+          "question": "Is therapy only for people in crisis?"
         },
         {
-          "question": "Will counseling include my faith if I want it to?",
-          "answer": "Yes, if you want it, and not if you don't. You lead."
+          "answer": "Yes, if you want it, and not if you don't. You lead.",
+          "question": "Will counseling include my faith if I want it to?"
         },
         {
-          "question": "Can I switch counselors if the fit isn't right?",
-          "answer": "Yes, at any time."
+          "answer": "Yes, at any time.",
+          "question": "Can I switch counselors if the fit isn't right?"
+        },
+        {
+          "answer": "Early on, as often as you reasonably can. We usually recommend weekly, or at least every other week, for the first six to eight sessions, then most people spread sessions out.",
+          "question": "How often will I meet with my counselor?"
         }
       ],
       "focus_keyword": "individual therapy",
@@ -41,28 +45,28 @@
       "meta_description": "Marriage and couples counseling in Louisville, informed by the Gottman Method, with room for faith. In person or online, usually seen the same week. Pre-marital counseling too.",
       "faqs": [
         {
-          "question": "Do both partners need to attend every session?",
-          "answer": "Most sessions include you both, because the work is about the pattern between you. Your counselor may occasionally suggest an individual session, always discussed with you first."
+          "answer": "Most sessions include you both, because the work is about the pattern between you. Your counselor may occasionally suggest an individual session, always discussed with you first.",
+          "question": "Do both partners need to attend every session?"
         },
         {
-          "question": "What if my spouse is hesitant?",
-          "answer": "That's common, and it doesn't mean counseling won't work. Many couples start with one partner more ready than the other. Reaching out on your own is a reasonable place to begin."
+          "answer": "That's common, and it doesn't mean counseling won't work. Many couples start with one partner more ready than the other. Reaching out on your own is a reasonable place to begin.",
+          "question": "What if my spouse is hesitant?"
         },
         {
-          "question": "Is marriage counseling only for couples in crisis?",
-          "answer": "No. Many couples come in to break a cycle before it gets worse."
+          "answer": "No. Many couples come in to break a cycle before it gets worse.",
+          "question": "Is marriage counseling only for couples in crisis?"
         },
         {
-          "question": "We tried counseling before and it didn't help. Why would this be different?",
-          "answer": "It often comes down to fit and approach. Tell your new counselor what didn't work, so they can adjust from the start."
+          "answer": "It often comes down to fit and approach. Tell your new counselor what didn't work, so they can adjust from the start.",
+          "question": "We tried counseling before and it didn't help. Why would this be different?"
         },
         {
-          "question": "Can it help if only one of us wants to change?",
-          "answer": "It can, though the work looks different. One partner's changes often shift the whole pattern over time. Your counselor will talk through what's realistic."
+          "answer": "It can, though the work looks different. One partner's changes often shift the whole pattern over time. Your counselor will talk through what's realistic.",
+          "question": "Can it help if only one of us wants to change?"
         },
         {
-          "question": "Do you offer pre-marital counseling?",
-          "answer": "Yes. It's a good way to build a strong foundation before the wedding."
+          "answer": "Yes. It's a good way to build a strong foundation before the wedding.",
+          "question": "Do you offer pre-marital counseling?"
         }
       ],
       "focus_keyword": "marriage counseling louisville ky",
@@ -73,31 +77,47 @@
     "family-counseling": {
       "h1": "Family therapy in Louisville for when home doesn't feel like home",
       "meta_title": "Family Therapy in Louisville, KY | Freedom Counseling",
-      "meta_description": "Family therapy in Louisville for families stuck in the same conflicts, blended families, and parents and teens. In person or online, usually seen the same week.",
+      "meta_description": "Family therapy in Louisville for parents and teens, blended families, co-parenting, and adult children with aging parents. Parent coaching too. $100 to $165, usually seen the same week.",
       "faqs": [
         {
-          "question": "Does the whole family need to attend every session?",
-          "answer": "No. Your counselor will recommend who comes when, based on what's going on."
+          "answer": "No. Your counselor will recommend who comes when, based on what's going on.",
+          "question": "Does the whole family need to attend every session?"
         },
         {
-          "question": "What ages can be included?",
-          "answer": "Children 8 and older, teens, and adults. For younger children, we'll help you find the right next step."
+          "answer": "Children 8 and older, teens, and adults. For younger children, we'll help you find the right next step.",
+          "question": "What ages can be included?"
         },
         {
-          "question": "What if only one person is willing to come in?",
-          "answer": "That's still a good place to start. One person's changes often begin shifting the whole pattern, and others sometimes join once they see something changing."
+          "answer": "That's still a good place to start, and that includes parent-only sessions. One person's changes often begin shifting the whole pattern, and others sometimes join once they see something changing.",
+          "question": "What if only one person is willing to come in?"
         },
         {
-          "question": "Is family counseling only for families in crisis?",
-          "answer": "No. Many families come in to break a long-standing pattern before it gets harder."
+          "answer": "No. Many families come in to break a long-standing pattern before it gets harder.",
+          "question": "Is family counseling only for families in crisis?"
         },
         {
-          "question": "How is this different from individual counseling for one family member?",
-          "answer": "Individual counseling focuses on one person's inner experience. Family counseling focuses on what happens between you."
+          "answer": "Individual counseling focuses on one person's inner experience. Family counseling focuses on what happens between you.",
+          "question": "How is this different from individual counseling for one family member?"
         },
         {
-          "question": "Can you help blended families?",
-          "answer": "Yes. Building trust and clear roles in a new stepfamily is one of the most common reasons families reach out."
+          "answer": "Yes. Building trust and clear roles in a new stepfamily is one of the most common reasons families reach out.",
+          "question": "Can you help blended families?"
+        },
+        {
+          "answer": "The best-known approaches all look at the family as a whole rather than one person: family systems therapy (how each person's reactions shape the others), structural (roles, rules, and who's in charge), strategic (changing specific patterns that keep a problem going), and narrative (the stories a family tells about itself). Our counselors work mainly from family systems therapy, with practical tools for communication and repair.",
+          "question": "What are the main types of family therapy?"
+        },
+        {
+          "answer": "Yes, in practice. Both mean working with a trained professional on how your family relates.",
+          "question": "Is family counseling the same as family therapy?"
+        },
+        {
+          "answer": "Someone trained to work with the whole family, not just one person. Tony Gore, LCSW, works from family systems therapy, and Staci and Luke work with families too.",
+          "question": "What kind of therapist should we see for family issues?"
+        },
+        {
+          "answer": "Yes. Parent-only sessions are a good place to start.",
+          "question": "Can I come in for parent coaching if my child isn't in counseling?"
         }
       ],
       "focus_keyword": "family therapy louisville ky",
@@ -108,31 +128,47 @@
     "child-teen-counseling": {
       "h1": "A child and teen therapist in Louisville your kid might actually talk to",
       "meta_title": "Child & Teen Therapist in Louisville, KY | Freedom Counseling",
-      "meta_description": "Counseling for kids 8 and up and teens in Louisville, with art interventions for younger kids. In person or online, usually seen the same week. Student sessions $50.",
+      "meta_description": "Child and teen therapists in Louisville for anxiety, ADHD, grief, self-harm, and more, with art interventions for kids 8 and up. From $50 a session, usually seen the same week.",
       "faqs": [
         {
-          "question": "Will you tell me everything my child says?",
-          "answer": "With teens, counselors protect enough privacy for your teen to be honest, while keeping you informed about safety and general progress. Your counselor will explain how this works for your child's age."
+          "answer": "With teens, counselors protect enough privacy for your teen to be honest, while keeping you informed about safety and general progress. Your counselor will explain how this works for your child's age.",
+          "question": "Will you tell me everything my child says?"
         },
         {
-          "question": "What if my teen doesn't want to go?",
-          "answer": "That's common. A counselor experienced with teens knows how to work with that, starting with trust rather than pushing into hard topics."
+          "answer": "That's common. A counselor experienced with teens knows how to work with that, starting with trust rather than pushing into hard topics.",
+          "question": "What if my teen doesn't want to go?"
         },
         {
-          "question": "What ages do you see?",
-          "answer": "Children 8 and up, teens, and young adults."
+          "answer": "Children 8 and up, teens, and young adults.",
+          "question": "What ages do you see?"
         },
         {
-          "question": "How do I know if my child needs counseling, or if it's a phase?",
-          "answer": "A few sessions are a low-pressure way to find out. Waiting months to see if it passes can let patterns settle in."
+          "answer": "A few sessions are a low-pressure way to find out. Waiting months to see if it passes can let patterns settle in.",
+          "question": "How do I know if my child needs counseling, or if it's a phase?"
         },
         {
-          "question": "Can siblings see the same counselor?",
-          "answer": "Sometimes. Other times, separate counselors give each child a space that's fully theirs. We'll talk through what fits your family."
+          "answer": "Sometimes. Other times, separate counselors give each child a space that's fully theirs. We'll talk through what fits your family.",
+          "question": "Can siblings see the same counselor?"
         },
         {
-          "question": "Will faith be part of my child's counseling?",
-          "answer": "Only if your family wants it."
+          "answer": "Only if your family wants it.",
+          "question": "Will faith be part of my child's counseling?"
+        },
+        {
+          "answer": "Yes, with the focus, frustration, and self-esteem pieces of it. If your child needs testing or medication, we'll coordinate with your pediatrician (with your written consent).",
+          "question": "Do you work with ADHD?"
+        },
+        {
+          "answer": "Yes. Your counselor starts with safety and builds a plan with you. If your child is in danger right now, call or text 988, or call 911.",
+          "question": "My child is hurting themselves. Can you help?"
+        },
+        {
+          "answer": "Yes, in coordination with your child's doctor, who monitors the medical side.",
+          "question": "Do you treat eating disorders?"
+        },
+        {
+          "answer": "With your written consent, yes. It helps when school and home are working from the same plan.",
+          "question": "Will you talk with my child's school?"
         }
       ],
       "focus_keyword": "child therapist louisville ky",
@@ -178,31 +214,47 @@
     "grief-counseling": {
       "h1": "Grief counselors in Louisville who won't rush your grief",
       "meta_title": "Grief Counselors in Louisville, KY | Freedom Counseling",
-      "meta_description": "Grief counseling in Louisville for the loss of a loved one, divorce, pregnancy loss, and losses others don't see. At your pace, in person or online. Usually seen the same week.",
+      "meta_description": "Grief counselors in Louisville for any kind of loss, with EMDR, ACT, and room for faith. $50 to $115 a session, usually seen the same week.",
       "faqs": [
         {
-          "question": "How soon after a loss should I start?",
-          "answer": "There's no waiting period. Days, months, or years later are all appropriate."
+          "answer": "There's no waiting period. Days, months, or years later are all appropriate.",
+          "question": "How soon after a loss should I start?"
         },
         {
-          "question": "Is grief counseling only for a death?",
-          "answer": "No. Divorce, pregnancy loss, a diagnosis, a job, or a pet can all bring real grief."
+          "answer": "No. Divorce, pregnancy loss, a diagnosis, a job, or a pet can all bring real grief.",
+          "question": "Is grief counseling only for a death?"
         },
         {
-          "question": "Will I have to talk about painful memories before I'm ready?",
-          "answer": "No. Your counselor follows your pace."
+          "answer": "No. Your counselor follows your pace.",
+          "question": "Will I have to talk about painful memories before I'm ready?"
         },
         {
-          "question": "What if my grief feels too big, or not big enough?",
-          "answer": "Both feelings are common. Grief doesn't have to reach a certain size to deserve care."
+          "answer": "Both feelings are common. Grief doesn't have to reach a certain size to deserve care.",
+          "question": "What if my grief feels too big, or not big enough?"
         },
         {
-          "question": "Can counseling help if it's been years?",
-          "answer": "Yes. Grief that was rushed or set aside often comes back later. It's never too late."
+          "answer": "Yes. Grief that was rushed or set aside often comes back later. It's never too late.",
+          "question": "Can counseling help if it's been years?"
         },
         {
-          "question": "Do you bring faith into grief counseling?",
-          "answer": "When you want it, including room for anger at God and questions about suffering."
+          "answer": "When you want it, including room for anger at God and questions about suffering.",
+          "question": "Do you bring faith into grief counseling?"
+        },
+        {
+          "answer": "Someone trained in grief who lets you set the pace, and who fits what you're carrying. For a traumatic loss, look for trauma training like EMDR. Approaches like acceptance and commitment therapy (ACT) help many people live alongside grief rather than fight it.",
+          "question": "What kind of therapist is best for grief?"
+        },
+        {
+          "answer": "It depends on your plan. Grief has its own diagnosis code (Z63.4), and we include it on your superbill, but many plans don't reimburse for grief on its own, so it's worth asking your plan. You can also pay with an HSA or FSA card.",
+          "question": "Will insurance cover grief counseling?"
+        },
+        {
+          "answer": "See the groups listed above. Hosparus Health, First Hour Grief Response, GriefShare, and The Compassionate Friends all have Louisville-area options, and many are free.",
+          "question": "How do I find a grief support group?"
+        },
+        {
+          "answer": "Yes. Losing a job, a marriage, the life you expected, or your sense of purpose can bring real grief, and it deserves care too.",
+          "question": "Can counseling help with a loss that isn't a death?"
         }
       ],
       "focus_keyword": "grief counselors louisville ky",
@@ -213,31 +265,47 @@
     "anxiety-depression-counseling": {
       "h1": "An anxiety therapist in Louisville for when your mind won't slow down",
       "meta_title": "Anxiety Therapist in Louisville, KY | Freedom Counseling",
-      "meta_description": "Anxiety counseling in Louisville with practical tools, not just talk. Worry, panic, and a mind that won't slow down. In person or online, usually seen the same week.",
+      "meta_description": "An anxiety therapist in Louisville for worry, panic, social anxiety, and health anxiety, with practical tools and room for faith. $50 to $165 a session, usually seen the same week.",
       "faqs": [
         {
-          "question": "Will I need medication?",
-          "answer": "Not necessarily. Your counselor can refer you for an evaluation if it seems worth exploring."
+          "answer": "Not necessarily. Your counselor can refer you for an evaluation if it seems worth exploring.",
+          "question": "Will I need medication?"
         },
         {
-          "question": "How is this different from general counseling?",
-          "answer": "It uses structured approaches built for anxiety, with practical tools for your specific symptoms."
+          "answer": "It uses structured approaches built for anxiety, with practical tools for your specific symptoms.",
+          "question": "How is this different from general counseling?"
         },
         {
-          "question": "What if my anxiety feels too big to explain?",
-          "answer": "You don't need the words yet. Figuring it out together is part of the work."
+          "answer": "You don't need the words yet. Figuring it out together is part of the work.",
+          "question": "What if my anxiety feels too big to explain?"
         },
         {
-          "question": "How quickly will I feel better?",
-          "answer": "It varies. Some people notice change within a few months; longer-standing patterns can take more time. Your counselor tracks progress with you."
+          "answer": "It varies. Some people notice change within a few months; longer-standing patterns can take more time. Your counselor tracks progress with you.",
+          "question": "How quickly will I feel better?"
         },
         {
-          "question": "I tried therapy before and it didn't help. Why would this be different?",
-          "answer": "Often the approach or the fit wasn't right. Matching the right approach to you is part of what we do."
+          "answer": "Often the approach or the fit wasn't right. Matching the right approach to you is part of what we do.",
+          "question": "I tried therapy before and it didn't help. Why would this be different?"
         },
         {
-          "question": "Is it normal to feel anxious about starting?",
-          "answer": "Very. You don't need to feel calm before you reach out."
+          "answer": "Very. You don't need to feel calm before you reach out.",
+          "question": "Is it normal to feel anxious about starting?"
+        },
+        {
+          "answer": "One trained in approaches with strong research behind them for anxiety, like cognitive behavioral therapy (CBT, including step-by-step exposure, when it fits) and acceptance and commitment therapy (ACT), and one you feel comfortable with. Fit matters as much as method.",
+          "question": "What kind of therapist is best for anxiety?"
+        },
+        {
+          "answer": "CBT has the most research behind it, and ACT helps many people too. Your counselor will match the approach to what you're facing and what you're comfortable with.",
+          "question": "What type of therapy is best for anxiety?"
+        },
+        {
+          "answer": "For many people, yes. No counselor can promise a result, but you and your counselor will track progress together, so you can see what's helping.",
+          "question": "Does anxiety therapy work?"
+        },
+        {
+          "answer": "A quick grounding exercise: name 3 things you see, 3 sounds you hear, and move 3 parts of your body.",
+          "question": "What is the 3-3-3 rule?"
         }
       ],
       "focus_keyword": "anxiety therapist",
@@ -250,31 +318,47 @@
     "trauma-emdr-counseling": {
       "h1": "EMDR therapy in Louisville, at a pace that feels safe",
       "meta_title": "EMDR Therapy in Louisville, KY | Freedom Counseling",
-      "meta_description": "EMDR therapy in Louisville, in person or online. You stay in control of the pace, and you don't have to describe everything in detail. Usually seen the same week.",
+      "meta_description": "EMDR therapy in Louisville with two EMDR-trained counselors, in person or online. $100 a session, usually seen the same week.",
       "faqs": [
         {
-          "question": "What is EMDR, and how does it work?",
-          "answer": "A structured, well-researched therapy that uses guided eye movements or another back-and-forth rhythm while you briefly focus on a memory, so it carries less emotional charge over time."
+          "answer": "A structured, well-researched therapy that uses guided eye movements or another back-and-forth rhythm while you briefly focus on a memory, so it carries less emotional charge over time.",
+          "question": "What is EMDR, and how does it work?"
         },
         {
-          "question": "Do I have to describe my trauma in detail?",
-          "answer": "No, not to reach out or to begin."
+          "answer": "No, not to reach out or to begin.",
+          "question": "Do I have to describe my trauma in detail?"
         },
         {
-          "question": "Will EMDR make me relive the trauma?",
-          "answer": "You stay in control of the pace and can pause at any point. Safety and grounding come first."
+          "answer": "You stay in control of the pace and can pause at any point. Safety and grounding come first.",
+          "question": "Will EMDR make me relive the trauma?"
         },
         {
-          "question": "Are there side effects?",
-          "answer": "Some people notice stronger emotions, vivid dreams, or tiredness between sessions for a while. Your counselor prepares you for this and helps you stay steady."
+          "answer": "Some people notice stronger emotions, vivid dreams, or tiredness between sessions for a while. Your counselor prepares you for this and helps you stay steady.",
+          "question": "Are there side effects?"
         },
         {
-          "question": "Can EMDR be done online?",
-          "answer": "Yes. Staci and Kasie offer EMDR in person or online for clients in Kentucky."
+          "answer": "Yes, for clients in Kentucky, with Staci or Kasie.",
+          "question": "Can EMDR be done online?"
         },
         {
-          "question": "Can EMDR include faith?",
-          "answer": "Yes, if you want it."
+          "answer": "Yes, if you want it.",
+          "question": "Can EMDR include faith?"
+        },
+        {
+          "answer": "At Freedom, $100 per 50-minute session with Staci or Kasie. HSA and FSA cards work, and we provide a superbill.",
+          "question": "How much does EMDR therapy cost per session?"
+        },
+        {
+          "answer": "Yes. Research on EMDR is strongest for post-traumatic stress disorder (PTSD), and it's also widely used for painful experiences that don't fit a single event, like a hard childhood, a painful relationship, or memories tied to shame.",
+          "question": "Can EMDR help with emotional trauma, not just one big event?"
+        },
+        {
+          "answer": "50 minutes.",
+          "question": "How long does an EMDR session last?"
+        },
+        {
+          "answer": "Rest, use your grounding tools, and jot down what comes up for next time. Feeling tired or emotional for a day or two is common.",
+          "question": "What should I do after EMDR?"
         }
       ],
       "focus_keyword": "emdr therapy louisville ky",
@@ -287,31 +371,43 @@
     "trauma-counseling": {
       "h1": "A trauma therapist in Louisville who lets you set the pace",
       "meta_title": "Trauma Therapist in Louisville, KY | Freedom Counseling",
-      "meta_description": "Trauma counseling in Louisville, in person or online: EMDR, internal family systems, and ACT, at a pace that feels safe. Usually seen the same week.",
+      "meta_description": "Trauma therapists in Louisville: EMDR with EMDR-trained counselors, IFS, ACT, and room for faith. $100 to $165 a session, usually seen the same week.",
       "faqs": [
         {
-          "question": "Do I have to describe my trauma in detail?",
-          "answer": "No, not to reach out or to begin."
+          "answer": "No, not to reach out or to begin.",
+          "question": "Do I have to describe my trauma in detail?"
         },
         {
-          "question": "Is trauma counseling only for major, single events?",
-          "answer": "No. Repeated or long-term hard experiences are just as real, and just as treatable."
+          "answer": "No. Repeated or long-term hard experiences are just as real, and just as treatable.",
+          "question": "Is trauma counseling only for major, single events?"
         },
         {
-          "question": "How do I know which approach is right for me?",
-          "answer": "You don't have to know. Tell us what's going on, and we'll suggest a counselor and a way to start."
+          "answer": "You don't have to know. Tell us what's going on, and we'll suggest a counselor and a way to start.",
+          "question": "How do I know which approach is right for me?"
         },
         {
-          "question": "How do I know if it's trauma or just a bad memory?",
-          "answer": "If a past event still shapes how you react to stress, relationships, or your own body today, it's worth exploring."
+          "answer": "If a past event still shapes how you react to stress, relationships, or your own body today, it's worth exploring.",
+          "question": "How do I know if it's trauma or just a bad memory?"
         },
         {
-          "question": "Can I meet online?",
-          "answer": "Yes, if you're in Kentucky, including EMDR with Staci or Kasie."
+          "answer": "Yes, if you're in Kentucky, including EMDR with Staci or Kasie.",
+          "question": "Can I meet online?"
         },
         {
-          "question": "Can trauma counseling include faith?",
-          "answer": "Yes, if you want it."
+          "answer": "Yes, if you want it.",
+          "question": "Can trauma counseling include faith?"
+        },
+        {
+          "answer": "PTSD often follows a single frightening event. Complex trauma comes from hurt that was repeated or long-term, and it tends to affect how you see yourself and others. Both are treatable.",
+          "question": "What's the difference between PTSD and complex trauma?"
+        },
+        {
+          "answer": "Often it's fit, approach, or pace, not you. Tell your counselor what didn't help.",
+          "question": "Why hasn't therapy worked for me before?"
+        },
+        {
+          "answer": "If you're in crisis, call or text 988 any time. Your counselor will also give you grounding tools to use between sessions.",
+          "question": "Is there support between sessions?"
         }
       ],
       "focus_keyword": "trauma therapist louisville ky",
@@ -325,31 +421,47 @@
     "depression-counseling": {
       "h1": "A depression therapist in Louisville for when everything feels heavy",
       "meta_title": "Depression Therapist in Louisville, KY | Freedom Counseling",
-      "meta_description": "Depression counseling in Louisville for when everything feels heavy. Six counselors, in person or online, usually seen the same week. $50 to $165 per session.",
+      "meta_description": "A depression therapist in Louisville for low mood, postpartum and seasonal depression, and the heaviness that won't lift. $50 to $165 a session, usually seen the same week.",
       "faqs": [
         {
-          "question": "How do I know if it's depression or just a hard season?",
-          "answer": "If low mood, tiredness, or not caring about things has lasted more than a couple of weeks and is affecting your life, it's worth talking to someone."
+          "answer": "If low mood, tiredness, or not caring about things has lasted more than a couple of weeks and is affecting your life, it's worth talking to someone.",
+          "question": "How do I know if it's depression or just a hard season?"
         },
         {
-          "question": "Will I need medication?",
-          "answer": "Not necessarily. Your counselor can refer you for an evaluation if it seems worth exploring."
+          "answer": "Not necessarily. Your counselor can refer you for an evaluation if it seems worth exploring.",
+          "question": "Will I need medication?"
         },
         {
-          "question": "What if I don't have the energy to get to appointments?",
-          "answer": "Online sessions can help on hard days. You can switch between online and in person anytime, if you're in Kentucky."
+          "answer": "Online sessions can help on hard days. You can switch between online and in person anytime, if you're in Kentucky.",
+          "question": "What if I don't have the energy to get to appointments?"
         },
         {
-          "question": "How long does counseling for depression take?",
-          "answer": "It varies. Some people notice change within a few months; longer-standing depression can take more time. Your counselor tracks progress with you."
+          "answer": "It varies. Some people notice change within a few months; longer-standing depression can take more time. Your counselor tracks progress with you.",
+          "question": "How long does counseling for depression take?"
         },
         {
-          "question": "Can I talk about thoughts of suicide?",
-          "answer": "Yes. Your counselor will listen without judgment and help you stay safe."
+          "answer": "Yes. Your counselor will listen without judgment and help you stay safe.",
+          "question": "Can I talk about thoughts of suicide?"
         },
         {
-          "question": "Can counseling include faith?",
-          "answer": "Yes, if you want it."
+          "answer": "Yes, if you want it.",
+          "question": "Can counseling include faith?"
+        },
+        {
+          "answer": "One trained in approaches with strong research behind them for depression, like cognitive behavioral therapy (CBT) and behavioral activation, and one you feel comfortable with. Fit matters as much as method.",
+          "question": "What kind of therapist is best for depression?"
+        },
+        {
+          "answer": "They're how clinicians describe the path of recovery: response (symptoms start to ease), remission (they're mostly gone), recovery (remission that lasts), and the two things to watch for, relapse (symptoms returning soon after) and recurrence (a new episode later). Your counselor tracks progress with you along the way.",
+          "question": "What are the \"5 R's\" of depression?"
+        },
+        {
+          "answer": "Yes. Staci, Kasie, and Rhonda work with postpartum depression. If you have thoughts of harming yourself or your baby, call or text 988, or call 911.",
+          "question": "Do you help with postpartum depression?"
+        },
+        {
+          "answer": "It usually needs psychiatric care, so we typically refer out and help you find the right provider.",
+          "question": "Do you treat bipolar disorder?"
         }
       ],
       "focus_keyword": "depression therapist",
@@ -363,31 +475,47 @@
     "ocd-treatment": {
       "h1": "An OCD therapist in Louisville, for when the thoughts won't let go",
       "meta_title": "OCD Therapist in Louisville, KY | ERP at Freedom Counseling",
-      "meta_description": "OCD treatment in Louisville with exposure and response prevention (ERP), for boys and men 8 and up. In person or online, usually seen the same week. $115 per session.",
+      "meta_description": "An OCD therapist in Louisville for every kind of OCD, with exposure and response prevention (ERP) and ACT, for boys and men 8 and up. Usually seen the same week. $115 per session.",
       "faqs": [
         {
-          "question": "What is ERP?",
-          "answer": "Exposure and response prevention: gradually facing what triggers your OCD without doing the compulsion, so the anxiety and the urges fade over time."
+          "answer": "Exposure and response prevention: gradually facing what triggers your OCD without doing the compulsion, so the anxiety and the urges fade over time.",
+          "question": "What is ERP?"
         },
         {
-          "question": "Will I have to do things I'm not ready for?",
-          "answer": "No. You and your counselor choose each step together, starting where it feels manageable."
+          "answer": "No. You and your counselor choose each step together, starting where it feels manageable.",
+          "question": "Will I have to do things I'm not ready for?"
         },
         {
-          "question": "Can ERP be done online?",
-          "answer": "Yes, for clients in Kentucky."
+          "answer": "Yes, for clients in Kentucky.",
+          "question": "Can ERP be done online?"
         },
         {
-          "question": "Do you work with kids who have OCD?",
-          "answer": "Yes, boys age 8 and up, with parents involved in the work."
+          "answer": "Yes, boys age 8 and up, with parents involved in the work. For girls, call us and we'll help you find the right fit.",
+          "question": "Do you work with kids who have OCD?"
         },
         {
-          "question": "Is it OCD or just anxiety?",
-          "answer": "OCD has a specific pattern of obsessions and compulsions. Your first sessions help sort that out."
+          "answer": "OCD has a specific pattern of obsessions and compulsions. Your first sessions help sort that out.",
+          "question": "Is it OCD or just anxiety?"
         },
         {
-          "question": "Can OCD treatment include faith?",
-          "answer": "Yes, if you want it."
+          "answer": "Yes, if you want it.",
+          "question": "Can OCD treatment include faith?"
+        },
+        {
+          "answer": "Not by trying to make the thought go away, which usually turns into another compulsion. Name it as OCD, calm your body (slow breathing, relaxing your muscles, cold water, a walk), and keep doing something meaningful without the ritual. Over time, the urge loses its pull.",
+          "question": "How do you calm down OCD?"
+        },
+        {
+          "answer": "Earlier onset, more sexual, religious, aggressive, or symmetry obsessions, rituals done in the mind, and a tendency to hide it. See the section above.",
+          "question": "What are common signs of OCD in men?"
+        },
+        {
+          "answer": "That's very common. OCD can attach to almost anything, and the theme matters far less than the loop of thought, distress, and compulsion. That loop is what we treat.",
+          "question": "What if I can't find my exact fear online?"
+        },
+        {
+          "answer": "Someone who uses exposure and response prevention (ERP), the most studied approach for OCD, rather than general talk therapy alone, and who explains each step and lets you set the pace.",
+          "question": "What should I look for in an OCD therapist?"
         }
       ],
       "focus_keyword": "ocd therapist",
@@ -401,31 +529,47 @@
     "act-therapy": {
       "h1": "Acceptance and commitment therapy (ACT) in Louisville, for a life that isn't run by your thoughts",
       "meta_title": "ACT Therapy in Louisville, KY | Acceptance and Commitment Therapy",
-      "meta_description": "Acceptance and commitment therapy (ACT) in Louisville. Stop fighting your thoughts and move toward what matters. In person or online, usually seen the same week.",
+      "meta_description": "ACT therapy (acceptance and commitment therapy) in Louisville: make room for hard thoughts and feelings and move toward what matters. $100 to $165, usually seen the same week.",
       "faqs": [
         {
-          "question": "What does ACT stand for?",
-          "answer": "Acceptance and commitment therapy: accepting what's outside your control, and committing to action that fits your values."
+          "answer": "Acceptance and commitment therapy: accepting what's outside your control, and committing to action that fits your values.",
+          "question": "What does ACT stand for?"
         },
         {
-          "question": "Is ACT the same as positive thinking?",
-          "answer": "No. ACT doesn't ask you to replace hard thoughts with happy ones. It helps you hold them more lightly."
+          "answer": "No. ACT doesn't ask you to replace hard thoughts with happy ones. It helps you hold them more lightly.",
+          "question": "Is ACT the same as positive thinking?"
         },
         {
-          "question": "What does ACT help with?",
-          "answer": "Anxiety, depression, OCD, chronic stress, trauma, and feeling stuck, among others."
+          "answer": "Anxiety, depression, OCD, chronic stress, trauma, and feeling stuck, among others.",
+          "question": "What does ACT help with?"
         },
         {
-          "question": "How is ACT different from CBT?",
-          "answer": "CBT often works on changing thoughts; ACT works on changing your relationship to them. Many counselors use both."
+          "answer": "CBT often works on changing thoughts; ACT works on changing your relationship to them. Many counselors use both.",
+          "question": "How is ACT different from CBT?"
         },
         {
-          "question": "Can I do ACT online?",
-          "answer": "Yes, if you're in Kentucky."
+          "answer": "Yes, if you're in Kentucky.",
+          "question": "Can I do ACT online?"
         },
         {
-          "question": "Can ACT include faith?",
-          "answer": "Yes, if you want it."
+          "answer": "Yes, if you want it.",
+          "question": "Can ACT include faith?"
+        },
+        {
+          "answer": "It builds six skills: making room for hard feelings, stepping back from thoughts, staying present, noticing you're bigger than any one thought, clarifying what matters, and taking steps toward it.",
+          "question": "How does ACT work?"
+        },
+        {
+          "answer": "Mindfulness exercises, ways to step back from sticky thoughts, values work, and small committed actions you practice between sessions.",
+          "question": "What techniques does ACT use?"
+        },
+        {
+          "answer": "It isn't designed to make feelings disappear quickly, and its research base, while strong, is newer than CBT's for some conditions.",
+          "question": "What are the limitations of ACT?"
+        },
+        {
+          "answer": "Psychologist Steven Hayes and colleagues.",
+          "question": "Who developed ACT?"
         }
       ],
       "focus_keyword": "act therapy",
@@ -439,31 +583,43 @@
     "dbt-therapy": {
       "h1": "DBT-informed therapy in Louisville: dialectical behavior therapy skills for when emotions feel too big",
       "meta_title": "Dialectical Behavior Therapy (DBT) Skills in Louisville, KY",
-      "meta_description": "DBT-informed counseling in Louisville: skills for big emotions, distress, and relationships, in individual sessions. In person or online, usually seen the same week.",
+      "meta_description": "DBT-informed therapy in Louisville: dialectical behavior therapy skills for big emotions and hard relationships, within individual counseling. $100 to $115.",
       "faqs": [
         {
-          "question": "What's the difference between DBT and DBT-informed counseling?",
-          "answer": "Comprehensive DBT includes individual therapy, a weekly skills group, phone coaching, and a consultation team. DBT-informed counseling teaches DBT skills within individual sessions."
+          "answer": "Comprehensive DBT includes individual therapy, a weekly skills group, phone coaching, and a consultation team. DBT-informed counseling teaches DBT skills within individual sessions.",
+          "question": "What's the difference between DBT and DBT-informed counseling?"
         },
         {
-          "question": "Is your DBT certified?",
-          "answer": "No. Our counselors are DBT-informed, not DBT-certified."
+          "answer": "No. Our counselors are DBT-informed, not DBT-certified.",
+          "question": "Is your DBT certified?"
         },
         {
-          "question": "Who is DBT-informed counseling for?",
-          "answer": "People who want skills for intense emotions, distress, and relationships, and don't need a full DBT program."
+          "answer": "People who want skills for intense emotions, distress, and relationships, and don't need a full DBT program.",
+          "question": "Who is DBT-informed counseling for?"
         },
         {
-          "question": "Do you offer DBT for teens?",
-          "answer": "Luke works with boys age 8 and up and teaches DBT skills within individual counseling."
+          "answer": "Luke works with boys age 8 and up and teaches DBT skills within individual counseling.",
+          "question": "Do you offer DBT for teens?"
         },
         {
-          "question": "Can I meet online?",
-          "answer": "Yes, if you're in Kentucky."
+          "answer": "Yes, if you're in Kentucky.",
+          "question": "Can I meet online?"
         },
         {
-          "question": "Can counseling include faith?",
-          "answer": "Yes, if you want it."
+          "answer": "Yes, if you want it.",
+          "question": "Can counseling include faith?"
+        },
+        {
+          "answer": "Dialectical behavior therapy: practical skills for intense emotions, crises, and relationships, built on accepting yourself while working to change.",
+          "question": "What is DBT?"
+        },
+        {
+          "answer": "Mindfulness, distress tolerance, emotion regulation, and interpersonal effectiveness.",
+          "question": "What are the core DBT skills?"
+        },
+        {
+          "answer": "DBT-informed counseling teaches DBT skills within individual counseling. A full program adds a weekly skills group, phone coaching, and a consultation team. Freedom offers DBT-informed counseling, not a full program.",
+          "question": "What's the difference between DBT-informed counseling and a full DBT program?"
         }
       ],
       "focus_keyword": "dbt near me",
@@ -477,31 +633,43 @@
     "cbt-therapy": {
       "h1": "Cognitive behavioral therapy (CBT) in Louisville, with practical tools you can use",
       "meta_title": "Cognitive Behavioral Therapist (CBT) in Louisville, KY | Freedom",
-      "meta_description": "Cognitive behavioral therapy (CBT) in Louisville: practical tools for anxiety, depression, and stress. Six counselors, in person or online, usually seen the same week.",
+      "meta_description": "Cognitive behavioral therapy (CBT) in Louisville: practical tools to change the thoughts and habits that keep you stuck. Six counselors use CBT. $50 to $165, usually seen the same week.",
       "faqs": [
         {
-          "question": "What does CBT help with?",
-          "answer": "Anxiety, depression, stress, panic, and many other concerns. Combined with exposure and response prevention, it also treats OCD."
+          "answer": "Anxiety, depression, stress, panic, and many other concerns. Combined with exposure and response prevention, it also treats OCD.",
+          "question": "What does CBT help with?"
         },
         {
-          "question": "Is CBT just positive thinking?",
-          "answer": "No. It's about thinking accurately, not just positively, and practicing new responses."
+          "answer": "No. It's about thinking accurately, not just positively, and practicing new responses.",
+          "question": "Is CBT just positive thinking?"
         },
         {
-          "question": "Will I have homework?",
-          "answer": "Usually something small to practice between sessions. It's flexible and agreed on together."
+          "answer": "Usually something small to practice between sessions. It's flexible and agreed on together.",
+          "question": "Will I have homework?"
         },
         {
-          "question": "How long does CBT take?",
-          "answer": "It varies. Many people notice change within a few months."
+          "answer": "It varies. Many people notice change within a few months.",
+          "question": "How long does CBT take?"
         },
         {
-          "question": "Can I do CBT online?",
-          "answer": "Yes, if you're in Kentucky."
+          "answer": "Yes, if you're in Kentucky.",
+          "question": "Can I do CBT online?"
         },
         {
-          "question": "Can CBT include faith?",
-          "answer": "Yes, if you want it."
+          "answer": "Yes, if you want it.",
+          "question": "Can CBT include faith?"
+        },
+        {
+          "answer": "You set goals with your counselor, learn to notice and test unhelpful thoughts, try small changes in what you do, and practice between sessions.",
+          "question": "How does CBT work?"
+        },
+        {
+          "answer": "Anxiety, panic, depression, low self-esteem, perfectionism, ADHD, and unhelpful habits, among others.",
+          "question": "What can CBT treat?"
+        },
+        {
+          "answer": "Often it's the approach, the fit, or not enough practice between sessions. Tell your counselor what isn't working, so you can adjust together.",
+          "question": "Why isn't therapy helping me?"
         }
       ],
       "focus_keyword": "cognitive behavioral therapist",
@@ -515,31 +683,47 @@
     "ifs-therapy": {
       "h1": "Internal family systems (IFS) therapy in Louisville, for the parts of you that feel stuck",
       "meta_title": "IFS Therapy in Louisville, KY | Internal Family Systems Therapy",
-      "meta_description": "Internal family systems (IFS) therapy in Louisville: understand the parts of you that feel stuck, with compassion instead of force. In person or online, usually seen the same week.",
+      "meta_description": "IFS therapy (internal family systems) in Louisville: understand the parts of you that feel stuck, with compassion instead of force. IFS-informed counselors. $100 to $165.",
       "faqs": [
         {
-          "question": "What does IFS stand for?",
-          "answer": "Internal family systems, an approach that works with the different \"parts\" of a person."
+          "answer": "Internal family systems, an approach that works with the different \"parts\" of a person.",
+          "question": "What does IFS stand for?"
         },
         {
-          "question": "What does IFS help with?",
-          "answer": "Trauma, anxiety, depression, shame, inner criticism, and feeling stuck, among others."
+          "answer": "Trauma, anxiety, depression, shame, inner criticism, and feeling stuck, among others.",
+          "question": "What does IFS help with?"
         },
         {
-          "question": "Do I have to believe I have \"parts\"?",
-          "answer": "No. Many people find it's a natural way to describe mixed feelings they already have."
+          "answer": "No. Many people find it's a natural way to describe mixed feelings they already have.",
+          "question": "Do I have to believe I have \"parts\"?"
         },
         {
-          "question": "Is IFS compatible with Christian faith?",
-          "answer": "Many Christians use it. Your counselor can talk through any questions you have."
+          "answer": "Many Christians use it. Your counselor can talk through any questions you have.",
+          "question": "Is IFS compatible with Christian faith?"
         },
         {
-          "question": "Can I do IFS online?",
-          "answer": "Yes, if you're in Kentucky."
+          "answer": "Yes, if you're in Kentucky.",
+          "question": "Can I do IFS online?"
         },
         {
-          "question": "Can IFS include faith?",
-          "answer": "Yes, if you want it."
+          "answer": "Yes, if you want it.",
+          "question": "Can IFS include faith?"
+        },
+        {
+          "answer": "The mind has protective parts and hurt parts, and a calm, curious core self that can get to know them and help them ease up.",
+          "question": "What are the core ideas of IFS?"
+        },
+        {
+          "answer": "Trauma, anxiety, depression, shame, inner criticism, and feeling pulled in different directions.",
+          "question": "What can IFS help with?"
+        },
+        {
+          "answer": "Its research base is still growing compared with older approaches like CBT. Many people find it helpful, and your counselor will talk with you about what fits.",
+          "question": "What are the criticisms of IFS?"
+        },
+        {
+          "answer": "No. Tony and Luke are IFS-informed, and Kasie is in IFS training. They use IFS ideas within counseling.",
+          "question": "Are your counselors accredited IFS practitioners?"
         }
       ],
       "focus_keyword": "ifs therapy",
@@ -629,28 +813,36 @@
       "meta_description": "Christian counselors about 20 minutes from New Albany, Jeffersonville, and Clarksville, just across the river in Louisville. Usually seen the same week. $50 to $165.",
       "faqs": [
         {
-          "question": "Can I meet with a counselor online from Indiana?",
-          "answer": "No. Our counselors are licensed in Kentucky, so Indiana clients meet in person at our Louisville office."
+          "answer": "No. Our counselors are licensed in Kentucky, so Indiana clients meet in person at our Louisville office.",
+          "question": "Can I meet with a counselor online from Indiana?"
         },
         {
-          "question": "How far is your office from New Albany?",
-          "answer": "About 20 minutes, just off I-64 in Louisville's Middletown area."
+          "answer": "About 20 minutes, just off I-64 in Louisville's Middletown area.",
+          "question": "How far is your office from New Albany?"
         },
         {
-          "question": "Do I need a Kentucky address or insurance plan?",
-          "answer": "No. Anyone can come to our office. Fees work the same for every client."
+          "answer": "No. Anyone can come to our office. Fees work the same for every client.",
+          "question": "Do I need a Kentucky address or insurance plan?"
         },
         {
-          "question": "How soon can I be seen?",
-          "answer": "Usually the same week, sometimes as soon as the next day."
+          "answer": "Usually the same week, sometimes as soon as the next day.",
+          "question": "How soon can I be seen?"
         },
         {
-          "question": "Can my teen or child be seen too?",
-          "answer": "Yes. We see children 8 and up, teens, and families, all in person at our office."
+          "answer": "Yes. We see children 8 and up, teens, and families, all in person at our office.",
+          "question": "Can my teen or child be seen too?"
         },
         {
-          "question": "Do you take insurance?",
-          "answer": "We don't bill insurance, but we provide a superbill for possible out-of-network reimbursement."
+          "answer": "We don't bill insurance, but we provide a superbill for possible out-of-network reimbursement.",
+          "question": "Do you take insurance?"
+        },
+        {
+          "answer": "\"LMHC\" is Indiana's license for mental health counselors. Our counselors hold Kentucky credentials (LCSW and LPCA, plus a student counselor under supervision), which is why Indiana clients meet with us in person at our Kentucky office.",
+          "question": "Is an LMHC the same as a therapist?"
+        },
+        {
+          "answer": "$50 to $165 per 50-minute session, depending on your counselor. HSA and FSA cards work, and we give you a superbill.",
+          "question": "How much does it cost?"
         }
       ],
       "focus_keyword": "therapist new albany indiana",
@@ -669,32 +861,32 @@
     },
     "elizabethtown-counseling": {
       "h1": "A therapist for Elizabethtown, online or in person",
-      "meta_title": "Therapist for Elizabethtown, KY | Online or In Person | Freedom Counseling",
+      "meta_title": "Therapist for Elizabethtown, KY | Online or In Person | Freedom",
       "meta_description": "Christian counselors serving Elizabethtown, KY online or in person at our Louisville office. Usually seen the same week. Rates listed openly, $50 to $165.",
       "faqs": [
         {
-          "question": "Can I see a Freedom counselor online from Elizabethtown?",
-          "answer": "Yes. Every counselor offers online sessions for clients in Kentucky."
+          "answer": "Yes. Every counselor offers online sessions for clients in Kentucky.",
+          "question": "Can I see a Freedom counselor online from Elizabethtown?"
         },
         {
-          "question": "Do you have an office in Elizabethtown?",
-          "answer": "No. Our office is in Louisville's Middletown area, under an hour away. Many E-town clients meet online, come in person, or mix the two."
+          "answer": "No. Our office is in Louisville's Middletown area, under an hour away. Many E-town clients meet online, come in person, or mix the two.",
+          "question": "Do you have an office in Elizabethtown?"
         },
         {
-          "question": "Is online counseling as effective as in person?",
-          "answer": "For most people and most concerns, yes. If it isn't working for you, your counselor will talk through other options."
+          "answer": "For most people and most concerns, yes. If it isn't working for you, your counselor will talk through other options.",
+          "question": "Is online counseling as effective as in person?"
         },
         {
-          "question": "Can couples meet online?",
-          "answer": "Yes, together from home, or in person at our office."
+          "answer": "Yes, together from the same room, so your counselor can work with you both at once.",
+          "question": "Can my spouse and I do couples counseling online?"
         },
         {
-          "question": "How soon can I be seen?",
-          "answer": "Usually the same week, sometimes as soon as the next day."
+          "answer": "Usually the same week, sometimes as soon as the next day.",
+          "question": "How soon can I be seen?"
         },
         {
-          "question": "Do you take insurance?",
-          "answer": "We don't bill insurance, but we provide a superbill for possible out-of-network reimbursement."
+          "answer": "We don't bill insurance, but we provide a superbill for possible out-of-network reimbursement.",
+          "question": "Do you take insurance?"
         }
       ],
       "focus_keyword": "therapist elizabethtown ky",
@@ -837,28 +1029,40 @@
       "meta_description": "Christian counseling and therapy in Louisville for individuals, couples, families, and teens. Six counselors, in person or online. Usually seen the same week. $50 to $165 per session.",
       "faqs": [
         {
-          "question": "Do you take insurance?",
-          "answer": "We don't bill insurance directly. We'll give you a superbill to submit for possible out-of-network reimbursement. Sessions are $50 to $165."
+          "answer": "We don't bill insurance directly, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement. Sessions are $50 to $165.",
+          "question": "Do you take insurance?"
         },
         {
-          "question": "How soon can I be seen?",
-          "answer": "Usually the same week, and sometimes as soon as the next day."
+          "answer": "Usually the same week, and sometimes as soon as the next day.",
+          "question": "How soon can I be seen?"
         },
         {
-          "question": "I'm not religious. Is Freedom still right for me?",
-          "answer": "Yes. Faith is central to how we work, but it's never required. You'll get the same excellent clinical care, and we follow your lead on faith."
+          "answer": "Yes. Faith is central to how we work, but it's never required. You'll get the same excellent clinical care, and we follow your lead on faith.",
+          "question": "I'm not religious. Is Freedom still right for me?"
         },
         {
-          "question": "Can I meet online?",
-          "answer": "Yes, if you're in Kentucky. Every counselor offers online sessions. Clients from Southern Indiana meet with us in person, about 20 minutes from New Albany."
+          "answer": "Yes, if you're in Kentucky. Every counselor offers online sessions. Clients from Southern Indiana meet with us in person, about 20 minutes from New Albany.",
+          "question": "Can I meet online?"
         },
         {
-          "question": "What if I don't click with my counselor?",
-          "answer": "You can switch to another Freedom counselor at any time. Finding the right fit matters."
+          "answer": "You can switch to another Freedom counselor at any time. Finding the right fit matters.",
+          "question": "What if I don't click with my counselor?"
         },
         {
-          "question": "What happens at the first session?",
-          "answer": "You'll talk about what brought you in and what you'd like to be different. There's no pressure to share everything at once."
+          "answer": "You'll talk about what brought you in and what you'd like to be different. There's no pressure to share everything at once.",
+          "question": "What happens at the first session?"
+        },
+        {
+          "answer": "Early on, as often as you reasonably can, given your budget, your schedule, and everything else on your plate. For your first six to eight sessions, we usually recommend weekly, or at least every other week. That builds momentum, helps you and your counselor build a strong working relationship quickly, and gives you time to set clear goals together. From there, most people begin spreading sessions out.",
+          "question": "How often will I meet with my counselor?"
+        },
+        {
+          "answer": "Yes. You can pay for sessions with an HSA or FSA card.",
+          "question": "Can I use my HSA or FSA?"
+        },
+        {
+          "answer": "Not in any way that should change your choice. People use the words interchangeably for a trained professional who provides talk therapy. What matters most is fit: someone whose training matches what you're facing, and who you feel comfortable talking to.",
+          "question": "Is there a difference between a counselor and a therapist?"
         }
       ],
       "focus_keyword": "therapist louisville ky",

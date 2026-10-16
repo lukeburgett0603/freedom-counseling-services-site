@@ -39,12 +39,24 @@
     "faith.body": "For some people, OCD attaches to faith: fear of having sinned, of offending God, or of not believing \"enough,\" with compulsions like repeated confession, prayer, or reassurance seeking. This is sometimes called scrupulosity. Your counselor understands how OCD can show up in faith, and can help you tell the difference between OCD and your convictions. If you'd rather not bring faith in, you'll get the same clinical care. You lead.",
     "sections": [
       {
-        "heading": "OCD isn't about being neat",
-        "body": "OCD is a cycle of obsessions (unwanted, distressing thoughts, images, or urges) and compulsions (things you do, or think, to make the distress go away). Compulsions bring relief for a moment, but they teach your brain the thought was dangerous, so it comes back stronger. Some people's compulsions are mostly mental, sometimes called \"Pure O.\" It's common, it has a name, and it can be treated."
+        "body": "OCD is a cycle of obsessions (unwanted, distressing thoughts, images, or urges) and compulsions (things you do, or think, to make the distress go away). Compulsions bring relief for a moment, but they teach your brain the thought was dangerous, so it comes back stronger. Some people's compulsions are mostly mental, sometimes called \"Pure O.\" It's common, it has a name, and it can be treated.",
+        "heading": "OCD isn't about being neat"
       },
       {
-        "heading": "Exposure and response prevention, at a pace you choose",
-        "body": "ERP is the most studied therapy for OCD. With your counselor, you build a list of situations that trigger your OCD, from easiest to hardest. Then, step by step, you practice facing them without doing the compulsion. Over time, your brain learns the thought isn't an emergency, and the urge to ritualize fades.\n\nYou're never forced into anything. You and your counselor choose each step together, and acceptance and commitment therapy (ACT) skills help you make room for discomfort along the way. Afraid to start? Read [What is ERP therapy?](/what-is-erp-therapy-a-gentler-look-for-anyone-afraid-to-start)"
+        "body": "OCD can latch onto almost anything: germs, harm, sex, relationships, faith, your body, getting things \"just right.\" Many people search for their exact fear online, can't find it, and decide it must be something other than OCD. It usually isn't. Whatever the content, OCD runs on the same loop: an unwanted thought, a surge of distress, and something you do or think to make it go away. That's why treatment targets the loop, not the theme, and why there's no kind of OCD we don't work with.",
+        "heading": "The theme isn't the problem. The process is."
+      },
+      {
+        "body": "ERP is the most studied therapy for OCD. With your counselor, you build a list of situations that trigger your OCD, from easiest to hardest. Then, step by step, you practice facing them without doing the compulsion. Over time, your brain learns the thought isn't an emergency, and the urge to ritualize fades.\n\nYou're never forced into anything. You and your counselor choose each step together, and acceptance and commitment therapy (ACT) skills help you make room for discomfort along the way. Afraid to start? Read [What is ERP therapy?](/what-is-erp-therapy-a-gentler-look-for-anyone-afraid-to-start)\n\nYour counselor may also use the Brain Lock approach, a four-step way to recognize an OCD thought for what it is, step back from it, and turn your attention to something that matters.",
+        "heading": "Exposure and response prevention, at a pace you choose"
+      },
+      {
+        "body": "Here's the part most people don't expect: compulsions are your mind's way of calming the obsession. They work for a moment, and that's exactly why OCD keeps coming back stronger. So the goal isn't to make the thought go away. It's to let it be there without doing the compulsion, and to keep doing something that matters to you while the discomfort passes. Things that help in the moment:\n\n- **Notice and name it.** \"That's an OCD thought.\" Labeling it puts a little space between you and it.\n- **Slow your breathing.** Try a physiological sigh (two quick breaths in through the nose, one long breath out) or box breathing (in for 4, hold for 4, out for 4, hold for 4).\n- **Relax your body.** Tense and release one muscle group at a time.\n- **Change your temperature.** Splash cold water on your face, or take a cold shower.\n- **Change your surroundings.** Go for a walk.\n\nThen turn back toward what you were doing, without the ritual. Your counselor will help you practice this until it gets easier.",
+        "heading": "What to do when an obsession hits"
+      },
+      {
+        "heading": "Signs of OCD in men",
+        "body": "OCD in men often looks different, and it often hides. Research finds that in men, OCD:\n\n- **tends to start earlier**, often in childhood or the teen years;\n- **more often involves sexual, religious, aggressive, or symmetry obsessions**, and rituals done silently in the mind;\n- **can show up in the body first**, such as worries about urination or sexual function that lead to doctor visits before anyone names OCD;\n- **is often kept secret**, because shame and the pressure to be strong and in control make it hard to ask for help.\n\nThe encouraging part: treatment works just as well for men as for women. Luke works with boys and men, 8 and up, and an unwanted thought never says anything about your character.\n\n*Research: Mathes, Morabito & Schmidt (2019), Current Psychiatry Reports; Torresan et al. (2009), Comprehensive Psychiatry; de Mathis et al. (2011), Revista Brasileira de Psiquiatria; Conti, Fineberg et al. (2023), Trends in Urology & Men's Health; Goodman, Lochner & Stein (2021), Comprehensive Men's Mental Health; Surles (2025), International OCD Foundation.*"
       }
     ],
     "team.heading": "Your OCD therapists",
@@ -57,6 +69,6 @@
     "team.note": "Luke works with boys and men. If you're looking for OCD treatment for a woman or girl, call us and we'll help you find the right fit.",
     "expect.heading": "Your first session",
     "expect.body": "Your first session is about understanding your OCD: what the thoughts are, what you do in response, and how it's affecting your life. You won't be asked to face anything before you're ready. Sessions are in our Middletown office or online.",
-    "cost.body": "$115 per session. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "$115 per session. We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

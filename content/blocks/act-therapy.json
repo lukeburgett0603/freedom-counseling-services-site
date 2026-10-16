@@ -39,31 +39,47 @@
     "faith.body": "ACT's focus on values fits naturally with faith for many people: living by what you believe matters, even when it's hard. If you want faith to be part of your counseling, your counselor will bring it in. If not, you'll get the same clinical care. You lead.",
     "sections": [
       {
-        "heading": "Less fighting, more living",
-        "body": "Most of us try to get rid of painful thoughts and feelings. ACT takes a different approach: learning to notice them without being pushed around by them, getting clear on what matters most to you, and taking steps in that direction, even when it's uncomfortable. ACT has strong research behind it for anxiety, depression, OCD, chronic stress, and more."
+        "body": "Acceptance and commitment therapy (ACT, said like the word \"act\") helps you stop fighting painful thoughts and feelings, so they lose their grip on your choices. Instead of waiting to feel better before you live fully, you learn to carry what's hard and take steps toward the life you want. ACT was developed by psychologist Steven Hayes and colleagues.",
+        "heading": "What is ACT therapy?"
       },
       {
-        "heading": "Practical, and built around your values",
-        "body": "ACT sessions are active. You'll practice skills like stepping back from sticky thoughts, making room for hard feelings, and staying present. You'll also name your values, the kind of person you want to be, and turn them into small, concrete steps between sessions."
+        "body": "Most of us try to get rid of painful thoughts and feelings. ACT takes a different approach: learning to notice them without being pushed around by them, getting clear on what matters most to you, and taking steps in that direction, even when it's uncomfortable. ACT has strong research behind it for anxiety, depression, OCD, chronic stress, and more.",
+        "heading": "Less fighting, more living"
+      },
+      {
+        "body": "ACT sessions are active. You'll practice skills like stepping back from sticky thoughts, making room for hard feelings, and staying present. You'll also name your values, the kind of person you want to be, and turn them into small, concrete steps between sessions.",
+        "heading": "Practical, and built around your values"
+      },
+      {
+        "heading": "How ACT works, in plain words",
+        "body": "- Making room for difficult feelings instead of pushing them away.\n- Stepping back from thoughts, so they're just thoughts, not orders.\n- Coming back to the present moment.\n- Noticing that you're bigger than any thought or feeling you have.\n- Getting clear on what matters most to you.\n- Taking small, concrete steps in that direction."
+      },
+      {
+        "heading": "What ACT helps with",
+        "body": "[Anxiety](/anxiety-depression-counseling), [depression](/depression-counseling), [OCD](/ocd-treatment) (alongside exposure and response prevention), [grief](/grief-counseling), chronic stress, and feeling stuck."
+      },
+      {
+        "heading": "Honest limits",
+        "body": "ACT isn't aimed at making feelings disappear quickly, and that can feel frustrating at first. Its research base is strong and growing, but newer than CBT's for some conditions; your counselor will tell you what fits best."
       }
     ],
     "team.heading": "Counselors who use ACT",
     "team.items": [
       {
         "slug": "tony-gore",
-        "text": "Couples, families, teens, young adults, and men who feel stuck or overwhelmed."
+        "text": "ACT-informed. Couples, families, teens, young adults, and men who feel stuck or overwhelmed."
       },
       {
         "slug": "staci-harrub",
-        "text": "Emerging adults and adults working through anxiety, grief, trauma, and perfectionism."
+        "text": "ACT-informed. Emerging adults and adults working through anxiety, grief, trauma, and perfectionism."
       },
       {
         "slug": "luke-burgett",
-        "text": "Boys and men, age 8 and up, working through anxiety, depression, OCD, and trauma."
+        "text": "Trained in ACT. Boys and men, age 8 and up, working through anxiety, depression, OCD, and trauma."
       }
     ],
     "expect.heading": "Your first session",
     "expect.body": "Your first session is about getting to know you: what's been hard, and what you'd want your life to look like if it weren't in the way. Sessions are in our Middletown office or online.",
-    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

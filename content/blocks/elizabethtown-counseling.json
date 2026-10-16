@@ -17,46 +17,76 @@
     "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
     "sections": [
       {
-        "heading": "Counseling that fits your week, from E-town",
-        "body": "- **Online, from home.** Because Elizabethtown is in Kentucky, you can meet with any Freedom counselor online. No drive, no time off for travel.\n- **In person, in Louisville.** Our office is just off Blankenbaker Parkway in Middletown, under an hour from Elizabethtown. Some clients like the drive, and the time to think on the way home.\n- **Or both.** Switch from week to week, whenever you need to."
+        "body": "- **Online, from home.** Because Elizabethtown is in Kentucky, you can meet with any Freedom counselor online. No drive, no time off for travel.\n- **In person, in Louisville.** Our office is just off Blankenbaker Parkway in Middletown, under an hour from Elizabethtown. Some clients like the drive, and the time to think on the way home.\n- **Or both.** Switch from week to week, whenever you need to.\n\nService members and military families from Fort Knox are welcome. We don't bill TRICARE, but we can give you a superbill, and online sessions fit around a military schedule.",
+        "heading": "Counseling that fits your week, from E-town"
       }
     ],
     "links.heading": "What Elizabethtown clients come to us for",
     "links.items": [
       {
-        "title": "Individual counseling",
+        "href": "/individual-counseling",
         "text": "For anxiety, depression, OCD, or a season of feeling stuck",
-        "href": "/individual-counseling"
+        "title": "Individual counseling"
       },
       {
-        "title": "Couples and marriage counseling",
+        "title": "Anxiety counseling",
+        "text": "Worry, panic, and a mind that won't slow down",
+        "href": "/anxiety-depression-counseling"
+      },
+      {
+        "title": "Depression counseling",
+        "text": "Including postpartum and seasonal depression",
+        "href": "/depression-counseling"
+      },
+      {
+        "title": "OCD treatment",
+        "text": "For boys and men, 8 and up",
+        "href": "/ocd-treatment"
+      },
+      {
+        "href": "/couples-marriage-counseling",
         "text": "Including pre-marital, in person or online",
-        "href": "/couples-marriage-counseling"
+        "title": "Couples and marriage counseling"
       },
       {
-        "title": "Family counseling",
+        "href": "/family-counseling",
         "text": "Including parent and child relationships",
-        "href": "/family-counseling"
+        "title": "Family counseling"
       },
       {
-        "title": "Child and teen counseling",
+        "href": "/child-teen-counseling",
         "text": "For kids 8 and up",
-        "href": "/child-teen-counseling"
+        "title": "Child and teen counseling"
       },
       {
-        "title": "Grief counseling",
+        "href": "/grief-counseling",
         "text": "After a loss",
-        "href": "/grief-counseling"
+        "title": "Grief counseling"
       },
       {
-        "title": "Trauma counseling and EMDR",
-        "text": "Including EMDR online",
-        "href": "/trauma-counseling"
+        "href": "/trauma-counseling",
+        "text": "Including spiritual and church hurt",
+        "title": "Trauma counseling"
       },
       {
-        "title": "Christian counseling",
+        "title": "EMDR therapy",
+        "text": "With two EMDR-trained counselors",
+        "href": "/trauma-emdr-counseling"
+      },
+      {
+        "href": "/christian-counseling",
         "text": "For anyone who wants faith at the center",
-        "href": "/christian-counseling"
+        "title": "Christian counseling"
+      },
+      {
+        "title": "Counseling for pastors",
+        "text": "Confidential help for ministry burnout",
+        "href": "/counseling-for-pastors"
+      },
+      {
+        "title": "Porn addiction counseling",
+        "text": "Shame-free help for men",
+        "href": "/porn-addiction-counseling"
       }
     ],
     "faith.heading": "Faith at the center, never forced",
@@ -75,6 +105,6 @@
     "expect.heading": "",
     "expect.body": "",
     "cost.heading": "What it costs",
-    "cost.body": "$50 to $165 per session, depending on your counselor, the same online or in person. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "$50 to $165 per session, depending on your counselor, the same online or in person. We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

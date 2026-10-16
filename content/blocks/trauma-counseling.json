@@ -33,41 +33,77 @@
       },
       {
         "text": "Part of you wants to heal, and part of you would rather not go near it."
+      },
+      {
+        "text": "Faith or church became a source of hurt instead of comfort."
+      },
+      {
+        "text": "You're quick to anger, shut down, or always busy, and you're not sure why."
       }
     ],
     "faith.heading": "Faith at the center, never forced",
     "faith.body": "If you want faith to be part of your healing, including hard questions about safety, trust, and where God was in what happened, your counselor will bring it in. If not, that's entirely your call.",
     "sections": [
       {
-        "heading": "It doesn't have to be one big event",
-        "body": "Trauma isn't only a single dramatic event. A difficult childhood, a painful relationship, or many smaller hard experiences add up too. If your body is still reacting as though something isn't safe, that's reason enough to get support."
+        "body": "Trauma isn't only a single dramatic event. A difficult childhood, a painful relationship, or many smaller hard experiences add up too. If your body is still reacting as though something isn't safe, that's reason enough to get support.",
+        "heading": "It doesn't have to be one big event"
       },
       {
-        "heading": "More than one path to healing",
-        "body": "There's no single right way to heal from trauma, so our counselors work in different ways:\n\n- **EMDR** helps painful memories lose their emotional charge, without describing everything in detail. [About EMDR](/trauma-emdr-counseling)\n- **Internal family systems (IFS)** helps you understand the parts of you still protecting against what happened, with compassion instead of force.\n- **Acceptance and commitment therapy (ACT)** helps you relate differently to painful memories and feelings so they stop running your life.\n- **Psychodynamic, trauma-focused counseling** looks at how what happened still shapes your relationships and reactions today."
+        "body": "- **Childhood:** abuse, neglect, a chaotic or unsafe home, growing up around addiction or conflict\n- **Abuse or a painful relationship:** emotional, physical, or sexual harm, including from someone you trusted\n- **Accidents and medical trauma:** a crash, a frightening diagnosis, a hard birth, time in the ICU\n- **Sudden or traumatic loss:** a death by suicide, overdose, violence, or accident ([grief](/grief-counseling))\n- **Work-related trauma:** first responders, healthcare workers, military service\n- **Spiritual and church-related hurt:** spiritual abuse, harsh or shaming teaching, being hurt by people in the church\n- **Many smaller hard experiences** that added up over years",
+        "heading": "Kinds of trauma we help with"
       },
       {
-        "heading": "You stay in control",
-        "body": "Before any deep work begins, your counselor helps you build safety and steadiness: tools to calm your body and stay grounded. You set the pace, and you can pause at any time. The goal is healing, never re-living the trauma."
+        "body": "Trauma tends to show up in four ways:\n\n- **It comes back:** memories, nightmares, or flashes that arrive without warning.\n- **You avoid:** places, people, conversations, or feelings that remind you of it.\n- **You stay on guard:** startling easily, trouble sleeping, irritability, a body that won't settle.\n- **It changes how you see things:** shame, guilt, numbness, or feeling that you, other people, or the world aren't safe.",
+        "heading": "How trauma can show up"
+      },
+      {
+        "body": "Some people develop post-traumatic stress disorder (PTSD) after a single frightening event. Others carry **complex trauma**, from hurt that was repeated or went on for a long time, often in childhood or in a close relationship. Complex trauma often affects how you see yourself and how you trust others, not just how you react to reminders. You don't need a diagnosis to start. Your counselor will help you understand what you're carrying and what will help.",
+        "heading": "PTSD and complex trauma"
+      },
+      {
+        "body": "There's no single right way to heal from trauma. Here's how the approaches we use differ:\n\n- **Eye movement desensitization and reprocessing (EMDR)** helps painful memories lose their emotional charge, without describing everything in detail. Often a good fit when specific memories keep hitting with the same force. With Staci or Kasie, both EMDR-trained. [About EMDR](/trauma-emdr-counseling)\n- **Internal family systems (IFS)** helps you understand the parts of you still protecting against what happened, with compassion instead of force. Often a good fit when you feel pulled in different directions inside.\n- **Acceptance and commitment therapy (ACT)** helps you relate differently to painful memories and feelings, so they stop running your life. Often a good fit when avoidance has made life smaller.\n- **Psychodynamic, trauma-focused counseling** looks at how what happened still shapes your relationships and reactions today.\n\nYou don't have to choose. Tell us what's going on, and we'll suggest a counselor and a way to start.",
+        "heading": "Which approach fits you"
+      },
+      {
+        "body": "For some people, the hurt came from a church, a leader, or teaching that left them feeling afraid of God or never good enough. Spiritual and religious trauma is real, and every counselor at Freedom works with it. You won't be pushed toward or away from faith. We'll help you sort out what happened, what you believe now, and what you want your faith to be, if anything. When it shows up as constant fear of sinning or needing reassurance (scrupulosity), Luke works with that specifically ([OCD treatment](/ocd-treatment)).",
+        "heading": "When faith or the church is part of the hurt"
+      },
+      {
+        "body": "Trauma in boys and men often doesn't look like fear. It can look like anger, shutting down, staying busy, drinking, or acting like everything's fine. Luke works with boys and men, 8 and up, through IFS and ACT, and Tony works with men too.",
+        "heading": "Trauma in boys and men"
+      },
+      {
+        "body": "Before any deep work begins, your counselor helps you build safety and steadiness: tools to calm your body and stay grounded. You set the pace, and you can pause at any time. The goal is healing, never re-living the trauma.",
+        "heading": "You stay in control"
+      },
+      {
+        "heading": "If therapy hasn't helped before",
+        "body": "If you've tried therapy and it didn't help, that doesn't mean you can't heal. Often it was the wrong approach for what you're carrying, the wrong pace, or simply not the right fit. Tell your counselor what didn't work, so they can start differently. And you can always switch counselors here."
       }
     ],
     "team.heading": "Counselors who work with trauma",
     "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Trauma in couples, families, teens, and men."
+      },
       {
         "slug": "staci-harrub",
         "text": "Psychodynamic, trauma-focused counseling and EMDR, in person or online."
       },
       {
         "slug": "luke-burgett",
-        "text": "Boys and men, age 8 and up, working through trauma with internal family systems (IFS) and acceptance and commitment therapy (ACT)."
+        "text": "Boys and men, age 8 and up, working through trauma with internal family systems (IFS) and acceptance and commitment therapy (ACT), including scrupulosity."
       },
       {
         "slug": "kasie-secrest",
-        "text": "Trauma, including EMDR, in person or online."
+        "text": "Women and older teens healing from trauma, including EMDR, in person or online."
       }
     ],
     "expect.heading": "Your first session",
     "expect.body": "Your first session focuses on getting to know you and building safety, not on the trauma itself. You won't be asked to go into detail before you're ready. Sessions are in our Middletown office or online.",
-    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement.",
+    "note.heading": "Substance use",
+    "note.body": "If drinking or drug use has become part of how you cope, you deserve care for that too. We'll help you find a specialized substance use program, and counseling here can work alongside it."
   }
 }

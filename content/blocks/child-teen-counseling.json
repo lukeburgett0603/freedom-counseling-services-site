@@ -34,37 +34,74 @@
       },
       {
         "text": "You're not sure if it's a phase, and you'd rather not wait to find out."
+      },
+      {
+        "text": "Your child is hurting themselves, or you're worried about how they eat."
+      },
+      {
+        "text": "Your child can't focus, can't sit still, or is falling behind, and it's affecting how they feel about themselves."
+      },
+      {
+        "text": "Your child joined your family through adoption or foster care, and you want help understanding what they carry."
       }
     ],
     "faith.heading": "Faith at the center, never forced",
     "faith.body": "If your family wants faith to be part of your child's counseling, it's brought in at a level that fits their age. If not, sessions stay clinically focused. Either way, the clinical care is the same.",
     "sections": [
       {
-        "heading": "Is it a phase, or something more?",
-        "body": "It isn't always obvious, and it's fair to be unsure. A few sessions with a counselor trained to work with kids is a low-pressure way to find out, and it's easier to help early, before patterns settle in."
+        "body": "It isn't always obvious, and it's fair to be unsure. A few sessions with a counselor trained to work with kids is a low-pressure way to find out, and it's easier to help early, before patterns settle in.",
+        "heading": "Is it a phase, or something more?"
       },
       {
-        "heading": "What counseling for kids and teens looks like",
-        "body": "Counselors meet kids where they are. With younger children, that often means art and creative activities: drawing, games, and hands-on activities that let a child show what they can't yet say. With teens, it means building enough trust that therapy feels like their space, not a punishment.\n\nOur counselors use approaches including art interventions and dialectical behavior therapy (DBT) skills for managing big emotions."
+        "body": "- **Anxiety and worry**, including school refusal and panic ([anxiety](/anxiety-depression-counseling))\n- **Low mood and depression**, when a child seems flat, tired, or hopeless ([depression](/depression-counseling))\n- **Big emotions and anger**: meltdowns, outbursts, or shutting down\n- **ADHD**: focus, impulsivity, and the frustration and self-doubt that often come with it, using IFS, ACT, and CBT\n- **Self-esteem**, including the pressure of social media and comparison\n- **Social anxiety and friendships**\n- **School stress** and perfectionism\n- **Self-harm**, with safety first and a plan you're part of, using IFS, ACT, and CBT\n- **Eating disorders**, alongside your child's doctor, using IFS, ACT, and CBT\n- **OCD, including somatic obsessions** (with Luke): getting stuck on body sensations like breathing, swallowing, or blinking, and not being able to stop noticing them ([OCD](/ocd-treatment))\n- **Grief and loss** (with Sophie and Luke) ([grief](/grief-counseling))\n- **Trauma**, and big changes like divorce or a move ([trauma](/trauma-counseling))\n- **Adoption and foster care**",
+        "heading": "What we help kids and teens with"
       },
       {
-        "heading": "How we keep you involved",
-        "body": "Kids do best when the adults around them are supported too. Depending on what's going on, a parent may join every session, or your child may meet one on one with their counselor. We often also recommend sessions with just the parents: most of what a child faces has roots in the family, and counseling works best when you have tools to help your child at home between sessions.\n\nWith teens, counselors balance confidentiality, so your teen has room to be honest, with keeping you informed about safety and general progress. Your counselor will explain exactly how this works for your child."
+        "body": "Counselors meet kids where they are. With younger children, that often means art and creative activities: drawing, games, and hands-on activities that let a child show what they can't yet say. With teens, it means building enough trust that therapy feels like their space, not a punishment.\n\nOur counselors use art interventions and dialectical behavior therapy (DBT) skills for managing big emotions. For ADHD, self-harm, and eating disorders, they draw on internal family systems (IFS), acceptance and commitment therapy (ACT), and cognitive behavioral therapy (CBT). The approach always fits what your child is working through.",
+        "heading": "What counseling for kids and teens looks like"
+      },
+      {
+        "body": "Younger children often can't explain what they feel, but they can show it. Drawing and other art activities give them a way to say what they don't have words for yet. A counselor helps them make sense of what comes up and practice new ways to cope. For your child, it can feel more like making something than like talking about problems.",
+        "heading": "Why art helps"
+      },
+      {
+        "body": "Boys often don't say \"I'm anxious\" or \"I'm sad.\" It comes out as anger, silence, video games for hours, or \"I'm fine.\" Luke Burgett works with boys and young men, 8 and up, through anxiety, depression, OCD (including somatic obsessions), and grief, and he almost always invites parents in for sessions of their own.",
+        "heading": "Boys and teen boys"
+      },
+      {
+        "body": "Kids grieve differently from adults. It can come and go, show up as behavior instead of tears, or surface months later. Sophie and Luke both work with grieving children and teens, at a pace that fits their age.",
+        "heading": "Grieving children and teens"
+      },
+      {
+        "body": "Kids and teens have real questions about God, especially after a loss or a hard season. Some teens start questioning the faith they grew up with. If your family wants faith in your child's counseling, those questions are welcome, and nobody is pushed toward or away from belief.",
+        "heading": "Faith questions at their age"
+      },
+      {
+        "body": "Kids do best when the adults around them are supported too. Depending on what's going on, a parent may join every session, or your child may meet one on one with their counselor. We often also recommend sessions with just the parents: most of what a child faces has roots in the family, and counseling works best when you have tools to help your child at home between sessions.\n\nWith teens, counselors balance confidentiality, so your teen has room to be honest, with keeping you informed about safety and general progress. Your counselor will explain exactly how this works for your child.\n\nYou can also come in for parent coaching on your own, even if your child isn't in counseling. And with your written consent, your child's counselor can talk with their school or pediatrician, so everyone is working from the same plan.",
+        "heading": "How we keep you involved"
+      },
+      {
+        "heading": "What to tell your child about counseling",
+        "body": "- **Younger kids:** \"You're going to meet someone whose job is to help kids with big feelings. You'll draw and talk, and you're not in trouble.\"\n- **Older kids and teens:** \"Things have felt hard lately. I found someone you can talk to who isn't me. What you say stays mostly between you two, and if you don't click, we'll find someone else.\"\n- **Avoid:** presenting it as a punishment, or promising it will fix everything quickly."
       }
     ],
     "team.heading": "Counselors who work with kids and teens",
     "team.items": [
       {
         "slug": "sophie-bowman",
-        "text": "Children, teens, and young adults, especially adolescent girls, using art interventions."
+        "text": "Children, teens, and young adults, especially adolescent girls, using art interventions, including grief."
       },
       {
         "slug": "luke-burgett",
-        "text": "Boys and young men, age 8 and up, working through anxiety, depression, and OCD."
+        "text": "Boys and young men, age 8 and up, working through anxiety, depression, OCD (including somatic obsessions), and grief."
       },
       {
         "slug": "rhonda-gore",
         "text": "Older teen girls and young women working through anxiety, shame, and identity."
+      },
+      {
+        "slug": "kasie-secrest",
+        "text": "Older teen girls and young women working through anxiety, depression, grief, and relationships."
       },
       {
         "slug": "tony-gore",
@@ -73,7 +110,7 @@
     ],
     "expect.heading": "The first session",
     "expect.body": "The first session usually includes a parent, so the counselor can hear what's been happening and what you're hoping for. From there, your counselor will recommend what fits: sessions together, one on one with your child, sessions with just the parents, or a mix. Sessions are in our Middletown office or online.",
-    "cost.body": "Student sessions with Sophie are $50. We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement.",
+    "cost.body": "Student sessions with Sophie are $50. We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement.",
     "note.heading": "Who we see",
     "note.body": "Freedom works with children 8 and older. For younger children, we'll gladly help you find the right next step."
   }

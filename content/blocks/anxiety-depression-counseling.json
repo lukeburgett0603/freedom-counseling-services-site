@@ -33,30 +33,68 @@
       },
       {
         "text": "You've been told to \"just relax,\" and it hasn't helped."
+      },
+      {
+        "text": "You've had a panic attack, and now you're afraid of the next one."
+      },
+      {
+        "text": "You keep checking your body or searching symptoms, and the reassurance never lasts."
       }
     ],
     "faith.heading": "Faith at the center, never forced",
     "faith.body": "If you want faith to be part of how you work through anxiety, your counselor will bring it in. If not, you'll get the same excellent clinical care. You lead.",
     "sections": [
       {
-        "heading": "It doesn't have to make sense yet",
-        "body": "Anxiety can be hard to put into words. You don't need to have it figured out before you start. Early sessions are about building a clear picture of what's happening for you, and that's part of the work."
+        "body": "Anxiety can be hard to put into words. You don't need to have it figured out before you start. Early sessions are about building a clear picture of what's happening for you, and that's part of the work.",
+        "heading": "It doesn't have to make sense yet"
       },
       {
-        "heading": "Practical tools, not just a place to talk",
-        "body": "Counseling for anxiety at Freedom is active and practical. Our counselors use approaches with strong research behind them, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), and mindfulness-based approaches. You'll learn what keeps anxiety going for you, and practice ways to respond that loosen its grip.\n\nIf unwanted, repeating thoughts are a big part of what you're facing, that may be OCD, which has a specific, effective treatment. See [OCD treatment](/ocd-treatment).\n\nYour counselor tracks progress with you along the way, so you can both see what's helping."
+        "body": "- **Constant worry** that jumps from one thing to the next (generalized anxiety)\n- **Panic attacks**: sudden waves of fear with a racing heart, shaking, or feeling like you can't breathe\n- **Social anxiety**: dreading being judged, replaying conversations, avoiding people\n- **Phobias**: intense fear of a specific thing, like driving, flying, or needles\n- **Health anxiety**: worrying something is seriously wrong with your body, even after reassurance\n- **High-functioning anxiety**: getting everything done while running on worry underneath ([read more](/when-anxiety-feels-like-a-full-time-job))",
+        "heading": "Kinds of anxiety we help with"
       },
       {
-        "heading": "Will I need medication?",
-        "body": "Not necessarily. Counseling alone helps many people. For others, medication from a physician works well alongside counseling. Your counselor can talk through what makes sense and refer you for a medication evaluation if it's worth exploring. Freedom doesn't prescribe medication."
+        "body": "Anxiety isn't only in your head. It can show up as a racing heart, a tight chest, an upset stomach, headaches, tense muscles, restlessness, or trouble falling or staying asleep. If you notice these, it's worth getting checked by your doctor too, and then working on the anxiety itself.",
+        "heading": "How anxiety shows up in your body"
       },
       {
-        "heading": "When another kind of care fits better",
-        "body": "If your symptoms are severe and need psychiatric care or medication management, we'll help you find the right provider."
+        "body": "Counseling for anxiety at Freedom is active and practical. Our counselors use approaches with strong research behind them, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), and mindfulness-based approaches. You'll learn what keeps anxiety going for you, and practice ways to respond that loosen its grip.\n\nIf unwanted, repeating thoughts are a big part of what you're facing, that may be OCD, which has a specific, effective treatment. See [OCD treatment](/ocd-treatment).\n\nYour counselor tracks progress with you along the way, so you can both see what's helping.\n\nFor panic and phobias, your counselor may suggest facing what you fear in small, planned steps, so your body learns it's safe. It's always your choice and always case by case; if it isn't right for you, there's another route.",
+        "heading": "Practical tools, not just a place to talk"
+      },
+      {
+        "body": "After a panic attack, many people start avoiding anything that might trigger another one: driving, stores, exercise, being far from home. The avoidance makes sense, and it usually makes the fear grow. Counseling helps you understand what's happening in your body and gradually take your life back, at a pace you agree to.",
+        "heading": "Panic attacks and the fear of the next one"
+      },
+      {
+        "body": "If you keep checking your body, searching symptoms, or seeking reassurance that doesn't last, that may be health anxiety. We usually recommend a screening with your doctor first, to make sure nothing medical is being missed. Then counseling can help with the cycle of worry and checking itself.",
+        "heading": "Health anxiety"
+      },
+      {
+        "body": "When anxiety spikes, bring your attention back to the room:\n\n1. Name **3 things you can see**.\n2. Name **3 sounds you can hear**.\n3. Move **3 parts of your body**: your fingers, your shoulders, your feet.\n\nIt won't fix anxiety, but it can help you get steady enough for the next step. If you're in crisis, call or text 988.",
+        "heading": "Something to try right now: the 3-3-3 rule"
+      },
+      {
+        "body": "Many Christians feel guilty for being anxious, as if worrying means their faith isn't strong enough. Anxiety isn't a spiritual failure. If you want faith in your counseling, your counselor can help you bring your worries to God without shame, and use what you believe as a source of steadiness. If not, you'll get the same clinical care.",
+        "heading": "Anxiety and faith"
+      },
+      {
+        "heading": "Anxiety in men and boys",
+        "body": "In men and boys, anxiety often doesn't look like worry. It can look like irritability, needing control, working nonstop, or trouble sleeping. Luke works with boys and men, 8 and up, and Tony works with men too."
+      },
+      {
+        "body": "Not necessarily. Counseling alone helps many people. For others, medication from a physician works well alongside counseling. Your counselor can talk through what makes sense and refer you for a medication evaluation if it's worth exploring. Freedom doesn't prescribe medication.",
+        "heading": "Will I need medication?"
+      },
+      {
+        "body": "If your symptoms are severe and need psychiatric care or medication management, we'll help you find the right provider.",
+        "heading": "When another kind of care fits better"
       }
     ],
     "team.heading": "Counselors who work with anxiety",
     "team.items": [
+      {
+        "slug": "tony-gore",
+        "text": "Teens and adults whose anxiety is spilling into every part of life: work, home, relationships, and sleep."
+      },
       {
         "slug": "luke-burgett",
         "text": "Boys and men, age 8 and up, working through anxiety, worry, and panic."
@@ -64,6 +102,10 @@
       {
         "slug": "staci-harrub",
         "text": "Young adults and adults working through anxiety and perfectionism."
+      },
+      {
+        "slug": "kasie-secrest",
+        "text": "Women and older teens working through anxiety."
       },
       {
         "slug": "rhonda-gore",
@@ -76,6 +118,6 @@
     ],
     "expect.heading": "Your first session",
     "expect.body": "It's normal to feel anxious about your first session. You'll talk about what you've been experiencing and what you'd like to be different, at whatever pace feels okay. Sessions are in our Middletown office or online.",
-    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

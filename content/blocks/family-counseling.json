@@ -33,18 +33,46 @@
       },
       {
         "text": "You're worried about one person, and it's affecting all of you."
+      },
+      {
+        "text": "You and your ex are raising kids in two homes, and every handoff is tense."
+      },
+      {
+        "text": "Your child is struggling at school or at home, and you don't know what to do differently."
+      },
+      {
+        "text": "You're an adult child caring for an aging parent, and old family patterns are coming back."
+      },
+      {
+        "text": "Your teen or adult child is questioning the faith you raised them in."
       }
     ],
     "faith.heading": "Faith at the center, never forced",
     "faith.body": "If your family wants faith to be part of counseling, your counselor will bring it in. If family members see faith differently, your counselor can help you hold that too. You lead.",
     "sections": [
       {
-        "heading": "No one is the problem. The pattern is.",
-        "body": "Families often come in hoping one person will be \"fixed.\" Family therapy looks at something more useful: the pattern between you, how each person's reactions shape everyone else's. When the pattern changes, everyone gets some relief."
+        "body": "Families often come in hoping one person will be \"fixed.\" Family therapy looks at something more useful: the pattern between you, how each person's reactions shape everyone else's. When the pattern changes, everyone gets some relief.",
+        "heading": "No one is the problem. The pattern is."
       },
       {
-        "heading": "What family counseling at Freedom looks like",
-        "body": "Your counselor will recommend a structure that fits your family. Some sessions include everyone, some focus on one relationship (like a parent and a teen), and some may include individual time with a child as part of the family's work. Our counselors draw on family systems therapy, which focuses on how a family works as a whole, along with practical tools for communication and repair."
+        "body": "Your counselor will recommend a structure that fits your family. Some sessions include everyone, some focus on one relationship (like a parent and a teen), and some may include individual time with a child as part of the family's work. Our counselors draw on family systems therapy, which focuses on how a family works as a whole, along with practical tools for communication and repair.\n\nEarly on, families usually meet weekly or every other week, as often as you reasonably can, to build momentum and set clear goals together. As things improve, sessions spread out.",
+        "heading": "What family counseling at Freedom looks like"
+      },
+      {
+        "body": "Sometimes the most useful sessions are just for parents. Parent coaching gives you a place to understand what's going on with your child and to practice what to do differently at home, with the counselor's support. When we see a child or teen, we almost always invite parents in for sessions of their own. And you can come for parent coaching even if your child isn't seeing a counselor at all.",
+        "heading": "Sessions for parents"
+      },
+      {
+        "body": "It's common for a teen to refuse, at least at first. You don't have to wait for them. Start with parent sessions, or with whoever is willing. Changes in how you respond often shift things at home, and many teens join later once they see it isn't about blaming them.",
+        "heading": "When your teen won't come"
+      },
+      {
+        "body": "- Parents and teens stuck in the same arguments\n- Blended families and stepfamilies\n- Co-parenting across two homes after a divorce or separation\n- Siblings in constant conflict\n- Families after a loss, a move, or a crisis\n- Adult children and aging parents, including caregiving decisions and old patterns that resurface\n- A family member's substance use: we help the rest of the family while your loved one gets specialized treatment (with Tony or Staci)\n\nWe don't do custody evaluations.",
+        "heading": "Families we work with"
+      },
+      {
+        "heading": "When faith differs across generations",
+        "body": "A teen pulling away from church, an adult child who no longer believes, or parents who see faith differently from each other: these can feel like a fracture in the family. Your counselor can help you stay connected and keep talking, without forcing anyone's beliefs, and with room for faith in the conversation if your family wants it."
       }
     ],
     "team.heading": "Counselors who work with families",
@@ -59,11 +87,11 @@
       },
       {
         "slug": "luke-burgett",
-        "text": "Parent and child relationships, especially with boys and teens, when family sessions are part of the work."
+        "text": "Parent and child relationships and parent coaching, especially with boys and teens."
       }
     ],
     "expect.heading": "Your first session",
     "expect.body": "Your first session is about understanding your family: what's happening, who's affected, and what you'd each like to be different. Children in family sessions are 8 and older. Sessions are in our Middletown office or online.",
-    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }

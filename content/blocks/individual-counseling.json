@@ -39,12 +39,16 @@
     "faith.body": "If you'd like your faith to be part of your counseling, through prayer, Scripture, or talking through where God fits in what you're facing, your counselor will bring it in. If you'd rather not, you'll get the same excellent clinical care. You lead.",
     "sections": [
       {
-        "heading": "You don't need a diagnosis to start",
-        "body": "Many people wait until things fall apart before reaching out. You don't have to. You don't need a diagnosis, a clear problem, or the right words. Figuring out what's going on is part of the work, and it's a lot easier with someone beside you."
+        "body": "Many people wait until things fall apart before reaching out. You don't have to. You don't need a diagnosis, a clear problem, or the right words. Figuring out what's going on is part of the work, and it's a lot easier with someone beside you.",
+        "heading": "You don't need a diagnosis to start"
       },
       {
-        "heading": "What individual therapy at Freedom looks like",
-        "body": "Your counselor starts by understanding you: what brought you in, what you've already tried, and what you'd like to be different. From there, you work together on it, with practical tools, not just a place to talk.\n\nOur counselors draw on approaches with strong research behind them, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), and internal family systems (IFS), and they match the approach to you rather than the other way around."
+        "heading": "What people come to individual therapy for",
+        "body": "- **Anxiety and worry** that won't quiet down ([anxiety](/anxiety-depression-counseling))\n- **Depression and low mood**, or feeling flat for too long ([depression](/depression-counseling))\n- **Grief and loss**, of any kind ([grief](/grief-counseling))\n- **Trauma** and painful memories that still feel present ([trauma](/trauma-counseling), [EMDR](/trauma-emdr-counseling))\n- **OCD and intrusive thoughts** ([OCD](/ocd-treatment))\n- **Anger**, burnout, and work stress\n- **Porn addiction**, for men ([porn addiction counseling](/porn-addiction-counseling))\n- **Pastor and ministry burnout** ([counseling for pastors](/counseling-for-pastors))\n- **Life transitions**: a move, a new role, an empty nest, a loss of direction\n- **Faith questions**, doubt, or church hurt ([Christian counseling](/christian-counseling))\n- **Not sure yet?** That's fine. Tell us what's going on, and we'll help you find the right counselor."
+      },
+      {
+        "body": "Your counselor starts by understanding you: what brought you in, what you've already tried, and what you'd like to be different. From there, you work together on it, with practical tools, not just a place to talk.\n\nOur counselors draw on approaches with strong research behind them, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), and internal family systems (IFS), and they match the approach to you rather than the other way around.",
+        "heading": "What individual therapy at Freedom looks like"
       }
     ],
     "team.heading": "Counselors who see individuals",
@@ -77,6 +81,6 @@
     "team.note": "Choose the counselor who sounds right, or tell us what's going on and we'll suggest the best fit. You can always switch.",
     "expect.heading": "Your first session",
     "expect.body": "Your first session is mostly a conversation. You'll talk about what brought you in now and what you'd like to be different. There's no pressure to share everything at once. Sessions are in our Middletown office or online, whichever fits your life.",
-    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }
