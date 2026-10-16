@@ -21,8 +21,9 @@ import RequestPanel from '../components/site/RequestPanel.astro';
 import { blockReader, type BlockValues } from '../lib/blocks';
 import type { Page, Business } from '../lib/pages';
 import { PAGE_BLOCKS } from './page.blocks';
-import { personCards, counselorOptions, rateRange, fill } from './shared';
+import { personCards, counselorOptions, counselorPages, rateRange, fill } from './shared';
 import { withBase } from '../lib/url';
+import { buildPersonSchema } from '../lib/schema';
 
 interface Props {
   page: Page;
@@ -48,7 +49,7 @@ const showTeam = teamMode === 'all';
 // the whole set of services (added 2026-10-15; the services page had only
 // WebPage markup).
 const linked = [...list('links.items'), ...list('links2.items')].filter((it) => it.title && it.href);
-const extraSchemas = linked.length
+const extraSchemas: Record<string, unknown>[] = linked.length
   ? [{
       '@context': 'https://schema.org',
       '@type': 'ItemList',
@@ -61,6 +62,23 @@ const extraSchemas = linked.length
       })),
     }]
   : [];
+
+// When the page shows the team (the counselors page), list each counselor
+// as a Person, so search engines connect every profile to the practice
+// (added 2026-10-16; the page had only WebPage markup).
+if (teamMode === 'top' || teamMode === 'all') {
+  const siteUrl = new URL(withBase('/'), Astro.site ?? Astro.url).toString().replace(/\/$/, '');
+  extraSchemas.push({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: page.h1 ?? page.title,
+    itemListElement: counselorPages(allPages).map((p, i) => {
+      const { '@context': _ctx, ...person } = buildPersonSchema(p, siteUrl);
+      if (p.images.headshot?.placeholder) delete person.image;
+      return { '@type': 'ListItem', position: i + 1, item: person };
+    }),
+  });
+}
 ---
 
 <SiteLayout page={page} allPages={allPages} business={business} extraSchemas={extraSchemas}>

@@ -20,38 +20,48 @@
     "chooser.items": [
       {
         "quote": "For your marriage or relationship",
-        "label": "Tony",
-        "href": "/tony-gore"
+        "label": "Tony (Gottman Method), Staci, or Kasie",
+        "href": "/couples-marriage-counseling"
       },
       {
         "quote": "For a child or teen",
-        "label": "Sophie or Luke (boys), or Rhonda (older teen girls)",
-        "href": "/sophie-bowman"
+        "label": "Sophie (children and teens), Luke (boys 8 and up), or Rhonda (older teen girls)",
+        "href": "/child-teen-counseling"
       },
       {
         "quote": "For a family or parent and child",
         "label": "Tony, Staci, or Luke",
-        "href": "/tony-gore"
+        "href": "/family-counseling"
       },
       {
-        "quote": "For trauma or EMDR",
-        "label": "Staci (EMDR) or Luke (ACT and IFS)",
-        "href": "/staci-harrub"
+        "quote": "For trauma",
+        "label": "Staci or Kasie (EMDR), Tony, or Luke",
+        "href": "/trauma-counseling"
       },
       {
         "quote": "For grief",
-        "label": "Staci or Rhonda",
-        "href": "/staci-harrub"
+        "label": "Staci, Rhonda, Luke, or Kasie",
+        "href": "/grief-counseling"
       },
       {
-        "quote": "For women working through shame, worth, or identity",
-        "label": "Rhonda",
+        "quote": "For women working through shame, worth, or relationships",
+        "label": "Rhonda or Kasie",
         "href": "/rhonda-gore"
       },
       {
-        "quote": "For anxiety, depression, or OCD",
-        "label": "Luke, Staci, or Rhonda",
-        "href": "/luke-burgett"
+        "quote": "For anxiety or depression",
+        "label": "Any of our counselors",
+        "href": "/anxiety-depression-counseling"
+      },
+      {
+        "quote": "For OCD and intrusive thoughts",
+        "label": "Luke (boys and men, 8 and up)",
+        "href": "/ocd-treatment"
+      },
+      {
+        "quote": "For pastors and ministry leaders",
+        "label": "Tony or Luke",
+        "href": "/counseling-for-pastors"
       },
       {
         "quote": "For the lowest cost",
@@ -62,6 +72,6 @@
     "faith.heading": "Faith at the center, never forced",
     "faith.body": "Every Freedom counselor brings together a biblical worldview, Christian theology, and the best clinical practice. If you'd rather not bring faith into your counseling, you'll get the same excellent care, and your counselor will follow your lead.",
     "cost.heading": "What it costs",
-    "cost.body": "We don't bill insurance, but we'll give you a superbill to submit for possible out-of-network reimbursement."
+    "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }
