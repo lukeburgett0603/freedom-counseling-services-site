@@ -4,19 +4,37 @@
     "hero.eyebrow": "Porn addiction counseling · Online across Kentucky or in Louisville",
     "hero.subhead": "You've tried to stop, and it keeps pulling you back. That doesn't mean you're broken. Confidential counseling for men that gets underneath the habit, without shame, toward a real peace porn can't give.",
     "facts": [
-      { "icon": "calendar-check", "text": "Usually seen the same week" },
-      { "icon": "video-camera", "text": "Online from home, anywhere in Kentucky" }
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "Online from home, anywhere in Kentucky"
+      }
     ],
     "request.heading": "There's a way out, and you don't have to find it alone",
     "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
     "request.crisis": "If you're thinking about suicide or are in crisis, call or text 988 (Suicide & Crisis Lifeline), or call 911.",
     "signs.items": [
-      { "text": "You've promised yourself you'd stop, more times than you can count." },
-      { "text": "It's the first thing you reach for when you're stressed, bored, or lonely." },
-      { "text": "You feel a wave of shame afterward, and then do it again." },
-      { "text": "It's going against what you believe, and that's eating at you." },
-      { "text": "You're hiding it from your wife or the people closest to you." },
-      { "text": "Filters and accountability apps helped for a while, then didn't." }
+      {
+        "text": "You've promised yourself you'd stop, more times than you can count."
+      },
+      {
+        "text": "It's the first thing you reach for when you're stressed, bored, or lonely."
+      },
+      {
+        "text": "You feel a wave of shame afterward, and then do it again."
+      },
+      {
+        "text": "It's going against what you believe, and that's eating at you."
+      },
+      {
+        "text": "You're hiding it from your wife or the people closest to you."
+      },
+      {
+        "text": "Filters and accountability apps helped for a while, then didn't."
+      }
     ],
     "faith.heading": "Faith at the center, never forced",
     "faith.body": "For Christian men, recovery isn't just about stopping. It's about drawing closer to God instead of hiding from Him. Your counselor will bring faith into the work in the ways that help you, never as a lecture. If you'd rather leave faith out, he follows your lead.",
@@ -44,11 +62,17 @@
     ],
     "team.heading": "Who you'll work with",
     "team.items": [
-      { "slug": "luke-burgett", "text": "Men working to break free of porn addiction, with a faith-integrated, shame-free approach." },
-      { "slug": "tony-gore", "text": "Wives affected by a husband's porn addiction, and couples who want help for their marriage because of it." }
+      {
+        "slug": "luke-burgett",
+        "text": "Men working to break free of porn addiction, with a faith-integrated, shame-free approach."
+      },
+      {
+        "slug": "tony-gore",
+        "text": "Wives affected by a husband's porn addiction, and couples who want help for their marriage because of it."
+      }
     ],
     "expect.heading": "Your first session",
-    "expect.body": "You don't have to tell your whole story at once. Your first session is a conversation about what's been happening, what you've tried, and what you want to be different. Many men say just saying it out loud to someone who won't judge them is a relief.",
+    "expect.body": "You don't have to tell your whole story at once. Your first session is a conversation about what's been happening, what you've tried, and what you want to be different.",
     "cost.body": "We don't bill insurance, but you can pay with an HSA or FSA card, and we'll give you a superbill to submit for possible out-of-network reimbursement."
   }
 }
