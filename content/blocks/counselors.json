@@ -19,54 +19,54 @@
     "chooser.lede": "Tell us a little about what's going on, and we'll suggest the best fit. You can always switch later.",
     "chooser.items": [
       {
-        "quote": "For your marriage or relationship",
-        "label": "Tony (Gottman Method), Staci, or Kasie",
-        "href": "/couples-marriage-counseling"
+        "href": "/couples-marriage-counseling",
+        "label": "Tony (Gottman Method informed), Staci, or Kasie",
+        "quote": "For your marriage or relationship"
       },
       {
-        "quote": "For a child or teen",
+        "href": "/child-teen-counseling",
         "label": "Sophie (children and teens), Luke (boys 8 and up), or Rhonda (older teen girls)",
-        "href": "/child-teen-counseling"
+        "quote": "For a child or teen"
       },
       {
-        "quote": "For a family or parent and child",
+        "href": "/family-counseling",
         "label": "Tony, Staci, or Luke",
-        "href": "/family-counseling"
+        "quote": "For a family or parent and child"
       },
       {
-        "quote": "For trauma",
+        "href": "/trauma-counseling",
         "label": "Staci or Kasie (EMDR), Tony, or Luke",
-        "href": "/trauma-counseling"
+        "quote": "For trauma"
       },
       {
-        "quote": "For grief",
+        "href": "/grief-counseling",
         "label": "Staci, Rhonda, Luke, or Kasie",
-        "href": "/grief-counseling"
+        "quote": "For grief"
       },
       {
-        "quote": "For women working through shame, worth, or relationships",
+        "href": "/rhonda-gore",
         "label": "Rhonda or Kasie",
-        "href": "/rhonda-gore"
+        "quote": "For women working through shame, worth, or relationships"
       },
       {
-        "quote": "For anxiety or depression",
+        "href": "/anxiety-depression-counseling",
         "label": "Any of our counselors",
-        "href": "/anxiety-depression-counseling"
+        "quote": "For anxiety or depression"
       },
       {
-        "quote": "For OCD and intrusive thoughts",
+        "href": "/ocd-treatment",
         "label": "Luke (boys and men, 8 and up)",
-        "href": "/ocd-treatment"
+        "quote": "For OCD and intrusive thoughts"
       },
       {
-        "quote": "For pastors and ministry leaders",
+        "href": "/counseling-for-pastors",
         "label": "Tony or Luke",
-        "href": "/counseling-for-pastors"
+        "quote": "For pastors and ministry leaders"
       },
       {
-        "quote": "For the lowest cost",
+        "href": "/sophie-bowman",
         "label": "Sophie, $50 per session",
-        "href": "/sophie-bowman"
+        "quote": "For the lowest cost"
       }
     ],
     "faith.heading": "Faith at the center, never forced",
