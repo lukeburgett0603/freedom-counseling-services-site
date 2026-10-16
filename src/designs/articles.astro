@@ -3,12 +3,14 @@
 // filterable by topic. Topics are the service pages that have articles,
 // in menu order: the service pages are the category hubs, the articles
 // their spokes (each article's `category` matches one service page).
+// The newest article (or one chosen in Page text) is featured at the top.
 import SiteLayout from '../layouts/SiteLayout.astro';
 import HeroSplit from '../components/site/HeroSplit.astro';
 import ArticleLibrary from '../components/site/ArticleLibrary.astro';
 import RequestPanel from '../components/site/RequestPanel.astro';
 import type { Page, Business } from '../lib/pages';
-import type { BlockValues } from '../lib/blocks';
+import { blockReader, type BlockValues } from '../lib/blocks';
+import { ARTICLES_BLOCKS } from './articles.blocks';
 import { withBase } from '../lib/url';
 import { counselorOptions } from './shared';
 
@@ -20,7 +22,8 @@ interface Props {
   allBlocks: Map<string, BlockValues>;
 }
 
-const { page, allPages, business } = Astro.props;
+const { page, allPages, business, blocks } = Astro.props;
+const { t } = blockReader(blocks, ARTICLES_BLOCKS);
 const posts = allPages
   .filter((p) => p.page_type === 'Blog Post')
   .sort((a, b) => (b.date_published ?? '').localeCompare(a.date_published ?? ''));
@@ -40,12 +43,18 @@ const articles = posts.map((p) => {
     author: p.author_name ? `By ${p.author_name}` : undefined,
     topic: hub?.slug,
     topicLabel: hub?.title,
+    slug: p.slug,
+    date: p.date_published ?? undefined,
+    image: p.images.hero?.url ? { url: p.images.hero.url, alt: p.images.hero.alt || '' } : undefined,
   };
 });
+// The featured article: the one named in the page text, or else the newest.
+const featuredSlug = t('featured.slug').trim().replace(/^\/+|\/+$/g, '');
+const featured = articles.find((a) => a.slug === featuredSlug) ?? articles[0];
 ---
 
 <SiteLayout page={page} allPages={allPages} business={business}>
   <HeroSplit headline={page.h1 ?? page.title} subhead={page.hero_subhead ?? 'Plain answers to the questions people bring to counseling, written by our counselors. Choose a topic, or browse them all.'} />
-  <ArticleLibrary topics={topics} articles={articles} />
+  <ArticleLibrary topics={topics} articles={articles} featured={featured?.slug} />
   <RequestPanel slug={page.slug} business={business} heading="Ready when you are." text="Request an appointment in about a minute. Most people are seen the same week." counselors={counselorOptions(allPages)} formatNote="Online sessions are for clients in Kentucky. Indiana clients meet in person." />
 </SiteLayout>

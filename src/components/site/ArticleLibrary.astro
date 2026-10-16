@@ -5,21 +5,45 @@
 // without JavaScript (everything shows); with it, the topic buttons
 // filter in place and the choice is kept in the address (?topic=slug),
 // so a service page can link straight to its own articles.
+// The featured article sits above the filter while "All articles" is
+// chosen (and isn't repeated in the grid); choosing a topic hides it and
+// shows every matching article, the featured one included.
+import { Image } from 'astro:assets';
 import Ph from './Ph.astro';
 
 interface Topic { slug: string; label: string; count: number }
-interface Article { title: string; text?: string; href: string; author?: string; topic?: string; topicLabel?: string }
+interface Article { title: string; text?: string; href: string; author?: string; topic?: string; topicLabel?: string; slug?: string; date?: string; image?: { url: string; alt: string } }
 
 interface Props {
   topics: Topic[];
   articles: Article[];
+  featured?: string;
 }
 
-const { topics, articles } = Astro.props;
+const { topics, articles, featured } = Astro.props;
+const lead = featured ? articles.find((a) => a.slug === featured) : undefined;
+const fmtDate = (d?: string) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : undefined;
 ---
 
 <section class="s-section al" data-library>
   <div class="s-wrap">
+    {lead && (
+      <a class="al-feature" href={lead.href} data-featured>
+        {lead.image && (
+          <div class="al-feature-img">
+            <Image src={lead.image.url} alt={lead.image.alt} inferSize widths={[480, 720, 960]} sizes="(max-width: 767px) 100vw, 560px" loading="eager" />
+          </div>
+        )}
+        <div class="al-feature-body">
+          <span class="al-badge">Featured article</span>
+          <span class="al-meta">{lead.topicLabel}{lead.topicLabel && lead.author && ' · '}{lead.author}</span>
+          <strong class="al-feature-title">{lead.title}</strong>
+          {lead.text && <span class="al-text">{lead.text}</span>}
+          {fmtDate(lead.date) && <span class="al-date">{fmtDate(lead.date)}</span>}
+          <span class="al-read">Read the article <Ph name="arrow-right" /></span>
+        </div>
+      </a>
+    )}
     <div class="al-filter" role="group" aria-label="Filter articles by topic">
       <button type="button" class="al-chip" aria-pressed="true" data-topic="">All articles <span>{articles.length}</span></button>
       {topics.map((t) => <button type="button" class="al-chip" aria-pressed="false" data-topic={t.slug}>{t.label} <span>{t.count}</span></button>)}
@@ -27,8 +51,13 @@ const { topics, articles } = Astro.props;
     <p class="al-count" aria-live="polite"></p>
     <ul class="al-list">
       {articles.map((a) => (
-        <li data-topic={a.topic ?? ''}>
+        <li data-topic={a.topic ?? ''} data-lead={lead && a.slug === lead.slug ? '' : undefined} hidden={!!lead && a.slug === lead.slug}>
           <a href={a.href}>
+            {a.image && (
+              <div class="al-img">
+                <Image src={a.image.url} alt={a.image.alt} inferSize widths={[360, 540, 720]} sizes="(max-width: 767px) 100vw, 400px" loading="lazy" />
+              </div>
+            )}
             <span class="al-meta">{a.topicLabel}{a.topicLabel && a.author && ' · '}{a.author}</span>
             <strong>{a.title}</strong>
             {a.text && <span class="al-text">{a.text}</span>}
@@ -50,13 +79,29 @@ const { topics, articles } = Astro.props;
   .al-count { margin-top: 18px; color: var(--muted); font-size: 0.95rem; min-height: 1.4em; }
   .al-list { list-style: none; padding: 0; margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
   .al-list li[hidden] { display: none; }
-  .al-list a { height: 100%; display: grid; gap: 8px; align-content: start; padding: 22px 24px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); text-decoration: none; transition: transform 0.2s; }
+  .al-list a { height: 100%; display: grid; gap: 8px; align-content: start; padding: 0 24px 22px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); text-decoration: none; transition: transform 0.2s; overflow: hidden; }
+  .al-list a > :first-child:not(.al-img) { margin-top: 22px; }
+  .al-img { margin: 0 -24px 6px; aspect-ratio: 16 / 9; background: var(--tint); overflow: hidden; }
+  .al-img img, .al-feature-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .al-feature { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); margin-bottom: 36px; background: var(--surface); border-radius: var(--radius-card); box-shadow: var(--shadow); overflow: hidden; text-decoration: none; transition: transform 0.2s; }
+  .al-feature:hover { transform: translateY(-2px); }
+  .al-feature[hidden] { display: none; }
+  .al-feature-img { min-height: 300px; background: var(--tint); }
+  .al-feature-body { display: grid; gap: 10px; align-content: center; padding: 32px 36px; }
+  .al-badge { justify-self: start; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent); padding: 5px 10px; border-radius: 999px; }
+  .al-feature-title { font-size: clamp(1.4rem, 2.4vw, 1.9rem); line-height: 1.2; }
+  .al-date { color: var(--muted); font-size: 0.88rem; }
   .al-list a:hover { transform: translateY(-2px); }
   .al-meta { font-size: 0.82rem; font-weight: 600; color: var(--accent); }
   strong { font-size: 1.15rem; line-height: 1.3; }
   .al-text { color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
   .al-read { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; font-size: 0.92rem; margin-top: 4px; }
-  @media (max-width: 767px) { .al-list { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 767px) {
+    .al-list { grid-template-columns: minmax(0, 1fr); }
+    .al-feature { grid-template-columns: minmax(0, 1fr); }
+    .al-feature-img { min-height: 0; aspect-ratio: 16 / 9; }
+    .al-feature-body { padding: 22px 24px 26px; }
+  }
 </style>
 
 <script>
@@ -64,11 +109,13 @@ const { topics, articles } = Astro.props;
     const chips = [...lib.querySelectorAll<HTMLButtonElement>('.al-chip')];
     const items = [...lib.querySelectorAll<HTMLElement>('.al-list li')];
     const count = lib.querySelector<HTMLElement>('.al-count')!;
+    const feature = lib.querySelector<HTMLElement>('[data-featured]');
     const show = (topic: string, push: boolean) => {
       if (topic && !chips.some((c) => c.dataset.topic === topic)) topic = '';
       chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.topic === topic)));
       let n = 0;
-      items.forEach((li) => { const on = !topic || li.dataset.topic === topic; li.hidden = !on; if (on) n++; });
+      items.forEach((li) => { const on = topic ? li.dataset.topic === topic : !('lead' in li.dataset); li.hidden = !on; if (on) n++; });
+      if (feature) feature.hidden = !!topic;
       const label = chips.find((c) => c.dataset.topic === topic)?.firstChild?.textContent?.trim();
       count.textContent = topic ? `${n} article${n === 1 ? '' : 's'} on ${label?.toLowerCase()}` : '';
       if (push) {

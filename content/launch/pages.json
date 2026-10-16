@@ -581,7 +581,7 @@
       "nav_placement": "primary",
       "nav_order": 13,
       "title": "Acceptance and Commitment Therapy (ACT)",
-      "category": "ACT",
+      "category": "Acceptance and Commitment Therapy (ACT)",
       "status": "content-complete"
     },
     "dbt-therapy": {
@@ -631,7 +631,7 @@
       "nav_placement": "primary",
       "nav_order": 14,
       "title": "Dialectical Behavior Therapy (DBT) Skills",
-      "category": "DBT-Informed",
+      "category": "Dialectical Behavior Therapy (DBT) Skills",
       "status": "content-complete"
     },
     "cbt-therapy": {
@@ -681,7 +681,7 @@
       "nav_placement": "primary",
       "nav_order": 12,
       "title": "Cognitive Behavioral Therapy (CBT)",
-      "category": "CBT",
+      "category": "Cognitive Behavioral Therapy (CBT)",
       "status": "content-complete"
     },
     "ifs-therapy": {
@@ -735,7 +735,7 @@
       "nav_placement": "primary",
       "nav_order": 15,
       "title": "Internal Family Systems (IFS)",
-      "category": "IFS",
+      "category": "Internal Family Systems (IFS)",
       "status": "content-complete"
     },
     "counselors": {
@@ -1096,7 +1096,7 @@
       "meta_title": "Negative Core Beliefs: The Voice in Your Head Isn't Always True | Freedom Counseling",
       "meta_description": "\"I'm too much.\" \"I always mess this up.\" Negative core beliefs feel like facts, but they aren't. Where they come from, and how to start questioning them.",
       "copy": "\"I always mess this up.\" \"I'm too much.\" \"Nobody actually wants me around.\" If you have a running commentary like this, you probably experience it less like a thought and more like a fact you've always known about yourself, something settled rather than chosen. Counselors call these negative core beliefs, and your inner critic repeats them often enough that they start to sound true.\n\nThat's usually the problem. The most damaging beliefs we carry rarely feel like beliefs. They feel like conclusions we already reached a long time ago, often based on one hard season, one relationship, or one voice that spoke louder than it should have.\n\n### Where these beliefs usually come from\n\nA critical parent, a painful breakup, a season of failure, a faith community that confused God's love with performance. Beliefs like these get formed under pressure, when we're least equipped to evaluate whether they're true. They just get filed away as fact and shape everything after, often without you noticing.\n\n### Starting to question them\n\nBlind positivity isn't the goal, either. Swapping \"I always mess this up\" for \"I'm perfect\" trades one distortion for another. The goal is accuracy: separating what happened from the story you built around it, and asking where that story came from in the first place.\n\nThis is slower work than it sounds, and it's hard to do alone, because the **belief** has usually been running unquestioned for years. Counseling gives you an outside perspective, and for clients who want it, space to explore whether some of what you believe about God matches who God says He is, rather than who a hard moment made Him seem to be.",
-      "category": "CBT"
+      "category": "Cognitive Behavioral Therapy (CBT)"
     },
     "what-is-erp-therapy-a-gentler-look-for-anyone-afraid-to-start": {
       "focus_keyword": "what is erp therapy",
@@ -1225,7 +1225,7 @@
       "nav_placement": "primary",
       "nav_order": 16,
       "title": "Counseling for Pastors",
-      "category": "Pastor Burnout",
+      "category": "Counseling for Pastors",
       "status": "content-complete"
     },
     "porn-addiction-counseling": {
@@ -1267,7 +1267,7 @@
       "nav_placement": "primary",
       "nav_order": 17,
       "title": "Porn Addiction Counseling",
-      "category": "Porn Addiction",
+      "category": "Porn Addiction Counseling",
       "status": "content-complete"
     }
   },

@@ -13,6 +13,7 @@ import { PAGE_BLOCKS } from './page.blocks';
 import { PROFILE_BLOCKS } from './profile.blocks';
 import { CONTACT_BLOCKS } from './contact.blocks';
 import { ARTICLE_BLOCKS } from './article.blocks';
+import { ARTICLES_BLOCKS } from './articles.blocks';
 
 export const DESIGN_BY_PAGE_TYPE: Partial<Record<PageType, string>> = {
   Homepage: 'home',
@@ -41,7 +42,7 @@ export const DESIGN_BLOCKS: Record<string, BlockDef[]> = {
   profile: PROFILE_BLOCKS,
   contact: CONTACT_BLOCKS,
   article: ARTICLE_BLOCKS,
-  articles: [],
+  articles: ARTICLES_BLOCKS,
   legal: [],
 };
 
