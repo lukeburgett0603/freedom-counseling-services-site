@@ -1,13 +1,13 @@
 {
   "slug": "luke-burgett",
   "blocks": {
-    "card.credential": "LPCA",
-    "card.summary": "Boys and men, 8 and up, with anxiety, depression, or OCD.",
-    "hero.subhead": "Helps boys and men who feel stuck, overwhelmed, anxious, depressed, or trapped by unwanted thoughts find peace, reconnect with purpose, and take steady steps toward the life they want.",
+    "card.credential": "LPCA, ACT-trained",
+    "card.summary": "Boys and men, 8 and up: anxiety, depression, OCD, anger, and grief.",
+    "hero.subhead": "Helps boys and men of every age who feel stuck, overwhelmed, angry, anxious, depressed, or trapped by unwanted thoughts find peace, reconnect with purpose, and take steady steps toward the life they want.",
     "quote": "Counseling with me is a collaborative experience. At every turn, you help direct our work toward what is most important to you.",
     "specialties": [
       {
-        "text": "Men and boys (8 and up)"
+        "text": "Men and boys (8 and up, including older men)"
       },
       {
         "text": "Anxiety"
@@ -19,7 +19,28 @@
         "text": "OCD and intrusive thoughts"
       },
       {
+        "text": "Anger"
+      },
+      {
+        "text": "Work stress and burnout"
+      },
+      {
+        "text": "Fatherhood"
+      },
+      {
+        "text": "Pornography use"
+      },
+      {
+        "text": "Grief and loss"
+      },
+      {
+        "text": "Meaning and purpose"
+      },
+      {
         "text": "Trauma"
+      },
+      {
+        "text": "Pastors and ministry leaders"
       },
       {
         "text": "Parent and child"
@@ -31,28 +52,48 @@
     "sections": [
       {
         "heading": "Who Luke works with",
-        "body": "Luke works with boys and men from age 8 through adulthood. Many feel like anxiety, depression, OCD, or unwanted thoughts are keeping them from the life they want. Anxiety may keep them avoiding things. Depression may make it hard to engage. OCD may leave them feeling trapped by thoughts and habits they wish they could stop. Underneath, most aren't just looking for symptom relief. They want peace, steadiness, and a sense of purpose. Luke also works with parents and children together when the relationship between them is part of the work."
+        "body": "Luke works with boys and men from age 8 through every stage of adulthood, including older men. Many feel like anxiety, depression, OCD, anger, or unwanted thoughts are keeping them from the life they want. Anxiety may keep them avoiding things. Depression may make it hard to engage. OCD may leave them feeling trapped by thoughts and habits they wish they could stop. Others come for work stress and burnout, the weight of being a father, or pornography use they want to get free of. Underneath, most aren't just looking for symptom relief. They want peace, steadiness, and a sense of purpose. Luke also works with parents and children together when the relationship between them is part of the work."
       },
       {
         "heading": "Luke's approach",
-        "body": "Luke draws on acceptance and commitment therapy (ACT), cognitive behavioral therapy (CBT), and internal family systems (IFS), and he offers exposure and response prevention (ERP), the leading treatment for OCD. He also works with trauma using ACT and IFS. His approach is collaborative: together you build a clear path forward and the skills to make progress toward your goals."
+        "body": "Luke is trained in acceptance and commitment therapy (ACT) and also uses cognitive behavioral therapy (CBT), drawing on internal family systems (IFS) as well. For OCD, he offers exposure and response prevention (ERP), the leading treatment for OCD, along with ACT and the Brain Lock approach. He works with trauma using ACT and IFS. His approach is collaborative: together you build a clear path forward and the skills to make progress toward your goals."
+      },
+      {
+        "heading": "Therapy for men who'd rather handle it alone",
+        "body": "Many men put off counseling because they think they should be able to fix it themselves, or they're not sure they want to sit and talk about feelings. Sessions with Luke are practical: you'll name what's getting in the way, work out what matters to you, and leave with something to try. You don't need the right words to start."
+      },
+      {
+        "heading": "Meaning and purpose, at any age",
+        "body": "Some men come to Luke not in crisis, but adrift: after retirement, a loss, or a season when life no longer feels like it adds up. Luke has real experience helping older men work through questions of meaning and purpose, and find what still matters."
+      },
+      {
+        "heading": "Grief, faith, and ministry",
+        "body": "Luke works with grieving teens and with boys and men carrying loss at any age. He also works with pastors and ministry leaders facing burnout, and with Christian men and boys whose OCD shows up in their faith (scrupulosity) or who carry church hurt."
+      },
+      {
+        "heading": "For parents of boys",
+        "body": "When Luke works with a boy or teen, he almost always invites parents in, so you know how to help at home. Parent-only sessions are available too."
+      },
+      {
+        "heading": "Credentials",
+        "body": "Luke is a Licensed Professional Counselor Associate (LPCA) in Kentucky, license number 297271. He holds a Master's in Clinical Mental Health Counseling from Colorado Christian University and is trained in acceptance and commitment therapy (ACT)."
       }
     ],
-    "practical.body": "In person in Middletown or online. Usually seen the same week.",
+    "practical.body": "In person in Middletown or online. Usually seen the same week. HSA and FSA cards accepted.",
     "faith.heading": "Faith",
     "faith.body": "For Christian clients who want it, Luke offers thoughtful Christian integration, including deeper questions about God, identity, calling, and what a flourishing life looks like. If you'd rather not bring faith in, he follows your lead.",
     "approaches": [
       {
-        "text": "ACT"
+        "text": "Acceptance and commitment therapy (ACT), trained"
       },
       {
-        "text": "CBT"
+        "text": "Cognitive behavioral therapy (CBT)"
       },
       {
-        "text": "ERP for OCD"
+        "text": "Exposure and response prevention (ERP) for OCD"
       },
       {
-        "text": "IFS"
+        "text": "Internal family systems (IFS), informed"
       },
       {
         "text": "Behavioral activation"
@@ -67,11 +108,11 @@
         "text": "Mindfulness-based stress reduction"
       },
       {
-        "text": "Christian/faith-based counseling"
+        "text": "Christian counseling"
       }
     ],
     "request.heading": "Ready to start with Luke?",
     "request.text": "Request an appointment with Luke, or call (502) 523-2970.",
-    "hero.eyebrow": "Anxiety, depression, OCD, trauma"
+    "hero.eyebrow": "Therapy for men and boys · Anxiety, depression, OCD, anger"
   }
 }

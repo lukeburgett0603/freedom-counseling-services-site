@@ -13,6 +13,7 @@ import PillGroups from '../components/site/PillGroups.astro';
 import ProseSplit from '../components/site/ProseSplit.astro';
 import StatementBand from '../components/site/StatementBand.astro';
 import InfoPair from '../components/site/InfoPair.astro';
+import FaqList from '../components/site/FaqList.astro';
 import RequestPanel from '../components/site/RequestPanel.astro';
 import { blockReader, readText, type BlockValues } from '../lib/blocks';
 import type { Page, Business } from '../lib/pages';
@@ -83,6 +84,7 @@ const cta = `Request an appointment with ${first}`;
     link={{ label: "See every counselor's rate", href: '/fees' }}
   />
 
+  <FaqList heading={`Questions about working with ${first}`} faqs={page.faqs} />
 
   <RequestPanel
     slug={page.slug}

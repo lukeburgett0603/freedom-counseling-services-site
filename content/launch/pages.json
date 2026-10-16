@@ -773,10 +773,43 @@
       }
     },
     "luke-burgett": {
-      "meta_title": "Luke Burgett, LPCA | Counselor for Men and Boys in Louisville, KY",
-      "meta_description": "Luke Burgett, LPCA, helps boys and men age 8 and up work through anxiety, depression, OCD, and trauma, including ERP for OCD. In Louisville and online. $115 per session.",
+      "meta_title": "Luke Burgett, LPCA | Male Therapist for Men and Boys in Louisville, KY",
+      "meta_description": "Luke Burgett, LPCA, is a male therapist in Louisville for boys and men 8 and up: anxiety, depression, OCD, anger, grief, and burnout. In person or online. $115 per session.",
       "cta_button_text": "Request an appointment",
-      "faqs": [],
+      "faqs": [
+        {
+          "answer": "Yes. Luke sees boys from age 8, teens, and men at every stage of life, including older men. For girls and women, our other counselors can help.",
+          "question": "Do you only work with boys and men?"
+        },
+        {
+          "answer": "Yes. Sessions are practical and goal-focused, and you set the pace.",
+          "question": "I'm not big on talking about feelings. Will this work for me?"
+        },
+        {
+          "answer": "Yes. Luke offers exposure and response prevention (ERP), the leading treatment for OCD, along with acceptance and commitment therapy (ACT).",
+          "question": "Do you treat OCD with ERP?"
+        },
+        {
+          "answer": "Yes. Luke works with men who want to get free of pornography use, without shame and at a pace that works for you.",
+          "question": "Can you help with pornography use?"
+        },
+        {
+          "answer": "Usually, yes, for part of the time. Luke almost always invites parents of minor clients in, and parent-only sessions are available.",
+          "question": "Do parents come to sessions?"
+        },
+        {
+          "answer": "Yes, anywhere in Kentucky. Indiana clients meet in person at our Middletown office.",
+          "question": "Can we meet online?"
+        },
+        {
+          "answer": "If you want it. If not, Luke follows your lead.",
+          "question": "Can faith be part of counseling?"
+        },
+        {
+          "answer": "$115 per 50-minute session. HSA and FSA cards work, and you'll get a superbill for possible out-of-network reimbursement.",
+          "question": "What does it cost?"
+        }
+      ],
       "images": {
         "headshot": {
           "alt": "Luke Burgett Headshot",
