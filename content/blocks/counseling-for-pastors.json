@@ -4,22 +4,40 @@
     "hero.eyebrow": "Counseling for pastors · Online across Kentucky or in Louisville",
     "hero.subhead": "You carry everyone else's burdens. It's okay to need a place to set yours down. Confidential counseling with licensed Christian counselors who understand ministry, and who won't treat your faith as the problem.",
     "facts": [
-      { "icon": "calendar-check", "text": "Usually seen the same week" },
-      { "icon": "video-camera", "text": "Online from home, anywhere in Kentucky" }
+      {
+        "icon": "calendar-check",
+        "text": "Usually seen the same week"
+      },
+      {
+        "icon": "video-camera",
+        "text": "Online from home, anywhere in Kentucky"
+      }
     ],
     "request.heading": "You don't have to carry this alone",
     "request.text": "Request an appointment in about a minute, or call (502) 523-2970. Most people are seen the same week.",
     "request.crisis": "If you're thinking about suicide or are in crisis, call or text 988 (Suicide & Crisis Lifeline), or call 911.",
     "signs.items": [
-      { "text": "You're exhausted in a way a day off doesn't fix." },
-      { "text": "You've started to dread Sundays, or the phone ringing." },
-      { "text": "You give to everyone, and there's no one you can be honest with." },
-      { "text": "You feel more cynical than you want to admit." },
-      { "text": "Ministry is straining your marriage or your family." },
-      { "text": "Your faith has started to feel like work." }
+      {
+        "text": "You're exhausted in a way a day off doesn't fix."
+      },
+      {
+        "text": "You've started to dread Sundays, or the phone ringing."
+      },
+      {
+        "text": "You give to everyone, and there's no one you can be honest with."
+      },
+      {
+        "text": "You feel more cynical than you want to admit."
+      },
+      {
+        "text": "Ministry is straining your marriage or your family."
+      },
+      {
+        "text": "Your faith has started to feel like work."
+      }
     ],
     "faith.heading": "Faith at the center, never forced",
-    "faith.body": "We share your faith, and we'll take it seriously, including the parts that feel tired, dry, or confused right now. You won't be preached at, and you won't be judged for doubt. Your counselor will follow your lead.",
+    "faith.body": "We share your faith, and we'll take it seriously, including the parts that feel tired, dry, or confused right now. You won't be preached at, and you won't be judged for doubt.\n\nIf you'd rather leave faith out, your counselor's care is just as thorough, and they follow your lead. [How faith works at Freedom](/christian-counseling)",
     "sections": [
       {
         "heading": "Needing help isn't a failure of faith",
@@ -44,8 +62,14 @@
     ],
     "team.heading": "Counselors who work with pastors and ministry leaders",
     "team.items": [
-      { "slug": "tony-gore", "text": "Pastors and ministry leaders, and their marriages and families, including pastors' spouses." },
-      { "slug": "luke-burgett", "text": "Pastors and ministry leaders working through burnout, anxiety, and depression." }
+      {
+        "slug": "tony-gore",
+        "text": "Pastors and ministry leaders, and their marriages and families, including pastors' spouses."
+      },
+      {
+        "slug": "luke-burgett",
+        "text": "Pastors and ministry leaders working through burnout, anxiety, and depression."
+      }
     ],
     "expect.heading": "Your first session",
     "expect.body": "You don't need to have it figured out. Your first session is a conversation about what's been weighing on you and what you'd like to be different, at whatever pace feels okay. Meet online from home or at our Middletown office.",
