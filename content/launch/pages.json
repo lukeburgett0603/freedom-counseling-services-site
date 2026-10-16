@@ -182,28 +182,32 @@
       "meta_description": "Christian counseling in Louisville that brings together a biblical worldview and the best clinical care, always at your pace. In person or online, usually seen the same week.",
       "faqs": [
         {
-          "question": "Do I have to be a Christian to see a counselor here?",
-          "answer": "No. People come from every background: lifelong faith, a return to it, distance from it, or curiosity. The clinical care is the same either way."
+          "answer": "No. People come from every background: lifelong faith, a return to it, distance from it, or curiosity. The clinical care is the same either way.",
+          "question": "Do I have to be a Christian to see a counselor here?"
         },
         {
-          "question": "Will you use Scripture or prayer in sessions?",
-          "answer": "Only if you want to. You can change that at any point."
+          "answer": "Only if you want to. You can change that at any point.",
+          "question": "Will you use Scripture or prayer in sessions?"
         },
         {
-          "question": "Is this the same as pastoral or biblical counseling?",
-          "answer": "No. It's clinical counseling from trained professionals, with faith woven in when you want it."
+          "answer": "No, though they share a lot. Biblical counseling is Scripture-led and doesn't use psychological methods; it's offered in churches and by certified biblical counselors in private practice. Freedom offers clinical counseling by licensed counselors, using research-based therapy with your faith integrated when you want it.",
+          "question": "Is Christian counseling the same as biblical counseling?"
         },
         {
-          "question": "Can I bring up doubts or anger at God?",
-          "answer": "Yes. Those are a normal part of faith being tested by hard things, and you won't be judged for them."
+          "answer": "Yes. Those are a normal part of faith being tested by hard things, and you won't be judged for them.",
+          "question": "Can I bring up doubts or anger at God?"
         },
         {
-          "question": "What if my spouse and I see faith differently?",
-          "answer": "That's common. Your counselor can help you hold different comfort levels within the same relationship."
+          "answer": "That's common. Your counselor can help you hold different comfort levels within the same relationship.",
+          "question": "What if my spouse and I see faith differently?"
         },
         {
-          "question": "Can I start with a clinical focus and add faith later?",
-          "answer": "Yes. Many people do."
+          "answer": "Yes. Many people do.",
+          "question": "Can I start with a clinical focus and add faith later?"
+        },
+        {
+          "answer": "No. Christians from every tradition are welcome, and so are people with questions or no faith at all.",
+          "question": "Do I have to be a certain kind of Christian?"
         }
       ],
       "focus_keyword": "christian counseling louisville ky",
