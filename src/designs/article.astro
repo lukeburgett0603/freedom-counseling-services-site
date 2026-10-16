@@ -2,7 +2,10 @@
 // Article design (site system v2): readable column, byline with the
 // counselor's photo and credential, the post body, a link to the
 // service it relates to, then the request form. Body text is the post's
-// own markdown (Blog posts screen).
+// own markdown (Blog posts screen). Key takeaways (the post's
+// key_takeaways) sit above the body for skimmers and AI answers, and a
+// sticky "On this page" list beside the body links to every section
+// (collapsed above the body on smaller screens).
 import SiteLayout from '../layouts/SiteLayout.astro';
 import RequestPanel from '../components/site/RequestPanel.astro';
 import LinkCards from '../components/site/LinkCards.astro';
@@ -28,12 +31,27 @@ const author = counselorPages(allPages).find((p) => p.title.trim().toLowerCase()
 const headshot = getAuthorHeadshot(page.author_name, allPages);
 const date = page.date_modified ?? page.date_published;
 const dateLabel = date ? new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
-// The post's own H1 is the page title; drop a leading "# " or "## " title
-// line in the body if it repeats it.
-const body = (page.copy ?? '').replace(/^#{1,2}\s+.*\n+/, (m) => (m.replace(/[#*\s]/g, '').toLowerCase().startsWith((page.h1 ?? page.title).replace(/[\s*?!.,'"]/g, '').toLowerCase().slice(0, 20)) ? '' : m));
+// The post's own H1 is the page title; drop any "#" or "##" heading in
+// the body that just repeats it.
+const norm = (t: string) => t.replace(/<[^>]+>|[#*_\s?!.,:'"]/g, '').toLowerCase();
+const titleKey = norm(page.h1 ?? page.title).slice(0, 24);
+const body = (page.copy ?? '').replace(/^#{1,2}\s+(.*)\n+/gm, (m, text: string) => (titleKey && norm(text).startsWith(titleKey) ? '' : m));
 // Heading order for accessibility: an article whose sections start at
 // "###" (no "##") would jump from the H1 to H3, so lift them a level.
 const leveled = /^## /m.test(body) ? body : body.replace(/^###(#?) /gm, '##$1 ');
+// Every section heading gets an id, and the table of contents links to
+// them: the H2s when there are at least two, otherwise H2s and H3s.
+const slug = (t: string) => t.toLowerCase().replace(/&[a-z]+;/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const heads: { text: string; id: string; level: number }[] = [];
+const bodyHtml = renderCopy(leveled).replace(/<h([23])(?: id="[^"]*")?>([\s\S]*?)<\/h\1>/g, (_m, lvl: string, inner: string) => {
+  const text = inner.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"').trim();
+  let id = slug(text) || `section-${heads.length + 1}`;
+  if (heads.some((h) => h.id === id)) id = `${id}-${heads.length + 1}`;
+  heads.push({ text, id, level: Number(lvl) });
+  return `<h${lvl} id="${id}">${inner}</h${lvl}>`;
+});
+const toc = heads.filter((h) => h.level === 2).length >= 2 ? heads.filter((h) => h.level === 2) : heads;
+const takeaways = (page.key_takeaways ?? []).filter((t) => t && t.trim());
 const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !== withBase(`/${page.slug}`)).slice(0, 3);
 ---
 
@@ -50,8 +68,21 @@ const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !=
         </div>
       </div>
     </header>
-    <div class="s-wrap">
-      <div class="ar-body s-rich" set:html={renderCopy(leveled)} />
+    <div class="s-wrap ar-layout">
+      <div class="ar-main">
+      {takeaways.length > 0 && (
+        <section class="ar-kt" aria-labelledby="ar-kt-h">
+          <h2 id="ar-kt-h">Key takeaways</h2>
+          <ul>{takeaways.map((t) => <li>{t}</li>)}</ul>
+        </section>
+      )}
+      {toc.length > 1 && (
+        <details class="ar-toc-m">
+          <summary>In this article</summary>
+          <ol>{toc.map((t) => <li class:list={[t.level === 3 && toc.some((x) => x.level === 2) && 'sub']}><a href={`#${t.id}`}>{t.text}</a></li>)}</ol>
+        </details>
+      )}
+      <div class="ar-body s-rich" set:html={bodyHtml} />
       {service && (
         <aside class="ar-cta">
           <div>
@@ -60,6 +91,13 @@ const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !=
           </div>
           <a class="s-btn s-btn-primary" href={withBase(`/${service.slug}`)}>About {service.title.toLowerCase()} <Ph name="arrow-right" /></a>
         </aside>
+      )}
+      </div>
+      {toc.length > 1 && (
+        <nav class="ar-toc" aria-label="On this page">
+          <p>On this page</p>
+          <ol>{toc.map((t) => <li class:list={[t.level === 3 && toc.some((x) => x.level === 2) && 'sub']}><a href={`#${t.id}`}>{t.text}</a></li>)}</ol>
+        </nav>
       )}
     </div>
   </article>
@@ -91,4 +129,42 @@ const more = relatedArticles(allPages, page.category, 4).filter((a) => a.href !=
   .ar-cta { max-width: 720px; margin-top: 48px; display: grid; gap: 16px; padding: 28px; border-radius: var(--radius-card); background: var(--accent-tint); }
   .ar-cta p { color: var(--muted); margin-top: 6px; }
   .ar-cta .s-btn { justify-self: start; }
+  .ar-layout { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .ar-main { min-width: 0; }
+  .ar-kt { max-width: 720px; margin-bottom: 32px; padding: 24px 28px; border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--shadow); border-left: 4px solid var(--ink); }
+  .ar-kt h2 { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  .ar-kt ul { list-style: disc; margin: 0; padding-left: 1.2em; display: grid; gap: 8px; font-size: 1.02rem; line-height: 1.55; }
+  .ar-toc-m { max-width: 720px; margin-bottom: 28px; border: 1.5px solid var(--line); border-radius: var(--radius-card); padding: 14px 20px; background: var(--surface); }
+  .ar-toc-m summary { font-weight: 700; cursor: pointer; }
+  .ar-toc-m ol { list-style: decimal; margin: 12px 0 2px; padding-left: 1.4em; display: grid; gap: 6px; }
+  .ar-toc-m a, .ar-toc a { color: var(--ink); text-decoration: none; }
+  .ar-toc-m a:hover, .ar-toc a:hover { text-decoration: underline; }
+  .ar-toc { display: none; }
+  .ar-body :global(h2[id]), .ar-body :global(h3[id]) { scroll-margin-top: 24px; }
+  .ar-toc li.sub a { padding-left: 28px; font-size: 0.88rem; }
+  .ar-toc-m li.sub { margin-left: 1em; }
+  @media (min-width: 1100px) {
+    .ar-layout { grid-template-columns: minmax(0, 720px) 250px; gap: 64px; justify-content: start; }
+    .ar-toc-m { display: none; }
+    .ar-toc { display: block; position: sticky; top: 108px; align-self: start; max-height: calc(100vh - 140px); overflow: auto; }
+    .ar-toc p { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+    .ar-toc ol { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); display: grid; gap: 2px; }
+    .ar-toc li a { display: block; padding: 6px 0 6px 14px; margin-left: -2px; border-left: 2px solid transparent; color: var(--muted); font-size: 0.93rem; line-height: 1.4; }
+    .ar-toc li a[aria-current='true'] { color: var(--ink); font-weight: 600; border-left-color: var(--ink); }
+  }
 </style>
+
+<script>
+  // Highlight the section being read in the sticky list.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.ar-toc a')];
+  const heads = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter((h): h is HTMLElement => !!h);
+  if (heads.length) {
+    const update = () => {
+      let current = heads[0];
+      for (const h of heads) if (h.getBoundingClientRect().top < 170) current = h;
+      links.forEach((a) => a.setAttribute('aria-current', String(a.hash === `#${current.id}`)));
+    };
+    addEventListener('scroll', update, { passive: true });
+    update();
+  }
+</script>
