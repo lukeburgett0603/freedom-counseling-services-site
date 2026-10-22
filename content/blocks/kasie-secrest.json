@@ -2,44 +2,61 @@
   "slug": "kasie-secrest",
   "blocks": {
     "card.credential": "LPCA, EMDR-trained",
-    "card.summary": "Women and couples working through grief, trauma, anxiety, and relationships.",
-    "hero.eyebrow": "Women, couples, grief, trauma",
-    "hero.subhead": "Comes alongside women, from older teens to adults, and couples working through anxiety, depression, grief, trauma, and hard relationships, so they can respond to life instead of just reacting to it.",
+    "card.summary": "Women and older teens working through grief, trauma, anxiety, and relationships.",
+    "hero.eyebrow": "Women, grief, trauma, anxiety",
+    "hero.subhead": "Comes alongside women, from older teens to adults, working through anxiety, depression, grief, trauma, and hard relationships, so they can respond to life instead of just reacting to it.",
     "quote": "I hope to serve as a faithful guide as you embark on your journey to health and wholeness. The journey is yours, but you will not walk it alone.",
     "specialties": [
-      { "text": "Women's counseling" },
-      { "text": "Couples and marriage" },
-      { "text": "Grief and endings" },
-      { "text": "Anxiety and depression" },
-      { "text": "Trauma and EMDR" },
-      { "text": "Boundaries and life transitions" }
+      {
+        "text": "Women's counseling"
+      },
+      {
+        "text": "Grief and endings"
+      },
+      {
+        "text": "Anxiety and depression"
+      },
+      {
+        "text": "Trauma and EMDR"
+      },
+      {
+        "text": "Boundaries and life transitions"
+      }
     ],
     "approaches": [
-      { "text": "EMDR" },
-      { "text": "Cognitive behavioral therapy (CBT), in training" },
-      { "text": "Internal family systems (IFS), in training" },
-      { "text": "Enneagram (certified coach), when you'd like it" }
+      {
+        "text": "EMDR"
+      },
+      {
+        "text": "Cognitive behavioral therapy (CBT), in training"
+      },
+      {
+        "text": "Internal family systems (IFS), in training"
+      },
+      {
+        "text": "Enneagram (certified coach), when you'd like it"
+      }
     ],
     "sections": [
       {
-        "heading": "Who Kasie works with",
-        "body": "Kasie loves coming alongside women of all ages, including older teens, young adults, and adult women, who are struggling with relationships, boundaries, life transitions, endings and grief, anxiety, depression, and traumatic experiences. She also works with couples who want to move through relational challenges toward a thriving marriage."
+        "body": "Kasie loves coming alongside women of all ages, including older teens, young adults, and adult women, who are struggling with relationships, boundaries, life transitions, endings and grief, anxiety, depression, and traumatic experiences.",
+        "heading": "Who Kasie works with"
       },
       {
-        "heading": "What people often feel when they start",
-        "body": "Many of Kasie's clients arrive exhausted, either numb or overwhelmed by their emotions. Often they feel over-responsible, not enough, or stuck. With Kasie, they learn to name their emotions, listen to what those emotions are telling them, and consider them without judgment, so they can respond to hard circumstances instead of reacting."
+        "body": "Many of Kasie's clients arrive exhausted, either numb or overwhelmed by their emotions. Often they feel over-responsible, not enough, or stuck. With Kasie, they learn to name their emotions, listen to what those emotions are telling them, and consider them without judgment, so they can respond to hard circumstances instead of reacting.",
+        "heading": "What people often feel when they start"
       },
       {
-        "heading": "Kasie's approach",
-        "body": "Kasie is creative and collaborative, and she believes her clients carry within themselves the ability to choose and to heal. Each session starts by touching base on what's come up since last time, then ties it back to the goals you've set together; what happens next depends on what you're working on.\n\nShe's EMDR-trained, uses ideas from internal family systems (IFS) and cognitive behavioral therapy (CBT) as she continues training in both, and, as a certified Enneagram coach, can bring in that framework if you'd like."
+        "body": "Kasie is creative and collaborative, and she believes her clients carry within themselves the ability to choose and to heal. Each session starts by touching base on what's come up since last time, then ties it back to the goals you've set together; what happens next depends on what you're working on.\n\nShe's EMDR-trained, uses ideas from internal family systems (IFS) and cognitive behavioral therapy (CBT) as she continues training in both, and, as a certified Enneagram coach, can bring in that framework if you'd like.",
+        "heading": "Kasie's approach"
       },
       {
-        "heading": "What Kasie hopes for you",
-        "body": "That you'll learn to show yourself grace, experience a hope that lasts, and see joy, even in the middle of deep grief. Learning to hold the hard alongside the healing, and to embrace the process, is one of her greatest hopes for every client."
+        "body": "That you'll learn to show yourself grace, experience a hope that lasts, and see joy, even in the middle of deep grief. Learning to hold the hard alongside the healing, and to embrace the process, is one of her greatest hopes for every client.",
+        "heading": "What Kasie hopes for you"
       },
       {
-        "heading": "A little about Kasie",
-        "body": "Kasie's own journey toward wholeness, including seasons of deep grief, is a big part of why she became a counselor: to offer others the comfort she has received. Outside the office she enjoys time with friends and family, her golden retriever and orange tabby cat, reading, movies, hiking, and coffee on her back porch.\n\nKasie is a Licensed Professional Counselor Associate (LPCA). She holds a BA in Communication Studies from Samford University and an MA in Clinical Mental Health Counseling from Colorado Christian University."
+        "body": "Kasie's own journey toward wholeness, including seasons of deep grief, is a big part of why she became a counselor: to offer others the comfort she has received. Outside the office she enjoys time with friends and family, her golden retriever and orange tabby cat, reading, movies, hiking, and coffee on her back porch.\n\nKasie is a Licensed Professional Counselor Associate (LPCA). She holds a BA in Communication Studies from Samford University and an MA in Clinical Mental Health Counseling from Colorado Christian University.",
+        "heading": "A little about Kasie"
       }
     ],
     "faith.heading": "Faith",

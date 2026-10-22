@@ -1351,6 +1351,36 @@
       "title": "Porn Addiction Counseling",
       "category": "Porn Addiction Counseling",
       "status": "content-complete"
+    },
+    "kasie-secrest": {
+      "meta_title": "Kasie Secrest, LPCA | Counselor for Women in Louisville, KY",
+      "meta_description": "Kasie Secrest, LPCA, helps women and older teens work through anxiety, depression, grief, trauma, and relationships, with EMDR. In Louisville and online. $100 per session.",
+      "specialties": [
+        {
+          "label": "Grief",
+          "page_slug": "grief-counseling"
+        },
+        {
+          "label": "Trauma",
+          "page_slug": "trauma-counseling"
+        },
+        {
+          "label": "EMDR",
+          "page_slug": "trauma-emdr-counseling"
+        },
+        {
+          "label": "Anxiety",
+          "page_slug": "anxiety-depression-counseling"
+        },
+        {
+          "label": "Depression",
+          "page_slug": "depression-counseling"
+        },
+        {
+          "label": "Christian Counseling",
+          "page_slug": "christian-counseling"
+        }
+      ]
     }
   },
   "business": {
