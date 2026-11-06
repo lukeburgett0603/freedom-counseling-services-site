@@ -192,7 +192,7 @@ const svg = (name: string) =>
           <p id="forgot-password-status" class="a-status" style="color:var(--a-muted)" role="status"></p>
         </form>
       </div>
-      <p class="a-auth-foot">Powered by Counselor Marketing Co.</p>
+      <p class="a-auth-foot">Powered by Therapy Marketing Co.</p>
     </div>
 
     <div id="set-password-view" class="a-auth" style="display: none;">
@@ -254,7 +254,7 @@ const svg = (name: string) =>
             ))}
           </ul>
         </div>
-        <div class="a-powered">Powered by Counselor Marketing Co.</div>
+        <div class="a-powered">Powered by Therapy Marketing Co.</div>
       </aside>
 
       <div class="a-main" id="a-main">
@@ -355,7 +355,7 @@ const svg = (name: string) =>
   });
 
   // Filled in once adminAuth.ts knows who's signed in.
-  const ROLE_LABEL: Record<AdminUser['role'], string> = { owner: 'Practice owner', staff: 'Team member', agency: 'Counselor Marketing Co.' };
+  const ROLE_LABEL: Record<AdminUser['role'], string> = { owner: 'Practice owner', staff: 'Team member', agency: 'Therapy Marketing Co.' };
   window.addEventListener('admin:authed', (event) => {
     const user = (event as CustomEvent<AdminUser>).detail;
     const name = user.display_name?.trim() || (user.email || '').split('@')[0].replace(/[._-]+/g, ' ').trim();

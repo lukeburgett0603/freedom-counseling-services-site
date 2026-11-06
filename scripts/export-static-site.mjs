@@ -174,7 +174,7 @@ use ${siteRoot}.
       : 'replaced with your phone number and email address. To add a form back, use a form service (for example Formspree) and ask your developer to point the form at it.'
   }
 - Removed: guide downloads, click tracking, and the site analytics that ran
-  through Counselor Marketing Co.'s systems.${
+  through Therapy Marketing Co.'s systems.${
   formAction
     ? ''
     : `
