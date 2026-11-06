@@ -13,3 +13,4 @@ supabase/.temp/
 
 # Client exit exports (scripts/export-static-site.mjs): never commit
 exports/
+.cache/

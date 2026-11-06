@@ -3,6 +3,10 @@ import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 import { loadEnv } from 'vite';
 import { loadSitemapDates } from './src/lib/sitemapDates.mjs';
+import { installRemoteImageCache } from './src/lib/remoteImageCache.mjs';
+
+// Each storage image downloads once, not once per use (see the module).
+installRemoteImageCache();
 
 // Real last-edited dates for the sitemap's <lastmod> (see the module).
 const sitemapDates = await loadSitemapDates({ ...loadEnv(process.env.NODE_ENV ?? 'production', process.cwd(), 'PUBLIC_'), ...process.env });
