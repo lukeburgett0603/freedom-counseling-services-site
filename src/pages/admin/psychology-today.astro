@@ -1,0 +1,135 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { withBase } from '../../lib/url';
+import { getBusiness } from '../../lib/pages';
+import { fullAddress } from '../../lib/hours';
+import { PT_STEPS, PT_DONTS, openingTemplate } from '../../lib/psychologyToday';
+
+// The practice's own facts, so step 1 can be copied exactly. Read at
+// build time like the rest of the site; Business info saves rebuild it.
+let practiceName = '';
+let address: string | null = null;
+let phone: string | null = null;
+let profileUrl: string | null = null;
+try {
+  const business = await getBusiness();
+  practiceName = business.display_name ?? '';
+  address = fullAddress(business);
+  phone = business.telephone;
+  profileUrl = (business.same_as ?? []).find((url) => /psychologytoday\.com/i.test(url)) ?? null;
+} catch {
+  // Build without database access: the guide still renders, without facts.
+}
+const website = Astro.site ? new URL(withBase('/'), Astro.site).href : null;
+const facts: [string, string | null][] = [
+  ['Practice name', practiceName || null],
+  ['Address', address],
+  ['Phone', phone],
+  ['Website', website],
+];
+---
+
+<!--
+  Psychology Today profile guide (Get found). Self-Guided's version of
+  the profile work Done for You does for the practice (approved by Luke
+  2026-11-07). Static: no table, no writes. Copy lives in
+  src/lib/psychologyToday.ts; the same steps are in CMC's instant audit.
+-->
+<AdminLayout title="Psychology Today | Admin" current="psychology-today">
+  <p class="i-intro">
+    Many clients still look here first. Make your profile sound like you, and make it lead to your website.
+    {profileUrl && <> <a href={profileUrl} target="_blank" rel="noopener">Open your profile</a></>}
+  </p>
+
+  <div class="t-grid v-top">
+    <section class="t-card t-s7">
+      <h2>Five steps</h2>
+      <ol class="v-numbered pt-steps">
+        {PT_STEPS.map((s) => <li><b>{s.title}</b> {s.body}</li>)}
+      </ol>
+    </section>
+
+    <section class="t-card t-s5">
+      <h2>Copy these exactly</h2>
+      <p class="v-help">Your profile should match your website word for word.</p>
+      <dl class="pt-facts">
+        {facts.map(([label, value]) => (
+          <div>
+            <dt>{label}</dt>
+            <dd>{value ?? <span class="pt-missing">Not set yet. Add it in <a href={withBase('/admin/content/business-info')}>Business info</a>.</span>}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  </div>
+
+  <section class="t-card">
+    <div class="v-block">
+      <div class="v-block-head">
+        <b>Template for your opening</b>
+        <button type="button" data-copy-target="pt-template" class="copy-button a-btn i-btn">Copy</button>
+      </div>
+      <p class="v-help">Replace everything in [brackets] with your own words, then paste it into your profile's opening.</p>
+      <pre id="pt-template" class="v-quote pt-template">{openingTemplate(practiceName || 'our practice')}</pre>
+    </div>
+    <div class="v-block">
+      <b>Avoid</b>
+      <ul class="v-numbered">{PT_DONTS.map((d) => <li>{d}</li>)}</ul>
+    </div>
+  </section>
+</AdminLayout>
+
+<style>
+  .pt-steps {
+    list-style: decimal;
+    padding-left: 22px;
+  }
+  .pt-steps li::marker {
+    color: var(--a-muted);
+  }
+  .pt-steps b {
+    color: var(--a-fg);
+    font-weight: 500;
+  }
+  .pt-facts {
+    display: grid;
+    gap: 10px;
+    margin: 12px 0 0;
+  }
+  .pt-facts dt {
+    color: var(--a-muted);
+    font-size: 12px;
+  }
+  .pt-facts dd {
+    margin: 2px 0 0;
+    color: var(--a-fg);
+    overflow-wrap: anywhere;
+  }
+  .pt-missing {
+    color: var(--a-muted);
+    font-size: 13px;
+  }
+  .pt-template {
+    white-space: pre-wrap;
+    font-family: inherit;
+  }
+</style>
+
+<script>
+  import { initAdminAuth } from '../../lib/adminAuth';
+
+  document.querySelectorAll<HTMLButtonElement>('.copy-button').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const text = document.getElementById(button.dataset.copyTarget!)!.textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = 'Copied';
+      } catch {
+        button.textContent = 'Select and copy';
+      }
+      setTimeout(() => (button.textContent = 'Copy'), 2000);
+    });
+  });
+
+  initAdminAuth(() => {}, { allowedRoles: ['owner', 'agency'] });
+</script>
