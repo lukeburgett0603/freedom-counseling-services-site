@@ -1055,3 +1055,12 @@ page's own `LeadGenerator` form, confirmed the sticky bar's "Schedule
 With Luke" half genuinely disappears the moment the form's real submit
 button enters the viewport, and "Call Now" correctly expands to fill
 the bar with no stray leftover border. No console errors.
+
+## Four-week results report (2026-11-10)
+
+Report for Freedom's leadership after the October 14 relaunch, web and PDF:
+`../Counselor Marking Co./client-site-system/freedom/reports/`. Search Console
+numbers through Nov 8 are saved in
+`../Counselor Marking Co./client-site-system/freedom/search-console-baseline.md`.
+Freedom approved publishing the results on Therapy Marketing Co.'s case study
+(2026-11-10). Next report: compare against these numbers.
