@@ -393,22 +393,11 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
                     placeholder="https://www.youtube.com/watch?v=..."
                     class="w-full rounded-md border border-slate-300 px-4 py-2"
                   />
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-xs text-slate-400">or upload a file</span>
-                    <label
-                      for="content-video-file"
-                      class="inline-block cursor-pointer rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      Choose File
-                    </label>
-                    <input id="content-video-file" type="file" accept="video/mp4,video/quicktime,video/webm" class="sr-only" />
-                  </div>
-                  <p id="content-video-status" class="text-xs text-slate-500"></p>
                 </div>
                 <p class="locked-view rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700" data-locked-value></p>
                 <p class="mt-1 text-xs text-slate-500">
-                  A YouTube/Vimeo link, or upload a video file directly (200MB max, MP4/MOV/WebM). Leave blank to skip
-                  the video.
+                  A YouTube or Vimeo link. Leave blank to skip the video. (Videos are never uploaded to the site
+                  itself: YouTube and Vimeo stream them for free.)
                 </p>
                 <p class="tier-note mt-1 text-xs text-slate-500">
                   Included as an agency-managed field on your plan — suggest a change below.
@@ -739,6 +728,7 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
 </AdminLayout>
 
 <script>
+  import { uploadImage } from '../../../lib/imageUpload';
   import { supabase, initAdminAuth, type AdminUser } from '../../../lib/adminAuth';
   import { initRichTextEditor } from '../../../lib/richTextEditor';
   import { renderCopy } from '../../../lib/markdown';
@@ -999,8 +989,6 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
   const contentBrandscriptTeaser = document.getElementById('content-brandscript-teaser') as HTMLTextAreaElement;
   const brandscriptFullEditor = initRichTextEditor('content-brandscript-full-editor');
   const contentBrandscriptVideoUrl = document.getElementById('content-brandscript-video-url') as HTMLInputElement;
-  const contentVideoFile = document.getElementById('content-video-file') as HTMLInputElement;
-  const contentVideoStatus = document.getElementById('content-video-status')!;
 
   // The counselor's own quote — Counselor-Profile-only, new 2026-09-16.
   // Ungated (no data-field wrapper) — see the loadContentForm() comment
@@ -1865,13 +1853,13 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     const file = contentImageFile.files?.[0];
     if (!file) return;
     contentImageStatus.textContent = 'Uploading...';
-    const path = `content/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const { error } = await supabase.storage.from('site-images').upload(path, file);
-    if (error) {
-      contentImageStatus.textContent = 'Upload failed: ' + error.message;
+    // Shrunk to web size first (lib/imageUpload.ts).
+    const { url: uploadedUrl, error } = await uploadImage(supabase, 'site-images', 'content', file);
+    if (error || !uploadedUrl) {
+      contentImageStatus.textContent = 'Upload failed: ' + error;
       return;
     }
-    const { data: urlData } = supabase.storage.from('site-images').getPublicUrl(path);
+    const urlData = { publicUrl: uploadedUrl };
     uploadedImageUrl = urlData.publicUrl;
     // A direct upload has no Unsplash attribution — clear any credit left
     // over from a previous Unsplash selection.
@@ -1880,27 +1868,6 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     contentImagePreview.src = urlData.publicUrl;
     contentImagePreview.classList.remove('hidden');
     contentImageStatus.textContent = 'Image uploaded.';
-  });
-
-  // Modeled directly on contentImageFile's own handler above — uploads
-  // to the site-videos bucket (0058_video_uploads_bucket.sql, 200MB/
-  // MP4-MOV-WebM limits enforced server-side) and writes the resulting
-  // public URL into the SAME input the external-link path uses, so
-  // brandscript_video_url stays one field regardless of which way it
-  // was populated.
-  contentVideoFile.addEventListener('change', async () => {
-    const file = contentVideoFile.files?.[0];
-    if (!file) return;
-    contentVideoStatus.textContent = 'Uploading...';
-    const path = `content/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const { error } = await supabase.storage.from('site-videos').upload(path, file);
-    if (error) {
-      contentVideoStatus.textContent = 'Upload failed: ' + error.message;
-      return;
-    }
-    const { data: urlData } = supabase.storage.from('site-videos').getPublicUrl(path);
-    contentBrandscriptVideoUrl.value = urlData.publicUrl;
-    contentVideoStatus.textContent = 'Video uploaded.';
   });
 
   initUnsplashSearchModal({

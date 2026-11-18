@@ -11,7 +11,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "export:site": "node scripts/export-static-site.mjs",
-    "blocks:seed": "node scripts/seed-blocks.mjs"
+    "blocks:seed": "node scripts/seed-blocks.mjs",
+    "check:usage": "node scripts/check-supabase-usage.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

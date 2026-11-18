@@ -116,6 +116,7 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
 </AdminLayout>
 
 <script>
+  import { uploadImage } from '../../lib/imageUpload';
   import { supabase, initAdminAuth } from '../../lib/adminAuth';
   import { callPublishFunction } from '../../lib/publishFunction';
   import { initUnsplashSearchModal, type UnsplashPhoto } from '../../lib/unsplashSearch';
@@ -339,7 +340,7 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
     if (!file) return;
     fileStatus.textContent = 'Uploading...';
     const path = `${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const { error } = await supabase.storage.from('lead-magnet-files').upload(path, file);
+    const { error } = await supabase.storage.from('lead-magnet-files').upload(path, file, { cacheControl: '31536000' });
     if (error) {
       fileStatus.textContent = 'Upload failed: ' + error.message;
       return;
@@ -354,13 +355,13 @@ import { SEQUENCE_SCHEDULE_DAYS } from '../../lib/nurtureSequence';
     const file = imageFileField.files?.[0];
     if (!file) return;
     imageStatus.textContent = 'Uploading...';
-    const path = `lead-magnets/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const { error } = await supabase.storage.from('site-images').upload(path, file);
-    if (error) {
-      imageStatus.textContent = 'Upload failed: ' + error.message;
+    // Shrunk to web size first (lib/imageUpload.ts).
+    const { url: uploadedUrl, error } = await uploadImage(supabase, 'site-images', 'lead-magnets', file);
+    if (error || !uploadedUrl) {
+      imageStatus.textContent = 'Upload failed: ' + error;
       return;
     }
-    const { data: urlData } = supabase.storage.from('site-images').getPublicUrl(path);
+    const urlData = { publicUrl: uploadedUrl };
     selectedImage = { url: urlData.publicUrl, alt: '', creditName: null, creditUrl: null };
     imagePreview.src = urlData.publicUrl;
     imagePreview.classList.remove('hidden');

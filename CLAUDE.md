@@ -4589,3 +4589,15 @@ URL and link point at a redirect that pointed back (a loop on every page,
 found while investigating the late-September ranking drop). Now
 `trailingSlash: 'always'`, `withBase()` / `pageUrl()` add the slash. Never
 build a page URL by hand. Old no-slash links still 301 to the slash form.
+
+## Supabase usage fixes (2026-11-18, from the usage audit)
+
+Same rules as the template's "Supabase usage" section (synced from it):
+share and structured-data images are built into the site
+(`src/lib/shareImages.ts`, called from `PageHead.astro`; the homepage share
+image went from a 6 MB Storage original to 432 KB on GitHub Pages); admin
+image uploads are shrunk to 2000px WebP first (`src/lib/imageUpload.ts`,
+used by blog, lead magnets and page copy); video file uploads removed
+(YouTube/Vimeo links only; migration 0080 drops the upload policy and makes
+`site-videos` private; the bucket was empty). Check with
+`npm run build && npm run check:usage`. Turnstile was already on here.
