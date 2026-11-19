@@ -4656,3 +4656,33 @@ would hold health details. Nothing here stores new health details.
 - Tested 2026-11-19 against Freedom's database in a rolled-back
   transaction (14 checks: call trigger, outcome clearing, counselor limits,
   phone/email matching, anon blocked).
+
+## Referral partners: email from the admin + one timeline (2026-11-19, migration 0082)
+
+Step 1 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- **Send email** on a partner's page (any email-type message, or "Blank
+  email") through `supabase/functions/send-partner-email` (owners/agency
+  only, checked against `admin_users`; verify_jwt on). It sends with the
+  practice's own `NURTURE_RESEND_API_KEY` / `NURTURE_SENDER_EMAIL`, from
+  "<Signed by> at <Practice>", reply-to the sender's own email or the
+  practice inbox (`lead_notification_email`), plain personal HTML plus a
+  text part. It refuses unfinished [brackets], partners with no valid email,
+  and more than 100 partner emails in a day. A failed send is not logged and
+  the error is shown. First outreach moves a Prospect to Contacted.
+- **Saved on the timeline:** sent emails keep their subject, text and
+  recipient (`referral_partner_activities.subject/body/sent_to/resend_id`).
+  A fixed reminder above the compose box: no client names or details.
+- **Timeline** (was Activity): sent emails (open to read), calls, visits,
+  notes, "They replied", stage changes (trigger
+  `referral_partners_log_stage`, `activity_type 'stage'`, `detail`
+  from/to), and each referral from `leads.referral_partner_id`.
+- **They replied** logs that a reply came (date only, never its text) and
+  points at the next follow-up. Replies themselves stay in the inbox they
+  went to until the Resend upgrade + HIPAA work (plan step 12).
+- People can insert only plain activity rows: never `stage`, and never
+  rows with subject/body/sent_to/resend_id/detail (policy in 0082), so the
+  timeline can be trusted. Last touch and Overview's "touches" skip stage
+  rows (Overview also skips replies).
+- Tested 2026-11-19 on Freedom's database in a rolled-back transaction
+  (10 checks).

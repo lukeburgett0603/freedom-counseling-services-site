@@ -293,7 +293,8 @@ const link = (path: string) => withBase(path);
     const livePartners = data.partners.filter((p) => !p.archived_at);
     const activePartners = livePartners.filter((p) => p.status === 'active').length;
     const inProgress = livePartners.filter((p) => ['prospect', 'contacted', 'meeting'].includes(p.status)).length;
-    const touches = data.activities.filter((a) => a.activity_type !== 'note' && a.occurred_on >= startIso && a.occurred_on < endIso).length;
+    // Outreach only: not notes, stage changes or their replies (0082).
+    const touches = data.activities.filter((a) => !['note', 'stage', 'reply'].includes(a.activity_type) && a.occurred_on >= startIso && a.occurred_on < endIso).length;
     const refLeads = leadsNow.filter(isReferral).length;
     const refClients = clientsNow.filter(isReferral).length;
     document.getElementById('referred')!.innerHTML = [

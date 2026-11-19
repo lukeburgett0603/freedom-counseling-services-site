@@ -142,12 +142,14 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
              partner's name, contact, and type plus the practice's live data.
              Editable before sending; "Log as sent" records it in Activity. -->
         <section class="t-card r-kit">
-          <h2>Outreach message<span class="t-aside">Edit freely before sending</span></h2>
+          <h2>Email or message<span class="t-aside">Edit freely before sending</span></h2>
+          <p class="r-privacy"><b>No client names or details.</b> Partners can't be told who was referred or who booked without the client's signed release. Sent emails are saved on this partner's timeline.</p>
           <div class="r-kit-grid">
             <div class="i-field">
               <label for="kit-template">Message</label>
               <select id="kit-template">
                 {OUTREACH_TEMPLATES.map((t) => <option value={t.key}>{t.label}</option>)}
+                <option value="blank">Blank email</option>
               </select>
             </div>
             <div class="i-field">
@@ -163,17 +165,26 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
             <label for="kit-body">Message</label>
             <textarea id="kit-body" rows="13"></textarea>
           </div>
+          <div id="kit-send-wrap" class="i-field" hidden>
+            <label for="kit-reply-to">Replies go to</label>
+            <select id="kit-reply-to">
+              <option value="me">My email</option>
+              <option value="practice">The practice inbox</option>
+            </select>
+          </div>
           <div class="i-inline r-kit-actions">
-            <button id="kit-log" type="button" class="a-btn a-btn-primary i-btn">Log as sent</button>
+            <button id="kit-send" type="button" class="a-btn a-btn-primary i-btn" hidden>Send email</button>
+            <button id="kit-log" type="button" class="a-btn i-btn">Log as sent</button>
             <button id="kit-copy" type="button" class="a-btn i-btn">Copy</button>
-            <a id="kit-mailto" href="#" class="a-btn i-btn" hidden>Open in email</a>
+            <a id="kit-mailto" href="#" class="a-btn i-btn" hidden>Open in my email app</a>
             <span id="kit-status" class="i-hint" role="status"></span>
           </div>
-          <p class="i-hint">Never mention a client by name, or that someone became a client, without their signed release.</p>
+          <p id="kit-no-email" class="i-hint" hidden>Add this partner's email address (right) to send from here.</p>
         </section>
 
         <section class="t-card">
-          <h2>Activity<span class="t-aside">Newest first</span></h2>
+          <h2>Timeline<span class="t-aside"><button id="replied-button" type="button" class="a-link">They replied</button></span></h2>
+          <p id="replied-status" class="i-hint" role="status"></p>
           <form id="activity-form" class="r-activity-form">
             <select name="activity_type" aria-label="Activity type">
               {ACTIVITY_TYPES.map((a) => <option value={a.value}>{a.label}</option>)}
@@ -353,8 +364,9 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     return new Date(y, m - 1, d).toLocaleDateString(undefined, opts);
   }
 
+  // A stage change is bookkeeping, not contact (0082).
   function lastTouch(partnerId: string): string | null {
-    const dates = activities.filter((a) => a.partner_id === partnerId).map((a) => a.occurred_on);
+    const dates = activities.filter((a) => a.partner_id === partnerId && a.activity_type !== 'stage').map((a) => a.occurred_on);
     return dates.length ? dates.sort().at(-1)! : null;
   }
 
@@ -492,23 +504,56 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     if (target?.dataset.partnerId) openDetail(target.dataset.partnerId);
   });
 
-  function renderActivities() {
-    const rows = activities
-      .filter((a) => a.partner_id === currentId)
-      .sort((a, b) => b.occurred_on.localeCompare(a.occurred_on) || b.created_at.localeCompare(a.created_at));
-    activityList.innerHTML = rows.length
-      ? rows
-          .map(
-            (a) => `
-        <li class="i-note">
+  // One timeline per partner (0082): everything logged or sent, stage
+  // changes, and each referral they sent, newest first.
+  function activityHtml(a: PartnerActivity): string {
+    if (a.activity_type === 'stage') {
+      const from = a.detail?.from ? partnerStatusLabel(a.detail.from) : '';
+      const to = a.detail?.to ? partnerStatusLabel(a.detail.to) : '';
+      return `<li class="i-note r-ev"><small>${formatDate(a.occurred_on)}</small><p>Stage: ${escapeHtml(from)} → ${escapeHtml(to)}</p></li>`;
+    }
+    if (a.activity_type === 'email' && a.body) {
+      return `<li class="i-note">
+          <small><b>Email sent</b> · ${formatDate(a.occurred_on)}${a.sent_to ? ` · to ${escapeHtml(a.sent_to)}` : ''}</small>
+          <details class="r-sent"><summary>${escapeHtml(a.subject ?? a.note ?? '(no subject)')}</summary><p>${escapeHtml(a.body)}</p></details>
+        </li>`;
+    }
+    return `<li class="i-note${a.activity_type === 'reply' ? ' r-reply' : ''}">
           <small><b>${escapeHtml(activityLabel(a.activity_type))}</b> · ${formatDate(a.occurred_on)}</small>
           ${a.note ? `<p>${escapeHtml(a.note)}</p>` : ''}
-        </li>`
-          )
-          .join('')
-      : '<li class="t-empty r-activity-empty">Nothing logged yet. Log every email, call, visit, and thank-you so you can see the relationship over time.</li>';
+        </li>`;
+  }
+
+  function renderActivities() {
+    type Item = { day: string; at: string; html: string };
+    const items: Item[] = activities
+      .filter((a) => a.partner_id === currentId)
+      .map((a) => ({ day: a.occurred_on, at: a.created_at, html: activityHtml(a) }));
+    for (const l of linkedLeads.filter((x) => x.referral_partner_id === currentId)) {
+      items.push({
+        day: l.created_at.slice(0, 10),
+        at: l.created_at,
+        html: `<li class="i-note r-ref"><small><b>Referral</b> · ${formatDate(l.created_at)}</small><p><a class="a-link" href="${withBase('/admin/crm')}?lead=${l.id}">${escapeHtml(l.name ?? 'An inquiry')}</a>${l.status === 'scheduled' ? ' · <b class="r-clients">Became a client</b>' : ''}</p></li>`,
+      });
+    }
+    items.sort((a, b) => b.day.localeCompare(a.day) || b.at.localeCompare(a.at));
+    activityList.innerHTML = items.length
+      ? items.map((i) => i.html).join('')
+      : '<li class="t-empty r-activity-empty">Nothing yet. Send an email from here, or log every call, visit, and thank-you so you can see the relationship over time.</li>';
     renderHeader();
   }
+
+  // "They replied" (0082): the reply itself stays in the inbox it went to;
+  // this records that it came, then suggests the next follow-up.
+  document.getElementById('replied-button')!.addEventListener('click', async () => {
+    const ok = await logActivity('reply', null);
+    if (!ok) return;
+    const followUp = partnerForm.elements.namedItem('next_follow_up') as HTMLInputElement;
+    document.getElementById('replied-status')!.textContent = followUp.value
+      ? 'Logged. Check the next follow-up date on the right.'
+      : 'Logged. Set a next follow-up on the right.';
+    followUp.focus();
+  });
 
   function renderReferrals() {
     const leads = linkedLeads
@@ -567,6 +612,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     archiveButton.textContent = p.archived_at ? 'Unarchive' : 'Archive';
     archivedBanner.classList.toggle('hidden', !p.archived_at);
     (activityForm.elements.namedItem('occurred_on') as HTMLInputElement).value = todayIso();
+    document.getElementById('replied-status')!.textContent = '';
     kitTemplate.value = STAGE_TEMPLATE[p.status] ?? 'intro_email';
     renderActivities();
     renderReferrals();
@@ -608,9 +654,15 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       partnerFormStatus.className = 'i-hint r-err';
       return;
     }
-    Object.assign(partners.find((p) => p.id === currentId)!, update);
+    const before = partners.find((p) => p.id === currentId)!;
+    const stageChanged = before.status !== update.status;
+    Object.assign(before, update);
     partnerFormStatus.textContent = 'Saved.';
     partnerFormStatus.className = 'i-hint r-ok';
+    if (stageChanged) {
+      await reloadActivities();
+      renderActivities();
+    }
     renderHeader();
     renderKit();
   });
@@ -629,11 +681,12 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     // First real outreach moves a prospect forward automatically; any
     // later stage change stays the user's call.
     const partner = partners.find((p) => p.id === currentId)!;
-    if (partner.status === 'prospect' && activityType !== 'note') {
+    if (partner.status === 'prospect' && activityType !== 'note' && activityType !== 'reply') {
       const { error: stageError } = await supabase.from('referral_partners').update({ status: 'contacted' }).eq('id', currentId);
       if (!stageError) {
         partner.status = 'contacted';
         (partnerForm.elements.namedItem('status') as HTMLSelectElement).value = 'contacted';
+        await reloadActivities();
       }
     }
     renderActivities();
@@ -689,6 +742,11 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   const kitBody = document.getElementById('kit-body') as HTMLTextAreaElement;
   const kitMailto = document.getElementById('kit-mailto') as HTMLAnchorElement;
   const kitStatus = document.getElementById('kit-status')!;
+  const kitSend = document.getElementById('kit-send') as HTMLButtonElement;
+  const kitSendWrap = document.getElementById('kit-send-wrap')!;
+  const kitReplyTo = document.getElementById('kit-reply-to') as HTMLSelectElement;
+  const kitLog = document.getElementById('kit-log') as HTMLButtonElement;
+  const kitNoEmail = document.getElementById('kit-no-email')!;
   const faithCheckbox = document.getElementById('faith-integration-checkbox') as HTMLInputElement;
   const faithStatus = document.getElementById('faith-status')!;
 
@@ -697,6 +755,8 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   // access is guarded.
   try {
     kitSigner.value = localStorage.getItem('outreach-signer') ?? '';
+    const savedReplyTo = localStorage.getItem('partner-reply-to');
+    if (savedReplyTo === 'me' || savedReplyTo === 'practice') kitReplyTo.value = savedReplyTo;
   } catch {
     /* storage unavailable */
   }
@@ -704,6 +764,15 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   function renderKit() {
     const partner = partners.find((p) => p.id === currentId);
     if (!partner || !practice) return;
+    if (kitTemplate.value === 'blank') {
+      kitSubjectWrap.hidden = false;
+      kitSubject.value = '';
+      const sign = [kitSigner.value.trim() || '[Your name]', practice.display_name, practice.telephone].filter(Boolean).join('\n');
+      kitBody.value = `${partner.contact_name ? `Hi ${partner.contact_name.trim().split(/\s+/)[0]},` : 'Hi,'}\n\n\n\n${sign}`;
+      kitStatus.textContent = '';
+      updateMailto();
+      return;
+    }
     const key = kitTemplate.value as OutreachTemplateKey;
     const meta = OUTREACH_TEMPLATES.find((t) => t.key === key)!;
     const message = buildOutreachMessage(key, {
@@ -726,14 +795,25 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     updateMailto();
   }
 
+  function isEmailTemplate(): boolean {
+    return kitTemplate.value === 'blank' || Boolean(OUTREACH_TEMPLATES.find((t) => t.key === kitTemplate.value)?.hasSubject);
+  }
+
   function updateMailto() {
     const partner = partners.find((p) => p.id === currentId);
-    const meta = OUTREACH_TEMPLATES.find((t) => t.key === kitTemplate.value)!;
-    const show = Boolean(partner?.email) && meta.hasSubject;
+    const emailKind = isEmailTemplate();
+    const hasEmail = Boolean(partner?.email?.trim());
+    const show = hasEmail && emailKind;
     kitMailto.hidden = !show;
     if (show) {
       kitMailto.href = `mailto:${partner!.email!.trim()}?subject=${encodeURIComponent(kitSubject.value)}&body=${encodeURIComponent(kitBody.value)}`;
     }
+    // Send from the admin (0082): any email-type message to a partner
+    // with an address. Handwritten notes keep "Log as sent".
+    kitSend.hidden = !show;
+    kitSendWrap.hidden = !show;
+    kitLog.hidden = show;
+    kitNoEmail.hidden = hasEmail || !emailKind;
   }
 
   kitTemplate.addEventListener('change', renderKit);
@@ -759,6 +839,73 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       kitStatus.className = 'i-hint r-warn';
     }
   });
+
+  kitSend.addEventListener('click', async () => {
+    const partner = partners.find((p) => p.id === currentId);
+    if (!partner?.email) return;
+    const subject = kitSubject.value.trim();
+    const text = kitBody.value.trim();
+    if (!subject || !text) {
+      kitStatus.textContent = 'Add a subject and a message.';
+      kitStatus.className = 'i-hint r-warn';
+      return;
+    }
+    if (/\[[^\]\n]{1,80}\]/.test(subject + '\n' + text)) {
+      kitStatus.textContent = 'Finish the [bracketed] parts first (for example, add your name under "Signed by").';
+      kitStatus.className = 'i-hint r-warn';
+      return;
+    }
+    if (!window.confirm(`Send this email to ${partner.email.trim()}?`)) return;
+    kitSend.disabled = true;
+    kitStatus.textContent = 'Sending...';
+    kitStatus.className = 'i-hint';
+    const { data, error } = await supabase.functions.invoke('send-partner-email', {
+      body: {
+        partner_id: partner.id,
+        subject,
+        body: text,
+        reply_to: kitReplyTo.value,
+        signer: kitSigner.value,
+        occurred_on: todayIso(),
+      },
+    });
+    kitSend.disabled = false;
+    if (error || !data?.ok) {
+      let message = data?.error as string | undefined;
+      if (!message && error && 'context' in error) {
+        try {
+          message = (await (error as { context: Response }).context.json()).error;
+        } catch {
+          /* no body */
+        }
+      }
+      kitStatus.textContent = message ?? 'The email was not sent. Please try again.';
+      kitStatus.className = 'i-hint r-err';
+      return;
+    }
+    if (data.activity) activities.push(data.activity as PartnerActivity);
+    if (data.status && data.status !== partner.status) {
+      partner.status = data.status;
+      (partnerForm.elements.namedItem('status') as HTMLSelectElement).value = data.status;
+      await reloadActivities();
+    }
+    try {
+      localStorage.setItem('partner-reply-to', kitReplyTo.value);
+    } catch {
+      /* storage unavailable */
+    }
+    renderActivities();
+    kitStatus.textContent = `Sent to ${partner.email.trim()}${data.reply_to ? `. Replies go to ${data.reply_to}` : ''}.`;
+    kitStatus.className = 'i-hint r-ok';
+  });
+
+  // Picks up rows written by the database (a stage change) after a save.
+  async function reloadActivities() {
+    if (!currentId) return;
+    const { data } = await supabase.from('referral_partner_activities').select('*').eq('partner_id', currentId);
+    if (!data) return;
+    activities = activities.filter((a) => a.partner_id !== currentId).concat(data as PartnerActivity[]);
+  }
 
   document.getElementById('kit-log')!.addEventListener('click', async () => {
     const meta = OUTREACH_TEMPLATES.find((t) => t.key === kitTemplate.value)!;
@@ -928,7 +1075,12 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     openDetail((inserted as ReferralPartner).id);
   });
 
-  async function load() {
+  async function load(user?: { id: string }) {
+    // "Signed by" starts as the person's own name (Team), once.
+    if (!kitSigner.value && user) {
+      const { data: me } = await supabase.from('admin_users').select('display_name').eq('id', user.id).maybeSingle();
+      if (me?.display_name) kitSigner.value = me.display_name as string;
+    }
     const [p, a, l, b, c] = await Promise.all([
       supabase.from('referral_partners').select('*').order('name'),
       supabase.from('referral_partner_activities').select('*'),

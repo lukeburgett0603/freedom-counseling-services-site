@@ -35,7 +35,13 @@ export const ACTIVITY_TYPES = [
 const CATEGORY_LABELS = new Map<string, string>(PARTNER_CATEGORIES.map((c) => [c.value, c.label]));
 const STATUS_LABELS = new Map<string, string>(PARTNER_STATUSES.map((s) => [s.value, s.label]));
 const STATUS_CLASSES = new Map<string, string>(PARTNER_STATUSES.map((s) => [s.value, s.classes]));
-const ACTIVITY_LABELS = new Map<string, string>(ACTIVITY_TYPES.map((a) => [a.value, a.label]));
+// 'reply' (They replied) and 'stage' (written by trigger) aren't in the
+// manual log form but still need labels on the timeline (0082).
+const ACTIVITY_LABELS = new Map<string, string>([
+  ...ACTIVITY_TYPES.map((a) => [a.value, a.label] as [string, string]),
+  ['reply', 'They replied'],
+  ['stage', 'Stage changed'],
+]);
 
 export const categoryLabel = (v: string) => CATEGORY_LABELS.get(v) ?? v;
 export const partnerStatusLabel = (v: string) => STATUS_LABELS.get(v) ?? v;
@@ -65,4 +71,10 @@ export type PartnerActivity = {
   occurred_on: string;
   note: string | null;
   created_at: string;
+  // Sent from the admin (0082): subject, text and who it went to.
+  subject?: string | null;
+  body?: string | null;
+  sent_to?: string | null;
+  // A stage change (0082): {"from": "prospect", "to": "contacted"}.
+  detail?: { from?: string; to?: string } | null;
 };

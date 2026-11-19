@@ -5356,3 +5356,52 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Referral partners: email from the admin + timeline (0082, 2026-11-19) */
+.r-privacy {
+  margin: -4px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--a-line2);
+  border-left: 2px solid var(--a-warn, #d97706);
+  border-radius: 8px;
+  background: var(--a-raise);
+  color: var(--a-fg2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.r-privacy b {
+  color: var(--a-fg);
+  font-weight: 600;
+}
+.r-ev::before {
+  background: var(--a-line2);
+  box-shadow: none;
+}
+.r-ev p {
+  color: var(--a-muted);
+}
+.r-reply::before {
+  background: var(--a-ok, #16a34a);
+  box-shadow: none;
+}
+.r-ref::before {
+  background: var(--a-ok, #16a34a);
+  box-shadow: none;
+}
+.r-sent {
+  margin-top: 2px;
+}
+.r-sent summary {
+  cursor: pointer;
+  color: var(--a-fg);
+  font-weight: 500;
+}
+.r-sent p {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-left: 2px solid var(--a-line2);
+  background: var(--a-raise);
+  white-space: pre-wrap;
+  color: var(--a-fg2);
+  font-size: 13px;
+}
