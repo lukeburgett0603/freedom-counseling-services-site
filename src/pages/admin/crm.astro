@@ -185,6 +185,24 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     </div>
   </div>
 
+  <div id="scripts-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6">
+      <div class="mb-2 flex items-center justify-between">
+        <h3 class="font-[family-name:var(--font-heading)] text-lg font-bold text-brand-ink">Reply scripts</h3>
+        <button id="scripts-close-button" type="button" class="text-sm text-slate-500 hover:text-slate-800">Close</button>
+      </div>
+      <p class="mb-4 text-xs text-slate-500">
+        Fill-ins: {'{first_name}'} {'{practice}'} {'{phone}'} {'{my_name}'} {'{counselor}'}. Text in [brackets] is a reminder to finish it
+        before sending. Keep health details out of scripts and email.
+      </p>
+      <div id="scripts-editor" class="space-y-4"></div>
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <button id="add-script-button" type="button" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Add a script</button>
+        <span id="scripts-editor-status" class="text-xs text-slate-500"></span>
+      </div>
+    </div>
+  </div>
+
   <div id="crm-detail-view" class="hidden">
     <div class="i-detail-top">
       <button id="back-to-list-button" type="button" class="a-link">&larr; All inquiries</button>
@@ -216,15 +234,37 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
             <span>What they wrote</span>
             <p id="detail-message"></p>
           </div>
+          <p id="detail-came-back" class="i-came-back hidden"></p>
         </section>
 
         <section class="t-card">
-          <h2>Notes<span class="t-aside">Newest first</span></h2>
+          <h2>Timeline<span class="t-aside">Newest first</span></h2>
+          <div class="i-call-row">
+            <span>Log a call</span>
+            <button type="button" class="a-btn i-btn" data-call="no_answer">No answer</button>
+            <button type="button" class="a-btn i-btn" data-call="voicemail">Left a voicemail</button>
+            <button type="button" class="a-btn i-btn" data-call="talked">Talked</button>
+            <span id="call-status" class="i-hint"></span>
+          </div>
           <form id="add-note-form" class="i-note-form">
-            <textarea id="note-text" rows="2" placeholder="Called and left a voicemail..." required aria-label="New note"></textarea>
-            <button type="submit" class="a-btn a-btn-primary i-btn">Add note</button>
+            <textarea id="note-text" rows="2" placeholder="Add a note..." required aria-label="New note"></textarea>
+            <button type="submit" class="a-btn i-btn">Add note</button>
           </form>
           <div id="notes-list" class="i-notes"></div>
+        </section>
+
+        <section class="t-card" id="scripts-card">
+          <h2>Reply scripts<span class="t-aside"><button type="button" id="edit-scripts-button" class="a-link hidden">Edit scripts</button></span></h2>
+          <p class="i-hint i-script-intro">Wording to copy into your own email, or to read on the phone. Nothing is sent from here.</p>
+          <div class="i-field">
+            <label for="script-select">Script</label>
+            <select id="script-select"></select>
+          </div>
+          <textarea id="script-text" class="i-script-text" rows="6" aria-label="Script text, ready to copy"></textarea>
+          <div class="i-inline">
+            <button type="button" id="copy-script-button" class="a-btn i-btn">Copy</button>
+            <span id="script-status" class="i-hint"></span>
+          </div>
         </section>
       </div>
 
@@ -242,6 +282,31 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
               <button id="clear-follow-up-button" type="button" class="a-link">Clear</button>
             </div>
             <span id="follow-up-status" class="i-hint"></span>
+          </div>
+          <div class="i-field">
+            <label for="detail-next-step">Next step</label>
+            <input id="detail-next-step" type="text" maxlength="200" placeholder="Call back Thursday afternoon" />
+            <span id="next-step-status" class="i-hint"></span>
+          </div>
+          <div id="detail-outcome-wrap" class="i-field hidden">
+            <label for="detail-outcome-reason">Why they didn't book</label>
+            <select id="detail-outcome-reason">
+              <option value="">Not recorded</option>
+              <option value="insurance">Insurance</option>
+              <option value="cost">Cost</option>
+              <option value="no_opening">No opening that fit</option>
+              <option value="specialty">Needed a different specialty</option>
+              <option value="no_response">Never responded</option>
+              <option value="chose_elsewhere">Chose someone else</option>
+              <option value="not_ready">Not ready yet</option>
+              <option value="other">Other</option>
+            </select>
+            <input id="detail-outcome-note" type="text" maxlength="300" placeholder="Short note (optional, no health details)" aria-label="Outcome note" />
+            <div id="detail-check-back-wrap" class="i-inline">
+              <label for="detail-check-back" class="i-faint">Check back on</label>
+              <input id="detail-check-back" type="date" />
+            </div>
+            <span id="outcome-status" class="i-hint"></span>
           </div>
           <div id="detail-assigned-wrap" class="i-field hidden">
             <label for="detail-assigned-select">With counselor</label>
@@ -331,6 +396,31 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     utm_term: string | null;
     landing_page: string | null;
     scheduled_at: string | null;
+    first_contacted_at: string | null;
+    next_step: string | null;
+    outcome_reason: string | null;
+    outcome_note: string | null;
+    check_back_date: string | null;
+    previous_lead_id: string | null;
+  };
+  type LeadEvent = { id: string; lead_id: string; kind: string; detail: Record<string, string | null>; created_at: string };
+  type ReplyScript = { id: string; name: string; body: string; sort_order: number };
+
+  const OUTCOME_EXPORT_LABELS: Record<string, string> = {
+    insurance: 'Insurance',
+    cost: 'Cost',
+    no_opening: 'No opening that fit',
+    specialty: 'Needed a different specialty',
+    no_response: 'Never responded',
+    chose_elsewhere: 'Chose someone else',
+    not_ready: 'Not ready yet',
+    other: 'Other',
+  };
+
+  const CALL_LABELS: Record<string, string> = {
+    no_answer: 'Called: no answer',
+    voicemail: 'Called: left a voicemail',
+    talked: 'Called: talked',
   };
 
   const SESSION_FORMAT_LABELS: Record<string, string> = {
@@ -704,7 +794,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
   // export to match what's on screen.
   exportButton.addEventListener('click', () => {
     const filtered = applyFilters(allLeads);
-    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Source', 'Counselor preference', 'Assigned counselor', 'Heard about us', 'Referred by', 'Referral partner', 'Session format preference', 'Came from Google Ads', 'Ad campaign', 'Ad keyword', 'Landing page', 'Archived', 'Message'];
+    const header = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Follow-up date', 'Next step', 'Why they didn\'t book', 'Check back on', 'Source', 'Counselor preference', 'Assigned counselor', 'Heard about us', 'Referred by', 'Referral partner', 'Session format preference', 'Came from Google Ads', 'Ad campaign', 'Ad keyword', 'Landing page', 'Archived', 'Message'];
     const rows = filtered.map((lead) => [
       new Date(lead.created_at).toLocaleDateString(),
       lead.name ?? '',
@@ -712,6 +802,9 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
       lead.phone ?? '',
       lead.status ?? 'new',
       lead.follow_up_date ?? '',
+      lead.next_step ?? '',
+      [lead.outcome_reason ? (OUTCOME_EXPORT_LABELS[lead.outcome_reason] ?? lead.outcome_reason) : '', lead.outcome_note ?? ''].filter(Boolean).join(': '),
+      lead.check_back_date ?? '',
       sourceLabel(lead),
       lead.preferred_counselor_page_id ? (counselorNames.get(lead.preferred_counselor_page_id) ?? 'Unknown') : '',
       lead.assigned_counselor_page_id ? (counselorNames.get(lead.assigned_counselor_page_id) ?? 'Unknown') : '',
@@ -936,9 +1029,21 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
 
   initStatusSelectHandler(detailStatusContainer, (leadId, newStatus) => {
     const lead = allLeads.find((l) => l.id === leadId);
-    if (lead) lead.status = newStatus;
+    if (lead) {
+      lead.status = newStatus;
+      // Back to an open status clears the old outcome (database trigger).
+      if (newStatus === 'new' || newStatus === 'contacted') {
+        lead.outcome_reason = null;
+        lead.outcome_note = null;
+        lead.check_back_date = null;
+      }
+    }
     renderDueThisWeek();
-    if (lead) renderAssignedHint(lead);
+    if (lead) {
+      renderAssignedHint(lead);
+      renderOutcome(lead);
+      loadNotes(lead.id);
+    }
   });
 
   // In a group practice, a Scheduled client with no counselor can't be
@@ -1052,6 +1157,12 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     detailMessage.textContent = lead.message?.trim() || 'No message.';
     detailFollowUp.value = lead.follow_up_date ?? '';
     followUpStatus.textContent = '';
+    detailNextStep.value = lead.next_step ?? '';
+    nextStepStatus.textContent = '';
+    callStatus.textContent = '';
+    renderOutcome(lead);
+    renderCameBack(lead);
+    renderScripts(lead);
     detailArchiveButton.textContent = lead.archived_at ? 'Unarchive' : 'Archive';
     detailArchivedBanner.classList.toggle('hidden', !lead.archived_at);
 
@@ -1092,31 +1203,286 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     saveFollowUpButton.click();
   });
 
+  function leadLink(id: string, label: string): string {
+    return `<a class="a-link" href="?lead=${id}" data-open-lead="${id}">${escapeHtml(label)}</a>`;
+  }
+
+  function eventText(ev: LeadEvent): string {
+    const d = ev.detail ?? {};
+    if (ev.kind === 'stage') return `Status: ${escapeHtml(STATUS_LABELS[d.from ?? 'new'] ?? d.from ?? '')} → ${escapeHtml(STATUS_LABELS[d.to ?? 'new'] ?? d.to ?? '')}`;
+    if (ev.kind === 'assigned') return d.to ? `With ${escapeHtml(counselorNames.get(d.to) ?? 'a counselor')}` : 'Counselor removed';
+    if (ev.kind === 'call') return escapeHtml(CALL_LABELS[d.outcome ?? ''] ?? 'Called');
+    if (ev.kind === 'came_back') return d.previous_lead_id && allLeads.some((l) => l.id === d.previous_lead_id) ? `Came back (${leadLink(d.previous_lead_id, 'earlier inquiry')})` : 'Came back';
+    if (ev.kind === 'came_back_later') return d.lead_id && allLeads.some((l) => l.id === d.lead_id) ? `Reached out again (${leadLink(d.lead_id, 'newer inquiry')})` : 'Reached out again';
+    return escapeHtml(ev.kind);
+  }
+
+  // One history per inquiry: notes plus what happened and when (0081).
   async function loadNotes(leadId: string) {
     notesList.innerHTML = '<div class="t-skel" style="height:56px"></div>';
-    const { data, error } = await supabase
-      .from('lead_notes')
-      .select('*')
-      .eq('lead_id', leadId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      notesList.innerHTML = `<p class="text-sm text-red-600">Could not load notes: ${escapeHtml(error.message)}</p>`;
+    const lead = allLeads.find((l) => l.id === leadId);
+    const [notesRes, eventsRes] = await Promise.all([
+      supabase.from('lead_notes').select('*').eq('lead_id', leadId).order('created_at', { ascending: false }),
+      supabase.from('lead_events').select('*').eq('lead_id', leadId).order('created_at', { ascending: false }),
+    ]);
+    if (notesRes.error) {
+      notesList.innerHTML = `<p class="text-sm text-red-600">Could not load the timeline: ${escapeHtml(notesRes.error.message)}</p>`;
       return;
     }
-    const notes = data as LeadNote[];
+    if (currentLeadId !== leadId) return;
+    const notes = notesRes.data as LeadNote[];
     noteCounts.set(leadId, notes.length);
-    if (notes.length === 0) {
-      notesList.innerHTML = '<p class="i-faint">No notes yet. Add the first one above.</p>';
-      return;
+    // Before migration 0081 the events table doesn't exist; show notes only.
+    const events = eventsRes.error ? [] : (eventsRes.data as LeadEvent[]);
+    const items: { at: string; html: string; note?: boolean }[] = [
+      ...notes.map((n) => ({ at: n.created_at, html: `<p>${escapeHtml(n.note)}</p>`, note: true })),
+      ...events.map((e) => ({ at: e.created_at, html: `<p>${eventText(e)}</p>` })),
+    ];
+    if (lead?.auto_reply_sent_at) items.push({ at: lead.auto_reply_sent_at, html: '<p>Automatic reply sent</p>' });
+    if (lead) items.push({ at: lead.created_at, html: `<p>Reached out${lead.source_page && lead.source_page !== MANUAL_SOURCE ? ` from ${escapeHtml(lead.source_page)}` : lead.source_page === MANUAL_SOURCE ? ' (added by hand)' : ''}</p>` });
+    items.sort((a, b) => b.at.localeCompare(a.at));
+    notesList.innerHTML = items
+      .map((it) => `<div class="i-note${it.note ? '' : ' i-ev'}">${it.html}<small>${relative(it.at)}</small></div>`)
+      .join('');
+  }
+
+  notesList.addEventListener('click', (event) => {
+    const a = (event.target as HTMLElement).closest<HTMLElement>('[data-open-lead]');
+    if (!a) return;
+    event.preventDefault();
+    openDetail(a.dataset.openLead!);
+  });
+
+  // --- Log a call (0081): outcome only, never what was said.
+  const callStatus = document.getElementById('call-status')!;
+  document.querySelectorAll<HTMLButtonElement>('[data-call]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!currentLeadId) return;
+      const leadId = currentLeadId;
+      const { data: userData } = await supabase.auth.getUser();
+      button.disabled = true;
+      const { error } = await supabase.from('lead_events').insert({
+        lead_id: leadId,
+        kind: 'call',
+        detail: { outcome: button.dataset.call },
+        created_by: userData.user?.id ?? null,
+      });
+      button.disabled = false;
+      if (error) {
+        callStatus.textContent = 'Could not log the call: ' + error.message;
+        return;
+      }
+      callStatus.textContent = '';
+      // A call moves a Waiting inquiry to Contacted (database trigger).
+      const lead = allLeads.find((l) => l.id === leadId);
+      if (lead) {
+        if (!lead.status || lead.status === 'new') lead.status = 'contacted';
+        lead.first_contacted_at = lead.first_contacted_at ?? new Date().toISOString();
+        if (currentLeadId === leadId) detailStatusContainer.innerHTML = renderStatusSelect(lead.id, lead.status);
+      }
+      renderDueThisWeek();
+      await loadNotes(leadId);
+    });
+  });
+
+  // --- Next step and outcome (0081).
+  const detailNextStep = document.getElementById('detail-next-step') as HTMLInputElement;
+  const nextStepStatus = document.getElementById('next-step-status')!;
+  const outcomeWrap = document.getElementById('detail-outcome-wrap')!;
+  const outcomeReason = document.getElementById('detail-outcome-reason') as HTMLSelectElement;
+  const outcomeNote = document.getElementById('detail-outcome-note') as HTMLInputElement;
+  const checkBackWrap = document.getElementById('detail-check-back-wrap')!;
+  const checkBack = document.getElementById('detail-check-back') as HTMLInputElement;
+  const outcomeStatus = document.getElementById('outcome-status')!;
+
+  async function saveLeadFields(fields: Partial<Lead>, statusEl: HTMLElement): Promise<boolean> {
+    if (!currentLeadId) return false;
+    const leadId = currentLeadId;
+    statusEl.textContent = 'Saving...';
+    const { error } = await supabase.from('leads').update(fields).eq('id', leadId);
+    if (error) {
+      statusEl.textContent = 'Could not save: ' + error.message;
+      return false;
     }
-    notesList.innerHTML = notes
+    const lead = allLeads.find((l) => l.id === leadId);
+    if (lead) Object.assign(lead, fields);
+    statusEl.textContent = 'Saved.';
+    return true;
+  }
+
+  detailNextStep.addEventListener('change', () => {
+    const value = detailNextStep.value.trim() || null;
+    const lead = allLeads.find((l) => l.id === currentLeadId);
+    if (lead && (lead.next_step ?? null) === value) return;
+    saveLeadFields({ next_step: value }, nextStepStatus);
+  });
+
+  function renderOutcome(lead: Lead) {
+    const closedWithoutBooking = lead.status === 'referred' || lead.status === 'withdrawn';
+    outcomeWrap.classList.toggle('hidden', !closedWithoutBooking);
+    outcomeReason.value = lead.outcome_reason ?? '';
+    outcomeNote.value = lead.outcome_note ?? '';
+    checkBackWrap.classList.toggle('hidden', lead.status !== 'withdrawn');
+    checkBack.value = lead.check_back_date ?? '';
+    outcomeStatus.textContent = closedWithoutBooking && !lead.outcome_reason ? 'Pick a reason: it shows in Inquiry trends.' : '';
+  }
+
+  outcomeReason.addEventListener('change', () => saveLeadFields({ outcome_reason: outcomeReason.value || null }, outcomeStatus));
+  outcomeNote.addEventListener('change', () => saveLeadFields({ outcome_note: outcomeNote.value.trim() || null }, outcomeStatus));
+  checkBack.addEventListener('change', () => saveLeadFields({ check_back_date: checkBack.value || null }, outcomeStatus));
+
+  // --- Came back (0081): linked inquiries from the same person.
+  function renderCameBack(lead: Lead) {
+    const el = document.getElementById('detail-came-back')!;
+    const earlier = lead.previous_lead_id ? allLeads.find((l) => l.id === lead.previous_lead_id) : null;
+    const later = allLeads.filter((l) => l.previous_lead_id === lead.id);
+    const parts: string[] = [];
+    const when = (l: Lead) => new Date(l.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (earlier) parts.push(`Came back. Earlier inquiry: ${leadLink(earlier.id, when(earlier))} (${escapeHtml(STATUS_LABELS[earlier.status ?? 'new'] ?? '')})`);
+    for (const l of later) parts.push(`Reached out again: ${leadLink(l.id, when(l))}`);
+    el.innerHTML = parts.join('<br>');
+    el.classList.toggle('hidden', parts.length === 0);
+  }
+  document.getElementById('detail-came-back')!.addEventListener('click', (event) => {
+    const a = (event.target as HTMLElement).closest<HTMLElement>('[data-open-lead]');
+    if (!a) return;
+    event.preventDefault();
+    openDetail(a.dataset.openLead!);
+  });
+
+  // --- Reply scripts (0081): copied into the practice's own email or read
+  // on the phone. Nothing is sent or stored from here.
+  let scripts: ReplyScript[] = [];
+  let practiceName = '';
+  let practicePhone = '';
+  let myName = '';
+  const scriptSelect = document.getElementById('script-select') as HTMLSelectElement;
+  const scriptText = document.getElementById('script-text') as HTMLTextAreaElement;
+  const scriptStatus = document.getElementById('script-status')!;
+
+  function fillScript(body: string, lead: Lead): string {
+    const first = (lead.name ?? '').trim().split(/\s+/)[0] || 'there';
+    const counselor = lead.assigned_counselor_page_id ? counselorNames.get(lead.assigned_counselor_page_id) ?? '' : '';
+    return body
+      .replaceAll('{first_name}', first)
+      .replaceAll('{practice}', practiceName || 'our practice')
+      .replaceAll('{phone}', practicePhone || '[phone]')
+      .replaceAll('{my_name}', myName || '[your name]')
+      .replaceAll('{counselor}', counselor || '[counselor]');
+  }
+
+  function renderScripts(lead: Lead) {
+    const card = document.getElementById('scripts-card')!;
+    card.classList.toggle('hidden', scripts.length === 0 && counselorMode);
+    const previous = scriptSelect.value;
+    scriptSelect.innerHTML = scripts.length
+      ? scripts.map((s) => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')
+      : '<option value="">No scripts yet</option>';
+    if (scripts.some((s) => s.id === previous)) scriptSelect.value = previous;
+    const script = scripts.find((s) => s.id === scriptSelect.value);
+    scriptText.value = script ? fillScript(script.body, lead) : '';
+    scriptStatus.textContent = '';
+  }
+
+  scriptSelect.addEventListener('change', () => {
+    const lead = allLeads.find((l) => l.id === currentLeadId);
+    if (lead) renderScripts(lead);
+  });
+
+  document.getElementById('copy-script-button')!.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(scriptText.value);
+      scriptStatus.textContent = /\[[^\]]*\]/.test(scriptText.value) ? 'Copied. Finish the [bracketed] parts before sending.' : 'Copied.';
+    } catch {
+      scriptText.select();
+      scriptStatus.textContent = 'Select the text and copy it (Cmd+C).';
+    }
+  });
+
+  async function loadScripts() {
+    const { data, error } = await supabase.from('reply_scripts').select('id, name, body, sort_order').order('sort_order').order('created_at');
+    scripts = error ? [] : (data as ReplyScript[]);
+  }
+
+  async function loadScriptFillIns(user: AdminUser) {
+    const [{ data: biz }, { data: me }] = await Promise.all([
+      supabase.from('business').select('display_name, telephone').maybeSingle(),
+      supabase.from('admin_users').select('display_name').eq('id', user.id).maybeSingle(),
+    ]);
+    practiceName = (biz?.display_name as string) ?? '';
+    practicePhone = (biz?.telephone as string) ?? '';
+    myName = ((me?.display_name as string) ?? '').trim() || (user.linked_counselor_page_id ? counselorNames.get(user.linked_counselor_page_id) ?? '' : '');
+  }
+
+  // Owners and the agency edit the scripts.
+  const scriptsModal = document.getElementById('scripts-modal')!;
+  const scriptsEditor = document.getElementById('scripts-editor')!;
+  const scriptsEditorStatus = document.getElementById('scripts-editor-status')!;
+  const editScriptsButton = document.getElementById('edit-scripts-button')!;
+
+  function renderScriptsEditor() {
+    scriptsEditor.innerHTML = scripts
       .map(
-        (note) => `
-      <div class="i-note"><p>${escapeHtml(note.note)}</p><small>${relative(note.created_at)}</small></div>`
+        (s) => `<div class="rounded-md border border-slate-200 p-3" data-script-id="${s.id}">
+          <input type="text" value="${escapeHtml(s.name)}" maxlength="80" aria-label="Script name" class="mb-2 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold" data-script-name />
+          <textarea rows="5" maxlength="4000" aria-label="Script text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" data-script-body>${escapeHtml(s.body)}</textarea>
+          <div class="mt-2 flex gap-3">
+            <button type="button" class="rounded-md bg-brand-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90" data-script-save>Save</button>
+            <button type="button" class="text-xs text-red-600 hover:underline" data-script-delete>Delete</button>
+          </div>
+        </div>`
       )
       .join('');
   }
+
+  editScriptsButton.addEventListener('click', () => {
+    renderScriptsEditor();
+    scriptsEditorStatus.textContent = '';
+    scriptsModal.classList.remove('hidden');
+    scriptsModal.classList.add('flex');
+  });
+  document.getElementById('scripts-close-button')!.addEventListener('click', () => {
+    scriptsModal.classList.add('hidden');
+    scriptsModal.classList.remove('flex');
+    const lead = allLeads.find((l) => l.id === currentLeadId);
+    if (lead) renderScripts(lead);
+  });
+
+  scriptsEditor.addEventListener('click', async (event) => {
+    const target = event.target as HTMLElement;
+    const box = target.closest<HTMLElement>('[data-script-id]');
+    if (!box) return;
+    const id = box.dataset.scriptId!;
+    if (target.matches('[data-script-save]')) {
+      const name = (box.querySelector('[data-script-name]') as HTMLInputElement).value.trim();
+      const body = (box.querySelector('[data-script-body]') as HTMLTextAreaElement).value.trim();
+      if (!name || !body) {
+        scriptsEditorStatus.textContent = 'A script needs a name and some text.';
+        return;
+      }
+      const { error } = await supabase.from('reply_scripts').update({ name, body }).eq('id', id);
+      scriptsEditorStatus.textContent = error ? 'Could not save: ' + error.message : `Saved "${name}".`;
+      if (!error) await loadScripts();
+    } else if (target.matches('[data-script-delete]')) {
+      if (!window.confirm('Delete this script?')) return;
+      const { error } = await supabase.from('reply_scripts').delete().eq('id', id);
+      scriptsEditorStatus.textContent = error ? 'Could not delete: ' + error.message : 'Deleted.';
+      if (!error) {
+        await loadScripts();
+        renderScriptsEditor();
+      }
+    }
+  });
+
+  document.getElementById('add-script-button')!.addEventListener('click', async () => {
+    const sort = scripts.reduce((m, s) => Math.max(m, s.sort_order), 0) + 1;
+    const { error } = await supabase.from('reply_scripts').insert({ name: 'New script', body: 'Hi {first_name}, ', sort_order: sort });
+    scriptsEditorStatus.textContent = error ? 'Could not add: ' + error.message : 'Added. Edit it and save.';
+    if (!error) {
+      await loadScripts();
+      renderScriptsEditor();
+    }
+  });
 
   addNoteForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -1260,6 +1626,8 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
         await loadPartners();
       }
       await loadCounselors();
+      await Promise.all([loadScripts(), loadScriptFillIns(user)]);
+      editScriptsButton.classList.toggle('hidden', !(user.role === 'owner' || user.role === 'agency'));
       await loadLeads();
       setView('leads');
       // Deep link from Today: /admin/crm?lead=<id>

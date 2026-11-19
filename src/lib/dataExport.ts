@@ -10,6 +10,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export const EXPORT_TABLES: { table: string; label: string }[] = [
   { table: 'leads', label: 'Leads and guide downloads' },
   { table: 'lead_notes', label: 'Lead notes' },
+  { table: 'lead_events', label: 'Inquiry timeline (calls, status changes)' },
+  { table: 'reply_scripts', label: 'Reply scripts' },
   { table: 'referral_partners', label: 'Referral partners' },
   { table: 'referral_partner_activities', label: 'Referral partner activity' },
   { table: 'link_opportunities', label: 'Link building tracker' },

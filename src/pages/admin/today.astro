@@ -65,6 +65,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     lead_source: string | null;
     assigned_counselor_page_id: string | null;
     source_page: string | null;
+    next_step: string | null;
+    check_back_date: string | null;
   };
   type Counselor = { id: string; title: string; availability_status: string | null };
   type Partner = { id: string; name: string; next_follow_up: string | null; status: string; archived_at: string | null };
@@ -178,7 +180,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
     if (!isFull && !isCounselor) return renderStaff(user);
 
-    const leadCols = 'id, name, created_at, status, scheduled_at, first_contacted_at, follow_up_date, archived_at, lead_magnet_id, lead_source, assigned_counselor_page_id, source_page';
+    // next_step and check_back_date come from migration 0081.
+    const leadCols = 'id, name, created_at, status, scheduled_at, first_contacted_at, follow_up_date, archived_at, lead_magnet_id, lead_source, assigned_counselor_page_id, source_page, next_step, check_back_date';
     let leadsQuery = supabase.from('leads').select(leadCols).is('lead_magnet_id', null);
     let caseQuery = supabase.from('counselor_caseload').select('*');
     if (isCounselor) {
@@ -311,7 +314,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       moves.push({
         id: `s-${l.id}`,
         title: `Book ${nameOf(l)}'s first session`,
-        sub: 'Contacted. Check it off when the first session is on the calendar.',
+        sub: l.next_step
+          ? `Next: ${l.next_step}. Check it off when the first session is on the calendar.`
+          : l.follow_up_date
+            ? 'Contacted. Check it off when the first session is on the calendar.'
+            : 'Contacted, with no next step yet. Open it and add one.',
         tag: 'Get booked',
         link: `${crm}?lead=${l.id}`,
         linkText: 'Open',
@@ -341,7 +348,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const today = new Date().toISOString().slice(0, 10);
     for (const l of leads.filter((x) => x.follow_up_date && x.follow_up_date <= today && !['scheduled', 'referred', 'withdrawn', 'new'].includes(x.status ?? '')).slice(0, 2)) {
       if (moves.some((m) => m.id.endsWith(l.id))) continue;
-      moves.push({ id: `f-${l.id}`, title: `Follow up with ${nameOf(l)}`, sub: l.follow_up_date! < today ? `Follow-up was due ${new Date(l.follow_up_date! + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Follow-up due today', tag: 'Get booked', link: `${crm}?lead=${l.id}`, linkText: 'Open' });
+      moves.push({ id: `f-${l.id}`, title: `Follow up with ${nameOf(l)}`, sub: (l.follow_up_date! < today ? `Follow-up was due ${new Date(l.follow_up_date! + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Follow-up due today') + (l.next_step ? `: ${l.next_step}` : ''), tag: 'Get booked', link: `${crm}?lead=${l.id}`, linkText: 'Open' });
+    }
+    // Withdrawn inquiries with a check-back date that has arrived (0081).
+    for (const l of leads.filter((x) => x.status === 'withdrawn' && x.check_back_date && x.check_back_date <= today).slice(0, 2)) {
+      moves.push({ id: `c-${l.id}`, title: `Check back with ${nameOf(l)}`, sub: 'They weren\'t ready before. You set a reminder to check back today.', tag: 'Get booked', link: `${crm}?lead=${l.id}`, linkText: 'Open' });
     }
     for (const p of partners.filter((x) => x.next_follow_up && x.next_follow_up <= today).sort((a, b) => a.next_follow_up!.localeCompare(b.next_follow_up!)).slice(0, 2)) {
       moves.push({ id: `p-${p.id}`, title: `Follow up with ${p.name}`, sub: p.next_follow_up! < today ? 'Referral partner follow-up is overdue' : 'Referral partner follow-up due today', tag: 'Get referred', icon: ICON.partner, link: withBase('/admin/referral-partners'), linkText: 'Open' });

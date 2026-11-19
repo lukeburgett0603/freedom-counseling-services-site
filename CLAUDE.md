@@ -4617,3 +4617,42 @@ ranking checks, and the competitor-gap list only the latest weekly run
 Before, they loaded the full history every visit (1,182 gap rows to show
 96), and ranking history would have hit Supabase's 1,000-row limit in
 early January. Checked against live data: identical results.
+
+## Inquiry timeline, calls, next step, outcomes, came back, reply scripts (2026-11-19, migration 0081)
+
+Brought over from Therapy Marketing Co.'s own CRM, minus email (plan:
+`Counselor Marking Co./crm/client-platform-plan.md`). **No email is sent or
+received from the platform** until the HIPAA work is done: inquiry replies
+would hold health details. Nothing here stores new health details.
+
+- **Timeline** (Inquiries detail): notes plus `lead_events` (status and
+  counselor changes written by trigger `leads_log_changes`, calls, came
+  back), the automatic reply and the original inquiry, newest first.
+- **Log a call:** No answer / Left a voicemail / Talked (outcome only). A
+  call moves Waiting to Contacted and sets `first_contacted_at`
+  (trigger `lead_events_apply_call`). People can insert only `kind = 'call'`;
+  everything else is written by the database or submit-lead.
+- **Next step:** `leads.next_step` next to the follow-up date. Today shows
+  it on "Book X's first session" and follow-up moves, and says when a
+  contacted inquiry has none.
+- **Why they didn't book:** `outcome_reason` (insurance, cost, no_opening,
+  specialty, no_response, chose_elsewhere, not_ready, other),
+  `outcome_note`, and for Withdrawn `check_back_date` (Today reminds).
+  Reopening an inquiry clears them.
+- **Came back:** submit-lead links a new inquiry to the same person's latest
+  earlier one (`find_previous_lead`: email, or last 10 phone digits;
+  service role only) via `previous_lead_id`. **Linked, never merged** (a
+  parent for a second child, one partner then the other). Both records show
+  the link; the notice email says so.
+- **Reply scripts** (`reply_scripts`, 4 defaults seeded): filled with the
+  person's first name, practice, phone, your name, counselor; Copy puts it on
+  the clipboard for the practice's own email. Owners/agency edit; linked
+  counselors read.
+- **Inquiry trends → Where inquiries go:** contacted and scheduled rates, why
+  they didn't book, scheduled rate by source and by counselor; 90 days, 12
+  months or all time.
+- Counselor guard (0073) widened to `next_step`, outcome fields and
+  `last_activity_at`. Both new tables are in "Your data" exports.
+- Tested 2026-11-19 against Freedom's database in a rolled-back
+  transaction (14 checks: call trigger, outcome clearing, counselor limits,
+  phone/email matching, anon blocked).

@@ -65,6 +65,27 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     </section>
   </div>
 
+  <!--
+    Where inquiries go (0081, 2026-11-19): from inquiry to contacted to
+    scheduled, why the rest didn't book (outcome_reason, set in
+    Inquiries), and the scheduled rate by source and by counselor.
+  -->
+  <section class="t-card q-section">
+    <h2>Where inquiries go<span class="t-aside"><select id="flow-period" aria-label="Period" class="q-period">
+      <option value="90">Last 90 days</option>
+      <option value="365">Last 12 months</option>
+      <option value="all">All time</option>
+    </select></span></h2>
+    <div class="q-flow" id="flow-steps"></div>
+    <div class="q-ads">
+      <div><p class="m-sub">Why they didn't book</p><div id="flow-reasons"></div></div>
+      <div>
+        <p class="m-sub">Became clients, by how they heard about you</p><div id="flow-by-source" class="q-groups"></div>
+        <p class="m-sub q-sub2" id="flow-by-counselor-label">Became clients, by counselor</p><div id="flow-by-counselor" class="q-groups"></div>
+      </div>
+    </div>
+  </section>
+
   <div class="t-grid">
     <section class="t-card t-s7">
       <h2>How they heard about you<span class="t-aside">All time, as they told you</span></h2>
@@ -150,6 +171,8 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     lead_source: string | null;
     lead_source_detail: string | null;
     first_contacted_at: string | null;
+    assigned_counselor_page_id: string | null;
+    outcome_reason: string | null;
     gclid: string | null;
     gbraid: string | null;
     wbraid: string | null;
@@ -340,6 +363,90 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     }
   }
 
+  const OUTCOME_LABELS: Record<string, string> = {
+    insurance: 'Insurance',
+    cost: 'Cost',
+    no_opening: 'No opening that fit',
+    specialty: 'Needed a different specialty',
+    no_response: 'Never responded',
+    chose_elsewhere: 'Chose someone else',
+    not_ready: 'Not ready yet',
+    other: 'Other',
+  };
+
+  function labelBars(values: string[], faintLabel: string): string {
+    const counts = new Map<string, number>();
+    for (const v of values) counts.set(v, (counts.get(v) ?? 0) + 1);
+    const sorted = [...counts.entries()].sort((x, y) => y[1] - x[1]);
+    const max = sorted[0]?.[1] ?? 1;
+    return `<div class="t-bars">${sorted
+      .map(([label, count]) => `<div class="t-bar"><span class="t-lbl${label === faintLabel ? ' i-faint' : ''}">${escapeHtml(label)}</span><div class="t-track"><div class="t-fill" style="width:${Math.round((count / max) * 100)}%"></div></div><span class="a-num">${count}</span></div>`)
+      .join('')}</div>`;
+  }
+
+  function pct(n: number, d: number): string {
+    return d ? `${Math.round((n / d) * 100)}%` : '—';
+  }
+
+  function renderRateGroups(el: HTMLElement, leads: Lead[], keyOf: (l: Lead) => string | null, missing: string) {
+    const groups = new Map<string, { n: number; c: number }>();
+    for (const l of leads) {
+      const k = keyOf(l) ?? missing;
+      const g = groups.get(k) ?? { n: 0, c: 0 };
+      g.n++;
+      if (l.status === 'scheduled') g.c++;
+      groups.set(k, g);
+    }
+    el.innerHTML = groups.size
+      ? [...groups.entries()]
+          .sort((a, b) => b[1].n - a[1].n)
+          .slice(0, 8)
+          .map(([k, g]) => `<div class="q-group"><span class="${k === missing ? 'i-faint' : ''}">${escapeHtml(k)}</span><span>${g.c} of ${g.n} · <b>${pct(g.c, g.n)}</b></span></div>`)
+          .join('')
+      : '<p class="i-hint">No inquiries in this period.</p>';
+  }
+
+  let flowLeads: Lead[] = [];
+  function renderFlow() {
+    const period = (document.getElementById('flow-period') as HTMLSelectElement).value;
+    const cutoff = period === 'all' ? 0 : Date.now() - Number(period) * 86_400_000;
+    const leads = flowLeads.filter((l) => new Date(l.created_at).getTime() >= cutoff);
+    const status = (l: Lead) => l.status ?? 'new';
+    const reached = leads.filter((l) => status(l) !== 'new').length;
+    const scheduled = leads.filter((l) => status(l) === 'scheduled').length;
+    const referred = leads.filter((l) => status(l) === 'referred').length;
+    const withdrawn = leads.filter((l) => status(l) === 'withdrawn').length;
+    const open = leads.filter((l) => status(l) === 'new' || status(l) === 'contacted').length;
+    const step = (label: string, value: number, sub: string) => `<div><span>${label}</span><b class="a-num">${value}</b><small>${sub}</small></div>`;
+    document.getElementById('flow-steps')!.innerHTML = [
+      step('Inquiries', leads.length, ''),
+      step('Contacted', reached, `${pct(reached, leads.length)} of inquiries`),
+      step('Became clients', scheduled, `${pct(scheduled, leads.length)} of inquiries`),
+      step('Referred out', referred, ''),
+      step('Withdrew', withdrawn, ''),
+      step('Still open', open, ''),
+    ].join('');
+
+    const closed = leads.filter((l) => status(l) === 'referred' || status(l) === 'withdrawn');
+    document.getElementById('flow-reasons')!.innerHTML = closed.length
+      ? labelBars(closed.map((l) => (l.outcome_reason ? OUTCOME_LABELS[l.outcome_reason] ?? l.outcome_reason : 'Not recorded')), 'Not recorded')
+      : '<p class="i-hint">No inquiries were referred out or withdrew in this period.</p>';
+
+    renderRateGroups(document.getElementById('flow-by-source')!, leads, (l) => (l.lead_source ? leadSourceLabel(l.lead_source) : null), 'Not answered');
+    const showCounselors = counselorNames.size > 1;
+    document.getElementById('flow-by-counselor-label')!.hidden = !showCounselors;
+    document.getElementById('flow-by-counselor')!.hidden = !showCounselors;
+    if (showCounselors) {
+      renderRateGroups(
+        document.getElementById('flow-by-counselor')!,
+        leads,
+        (l) => (l.assigned_counselor_page_id ? (counselorNames.get(l.assigned_counselor_page_id) ?? 'Unknown').split(',')[0] : null),
+        'Not assigned'
+      );
+    }
+  }
+  document.getElementById('flow-period')!.addEventListener('change', renderFlow);
+
   // Guide downloads (lead_magnet_id set) get their own widget, entirely
   // separate from renderDashboard() above — kept as raw submission counts
   // for the month-over-month numbers (consistent with how the main lead
@@ -418,6 +525,8 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       'No inquiries yet.'
     );
     renderContactsWidget(contacts, realLeads);
+    flowLeads = realLeads;
+    renderFlow();
 
     leadsCount.textContent = `${realLeads.length} total · click one to open it in Inquiries`;
     tableBody.innerHTML = realLeads

@@ -229,6 +229,35 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: 'Could not save lead: ' + insertError.message }, 500);
   }
 
+  // Came back (0081): link to the same person's most recent earlier
+  // inquiry (same email, or the same phone number), never merge. A parent
+  // asking for a second child, or one partner and then the other, stay
+  // separate records. Appointment requests only; best-effort.
+  let previousLead: { id: string; created_at: string; status: string | null } | null = null;
+  if (!insertPayload.lead_magnet_id) {
+    try {
+      const { data: prevId } = await supabase.rpc('find_previous_lead', {
+        p_email: email || null,
+        p_phone: (insertPayload.phone as string | null) ?? null,
+        p_exclude: lead.id,
+      });
+      if (prevId) {
+        const { data: prev } = await supabase.from('leads').select('id, created_at, status').eq('id', prevId).maybeSingle();
+        if (prev) {
+          previousLead = prev;
+          await supabase.from('leads').update({ previous_lead_id: prev.id }).eq('id', lead.id);
+          await supabase.from('lead_events').insert([
+            { lead_id: lead.id, kind: 'came_back', detail: { previous_lead_id: prev.id } },
+            { lead_id: prev.id, kind: 'came_back_later', detail: { lead_id: lead.id } },
+          ]);
+          await supabase.from('leads').update({ last_activity_at: new Date().toISOString() }).eq('id', prev.id);
+        }
+      }
+    } catch (err) {
+      console.error('submit-lead: came-back link failed', err);
+    }
+  }
+
   // Everything from here down is best-effort. A failure here still
   // returns { ok: true } to the visitor — the lead is already safely in
   // the database and visible in the admin dashboard either way. Also
@@ -296,6 +325,12 @@ Deno.serve(async (req: Request) => {
         ],
         ['Current website', insertPayload.existing_website_url as string | null],
         ['From page', (insertPayload.source_page as string | null) ?? '(homepage)'],
+        [
+          'Came back',
+          previousLead
+            ? `Has an earlier inquiry from ${new Date(previousLead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}. Both are linked in the admin.`
+            : null,
+        ],
       ];
       const rowsHtml = rows
         .filter(([, value]) => value)
