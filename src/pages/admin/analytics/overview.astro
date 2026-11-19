@@ -87,6 +87,7 @@ const link = (path: string) => withBase(path);
 <script>
   import { supabase, initAdminAuth } from '../../../lib/adminAuth';
   import { withBase } from '../../../lib/url';
+  import { fetchRankHistory } from '../../../lib/seoInsights';
   import { formatHours, hoursToFirstContact, leadSourceShortLabel, median, REFERRAL_LEAD_SOURCES } from '../../../lib/leadSource';
   import { ALMOST_FULL_THRESHOLD, daysSince, percentFull, targetCaseload, type CounselorCaseload } from '../../../lib/caseload';
   import { isGoogleAdsLead } from '../../../lib/adAttribution';
@@ -424,7 +425,8 @@ const link = (path: string) => withBase(path);
       supabase.from('review_snapshots').select('recorded_on, review_count, average_rating'),
       supabase.from('business').select('display_name, lead_auto_reply_enabled, collect_lead_source, google_review_url').single(),
       supabase.from('target_keywords').select('id').eq('status', 'active'),
-      supabase.from('keyword_rank_snapshots').select('target_keyword_id, position, checked_at').order('checked_at', { ascending: false }),
+      // Latest check only (plus a week, for a search the newest run missed).
+      fetchRankHistory(supabase, 8, 'target_keyword_id, position, checked_at').then((data) => ({ data }), () => ({ data: [] })),
       fetchTraffic(),
     ]);
     if (leads.error) {

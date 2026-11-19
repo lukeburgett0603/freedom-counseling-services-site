@@ -48,6 +48,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <script>
   import { initAdminAuth, supabase, type AdminUser } from '../../lib/adminAuth';
   import { withBase } from '../../lib/url';
+  import { fetchRankHistory } from '../../lib/seoInsights';
   import { targetCaseload, ALMOST_FULL_THRESHOLD, type CounselorCaseload } from '../../lib/caseload';
   import { leadSourceShortLabel, hoursToFirstContact, formatHours, median } from '../../lib/leadSource';
 
@@ -190,7 +191,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       caseQuery,
       isFull ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at') : Promise.resolve({ data: [] }),
       isFull ? supabase.from('target_keywords').select('id').eq('status', 'active') : Promise.resolve({ data: [] }),
-      isFull ? supabase.from('keyword_rank_snapshots').select('target_keyword_id, position, checked_at').order('checked_at', { ascending: false }) : Promise.resolve({ data: [] }),
+      // Latest check only (plus a week, for a search the newest run missed).
+      isFull ? fetchRankHistory(supabase, 8, 'target_keyword_id, position, checked_at').then((data) => ({ data }), () => ({ data: [] })) : Promise.resolve({ data: [] }),
       supabase.from('business').select('display_name').single(),
     ]);
     if ('error' in leadsRes && leadsRes.error) {

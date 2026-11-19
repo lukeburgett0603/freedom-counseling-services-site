@@ -4601,3 +4601,9 @@ used by blog, lead magnets and page copy); video file uploads removed
 (YouTube/Vimeo links only; migration 0080 drops the upload policy and makes
 `site-videos` private; the bucket was empty). Check with
 `npm run build && npm run check:usage`. Turnstile was already on here.
+Later the same day: Search rankings, Today and Overview fetch only recent
+ranking checks, and the competitor-gap list only the latest weekly run
+(`fetchRankHistory` / `fetchLatestGapRows` in `src/lib/seoInsights.ts`).
+Before, they loaded the full history every visit (1,182 gap rows to show
+96), and ranking history would have hit Supabase's 1,000-row limit in
+early January. Checked against live data: identical results.
