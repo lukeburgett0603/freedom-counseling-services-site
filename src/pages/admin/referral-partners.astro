@@ -179,7 +179,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
             <a id="kit-mailto" href="#" class="a-btn i-btn" hidden>Open in my email app</a>
             <span id="kit-status" class="i-hint" role="status"></span>
           </div>
-          <p id="kit-no-email" class="i-hint" hidden>Add this partner's email address (right) to send from here.</p>
+          <p id="kit-no-email" class="i-hint r-warn" hidden>No email address saved for this partner yet. Add it on the right and click Save to send from here.</p>
         </section>
 
         <section class="t-card">
@@ -808,9 +808,11 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     if (show) {
       kitMailto.href = `mailto:${partner!.email!.trim()}?subject=${encodeURIComponent(kitSubject.value)}&body=${encodeURIComponent(kitBody.value)}`;
     }
-    // Send from the admin (0082): any email-type message to a partner
-    // with an address. Handwritten notes keep "Log as sent".
-    kitSend.hidden = !show;
+    // Send from the admin (0082): always offered for an email-type message,
+    // so it's never a mystery where it went. Without a saved address it
+    // explains what's missing instead of hiding (Luke, 2026-11-19).
+    // Handwritten notes keep "Log as sent" only.
+    kitSend.hidden = !emailKind;
     kitSendWrap.hidden = !show;
     kitLog.hidden = show;
     kitNoEmail.hidden = hasEmail || !emailKind;
@@ -842,7 +844,16 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
 
   kitSend.addEventListener('click', async () => {
     const partner = partners.find((p) => p.id === currentId);
-    if (!partner?.email) return;
+    if (!partner) return;
+    if (!partner.email?.trim()) {
+      const typed = (partnerForm.elements.namedItem('email') as HTMLInputElement).value.trim();
+      kitStatus.textContent = typed
+        ? 'Click Save on the right first, so the email address is saved.'
+        : "Add this partner's email address on the right and click Save, then send.";
+      kitStatus.className = 'i-hint r-warn';
+      (partnerForm.elements.namedItem('email') as HTMLInputElement).focus();
+      return;
+    }
     const subject = kitSubject.value.trim();
     const text = kitBody.value.trim();
     if (!subject || !text) {
