@@ -4699,3 +4699,29 @@ Promotions tab in Luke's live test; a plain two-line note landed in Primary.
 Service details and the category note (care coordination with a release;
 attorneys: therapy, not custody evaluations) now travel with the drop-off
 note and handout. Keep partner emails this short.
+
+## Referral partners: rhythm and going cold (2026-11-19, migration 0083)
+
+Step 2 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- **Priority** per partner (`referral_partners.priority`): Key (every 30
+  days), Regular (60, the default), Occasional (90). Set in the partner's
+  side panel ("How often to be in touch"), which also says when the next
+  touch is due.
+- **Rules** live in `partnerHealth()` (`src/lib/referralPartners.ts`), shared
+  by the partners page and Today. Active partners only (never Prospect,
+  Contacted, Meeting, Inactive or archived): **due** once the interval has
+  passed since the last contact, **going cold** at 1.5x, and an active partner
+  with no contact logged is due. **Stopped referring:** at least two
+  referrals, and more than twice their usual gap (never under 60 days) since
+  the last one.
+- **Last contact** comes from the timeline, skipping notes and stage changes
+  (a reply counts). Numbers come from the `referral_partner_health` view
+  (security_invoker; anon revoked) so no screen pages through the whole
+  history (1,000-row limit).
+- Shown as "Time to reach out" on the partners page (stopped referring,
+  then going cold, then due; partners with an upcoming follow-up date are
+  left to Follow-ups due), colors on Last contact in the list and detail,
+  and up to two "Reach out to ..." moves on Today.
+- Tested 2026-11-19: 15 rule cases (tsx) and 9 database checks on Freedom in
+  a rolled-back transaction.

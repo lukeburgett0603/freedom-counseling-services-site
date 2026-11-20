@@ -1,6 +1,6 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { ACTIVITY_TYPES, PARTNER_CATEGORIES, PARTNER_STATUSES } from '../../lib/referralPartners';
+import { ACTIVITY_TYPES, PARTNER_CATEGORIES, PARTNER_PRIORITIES, PARTNER_STATUSES } from '../../lib/referralPartners';
 import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
 ---
 
@@ -41,6 +41,13 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
 
     <!-- Stage counts double as the stage filter. -->
     <div class="i-pipeline" id="r-pipeline" role="group" aria-label="Filter by stage"></div>
+
+    <!-- Rhythm and going cold (step 2, 0083): active partners due for a
+         touch, going cold, or no longer referring. -->
+    <div id="reach-section" class="t-card i-due hidden">
+      <h2>Time to reach out<span class="t-aside" id="r-reach-count"></span></h2>
+      <div id="reach-list" class="i-due-list"></div>
+    </div>
 
     <div id="due-section" class="t-card i-due hidden">
       <h2>Follow-ups due<span class="t-aside" id="r-due-count"></span></h2>
@@ -133,7 +140,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
           <div class="r-stats">
             <div><span>Inquiries sent</span><b class="a-num" id="r-detail-leads">0</b></div>
             <div><span>Became clients</span><b class="a-num" id="r-detail-clients">0</b></div>
-            <div><span>Last touch</span><b id="r-detail-touch">Never</b></div>
+            <div><span>Last contact</span><b id="r-detail-touch">Never</b></div>
           </div>
           <div class="r-links" id="r-detail-links"></div>
         </section>
@@ -204,6 +211,13 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
             <select id="pf-status" name="status">
               {PARTNER_STATUSES.map((s) => <option value={s.value}>{s.label}</option>)}
             </select>
+          </div>
+          <div class="i-field">
+            <label for="pf-priority">How often to be in touch</label>
+            <select id="pf-priority" name="priority">
+              {PARTNER_PRIORITIES.map((p) => <option value={p.value}>{p.label}: {p.hint.toLowerCase()}</option>)}
+            </select>
+            <span id="pf-rhythm-hint" class="i-hint"></span>
           </div>
           <div class="i-field">
             <label for="pf-next-follow-up">Next follow-up</label>
@@ -302,7 +316,10 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     activityLabel,
     categoryLabel,
     partnerStatusLabel,
+    partnerHealth,
+    priorityLabel,
     type PartnerActivity,
+    type PartnerHealthRow,
     type ReferralPartner,
   } from '../../lib/referralPartners';
 
@@ -317,6 +334,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
   let partners: ReferralPartner[] = [];
   let activities: PartnerActivity[] = [];
   let linkedLeads: LinkedLead[] = [];
+  let healthRows = new Map<string, PartnerHealthRow>();
   let currentId: string | null = null;
 
   const listView = document.getElementById('partners-list-view')!;
@@ -364,10 +382,28 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     return new Date(y, m - 1, d).toLocaleDateString(undefined, opts);
   }
 
-  // A stage change is bookkeeping, not contact (0082).
-  function lastTouch(partnerId: string): string | null {
-    const dates = activities.filter((a) => a.partner_id === partnerId && a.activity_type !== 'stage').map((a) => a.occurred_on);
-    return dates.length ? dates.sort().at(-1)! : null;
+  // Last real contact, needs-a-touch and stopped-referring flags (step 2,
+  // 0083): from the referral_partner_health view, one set of rules shared
+  // with Today (partnerHealth in lib/referralPartners.ts).
+  function healthOf(p: ReferralPartner) {
+    return partnerHealth(p, healthRows.get(p.id));
+  }
+
+  // Keeps the view's numbers current after something is logged or sent on
+  // this page, without reloading. Notes and stage changes aren't contact.
+  function noteContact(partnerId: string, activityType: string, occurredOn: string) {
+    if (activityType === 'note' || activityType === 'stage') return;
+    const row = healthRows.get(partnerId) ?? { partner_id: partnerId, last_contact_on: null, referral_count: 0, first_referral_at: null, last_referral_at: null };
+    if (!row.last_contact_on || occurredOn > row.last_contact_on) row.last_contact_on = occurredOn;
+    healthRows.set(partnerId, row);
+  }
+
+  function healthNote(p: ReferralPartner): { text: string; cls: string } | null {
+    const h = healthOf(p);
+    if (h.stoppedReferring) return { text: `No referral in ${h.stoppedReferring.daysSince} days (usually every ${h.stoppedReferring.usualGap})`, cls: 'r-cold' };
+    if (h.state === 'cold') return { text: h.daysSinceContact === null ? 'Never contacted' : `Going cold: no contact in ${h.daysSinceContact} days`, cls: 'r-cold' };
+    if (h.state === 'due') return { text: h.daysSinceContact === null ? 'No contact logged yet' : `Due for a touch (${priorityLabel(p.priority)}: every ${h.rhythm} days)`, cls: 'r-due' };
+    return null;
   }
 
   function referralCounts(partnerId: string) {
@@ -395,13 +431,10 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     const days = daysSince(ymd);
     if (days <= 0) return 'Today';
     if (days === 1) return 'Yesterday';
-    if (days <= QUIET_DAYS) return `${days} days ago`;
+    if (days <= 60) return `${days} days ago`;
     return formatDate(ymd);
   }
 
-  // An active partner nobody has contacted in two months is a relationship
-  // going quiet: worth a thank-you or a check-in.
-  const QUIET_DAYS = 60;
 
   function renderStats() {
     const live = partners.filter((p) => !p.archived_at);
@@ -473,16 +506,16 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     const today = todayIso();
     tableBody.innerHTML = rows
       .map((p) => {
-        const touch = lastTouch(p.id);
+        const touch = healthOf(p).lastContact;
         const counts = referralCounts(p.id);
-        const quiet = p.status === 'active' && !p.archived_at && (!touch || daysSince(touch) > QUIET_DAYS);
+        const flag = healthNote(p);
         const late = p.next_follow_up && p.next_follow_up < today && p.status !== 'inactive' && !p.archived_at;
         return `
       <tr data-partner-id="${p.id}" class="open-partner ${p.archived_at ? 'i-archived' : ''}">
         <td><div class="i-who"><span class="i-avatar">${escapeHtml(initials(p.name))}</span><div><b>${escapeHtml(p.name)}${p.archived_at ? ' <span class="i-tag">Archived</span>' : ''}</b><small>${escapeHtml(p.contact_name ?? categoryLabel(p.category))}</small></div></div></td>
         <td class="i-hide-md i-muted">${escapeHtml(categoryLabel(p.category))}</td>
         <td>${stageBadge(p.status)}</td>
-        <td class="i-hide-sm ${quiet ? 'r-quiet' : 'i-muted'}"${quiet ? ` title="No contact in over ${QUIET_DAYS} days"` : ''}>${touch ? touchText(touch) : '<span class="i-faint">Never</span>'}</td>
+        <td class="i-hide-sm ${flag ? flag.cls : 'i-muted'}"${flag ? ` title="${escapeAttr(flag.text)}"` : ''}>${touch ? touchText(touch) : '<span class="i-faint">Never</span>'}</td>
         <td class="i-hide-sm ${late ? 'i-late' : 'i-muted'}">${p.next_follow_up ? formatShort(p.next_follow_up) : ''}</td>
         <td class="i-hide-md r-num i-muted">${counts.leads}</td>
         <td class="r-num">${counts.clients ? `<span class="r-clients">${counts.clients}</span>` : '<span class="i-faint">0</span>'}</td>
@@ -491,8 +524,32 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       .join('');
   }
 
+  // Active partners who need a touch: stopped referring first, then going
+  // cold, then due. A partner with its own follow-up date coming up is left
+  // to Follow-ups due.
+  function renderReach() {
+    const today = todayIso();
+    const rank = (p: ReferralPartner) => {
+      const h = healthOf(p);
+      return h.stoppedReferring ? 0 : h.state === 'cold' ? 1 : h.state === 'due' ? 2 : 9;
+    };
+    const rows = partners
+      .filter((p) => !p.archived_at && p.status === 'active' && rank(p) < 9)
+      .filter((p) => !(p.next_follow_up && p.next_follow_up >= today))
+      .sort((a, b) => rank(a) - rank(b) || (healthOf(b).daysSinceContact ?? 9999) - (healthOf(a).daysSinceContact ?? 9999));
+    document.getElementById('reach-section')!.classList.toggle('hidden', rows.length === 0);
+    document.getElementById('r-reach-count')!.textContent = `${rows.length} partner${rows.length === 1 ? '' : 's'}`;
+    document.getElementById('reach-list')!.innerHTML = rows
+      .map((p) => {
+        const flag = healthNote(p)!;
+        return `<button type="button" data-partner-id="${p.id}" class="open-partner due-item"><span class="i-avatar sm">${escapeHtml(initials(p.name))}</span><span class="i-due-name">${escapeHtml(p.name)}</span><span class="i-due-when ${flag.cls}">${escapeHtml(flag.text)}</span></button>`;
+      })
+      .join('');
+  }
+
   function renderAll() {
     renderStats();
+    renderReach();
     renderDue();
     renderList();
   }
@@ -586,10 +643,19 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     const counts = referralCounts(p.id);
     document.getElementById('r-detail-leads')!.textContent = String(counts.leads);
     document.getElementById('r-detail-clients')!.textContent = String(counts.clients);
-    const touch = lastTouch(p.id);
+    const h = healthOf(p);
+    const flag = healthNote(p);
     const touchEl = document.getElementById('r-detail-touch')!;
-    touchEl.textContent = touch ? touchText(touch) : 'Never';
-    touchEl.classList.toggle('r-quiet', p.status === 'active' && (!touch || daysSince(touch) > QUIET_DAYS));
+    touchEl.textContent = h.lastContact ? touchText(h.lastContact) : 'Never';
+    touchEl.className = flag ? flag.cls : '';
+    const rhythmHint = document.getElementById('pf-rhythm-hint')!;
+    rhythmHint.textContent =
+      h.state === 'none'
+        ? 'The rhythm applies once they are an Active partner.'
+        : flag
+          ? flag.text
+          : `Next touch by ${formatDate(h.nextTouchBy!)}.`;
+    rhythmHint.className = flag ? `i-hint ${flag.cls}` : 'i-hint';
     const links: string[] = [];
     if (p.email) links.push(`<a class="a-btn i-btn" href="mailto:${escapeAttr(p.email.trim())}">Email</a>`);
     if (p.phone) links.push(`<a class="a-btn i-btn" href="tel:${escapeAttr(p.phone.replace(/[^\d+]/g, ''))}">Call ${escapeHtml(p.phone)}</a>`);
@@ -605,7 +671,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     if (!p) return;
     currentId = id;
     const f = partnerForm.elements as unknown as Record<string, HTMLInputElement>;
-    for (const key of ['name', 'category', 'status', 'contact_name', 'next_follow_up', 'email', 'phone', 'website', 'address', 'notes']) {
+    for (const key of ['name', 'category', 'status', 'priority', 'contact_name', 'next_follow_up', 'email', 'phone', 'website', 'address', 'notes']) {
       f[key].value = ((p as unknown as Record<string, string | null>)[key] ?? '') as string;
     }
     partnerFormStatus.textContent = '';
@@ -637,6 +703,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       name: text('name') ?? '',
       category: data.get('category') as string,
       status: data.get('status') as string,
+      priority: (data.get('priority') as string) || 'regular',
       contact_name: text('contact_name'),
       next_follow_up: text('next_follow_up'),
       email: text('email'),
@@ -677,6 +744,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       return false;
     }
     activities.push(inserted as PartnerActivity);
+    noteContact(currentId, activityType, occurredOn);
 
     // First real outreach moves a prospect forward automatically; any
     // later stage change stays the user's call.
@@ -894,7 +962,10 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       kitStatus.className = 'i-hint r-err';
       return;
     }
-    if (data.activity) activities.push(data.activity as PartnerActivity);
+    if (data.activity) {
+      activities.push(data.activity as PartnerActivity);
+      noteContact(partner.id, 'email', (data.activity as PartnerActivity).occurred_on);
+    }
     if (data.status && data.status !== partner.status) {
       partner.status = data.status;
       (partnerForm.elements.namedItem('status') as HTMLSelectElement).value = data.status;
@@ -1092,7 +1163,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       const { data: me } = await supabase.from('admin_users').select('display_name').eq('id', user.id).maybeSingle();
       if (me?.display_name) kitSigner.value = me.display_name as string;
     }
-    const [p, a, l, b, c] = await Promise.all([
+    const [p, a, l, b, c, h] = await Promise.all([
       supabase.from('referral_partners').select('*').order('name'),
       supabase.from('referral_partner_activities').select('*'),
       supabase
@@ -1108,6 +1179,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
         .select('title, availability_status, telehealth_available, specialties')
         .eq('page_type', 'Counselor Profile')
         .order('title'),
+      supabase.from('referral_partner_health').select('*'),
     ]);
     if (p.error) {
       document.getElementById('partners-count')!.textContent = 'Could not load partners: ' + p.error.message;
@@ -1116,6 +1188,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     partners = (p.data ?? []) as ReferralPartner[];
     activities = (a.data ?? []) as PartnerActivity[];
     linkedLeads = (l.data ?? []) as LinkedLead[];
+    healthRows = new Map(((h.data ?? []) as PartnerHealthRow[]).map((r) => [r.partner_id, r]));
     practice = (b.data as PracticeInfo) ?? null;
     faithCheckbox.checked = practice?.offers_faith_integration ?? false;
     counselors = ((c.data ?? []) as { title: string; availability_status: string | null; telehealth_available: boolean; specialties: { label: string }[] | null }[]).map(

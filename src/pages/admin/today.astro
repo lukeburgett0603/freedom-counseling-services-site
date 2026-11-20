@@ -51,6 +51,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   import { fetchRankHistory } from '../../lib/seoInsights';
   import { targetCaseload, ALMOST_FULL_THRESHOLD, type CounselorCaseload } from '../../lib/caseload';
   import { leadSourceShortLabel, hoursToFirstContact, formatHours, median } from '../../lib/leadSource';
+  import { partnerHealth, type PartnerHealthRow } from '../../lib/referralPartners';
 
   type Lead = {
     id: string;
@@ -69,7 +70,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     check_back_date: string | null;
   };
   type Counselor = { id: string; title: string; availability_status: string | null };
-  type Partner = { id: string; name: string; next_follow_up: string | null; status: string; archived_at: string | null };
+  type Partner = { id: string; name: string; next_follow_up: string | null; status: string; archived_at: string | null; priority: string | null; created_at: string };
 
   const MANUAL_SOURCE = 'Manually added';
   const DAY = 86_400_000;
@@ -188,15 +189,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       leadsQuery = leadsQuery.eq('assigned_counselor_page_id', user.linked_counselor_page_id!);
       caseQuery = caseQuery.eq('counselor_page_id', user.linked_counselor_page_id!);
     }
-    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes] = await Promise.all([
+    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes, healthRes] = await Promise.all([
       leadsQuery,
       supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').order('title'),
       caseQuery,
-      isFull ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at') : Promise.resolve({ data: [] }),
+      isFull ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at, priority, created_at') : Promise.resolve({ data: [] }),
       isFull ? supabase.from('target_keywords').select('id').eq('status', 'active') : Promise.resolve({ data: [] }),
       // Latest check only (plus a week, for a search the newest run missed).
       isFull ? fetchRankHistory(supabase, 8, 'target_keyword_id, position, checked_at').then((data) => ({ data }), () => ({ data: [] })) : Promise.resolve({ data: [] }),
       supabase.from('business').select('display_name').single(),
+      // Rhythm and going cold (0083).
+      isFull ? supabase.from('referral_partner_health').select('*') : Promise.resolve({ data: [] }),
     ]);
     if ('error' in leadsRes && leadsRes.error) {
       $('t-headline').textContent = "Couldn't load your numbers. Try reloading the page.";
@@ -218,7 +221,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
     const pageOne = [...latest.values()].filter((p) => p != null && p <= 10).length;
 
-    render({ user, isCounselor, leads, counselors, caseloads, partners, practice, me, keywords: activeKw.size, pageOne });
+    const partnerHealthRows = (healthRes.data ?? []) as PartnerHealthRow[];
+    render({ user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, practice, me, keywords: activeKw.size, pageOne });
   }
 
   type Ctx = {
@@ -228,6 +232,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     counselors: Counselor[];
     caseloads: CounselorCaseload[];
     partners: Partner[];
+    partnerHealthRows: PartnerHealthRow[];
     practice: string;
     me: Counselor | null;
     keywords: number;
@@ -235,7 +240,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   };
 
   function render(ctx: Ctx) {
-    const { user, isCounselor, leads, counselors, caseloads, partners, practice, me } = ctx;
+    const { user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, practice, me } = ctx;
     const name = firstName(user, me?.title ?? null);
     $('t-greeting').textContent = name ? `${greeting()}, ${name}.` : `${greeting()}.`;
 
@@ -356,6 +361,27 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
     for (const p of partners.filter((x) => x.next_follow_up && x.next_follow_up <= today).sort((a, b) => a.next_follow_up!.localeCompare(b.next_follow_up!)).slice(0, 2)) {
       moves.push({ id: `p-${p.id}`, title: `Follow up with ${p.name}`, sub: p.next_follow_up! < today ? 'Referral partner follow-up is overdue' : 'Referral partner follow-up due today', tag: 'Get referred', icon: ICON.partner, link: withBase('/admin/referral-partners'), linkText: 'Open' });
+    }
+    // Active partners who need a touch (0083): stopped referring first, then
+    // going cold, then due. Left out when the partner already has a
+    // follow-up date set (that has its own move above).
+    {
+      const health = new Map(partnerHealthRows.map((r) => [r.partner_id, r]));
+      const scored = partners
+        .filter((p) => p.status === 'active' && !(p.next_follow_up && p.next_follow_up >= today) && !moves.some((m) => m.id === `p-${p.id}`))
+        .map((p) => ({ p, h: partnerHealth(p, health.get(p.id)) }))
+        .filter(({ h }) => h.stoppedReferring || h.state === 'cold' || h.state === 'due')
+        .sort((a, b) => (a.h.stoppedReferring ? 0 : a.h.state === 'cold' ? 1 : 2) - (b.h.stoppedReferring ? 0 : b.h.state === 'cold' ? 1 : 2));
+      for (const { p, h } of scored.slice(0, 2)) {
+        const sub = h.stoppedReferring
+          ? `No referral in ${h.stoppedReferring.daysSince} days, though they usually send one every ${h.stoppedReferring.usualGap}. A check-in or thank-you can help.`
+          : h.daysSinceContact === null
+            ? 'Active partner with no contact logged yet.'
+            : h.state === 'cold'
+              ? `Going cold: no contact in ${h.daysSinceContact} days.`
+              : `Due for a touch: last contact ${h.daysSinceContact} days ago.`;
+        moves.push({ id: `r-${p.id}`, title: `Reach out to ${p.name}`, sub, tag: 'Get referred', warn: Boolean(h.stoppedReferring) || h.state === 'cold', icon: ICON.partner, link: withBase('/admin/referral-partners'), linkText: 'Open' });
+      }
     }
     if (isCounselor && me && full && cur / full >= ALMOST_FULL_THRESHOLD && me.availability_status === 'accepting') {
       moves.push({ id: 'avail', title: 'Update your availability', sub: 'Your caseload is nearly full, but your page still says you\'re accepting new clients.', tag: 'Profile', icon: ICON.profile, link: '#t-status', linkText: 'Update' });

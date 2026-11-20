@@ -5405,3 +5405,11 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
   color: var(--a-fg2);
   font-size: 13px;
 }
+
+/* Referral partners: rhythm and going cold (0083, 2026-11-19) */
+.r-due {
+  color: var(--a-warn);
+}
+.r-cold {
+  color: var(--a-bad, #e5484d);
+}
