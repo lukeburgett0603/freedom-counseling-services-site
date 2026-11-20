@@ -114,6 +114,27 @@ import { withBase } from '../../lib/url';
         </ul>
       </details>
     </section>
+
+    <!-- Weekly email (step 5, 0086): a Monday note to the owner about
+         partners to reach out to, follow-ups due and new referrals. Off by
+         default; nothing is sent on a week with nothing to report. -->
+    <section class="t-card r-digest">
+      <h2>Weekly email</h2>
+      <label class="i-check">
+        <input id="digest-enabled" type="checkbox" />
+        <span>Email me every Monday: partners to reach out to, follow-ups due, and new referrals</span>
+      </label>
+      <div class="i-field r-digest-to">
+        <label for="digest-email">Send it to</label>
+        <input id="digest-email" type="text" placeholder="Leave blank to use your inquiry notification address" />
+      </div>
+      <div class="i-inline">
+        <button id="digest-save" type="button" class="a-btn i-btn">Save</button>
+        <button id="digest-test" type="button" class="a-btn i-btn">Send me a test</button>
+        <span id="digest-status" class="i-hint" role="status"></span>
+      </div>
+      <p class="i-hint">Nothing is sent on a week with nothing to report. Client names are never included.</p>
+    </section>
   </div>
 
   <div id="partner-detail-view" class="hidden">
@@ -1238,7 +1259,63 @@ import { withBase } from '../../lib/url';
     openDetail((inserted as ReferralPartner).id);
   });
 
+  // ---------------------------------------------------------------------
+  // Weekly email (step 5, migration 0086)
+  // ---------------------------------------------------------------------
+  const digestEnabled = document.getElementById('digest-enabled') as HTMLInputElement;
+  const digestEmail = document.getElementById('digest-email') as HTMLInputElement;
+  const digestStatus = document.getElementById('digest-status')!;
+  let businessId: string | null = null;
+
+  function setDigestStatus(text: string, cls = '') {
+    digestStatus.textContent = text;
+    digestStatus.className = `i-hint ${cls}`;
+  }
+
+  async function loadDigest() {
+    const { data } = await supabase.from('business').select('id, partner_digest_enabled, partner_digest_email').maybeSingle();
+    if (!data) return;
+    businessId = data.id as string;
+    digestEnabled.checked = Boolean(data.partner_digest_enabled);
+    digestEmail.value = (data.partner_digest_email as string | null) ?? '';
+  }
+
+  document.getElementById('digest-save')!.addEventListener('click', async () => {
+    if (!businessId) return;
+    const emails = digestEmail.value.split(',').map((s) => s.trim()).filter(Boolean);
+    if (emails.some((e) => !/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(e))) {
+      setDigestStatus('Check the email address (separate more than one with commas).', 'r-warn');
+      return;
+    }
+    setDigestStatus('Saving...');
+    const { error } = await supabase
+      .from('business')
+      .update({ partner_digest_enabled: digestEnabled.checked, partner_digest_email: emails.join(', ') || null })
+      .eq('id', businessId);
+    if (error) setDigestStatus('Could not save: ' + error.message, 'r-err');
+    else setDigestStatus(digestEnabled.checked ? 'Saved. The next one goes out Monday morning.' : 'Saved. The weekly email is off.', 'r-ok');
+  });
+
+  document.getElementById('digest-test')!.addEventListener('click', async () => {
+    setDigestStatus('Sending...');
+    const { data, error } = await supabase.functions.invoke('send-partner-digest', { body: { test: true } });
+    if (error || !data?.ok) {
+      let message = data?.error as string | undefined;
+      if (!message && error && 'context' in error) {
+        try {
+          message = (await (error as { context: Response }).context.json()).error;
+        } catch {
+          /* no body */
+        }
+      }
+      setDigestStatus(message ?? 'The test was not sent.', 'r-err');
+      return;
+    }
+    setDigestStatus(`Test sent to ${(data.sent_to as string[]).join(', ')}.`, 'r-ok');
+  });
+
   async function load(user?: { id: string }) {
+    loadDigest();
     // "Signed by" starts as the person's own name (Team), once.
     if (!kitSigner.value && user) {
       const { data: me } = await supabase.from('admin_users').select('display_name').eq('id', user.id).maybeSingle();

@@ -24,3 +24,10 @@ verify_jwt = false
 # project-owned secret instead of a real Supabase-signed JWT.
 [functions.refresh-seo-rankings]
 verify_jwt = false
+
+# send-partner-digest (referral partners step 5): the weekly pg_cron job
+# calls it with its own DIGEST_CRON_SECRET, not a Supabase JWT, so the
+# gateway check is off. The admin's "Send me a test" path checks the
+# signed-in session inside the function instead.
+[functions.send-partner-digest]
+verify_jwt = false

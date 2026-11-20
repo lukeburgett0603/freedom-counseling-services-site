@@ -4774,3 +4774,33 @@ Step 4 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
 - Tested 2026-11-20: 5 database checks on Freedom in a rolled-back
   transaction; baseline hand count on Freedom (0 linked referrals, 8
   reported-but-unlinked in 90 days, 10 outreach touches).
+
+## Referral partners: weekly email (2026-11-20, migration 0086)
+
+Step 5 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- `supabase/functions/send-partner-digest`: a Monday note to the owner with
+  partners to reach out to (stopped referring, going cold, due), follow-ups
+  due in the next 7 days, new referrals in the last 7 days by partner
+  (counts only), and referrals reported but not linked. Plain email with
+  links to Referral partners and the Referral report. **Never a client's
+  name.**
+- Off by default (`business.partner_digest_enabled`); "Weekly email" card on
+  the Referral partners page (on/off, optional recipients in
+  `partner_digest_email`, else `lead_notification_email`, and **Send me a
+  test**). Nothing is sent on a week with nothing to report, and never twice
+  within six days (`partner_digest_last_sent_at`).
+- Auth: the schedule calls it with `DIGEST_CRON_SECRET` (verify_jwt off in
+  `config.toml`); the admin test path checks the signed-in owner/agency
+  session itself and sends only to that person. `{ dry_run: true }` with the
+  schedule's secret returns the email without sending (for checks).
+- **Schedule (per project, at launch):** pg_cron job
+  `send-partner-digest-weekly`, `30 13 * * 1` (Mondays 8:30 am Eastern in
+  winter), calling the function with the secret, same shape as
+  `refresh-seo-rankings-weekly`.
+- The due / going cold / stopped referring rules now live once in
+  `supabase/functions/_shared/partnerHealth.ts`, re-exported by
+  `src/lib/referralPartners.ts`, so the page, Today and the email agree.
+- Tested 2026-11-20: 15 rule cases after the move, 3 database checks on
+  Freedom in a rolled-back transaction (off by default, owner can turn it
+  on, counselor can't).
