@@ -93,6 +93,9 @@ Deno.serve(async (req: Request) => {
   const replyChoice = body.reply_to === 'practice' ? 'practice' : 'me';
   const signer = typeof body.signer === 'string' ? body.signer.trim().slice(0, 80) : '';
   // The sender's local date, so "today" on the timeline matches theirs.
+  // Which kit message this was (step 6: the availability update is tracked
+  // per partner). Known keys only.
+  const templateKey = ['intro_email', 'follow_up_email', 'availability_update', 'blank'].includes(String(body.template_key)) ? String(body.template_key) : null;
   const localDate = typeof body.occurred_on === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.occurred_on) ? body.occurred_on : null;
 
   if (!partnerId) return jsonResponse({ error: 'partner_id is required' }, 400);
@@ -172,6 +175,7 @@ Deno.serve(async (req: Request) => {
       sent_to: to,
       resend_id: sent.id,
       created_by: user.id,
+      ...(templateKey ? { detail: { template: templateKey } } : {}),
     })
     .select()
     .single();

@@ -70,7 +70,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     check_back_date: string | null;
   };
   type Counselor = { id: string; title: string; availability_status: string | null };
-  type Partner = { id: string; name: string; next_follow_up: string | null; status: string; archived_at: string | null; priority: string | null; created_at: string };
+  type Partner = { id: string; name: string; next_follow_up: string | null; status: string; archived_at: string | null; priority: string | null; created_at: string; email: string | null };
 
   const MANUAL_SOURCE = 'Manually added';
   const DAY = 86_400_000;
@@ -189,17 +189,27 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       leadsQuery = leadsQuery.eq('assigned_counselor_page_id', user.linked_counselor_page_id!);
       caseQuery = caseQuery.eq('counselor_page_id', user.linked_counselor_page_id!);
     }
-    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes, healthRes] = await Promise.all([
+    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes, healthRes, availRes] = await Promise.all([
       leadsQuery,
       supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').order('title'),
       caseQuery,
-      isFull ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at, priority, created_at') : Promise.resolve({ data: [] }),
+      isFull ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at, priority, created_at, email') : Promise.resolve({ data: [] }),
       isFull ? supabase.from('target_keywords').select('id').eq('status', 'active') : Promise.resolve({ data: [] }),
       // Latest check only (plus a week, for a search the newest run missed).
       isFull ? fetchRankHistory(supabase, 8, 'target_keyword_id, position, checked_at').then((data) => ({ data }), () => ({ data: [] })) : Promise.resolve({ data: [] }),
-      supabase.from('business').select('display_name').single(),
+      supabase.from('business').select('display_name, availability_update_cadence').single(),
       // Rhythm and going cold (0083).
       isFull ? supabase.from('referral_partner_health').select('*') : Promise.resolve({ data: [] }),
+      // Availability updates sent in the last quarter (0087), one row each.
+      isFull
+        ? supabase
+            .from('referral_partner_activities')
+            .select('partner_id, occurred_on')
+            .eq('activity_type', 'email')
+            .eq('detail->>template', 'availability_update')
+            .gte('occurred_on', new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10))
+            .limit(2000)
+        : Promise.resolve({ data: [] }),
     ]);
     if ('error' in leadsRes && leadsRes.error) {
       $('t-headline').textContent = "Couldn't load your numbers. Try reloading the page.";
@@ -222,7 +232,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const pageOne = [...latest.values()].filter((p) => p != null && p <= 10).length;
 
     const partnerHealthRows = (healthRes.data ?? []) as PartnerHealthRow[];
-    render({ user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, practice, me, keywords: activeKw.size, pageOne });
+    const availabilityCadence = ((bizRes.data as { availability_update_cadence?: string } | null)?.availability_update_cadence ?? 'monthly') as string;
+    const availabilitySent = (availRes.data ?? []) as { partner_id: string; occurred_on: string }[];
+    render({ user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, practice, me, keywords: activeKw.size, pageOne });
   }
 
   type Ctx = {
@@ -233,6 +245,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     caseloads: CounselorCaseload[];
     partners: Partner[];
     partnerHealthRows: PartnerHealthRow[];
+    availabilityCadence: string;
+    availabilitySent: { partner_id: string; occurred_on: string }[];
     practice: string;
     me: Counselor | null;
     keywords: number;
@@ -240,7 +254,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   };
 
   function render(ctx: Ctx) {
-    const { user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, practice, me } = ctx;
+    const { user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, practice, me } = ctx;
     const name = firstName(user, me?.title ?? null);
     $('t-greeting').textContent = name ? `${greeting()}, ${name}.` : `${greeting()}.`;
 
@@ -381,6 +395,27 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               ? `Going cold: no contact in ${h.daysSinceContact} days.`
               : `Due for a touch: last contact ${h.daysSinceContact} days ago.`;
         moves.push({ id: `r-${p.id}`, title: `Reach out to ${p.name}`, sub, tag: 'Get referred', warn: Boolean(h.stoppedReferring) || h.state === 'cold', icon: ICON.partner, link: withBase('/admin/referral-partners'), linkText: 'Open' });
+      }
+    }
+    // Availability update (0087): active partners with an email address who
+    // haven't had one this month (or quarter).
+    if (availabilityCadence !== 'off') {
+      const windowDays = availabilityCadence === 'quarterly' ? 90 : 30;
+      const since = new Date(Date.now() - (windowDays - 1) * 86_400_000).toISOString().slice(0, 10);
+      const sent = new Set(availabilitySent.filter((a) => a.occurred_on >= since).map((a) => a.partner_id));
+      const reachable = partners.filter((p) => p.status === 'active' && p.email?.trim());
+      const pending = reachable.filter((p) => !sent.has(p.id));
+      if (pending.length) {
+        const period = availabilityCadence === 'quarterly' ? 'this quarter' : 'this month';
+        moves.push({
+          id: 'avail',
+          title: `Send ${period}'s availability update`,
+          sub: `${pending.length} of ${reachable.length} active partner${reachable.length === 1 ? '' : 's'} haven't heard who has openings ${period}. One click drafts it from your counselors' availability.`,
+          tag: 'Get referred',
+          icon: ICON.partner,
+          link: withBase('/admin/referral-partners#avail-card'),
+          linkText: 'Start',
+        });
       }
     }
     if (isCounselor && me && full && cur / full >= ALMOST_FULL_THRESHOLD && me.availability_status === 'accepting') {

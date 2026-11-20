@@ -78,7 +78,8 @@ export type PartnerActivity = {
   body?: string | null;
   sent_to?: string | null;
   // A stage change (0082): {"from": "prospect", "to": "contacted"}.
-  detail?: { from?: string; to?: string } | null;
+  // A stage change: {from, to}. A sent email: {template} (step 6).
+  detail?: { from?: string; to?: string; template?: string } | null;
 };
 
 // Rhythm and going cold (steps 2 and 5): the rules live in one shared file

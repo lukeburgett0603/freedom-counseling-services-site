@@ -135,6 +135,25 @@ import { withBase } from '../../lib/url';
       </div>
       <p class="i-hint">Nothing is sent on a week with nothing to report. Client names are never included.</p>
     </section>
+
+    <!-- Availability update (step 6, 0087): who has openings, sent one
+         partner at a time from each partner's page. Never a mass email. -->
+    <section class="t-card r-digest" id="avail-card">
+      <h2>Availability update<span class="t-aside" id="avail-progress"></span></h2>
+      <p class="i-hint r-avail-intro">A short note telling active partners which counselors have openings, written from each counselor's current availability. You send it one partner at a time, so each one is personal and lands on their timeline.</p>
+      <div class="i-inline">
+        <button id="avail-next" type="button" class="a-btn i-btn">Send to the next partner</button>
+        <label class="i-inline r-avail-cadence">
+          <span class="i-faint">Remind me</span>
+          <select id="avail-cadence" aria-label="How often to suggest the availability update">
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="off">Never</option>
+          </select>
+        </label>
+        <span id="avail-status" class="i-hint" role="status"></span>
+      </div>
+    </section>
   </div>
 
   <div id="partner-detail-view" class="hidden">
@@ -591,6 +610,7 @@ import { withBase } from '../../lib/url';
 
   function renderAll() {
     renderStats();
+    renderAvailability();
     renderReach();
     renderDue();
     renderList();
@@ -613,7 +633,7 @@ import { withBase } from '../../lib/url';
     }
     if (a.activity_type === 'email' && a.body) {
       return `<li class="i-note">
-          <small><b>Email sent</b> · ${formatDate(a.occurred_on)}${a.sent_to ? ` · to ${escapeHtml(a.sent_to)}` : ''}</small>
+          <small><b>${a.detail?.template === 'availability_update' ? 'Availability update sent' : 'Email sent'}</b> · ${formatDate(a.occurred_on)}${a.sent_to ? ` · to ${escapeHtml(a.sent_to)}` : ''}</small>
           <details class="r-sent"><summary>${escapeHtml(a.subject ?? a.note ?? '(no subject)')}</summary><p>${escapeHtml(a.body)}</p></details>
         </li>`;
     }
@@ -732,6 +752,7 @@ import { withBase } from '../../lib/url';
   }
 
   document.getElementById('back-button')!.addEventListener('click', () => {
+    availQueue = false;
     detailView.classList.add('hidden');
     listView.classList.remove('hidden');
     renderAll();
@@ -988,6 +1009,7 @@ import { withBase } from '../../lib/url';
         body: text,
         reply_to: kitReplyTo.value,
         signer: kitSigner.value,
+        template_key: kitTemplate.value,
         occurred_on: todayIso(),
       },
     });
@@ -1022,6 +1044,21 @@ import { withBase } from '../../lib/url';
     renderActivities();
     kitStatus.textContent = `Sent to ${partner.email.trim()}${data.reply_to ? `. Replies go to ${data.reply_to}` : ''}.`;
     kitStatus.className = 'i-hint r-ok';
+    // Working through the availability update: offer the next partner.
+    if (availQueue && kitTemplate.value === 'availability_update') {
+      const { pending } = availabilityPool();
+      if (pending.length) {
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'a-link r-avail-nextlink';
+        next.textContent = `Next partner (${pending.length} left) →`;
+        next.addEventListener('click', () => openNextForAvailability());
+        kitStatus.append(' ', next);
+      } else {
+        availQueue = false;
+        kitStatus.append(' That was the last one for now.');
+      }
+    }
   });
 
   // Picks up rows written by the database (a stage change) after a save.
@@ -1273,12 +1310,87 @@ import { withBase } from '../../lib/url';
   }
 
   async function loadDigest() {
-    const { data } = await supabase.from('business').select('id, partner_digest_enabled, partner_digest_email').maybeSingle();
+    const { data } = await supabase.from('business').select('id, partner_digest_enabled, partner_digest_email, availability_update_cadence').maybeSingle();
     if (!data) return;
     businessId = data.id as string;
     digestEnabled.checked = Boolean(data.partner_digest_enabled);
     digestEmail.value = (data.partner_digest_email as string | null) ?? '';
+    availCadence.value = (data.availability_update_cadence as string) ?? 'monthly';
+    renderAvailability();
   }
+
+  // ---------------------------------------------------------------------
+  // Availability update (step 6, migration 0087)
+  // ---------------------------------------------------------------------
+  const availCadence = document.getElementById('avail-cadence') as HTMLSelectElement;
+  const availStatus = document.getElementById('avail-status')!;
+  // Set when a partner was opened from "Send to the next partner", so a
+  // successful send offers the next one.
+  let availQueue = false;
+
+  function availWindowDays(): number {
+    return availCadence.value === 'quarterly' ? 90 : 30;
+  }
+
+  function hadAvailabilityUpdate(partnerId: string): boolean {
+    const cutoff = new Date(Date.now() - (availWindowDays() - 1) * 86_400_000);
+    const cutoffIso = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`;
+    return activities.some((a) => a.partner_id === partnerId && a.activity_type === 'email' && a.detail?.template === 'availability_update' && a.occurred_on >= cutoffIso);
+  }
+
+  function availabilityPool() {
+    const active = partners.filter((p) => !p.archived_at && p.status === 'active');
+    const reachable = active.filter((p) => p.email?.trim());
+    const pending = reachable.filter((p) => !hadAvailabilityUpdate(p.id));
+    return { active, reachable, pending };
+  }
+
+  function renderAvailability() {
+    const { active, reachable, pending } = availabilityPool();
+    const period = availCadence.value === 'quarterly' ? 'this quarter' : 'this month';
+    const done = reachable.length - pending.length;
+    document.getElementById('avail-progress')!.textContent = reachable.length ? `${done} of ${reachable.length} active partners ${period}` : '';
+    const nextButton = document.getElementById('avail-next') as HTMLButtonElement;
+    nextButton.disabled = pending.length === 0;
+    const noEmail = active.length - reachable.length;
+    availStatus.className = 'i-hint';
+    availStatus.textContent = !active.length
+      ? 'No active partners yet.'
+      : pending.length === 0
+        ? `Everyone with an email address has had one ${period}.${noEmail ? ` ${noEmail} active partner${noEmail === 1 ? ' has' : 's have'} no email address.` : ''}`
+        : noEmail
+          ? `${noEmail} active partner${noEmail === 1 ? ' has' : 's have'} no email address.`
+          : '';
+  }
+
+  function openNextForAvailability() {
+    const { pending } = availabilityPool();
+    const next = pending.sort((a, b) => a.name.localeCompare(b.name))[0];
+    if (!next) {
+      availQueue = false;
+      return false;
+    }
+    availQueue = true;
+    openDetail(next.id);
+    kitTemplate.value = 'availability_update';
+    renderKit();
+    document.getElementById('kit-template')!.scrollIntoView({ block: 'center' });
+    return true;
+  }
+
+  document.getElementById('avail-next')!.addEventListener('click', () => {
+    if (!openNextForAvailability()) renderAvailability();
+  });
+
+  availCadence.addEventListener('change', async () => {
+    if (!businessId) return;
+    const { error } = await supabase.from('business').update({ availability_update_cadence: availCadence.value }).eq('id', businessId);
+    renderAvailability();
+    if (error) {
+      availStatus.textContent = 'Could not save: ' + error.message;
+      availStatus.className = 'i-hint r-err';
+    }
+  });
 
   document.getElementById('digest-save')!.addEventListener('click', async () => {
     if (!businessId) return;
@@ -1334,7 +1446,7 @@ import { withBase } from '../../lib/url';
         .single(),
       supabase
         .from('pages')
-        .select('title, availability_status, telehealth_available, specialties')
+        .select('title, availability_status, telehealth_available, specialties, created_at')
         .eq('page_type', 'Counselor Profile')
         .order('title'),
       supabase.from('referral_partner_health').select('*'),
@@ -1349,12 +1461,16 @@ import { withBase } from '../../lib/url';
     healthRows = new Map(((h.data ?? []) as PartnerHealthRow[]).map((r) => [r.partner_id, r]));
     practice = (b.data as PracticeInfo) ?? null;
     faithCheckbox.checked = practice?.offers_faith_integration ?? false;
-    counselors = ((c.data ?? []) as { title: string; availability_status: string | null; telehealth_available: boolean; specialties: { label: string }[] | null }[]).map(
+    // "Recently joined" for the availability update: added in the last 90 days.
+    const joinedSince = Date.now() - 90 * 86_400_000;
+    counselors = ((c.data ?? []) as { title: string; availability_status: string | null; telehealth_available: boolean; specialties: { label: string }[] | null; created_at: string }[]).map(
       (row) => ({
         name: row.title,
         specialties: (row.specialties ?? []).map((s) => s.label),
         accepting: row.availability_status === 'accepting',
         telehealth: row.telehealth_available,
+        availability: (row.availability_status as OutreachCounselor['availability']) ?? null,
+        isNew: new Date(row.created_at).getTime() >= joinedSince,
       })
     );
     renderAll();

@@ -4804,3 +4804,32 @@ Step 5 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
 - Tested 2026-11-20: 15 rule cases after the move, 3 database checks on
   Freedom in a rolled-back transaction (off by default, owner can turn it
   on, counselor can't).
+
+## Referral partners: availability update (2026-11-20, migration 0087)
+
+Step 6 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- New outreach message **Availability update (who has openings)**
+  (`availability_update` in `lib/outreachKit.ts`): one line per counselor
+  whose website status is accepting ("has openings") or almost full ("has a
+  few openings left"), with up to three specialties and "(recently joined
+  our team)" for counselor pages added in the last 90 days. Full
+  counselors are left out; if nobody has room it says so plainly and still
+  invites referrals. Short, no links, subject "Quick update on openings"
+  (Gmail Promotions lesson from step 1).
+- **The website status is the source**, not the caseload meter, so the
+  update never contradicts the site. Keep each counselor's availability
+  current (Today already flags a full caseload still marked accepting).
+- Sent one partner at a time with Send email (never a mass email);
+  `send-partner-email` saves `detail = {"template": "availability_update"}`
+  (it now records the kit template for every send) and the timeline says
+  "Availability update sent".
+- **Availability update** card on the Referral partners list: progress (X of
+  Y active partners with an email this month/quarter), **Send to the next
+  partner** (opens the next one with the update drafted; after a send it
+  offers "Next partner (N left)"), and how often to be reminded
+  (`business.availability_update_cadence`: monthly, quarterly, off).
+- Today shows "Send this month's availability update" while active partners
+  with an email haven't had one in the window.
+- Tested 2026-11-20: wording previewed for both cases (openings / all
+  full); 5 database checks on Freedom in a rolled-back transaction.

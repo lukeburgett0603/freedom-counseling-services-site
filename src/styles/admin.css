@@ -5504,3 +5504,14 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
 .r-digest-to input {
   max-width: 460px;
 }
+
+/* Referral partners: availability update card (0087, 2026-11-20) */
+.r-avail-intro {
+  margin: -4px 0 0;
+}
+.r-avail-cadence select {
+  padding: 5px 8px;
+  border: 1px solid var(--a-line2);
+  border-radius: 7px;
+  font: 13px var(--a-font);
+}

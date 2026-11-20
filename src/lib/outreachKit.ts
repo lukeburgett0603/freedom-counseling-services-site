@@ -11,13 +11,15 @@
 //     client. The thank-you note is deliberately general. Coordinating
 //     care with a partner always needs the client's signed release.
 
-export type OutreachTemplateKey = 'intro_email' | 'follow_up_email' | 'drop_off_note' | 'thank_you_note';
+export type OutreachTemplateKey = 'intro_email' | 'follow_up_email' | 'drop_off_note' | 'thank_you_note' | 'availability_update';
 
 export const OUTREACH_TEMPLATES: { key: OutreachTemplateKey; label: string; activityType: string; hasSubject: boolean }[] = [
   { key: 'intro_email', label: 'Introduction email', activityType: 'email', hasSubject: true },
   { key: 'follow_up_email', label: 'Follow-up email (no reply after ~2 weeks)', activityType: 'email', hasSubject: true },
   { key: 'drop_off_note', label: 'Note to leave with the practice handout', activityType: 'visit', hasSubject: false },
   { key: 'thank_you_note', label: 'Thank-you note (after they start referring)', activityType: 'thank_you', hasSubject: false },
+  // Step 6 (0087): who has openings, from live counselor availability.
+  { key: 'availability_update', label: 'Availability update (who has openings)', activityType: 'email', hasSubject: true },
 ];
 
 export type OutreachCounselor = {
@@ -25,6 +27,9 @@ export type OutreachCounselor = {
   specialties: string[];
   accepting: boolean;
   telehealth: boolean;
+  // Step 6: the counselor's website status, and whether they joined recently.
+  availability?: 'accepting' | 'almost_full' | 'not_accepting' | null;
+  isNew?: boolean;
 };
 
 export type OutreachInput = {
@@ -130,6 +135,36 @@ function howToRefer(input: OutreachInput): string {
   return `Referring is simple: anyone can ${phone}reach out through ${input.website}. No referral form is needed.${response}`;
 }
 
+// Specialty labels are title case ("Grief & Life Transitions"); mid-sentence
+// they read better lowercased, except acronyms (EMDR, OCD) and a few proper
+// words (Christian...).
+const PROPER = new Set(['christian', 'biblical', 'catholic', 'jewish', 'muslim', 'spanish', 'english', 'god']);
+function midSentence(label: string): string {
+  return label
+    .split(' ')
+    .map((w) => (/^[A-Z0-9&+]{2,}[s']?$/.test(w) || /[A-Z].*[A-Z]/.test(w) || PROPER.has(w.toLowerCase().replace(/[^a-z]/g, '')) ? w : w.toLowerCase()))
+    .join(' ');
+}
+function listOf(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? '';
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`;
+}
+
+// The availability update (step 6): one line per counselor with room, from
+// the status shown on the website. Full counselors are left out; if nobody
+// has room, it says so plainly. Short, no links (Gmail Promotions lesson).
+function availabilityLines(input: OutreachInput): string[] {
+  const firstName = (name: string) => name.split(',')[0].trim();
+  const open = input.counselors.filter((c) => c.availability === 'accepting' || c.availability === 'almost_full');
+  return open.map((c) => {
+    const focus = c.specialties.slice(0, 3).map(midSentence);
+    const room = c.availability === 'almost_full' ? 'has a few openings left' : 'has openings for new clients';
+    const joined = c.isNew ? ' (recently joined our team)' : '';
+    return `- ${firstName(c.name)}${joined} ${room}${focus.length ? `: ${listOf(focus)}` : ''}`;
+  });
+}
+
 export function buildOutreachMessage(key: OutreachTemplateKey, input: OutreachInput): { subject: string; body: string } {
   const ctx = contextFor(input.partnerCategory, input);
   const partner = input.partnerName.trim();
@@ -174,6 +209,22 @@ export function buildOutreachMessage(key: OutreachTemplateKey, input: OutreachIn
           signature(input),
         ].join('\n\n'),
       };
+    case 'availability_update': {
+      const lines = availabilityLines(input);
+      const reach = input.phone ? `As always, anyone can reach us at ${input.phone}.` : 'As always, anyone can reach out to us directly.';
+      return {
+        subject: 'Quick update on openings',
+        body: [
+          greeting(input),
+          lines.length
+            ? `A quick update in case it helps when someone among ${ctx.audience} needs support. Here's who has room right now:\n\n${lines.join('\n')}`
+            : `A quick update: our counselors are full right now. If someone among ${ctx.audience} needs support, please still send them our way. We'll help them find the soonest opening or another good option.`,
+          reach,
+          `Thank you,`,
+          signature(input, false),
+        ].join('\n\n'),
+      };
+    }
     case 'thank_you_note':
       // Deliberately general: never names a client or confirms that anyone
       // became a client (confidentiality; a signed release would be needed).
