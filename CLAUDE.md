@@ -4690,3 +4690,12 @@ Step 1 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
   rows (Overview also skips replies).
 - Tested 2026-11-19 on Freedom's database in a rolled-back transaction
   (10 checks).
+
+**Partner email wording (2026-11-19):** the Introduction and Follow-up
+emails are short personal notes with one ask (a call or a drop-by), no list
+of services, no "accepting new clients", no website link, subject "Quick
+introduction" / "Following up". The fuller version landed in Gmail's
+Promotions tab in Luke's live test; a plain two-line note landed in Primary.
+Service details and the category note (care coordination with a release;
+attorneys: therapy, not custody evaluations) now travel with the drop-off
+note and handout. Keep partner emails this short.

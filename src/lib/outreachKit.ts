@@ -113,49 +113,15 @@ function greeting(input: OutreachInput): string {
   return `Hi ${parts[0]},`;
 }
 
-function signature(input: OutreachInput): string {
-  return [input.signer.trim() || '[Your name]', input.practiceName, input.phone, input.website].filter(Boolean).join('\n');
+// Emails sign off without the website: a link and a block of contact
+// details make a note read like marketing (Gmail's Promotions tab).
+function signature(input: OutreachInput, withWebsite = true): string {
+  return [input.signer.trim() || '[Your name]', input.practiceName, input.phone, withWebsite ? input.website : null].filter(Boolean).join('\n');
 }
 
 function withPeriod(text: string): string {
   const t = text.trim();
   return /[.!?]$/.test(t) ? t : `${t}.`;
-}
-
-// "anxiety, grief, and couples counseling": the most common specialties
-// across the team, capped so the sentence stays readable.
-// Specialty labels are title case ("Grief & Life Transitions"); mid-sentence
-// they read better lowercased, except acronyms (EMDR, OCD) and proper nouns
-// (Christian, Biblical...), which keep their capital.
-const PROPER_WORDS = new Set(['christian', 'biblical', 'catholic', 'jewish', 'muslim', 'spanish', 'english', 'god']);
-
-function sentenceCase(label: string): string {
-  return label
-    .split(' ')
-    .map((word) => {
-      if (/^[A-Z0-9&+]{2,}[s']?$/.test(word) || /[A-Z].*[A-Z]/.test(word)) return word;
-      if (PROPER_WORDS.has(word.toLowerCase().replace(/[^a-z]/g, ''))) return word;
-      return word.toLowerCase();
-    })
-    .join(' ');
-}
-
-function specialtySummary(counselors: OutreachCounselor[], max = 6): string {
-  const counts = new Map<string, number>();
-  for (const c of counselors) for (const s of c.specialties) counts.set(s, (counts.get(s) ?? 0) + 1);
-  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, max).map(([s]) => sentenceCase(s));
-  if (top.length === 0) return '';
-  if (top.length === 1) return top[0];
-  return `${top.slice(0, -1).join(', ')}, and ${top.at(-1)}`;
-}
-
-function practiceLine(input: OutreachInput): string {
-  const where = input.city ? ` in ${input.city}` : '';
-  const team = input.counselors.length > 1 ? `Our ${input.counselors.length} counselors` : 'We';
-  const specialties = specialtySummary(input.counselors);
-  const telehealth = input.counselors.some((c) => c.telehealth) ? ' We see clients in person and by telehealth.' : '';
-  const accepting = input.counselors.some((c) => c.accepting) ? ' We are currently accepting new clients.' : '';
-  return `${input.practiceName} is a counseling practice${where}.${specialties ? ` ${team} help with ${specialties}.` : ''}${telehealth}${accepting}`;
 }
 
 function howToRefer(input: OutreachInput): string {
@@ -169,29 +135,31 @@ export function buildOutreachMessage(key: OutreachTemplateKey, input: OutreachIn
   const partner = input.partnerName.trim();
 
   switch (key) {
+    // The two emails are short personal notes with one ask, no list of
+    // services, no "accepting new clients", no links (2026-11-19: the fuller
+    // version landed in Gmail's Promotions tab in Luke's live test; a plain
+    // two-line note landed in Primary). The details travel with the handout
+    // and the conversation.
     case 'intro_email':
       return {
-        subject: `Counseling referrals for ${ctx.audience} | ${input.practiceName}`,
+        subject: 'Quick introduction',
         body: [
           greeting(input),
-          `I'm reaching out from ${input.practiceName}. ${ctx.why}`,
-          practiceLine(input),
-          howToRefer(input),
-          ctx.close,
-          `Would you be open to a short call, or to me stopping by ${partner} to drop off some information for your team?`,
-          `Thank you for the care you give ${ctx.audience}.`,
-          signature(input),
+          `I'm reaching out from ${input.practiceName}, a counseling practice${input.city ? ` in ${input.city}` : ''}. ${ctx.why}`,
+          `I'd love to be a resource for ${ctx.audience}. Would you be open to a short call, or to me stopping by ${partner} to drop off some information for your team?`,
+          `Thank you,`,
+          signature(input, false),
         ].join('\n\n'),
       };
     case 'follow_up_email':
       return {
-        subject: `Following up | ${input.practiceName}`,
+        subject: 'Following up',
         body: [
           greeting(input),
-          `I wanted to follow up on my note about ${input.practiceName}. I know how full your days are, so I'll keep this short.`,
-          `If someone among ${ctx.audience} could use counseling, we'd be glad to help. ${howToRefer(input)}`,
-          `I'm happy to send a one-page overview of our counselors and specialties, or to stop by whenever it's convenient.`,
-          signature(input),
+          `I wanted to follow up on my note from a couple of weeks ago. I know how full your days are.`,
+          `I'm still glad to stop by with some information for your team, or to answer any questions by phone. Would either of those work?`,
+          `Thank you,`,
+          signature(input, false),
         ].join('\n\n'),
       };
     case 'drop_off_note':
@@ -201,6 +169,7 @@ export function buildOutreachMessage(key: OutreachTemplateKey, input: OutreachIn
           greeting(input),
           `Thank you for taking a moment with this. ${input.practiceName} is a local counseling practice, and I've included a one-page overview of our counselors and what we help with.`,
           `If someone among ${ctx.audience} could use support, ${howToRefer(input).charAt(0).toLowerCase()}${howToRefer(input).slice(1)}`,
+          ctx.close,
           `Please keep this sheet anywhere it's handy. I'd welcome the chance to talk about how we can support the people you serve.`,
           signature(input),
         ].join('\n\n'),
