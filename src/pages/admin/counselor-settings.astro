@@ -113,6 +113,13 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
               <input id="weekly-target-input" type="number" min="1" max="60" inputmode="numeric" placeholder="e.g. 20" class="cs-num" />
               <span id="weekly-target-guidance" class="i-hint"></span>
             </div>
+            <!-- Full caseload per counselor (0088): their own number, or the
+                 weekly target x the default when left blank. -->
+            <div class="i-field">
+              <label for="full-caseload-input">Active clients when you're full</label>
+              <input id="full-caseload-input" type="number" min="1" max="200" inputmode="numeric" class="cs-num" />
+              <span id="full-caseload-hint" class="i-hint"></span>
+            </div>
             <div id="target-caseload-box" class="hidden cs-target">
               <span>Your full caseload</span>
               <b><span id="target-caseload-value" class="a-num"></span> clients</b>
@@ -150,6 +157,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     WEEKLY_TARGET_GUIDANCE,
     percentFull,
     targetCaseload,
+    defaultCaseload,
     type CounselorCaseload,
   } from '../../lib/caseload';
 
@@ -197,8 +205,9 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
   const caseloadStatusMsg = document.getElementById('caseload-status-msg')!;
 
   document.getElementById('weekly-target-guidance')!.textContent = WEEKLY_TARGET_GUIDANCE;
-  document.getElementById('target-caseload-explainer')!.textContent =
-    `Clients per week x ${CASELOAD_MULTIPLIER}. Your caseload is bigger than your weekly sessions because some clients come every other week or monthly.`;
+  const fullCaseloadInput = document.getElementById('full-caseload-input') as HTMLInputElement;
+  const fullCaseloadHint = document.getElementById('full-caseload-hint')!;
+  const targetCaseloadExplainer = document.getElementById('target-caseload-explainer')!;
 
   const KNOWN_MODALITIES = new Set(MODALITY_OPTIONS.map((m) => m.toLowerCase()));
 
@@ -214,8 +223,21 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
   // Recomputed live on every keystroke so the counselor sees their full
   // caseload number the moment they type a weekly target.
   function renderCaseloadPreview() {
-    const target = targetCaseload(readIntInput(weeklyTargetInput));
+    const weekly = readIntInput(weeklyTargetInput);
+    const own = readIntInput(fullCaseloadInput);
+    const suggested = defaultCaseload(weekly);
+    const target = targetCaseload(weekly, own);
     const current = readIntInput(currentClientsInput);
+
+    // The default shows as the placeholder, so blank always means "use it".
+    fullCaseloadInput.placeholder = suggested !== null ? String(suggested) : 'e.g. 40';
+    fullCaseloadHint.textContent =
+      suggested !== null
+        ? `Leave blank to use ${suggested} (clients per week x ${CASELOAD_MULTIPLIER}). Set your own if your clients come more or less often than that.`
+        : `Everyone you can carry at once, however often they come. Or fill in clients per week and we'll suggest a number (x ${CASELOAD_MULTIPLIER}).`;
+    targetCaseloadExplainer.textContent = own
+      ? 'Your own number.'
+      : `Clients per week x ${CASELOAD_MULTIPLIER}. Your caseload is bigger than your weekly sessions because some clients come every other week or monthly.`;
 
     targetCaseloadBox.classList.toggle('hidden', target === null);
     if (target !== null) targetCaseloadValue.textContent = String(target);
@@ -246,6 +268,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
   }
 
   weeklyTargetInput.addEventListener('input', renderCaseloadPreview);
+  fullCaseloadInput.addEventListener('input', renderCaseloadPreview);
   currentClientsInput.addEventListener('input', renderCaseloadPreview);
   radios.forEach((r) => r.addEventListener('change', renderCaseloadPreview));
 
@@ -253,6 +276,12 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     if (!selectedPage) return;
     const weekly = readIntInput(weeklyTargetInput);
     const current = readIntInput(currentClientsInput);
+    const full = readIntInput(fullCaseloadInput);
+    if (full !== null && (full < 1 || full > 200)) {
+      caseloadStatusMsg.textContent = 'Active clients when full should be between 1 and 200.';
+      caseloadStatusMsg.className = 'i-hint r-err';
+      return;
+    }
     if (weekly !== null && (weekly < 1 || weekly > 60)) {
       caseloadStatusMsg.textContent = 'Clients per week should be between 1 and 60.';
       caseloadStatusMsg.className = 'i-hint r-err';
@@ -269,6 +298,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
       counselor_page_id: selectedPage.id,
       weekly_client_target: weekly,
       current_active_clients: current,
+      full_caseload: full,
       updated_at: new Date().toISOString(),
     };
     const { error } = await supabase.from('counselor_caseload').upsert(row);
@@ -286,6 +316,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
     const row = selectedPage ? caseloads.get(selectedPage.id) : undefined;
     weeklyTargetInput.value = row?.weekly_client_target != null ? String(row.weekly_client_target) : '';
     currentClientsInput.value = row?.current_active_clients != null ? String(row.current_active_clients) : '';
+    fullCaseloadInput.value = row?.full_caseload != null ? String(row.full_caseload) : '';
     caseloadStatusMsg.textContent = '';
     renderCaseloadPreview();
   }

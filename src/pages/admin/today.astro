@@ -260,7 +260,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
     // Caseload: counselors with a weekly target set.
     const rows = caseloads
-      .map((c) => ({ c, target: targetCaseload(c.weekly_client_target), counselor: counselors.find((x) => x.id === c.counselor_page_id) }))
+      .map((c) => ({ c, target: targetCaseload(c.weekly_client_target, c.full_caseload), counselor: counselors.find((x) => x.id === c.counselor_page_id) }))
       .filter((r) => r.target && r.counselor) as { c: CounselorCaseload; target: number; counselor: Counselor }[];
     let cur = rows.reduce((s, r) => s + (r.c.current_active_clients ?? 0), 0);
     const full = rows.reduce((s, r) => s + r.target, 0);

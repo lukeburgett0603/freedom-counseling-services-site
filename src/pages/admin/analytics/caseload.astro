@@ -145,7 +145,7 @@ import { withBase } from '../../../lib/url';
     const missing: Counselor[] = [];
     for (const c of counselors) {
       const row = caseloads.get(c.id);
-      const target = targetCaseload(row?.weekly_client_target);
+      const target = targetCaseload(row?.weekly_client_target, row?.full_caseload);
       if (target === null || row?.current_active_clients == null) {
         missing.push(c);
         continue;
@@ -203,7 +203,7 @@ import { withBase } from '../../../lib/url';
 
   function cardHtml(c: Counselor, newThisMonth: number): string {
     const row = caseloads.get(c.id);
-    const target = targetCaseload(row?.weekly_client_target);
+    const target = targetCaseload(row?.weekly_client_target, row?.full_caseload);
     const cur = row?.current_active_clients ?? null;
     const name = esc(c.title.split(',')[0]);
     if (target === null || cur === null) {
@@ -283,7 +283,7 @@ import { withBase } from '../../../lib/url';
     paintRing();
     toast(
       delta < 0 ? 'Client finished' : 'Client added',
-      `${counselorMode ? 'Your' : `${c.title.split(',')[0]}'s`} caseload is now ${next} of ${targetCaseload(row.weekly_client_target)}.`
+      `${counselorMode ? 'Your' : `${c.title.split(',')[0]}'s`} caseload is now ${next} of ${targetCaseload(row.weekly_client_target, row.full_caseload)}.`
     );
   }
 
@@ -294,7 +294,7 @@ import { withBase } from '../../../lib/url';
       $('c-empty-body').textContent = counselorMode ? "Your login isn't linked to a counselor page yet. Ask the practice owner." : 'Caseload tracking needs at least one counselor profile page.';
       return;
     }
-    if (practiceTotals().full === 0 && counselors.every((c) => targetCaseload(caseloads.get(c.id)?.weekly_client_target) === null)) {
+    if (practiceTotals().full === 0 && counselors.every((c) => targetCaseload(caseloads.get(c.id)?.weekly_client_target, caseloads.get(c.id)?.full_caseload) === null)) {
       $('c-empty').hidden = false;
       $('c-empty-body').textContent = counselorMode || counselors.length === 1
         ? 'Enter your clients per week and current clients on Counselor settings to see your caseload here.'

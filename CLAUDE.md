@@ -4833,3 +4833,20 @@ Step 6 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
   with an email haven't had one in the window.
 - Tested 2026-11-20: wording previewed for both cases (openings / all
   full); 5 database checks on Freedom in a rolled-back transaction.
+
+## Full caseload per counselor (2026-11-20, migration 0088)
+
+Luke's call: "full" was the weekly client target x 1.5 for everyone, but
+client mixes differ too much between counselors (on Freedom: 1.5x for Luke,
+about 3.4x for Staci). Now:
+- `counselor_caseload.full_caseload`: each counselor's own "Active clients
+  when you're full" (Counselor settings; 1-200, blank = default).
+- Default raised to weekly target x **2.0** (`CASELOAD_MULTIPLIER` in
+  `src/lib/caseload.ts`). `targetCaseload(weekly, full)` uses the
+  counselor's own number when set; `defaultCaseload(weekly)` is the
+  suggestion shown as the field's placeholder.
+- Every caseload screen passes it through: Counselor settings, Caseload,
+  Today, Monthly report (including "caseload not set" and "stale" checks).
+- Tested 2026-11-20 on Freedom in a rolled-back transaction: existing rows
+  keep the default, 0 rejected, counselors save only their own number,
+  owners can set anyone's.

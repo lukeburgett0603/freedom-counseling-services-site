@@ -227,14 +227,14 @@ const link = (path: string) => withBase(path);
 
     const complete = data.counselors.filter((c) => {
       const r = data!.caseloads.get(c.id);
-      return targetCaseload(r?.weekly_client_target) !== null && r?.current_active_clients != null;
+      return targetCaseload(r?.weekly_client_target, r?.full_caseload) !== null && r?.current_active_clients != null;
     });
     let current = 0;
     let target = 0;
     for (const c of complete) {
       const r = data.caseloads.get(c.id)!;
       current += r.current_active_clients!;
-      target += targetCaseload(r.weekly_client_target)!;
+      target += targetCaseload(r.weekly_client_target, r.full_caseload)!;
     }
     document.getElementById('h-caseload')!.textContent = target ? `${Math.round((current / target) * 100)}%` : '—';
     document.getElementById('h-caseload-sub')!.textContent = target
@@ -370,10 +370,10 @@ const link = (path: string) => withBase(path);
     const overdue = data.partners.filter((p) => !p.archived_at && p.status !== 'inactive' && p.next_follow_up && p.next_follow_up < today).length;
     if (overdue) add(`${overdue} referral partner follow-up${overdue === 1 ? ' is' : 's are'} overdue.`, '/admin/referral-partners', 'Referral partners');
 
-    const unset = data.counselors.filter((c) => !data!.caseloads.get(c.id)?.weekly_client_target).length;
+    const unset = data.counselors.filter((c) => !data!.caseloads.get(c.id)?.weekly_client_target && !data!.caseloads.get(c.id)?.full_caseload).length;
     const stale = data.counselors.filter((c) => {
       const r = data!.caseloads.get(c.id);
-      return r?.weekly_client_target && daysSince(r.updated_at) > STALE_DAYS;
+      return (r?.weekly_client_target || r?.full_caseload) && daysSince(r.updated_at) > STALE_DAYS;
     }).length;
     if (unset) add(`${unset} counselor${unset === 1 ? " hasn't" : "s haven't"} set a caseload yet.`, '/admin/counselor-settings', 'Counselor settings');
     if (stale) add(`${stale} counselor${stale === 1 ? "'s" : "s'"} caseload numbers are over ${STALE_DAYS} days old.`, '/admin/counselor-settings', 'Counselor settings');

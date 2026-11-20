@@ -3,10 +3,11 @@
 // here rather than stored.
 
 // Caseload is bigger than weekly sessions because some clients come
-// biweekly or monthly. A deliberate rule of thumb (client decision,
-// 2026-09-28): close enough to be useful, without asking counselors to
-// describe their visit-frequency mix.
-export const CASELOAD_MULTIPLIER = 1.5;
+// biweekly or monthly, and some sessions get cancelled. The default "full"
+// is the weekly target x 2.0 (raised from 1.5 by Luke, 2026-11-20); each
+// counselor can set their own number instead (counselor_caseload.full_caseload,
+// migration 0088), since client mixes differ a lot between counselors.
+export const CASELOAD_MULTIPLIER = 2;
 
 export const WEEKLY_TARGET_GUIDANCE =
   'Most full-time counselors see 16 to 30 clients a week, and 20 is typical.';
@@ -19,12 +20,22 @@ export type CounselorCaseload = {
   counselor_page_id: string;
   weekly_client_target: number | null;
   current_active_clients: number | null;
+  // The counselor's own "full" number (0088). Null: weekly target x default.
+  full_caseload?: number | null;
   updated_at: string;
 };
 
-export function targetCaseload(weeklyClientTarget: number | null | undefined): number | null {
+// A counselor's full caseload: their own number when they've set one,
+// otherwise the weekly target x the default multiplier.
+export function targetCaseload(weeklyClientTarget: number | null | undefined, fullCaseload?: number | null): number | null {
+  if (fullCaseload && fullCaseload > 0) return fullCaseload;
   if (!weeklyClientTarget || weeklyClientTarget <= 0) return null;
   return Math.round(weeklyClientTarget * CASELOAD_MULTIPLIER);
+}
+
+// The default only (what "full" would be without the counselor's own number).
+export function defaultCaseload(weeklyClientTarget: number | null | undefined): number | null {
+  return targetCaseload(weeklyClientTarget, null);
 }
 
 // Percent full, capped at 100 for bar widths. Over-capacity is still
