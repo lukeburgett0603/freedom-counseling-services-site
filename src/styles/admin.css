@@ -5479,3 +5479,15 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* A table stretches to the card's bottom edge only when it's the last
+   thing in the card. Anything after it (an empty-state note, a hint) used
+   to be pulled 18px up into the table by the negative margin (Luke,
+   2026-11-20: the Referral report's empty note sat on the headings). */
+.q-table-wrap:not(:last-child) {
+  margin-bottom: 12px;
+}
+.i-table + .i-hint,
+.i-table + .t-empty {
+  margin-top: 12px;
+}

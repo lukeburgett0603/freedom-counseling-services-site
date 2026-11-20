@@ -37,7 +37,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
     <section class="t-card q-section">
       <h2>By partner<span class="t-aside" id="rr-partner-note"></span></h2>
-      <div class="q-table-wrap">
+      <div class="q-table-wrap" id="rr-partners-table">
         <table class="i-table">
           <thead>
             <tr>
@@ -53,7 +53,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           <tbody id="rr-partners"></tbody>
         </table>
       </div>
-      <p id="rr-partners-empty" class="i-hint" hidden>No referrals linked to a partner in this period.</p>
+      <p id="rr-partners-empty" class="t-empty" hidden>No referrals linked to a partner in this period.</p>
     </section>
 
     <div class="t-grid">
@@ -181,7 +181,9 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
         </tr>`
       )
       .join('');
+    // An empty table is hidden, not shown as bare headings (Luke, 2026-11-20).
     $('rr-partners-empty').hidden = rows.length > 0;
+    $('rr-partners-table').hidden = rows.length === 0;
     $('rr-partner-note').textContent = rows.length ? `${plural(rows.length, 'partner')}, ${label}` : '';
 
     // By type: partners, referrals and clients per category.
