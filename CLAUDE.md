@@ -4749,3 +4749,28 @@ Step 3 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
 - Inquiries shows "through <partner>'s referral link" under Came from.
 - Tested 2026-11-20: 8 browser-memory checks (tsx) and 10 database checks on
   Freedom in a rolled-back transaction.
+
+## Referral report (2026-11-20, migration 0085)
+
+Step 4 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- New page **Watch it work → Referral report** (`admin/analytics/referrals.astro`,
+  nav key `analytics-referrals`, owners/agency): for 90 days, 12 months or
+  all time, referred inquiries, clients, partners who referred, outreach
+  touches; a by-partner table (referrals, clients, last referral, outreach to
+  first referral); by type of partner; the typical days from first outreach
+  to a first referral (median, all time); active partners who haven't
+  referred yet; and referrals people reported ("doctor", "professional",
+  "church") that aren't linked to a partner, with a link to Inquiries.
+  Counts only, no client names.
+- `referral_partner_health` gained `first_contact_on` (first email, call,
+  visit... not notes, stage changes or replies).
+- `lib/fetchAllRows.ts` pages past Supabase's 1,000-row limit for reports
+  that need every row; the report uses it for referral inquiries and
+  activity. The monthly report now loads only the last three months of
+  partner activity instead of the whole history, and its Get referred
+  header links to the Referral report.
+- Partner pages open directly from `?partner=<id>`.
+- Tested 2026-11-20: 5 database checks on Freedom in a rolled-back
+  transaction; baseline hand count on Freedom (0 linked referrals, 8
+  reported-but-unlinked in 90 days, 10 outreach touches).

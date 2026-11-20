@@ -2,6 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { ACTIVITY_TYPES, PARTNER_CATEGORIES, PARTNER_PRIORITIES, PARTNER_STATUSES } from '../../lib/referralPartners';
 import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
+import { withBase } from '../../lib/url';
 ---
 
 <!--
@@ -19,7 +20,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
 -->
 <AdminLayout title="Referral partners | Admin" current="referral-partners">
   <div id="partners-list-view">
-    <p class="i-intro">The professionals who send you clients, and where each relationship stands.</p>
+    <p class="i-intro">The professionals who send you clients, and where each relationship stands. <a class="a-link" href={withBase('/admin/analytics/referrals')}>See the Referral report</a></p>
 
     <div class="r-kpis">
       <div class="t-kpi">
@@ -1280,6 +1281,9 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       })
     );
     renderAll();
+    // Deep link from the Referral report: /admin/referral-partners?partner=<id>
+    const linked = new URLSearchParams(window.location.search).get('partner');
+    if (linked && partners.some((p) => p.id === linked)) openDetail(linked);
   }
 
   initAdminAuth(load, { allowedRoles: ['owner', 'agency'] });

@@ -68,7 +68,7 @@ const link = (path: string) => withBase(path);
         <dl id="chosen" class="m-rows"></dl>
       </section>
       <section class="t-card m-step">
-        <h2><span class="m-num">3</span>Get referred<a class="t-aside m-more" href={link('/admin/referral-partners')}>Referral partners &rarr;</a></h2>
+        <h2><span class="m-num">3</span>Get referred<a class="t-aside m-more" href={link('/admin/analytics/referrals')}>Referral report &rarr;</a></h2>
         <dl id="referred" class="m-rows"></dl>
       </section>
       <section class="t-card m-step">
@@ -422,7 +422,14 @@ const link = (path: string) => withBase(path);
       supabase.from('pages').select('id, title').eq('page_type', 'Counselor Profile'),
       supabase.from('counselor_caseload').select('*'),
       supabase.from('referral_partners').select('id, status, next_follow_up, archived_at'),
-      supabase.from('referral_partner_activities').select('activity_type, occurred_on'),
+      // Only the months this report can show (this month, last month, and
+      // the month before for comparison), never the whole history (Supabase
+      // returns at most 1,000 rows per request).
+      supabase
+        .from('referral_partner_activities')
+        .select('activity_type, occurred_on')
+        .gte('occurred_on', localIso(new Date(new Date().getFullYear(), new Date().getMonth() - 2, 1)))
+        .limit(5000),
       supabase.from('review_snapshots').select('recorded_on, review_count, average_rating'),
       supabase.from('business').select('display_name, lead_auto_reply_enabled, collect_lead_source, google_review_url').single(),
       supabase.from('target_keywords').select('id').eq('status', 'active'),

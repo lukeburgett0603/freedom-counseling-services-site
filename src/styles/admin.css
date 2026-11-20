@@ -5453,3 +5453,29 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Referral report (0085, 2026-11-20) */
+.rr-kpis {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.rr-big {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 4px 0 10px;
+  color: var(--a-muted);
+  font-size: 13px;
+}
+.rr-big b {
+  color: var(--a-fg);
+  font-size: 26px;
+  font-weight: 500;
+}
+.rr-foot {
+  margin-top: 14px;
+}
+@media (max-width: 1000px) {
+  .rr-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

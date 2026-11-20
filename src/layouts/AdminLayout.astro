@@ -25,6 +25,7 @@ interface Props {
     | 'analytics-overview'
     | 'analytics-caseload'
     | 'analytics-leads'
+    | 'analytics-referrals'
     | 'analytics-traffic'
     | 'analytics-blog'
     | 'analytics-gbp'
@@ -133,6 +134,7 @@ const groups: { label?: string; items: NavItem[] }[] = [
     items: [
       { key: 'analytics-caseload', label: 'Caseload', href: '/admin/analytics/caseload', icon: 'caseload' },
       { key: 'analytics-leads', label: 'Inquiry trends', href: '/admin/analytics/leads', icon: 'trends' },
+      { key: 'analytics-referrals', label: 'Referral report', href: '/admin/analytics/referrals', icon: 'partners' },
       { key: 'analytics-overview', label: 'Monthly report', href: '/admin/analytics/overview', icon: 'report' },
     ],
   },

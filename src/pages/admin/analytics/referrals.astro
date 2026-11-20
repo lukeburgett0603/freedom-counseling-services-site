@@ -1,0 +1,298 @@
+---
+// Referral report (referral partners upgrade step 4, 2026-11-20; plan:
+// Counselor Marking Co./referral-partners/upgrade-plan.md). Which
+// relationships send clients: referrals and new clients by partner and by
+// type, how long a partner takes from first outreach to a first referral,
+// active partners who haven't referred yet, and referrals not yet linked
+// to a partner. Counts only: client names stay in Inquiries.
+//
+// Data: partners, the referral_partner_health view (0083/0085), and every
+// referral inquiry and outreach activity in the period, paged past
+// Supabase's 1,000-row limit (lib/fetchAllRows.ts). Owners and agency only.
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Referral report | Admin" current="analytics-referrals">
+  <div class="m-toolbar">
+    <p class="i-intro m-intro">Which referral relationships send you clients, and where to spend your outreach time.</p>
+    <div class="i-seg" role="group" aria-label="Period" id="rr-period">
+      <button type="button" data-days="90" aria-pressed="true">90 days</button>
+      <button type="button" data-days="365" aria-pressed="false">12 months</button>
+      <button type="button" data-days="all" aria-pressed="false">All time</button>
+    </div>
+  </div>
+
+  <div class="t-grid" id="rr-loading" aria-hidden="true">
+    <div class="t-skel t-s12" style="height:110px"></div>
+    <div class="t-skel t-s12" style="height:280px"></div>
+  </div>
+
+  <div id="rr-body" hidden>
+    <div class="r-kpis rr-kpis">
+      <div class="t-kpi"><span class="t-lbl">Referred inquiries</span><span id="rr-referrals" class="t-v a-num">—</span><span id="rr-referrals-sub" class="t-delta"></span></div>
+      <div class="t-kpi"><span class="t-lbl">Became clients</span><span id="rr-clients" class="t-v a-num">—</span><span id="rr-clients-sub" class="t-delta"></span></div>
+      <div class="t-kpi"><span class="t-lbl">Partners who referred</span><span id="rr-referrers" class="t-v a-num">—</span><span id="rr-referrers-sub" class="t-delta"></span></div>
+      <div class="t-kpi"><span class="t-lbl">Outreach</span><span id="rr-touches" class="t-v a-num">—</span><span id="rr-touches-sub" class="t-delta"></span></div>
+    </div>
+
+    <section class="t-card q-section">
+      <h2>By partner<span class="t-aside" id="rr-partner-note"></span></h2>
+      <div class="q-table-wrap">
+        <table class="i-table">
+          <thead>
+            <tr>
+              <th>Partner</th>
+              <th class="i-hide-md">Type</th>
+              <th class="i-hide-sm">Stage</th>
+              <th class="r-num">Referrals</th>
+              <th class="r-num">Clients</th>
+              <th class="i-hide-sm">Last referral</th>
+              <th class="i-hide-md">Outreach to first referral</th>
+            </tr>
+          </thead>
+          <tbody id="rr-partners"></tbody>
+        </table>
+      </div>
+      <p id="rr-partners-empty" class="i-hint" hidden>No referrals linked to a partner in this period.</p>
+    </section>
+
+    <div class="t-grid">
+      <section class="t-card t-s7">
+        <h2>By type of partner</h2>
+        <div id="rr-types" class="q-groups"></div>
+      </section>
+      <section class="t-card t-s5">
+        <h2>From first outreach to first referral<span class="t-aside">All partners, all time</span></h2>
+        <p class="rr-big"><b id="rr-lag" class="a-num">—</b><span id="rr-lag-sub"></span></p>
+        <p class="i-hint">Days from the first email, call or visit to the first referral, for partners who have sent one. Useful for knowing how long to keep at a new relationship.</p>
+      </section>
+    </div>
+
+    <div class="t-grid">
+      <section class="t-card t-s7">
+        <h2>Active partners who haven't referred yet</h2>
+        <div id="rr-waiting" class="q-groups"></div>
+      </section>
+      <section class="t-card t-s5">
+        <h2>Referrals not linked to a partner</h2>
+        <p class="rr-big"><b id="rr-unlinked" class="a-num">—</b><span>in this period</span></p>
+        <p class="i-hint" id="rr-unlinked-hint"></p>
+      </section>
+    </div>
+
+    <p class="i-hint rr-foot">Counts only. Client names stay in Inquiries, and partners are never told who was referred or who booked without the client's signed release.</p>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase, initAdminAuth } from '../../../lib/adminAuth';
+  import { withBase } from '../../../lib/url';
+  import { fetchAllRows } from '../../../lib/fetchAllRows';
+  import { REFERRAL_LEAD_SOURCES } from '../../../lib/leadSource';
+  import { categoryLabel, partnerStatusLabel, type PartnerHealthRow, type ReferralPartner } from '../../../lib/referralPartners';
+
+  type RefLead = { id: string; created_at: string; status: string | null; referral_partner_id: string | null; lead_source: string | null };
+  type Touch = { partner_id: string; activity_type: string; occurred_on: string };
+
+  let partners: ReferralPartner[] = [];
+  let health = new Map<string, PartnerHealthRow>();
+  let leads: RefLead[] = [];
+  let touches: Touch[] = [];
+  let days: number | 'all' = 90;
+
+  const DAY = 86_400_000;
+  const $ = (id: string) => document.getElementById(id)!;
+
+  function esc(value: string): string {
+    const d = document.createElement('div');
+    d.textContent = value;
+    return d.innerHTML;
+  }
+  function localDay(value: string): number {
+    if (value.length <= 10) {
+      const [y, m, d] = value.split('-').map(Number);
+      return new Date(y, m - 1, d).getTime();
+    }
+    const t = new Date(value);
+    return new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime();
+  }
+  function shortDate(value: string): string {
+    return new Date(localDay(value)).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  function median(values: number[]): number | null {
+    if (!values.length) return null;
+    const s = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2);
+  }
+  const pct = (n: number, d: number) => (d ? `${Math.round((n / d) * 100)}%` : '—');
+  const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+  const partnerUrl = (id: string) => `${withBase('/admin/referral-partners')}?partner=${id}`;
+
+  // Days from first outreach to first referral, per partner (all time).
+  function lagDays(p: ReferralPartner): number | null {
+    const h = health.get(p.id);
+    if (!h?.first_contact_on || !h.first_referral_at) return null;
+    const d = Math.round((localDay(h.first_referral_at) - localDay(h.first_contact_on)) / DAY);
+    return d >= 0 ? d : null; // referred before any logged outreach: not counted
+  }
+
+  function render() {
+    const cutoff = days === 'all' ? 0 : new Date(new Date().setHours(0, 0, 0, 0) - (days - 1) * DAY).getTime();
+    const inPeriod = (when: string) => localDay(when) >= cutoff;
+    const label = days === 'all' ? 'all time' : days === 90 ? 'the last 90 days' : 'the last 12 months';
+
+    const linked = leads.filter((l) => l.referral_partner_id && inPeriod(l.created_at));
+    const clients = linked.filter((l) => l.status === 'scheduled');
+    const live = partners.filter((p) => !p.archived_at);
+    const active = live.filter((p) => p.status === 'active');
+    const referrers = new Set(linked.map((l) => l.referral_partner_id!));
+    const outreach = touches.filter((t) => !['note', 'stage', 'reply'].includes(t.activity_type) && inPeriod(t.occurred_on));
+
+    $('rr-referrals').textContent = String(linked.length);
+    $('rr-referrals-sub').textContent = `Linked to a partner, ${label}`;
+    $('rr-clients').textContent = String(clients.length);
+    $('rr-clients-sub').textContent = linked.length ? `${pct(clients.length, linked.length)} of referred inquiries` : '';
+    $('rr-referrers').textContent = String(referrers.size);
+    $('rr-referrers-sub').textContent = `${plural(active.length, 'active partner')} in all`;
+    $('rr-touches').textContent = String(outreach.length);
+    $('rr-touches-sub').textContent = `Emails, calls, visits and thank-yous to ${plural(new Set(outreach.map((t) => t.partner_id)).size, 'partner')}`;
+
+    // By partner: everyone who referred in the period, most referrals first.
+    const rows = partners
+      .map((p) => {
+        const mine = linked.filter((l) => l.referral_partner_id === p.id);
+        const allMine = leads.filter((l) => l.referral_partner_id === p.id);
+        const last = allMine.map((l) => l.created_at).sort().at(-1) ?? null;
+        return { p, n: mine.length, c: mine.filter((l) => l.status === 'scheduled').length, last, lag: lagDays(p) };
+      })
+      .filter((r) => r.n > 0)
+      .sort((a, b) => b.n - a.n || b.c - a.c || a.p.name.localeCompare(b.p.name));
+    $('rr-partners').innerHTML = rows
+      .map(
+        (r) => `<tr>
+          <td><a class="a-link" href="${partnerUrl(r.p.id)}">${esc(r.p.name)}</a>${r.p.archived_at ? ' <span class="i-tag">Archived</span>' : ''}</td>
+          <td class="i-hide-md i-muted">${esc(categoryLabel(r.p.category))}</td>
+          <td class="i-hide-sm i-muted">${esc(partnerStatusLabel(r.p.status))}</td>
+          <td class="r-num">${r.n}</td>
+          <td class="r-num">${r.c ? `<span class="r-clients">${r.c}</span>` : '<span class="i-faint">0</span>'}</td>
+          <td class="i-hide-sm i-muted">${r.last ? shortDate(r.last) : ''}</td>
+          <td class="i-hide-md i-muted">${r.lag === null ? '<span class="i-faint">—</span>' : plural(r.lag, 'day')}</td>
+        </tr>`
+      )
+      .join('');
+    $('rr-partners-empty').hidden = rows.length > 0;
+    $('rr-partner-note').textContent = rows.length ? `${plural(rows.length, 'partner')}, ${label}` : '';
+
+    // By type: partners, referrals and clients per category.
+    const types = new Map<string, { partners: number; active: number; n: number; c: number }>();
+    for (const p of live) {
+      const t = types.get(p.category) ?? { partners: 0, active: 0, n: 0, c: 0 };
+      t.partners++;
+      if (p.status === 'active') t.active++;
+      types.set(p.category, t);
+    }
+    for (const l of linked) {
+      const p = partners.find((x) => x.id === l.referral_partner_id);
+      if (!p) continue;
+      const t = types.get(p.category) ?? { partners: 0, active: 0, n: 0, c: 0 };
+      t.n++;
+      if (l.status === 'scheduled') t.c++;
+      types.set(p.category, t);
+    }
+    $('rr-types').innerHTML = types.size
+      ? [...types.entries()]
+          .sort((a, b) => b[1].n - a[1].n || b[1].c - a[1].c || b[1].partners - a[1].partners)
+          .map(
+            ([cat, t]) =>
+              `<div class="q-group"><span>${esc(categoryLabel(cat))} <small class="i-faint">${plural(t.partners, 'partner')}, ${t.active} active</small></span><span>${plural(t.n, 'referral')} · <b>${plural(t.c, 'client')}</b></span></div>`
+          )
+          .join('')
+      : '<p class="i-hint">No referral partners yet.</p>';
+
+    // Outreach to first referral (all time, median across partners).
+    const lags = live.map(lagDays).filter((d): d is number => d !== null);
+    const m = median(lags);
+    $('rr-lag').textContent = m === null ? '—' : plural(m, 'day');
+    $('rr-lag-sub').textContent = lags.length ? `typical, across ${plural(lags.length, 'partner')}` : 'not enough history yet';
+
+    // Active partners with no referral ever, longest relationship first.
+    const waiting = active
+      .filter((p) => !(Number(health.get(p.id)?.referral_count ?? 0) > 0))
+      .map((p) => ({ p, since: health.get(p.id)?.first_contact_on ?? null, last: health.get(p.id)?.last_contact_on ?? null }))
+      .sort((a, b) => (a.since ?? '9999').localeCompare(b.since ?? '9999'));
+    $('rr-waiting').innerHTML = waiting.length
+      ? waiting
+          .map(
+            (w) =>
+              `<div class="q-group"><span><a class="a-link" href="${partnerUrl(w.p.id)}">${esc(w.p.name)}</a> <small class="i-faint">${esc(categoryLabel(w.p.category))}</small></span><span class="i-muted">${w.since ? `First outreach ${shortDate(w.since)}` : 'No outreach logged'}${w.last ? ` · last contact ${shortDate(w.last)}` : ''}</span></div>`
+          )
+          .join('')
+      : '<p class="i-hint">Every active partner has sent at least one referral.</p>';
+
+    // Referrals people told you about that aren't linked to a partner yet.
+    const unlinked = leads.filter((l) => !l.referral_partner_id && REFERRAL_LEAD_SOURCES.includes(l.lead_source ?? '') && inPeriod(l.created_at));
+    $('rr-unlinked').textContent = String(unlinked.length);
+    $('rr-unlinked-hint').innerHTML = unlinked.length
+      ? `They said a doctor, professional or church referred them, but no partner is linked. Link each one from its page in <a class="a-link" href="${withBase('/admin/crm')}">Inquiries</a> so it counts here.`
+      : 'Every referral in this period is linked to a partner.';
+  }
+
+  document.getElementById('rr-period')!.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-days]');
+    if (!button) return;
+    document.querySelectorAll<HTMLButtonElement>('#rr-period button').forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+    days = button.dataset.days === 'all' ? 'all' : Number(button.dataset.days);
+    render();
+  });
+
+  async function load() {
+    try {
+      const [p, h, linkedLeads, toldLeads, acts] = await Promise.all([
+        supabase.from('referral_partners').select('*').order('name'),
+        supabase.from('referral_partner_health').select('*'),
+        fetchAllRows<RefLead>((from, to) =>
+          supabase
+            .from('leads')
+            .select('id, created_at, status, referral_partner_id, lead_source')
+            .not('referral_partner_id', 'is', null)
+            .is('lead_magnet_id', null)
+            .order('created_at')
+            .order('id')
+            .range(from, to)
+        ),
+        fetchAllRows<RefLead>((from, to) =>
+          supabase
+            .from('leads')
+            .select('id, created_at, status, referral_partner_id, lead_source')
+            .is('referral_partner_id', null)
+            .in('lead_source', [...REFERRAL_LEAD_SOURCES])
+            .is('lead_magnet_id', null)
+            .order('created_at')
+            .order('id')
+            .range(from, to)
+        ),
+        fetchAllRows<Touch>((from, to) =>
+          supabase
+            .from('referral_partner_activities')
+            .select('partner_id, activity_type, occurred_on')
+            .order('occurred_on')
+            .order('id')
+            .range(from, to)
+        ),
+      ]);
+      if (p.error) throw new Error(p.error.message);
+      partners = (p.data ?? []) as ReferralPartner[];
+      health = new Map(((h.data ?? []) as PartnerHealthRow[]).map((r) => [r.partner_id, r]));
+      leads = [...linkedLeads, ...toldLeads];
+      touches = acts;
+      $('rr-loading').hidden = true;
+      $('rr-body').hidden = false;
+      render();
+    } catch (err) {
+      $('rr-loading').innerHTML = `<p class="i-hint r-err">Couldn't load the report: ${esc((err as Error).message)}</p>`;
+    }
+  }
+
+  initAdminAuth(load, { allowedRoles: ['owner', 'agency'] });
+</script>

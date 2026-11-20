@@ -104,6 +104,7 @@ export type PartnerHealthRow = {
   referral_count: number;
   first_referral_at: string | null;
   last_referral_at: string | null;
+  first_contact_on?: string | null; // 0085
 };
 
 export type PartnerHealth = {
