@@ -4666,8 +4666,12 @@ Step 1 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
   only, checked against `admin_users`; verify_jwt on). It sends with the
   practice's own `NURTURE_RESEND_API_KEY` / `NURTURE_SENDER_EMAIL`, from
   "<Signed by> at <Practice>", reply-to the sender's own email or the
-  practice inbox (`lead_notification_email`), plain personal HTML plus a
-  text part. It refuses unfinished [brackets], partners with no valid email,
+  practice inbox (`lead_notification_email`). **Plain text only, from a
+  personal-looking address** on the verified sending domain built from the
+  sender's first name (`luke@communications.<domain>`, titles skipped),
+  never the automated no-reply address: the first live test (HTML, no-reply
+  address) landed in Gmail's Promotions tab. That address has no mailbox;
+  Reply-To carries the real inbox. It refuses unfinished [brackets], partners with no valid email,
   and more than 100 partner emails in a day. A failed send is not logged and
   the error is shown. First outreach moves a Prospect to Contacted.
 - **Saved on the timeline:** sent emails keep their subject, text and

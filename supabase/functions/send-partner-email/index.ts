@@ -14,8 +14,13 @@
 // - Every sent email is saved on the partner's timeline
 //   (referral_partner_activities, activity_type 'email') with its subject
 //   and text. A failed send is not saved; the error goes back to the admin.
-// - Plain, personal-looking email (no newsletter layout), so it reads like
-//   a note from a person.
+// - Looks like a note typed by a person, so Gmail files it under Primary,
+//   not Promotions (Luke's live test 2026-11-19 landed in Promotions):
+//   plain text only (no HTML part), and sent from a personal-looking address
+//   on the practice's verified sending domain, built from the sender's first
+//   name (luke@communications.example.org), never the automated no-reply
+//   address. That address has no mailbox; Reply-To always carries the real
+//   inbox.
 // - Privacy: the admin shows a fixed reminder (no client names or details).
 //   This function can't judge content, so it doesn't try.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -32,20 +37,18 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-function escapeHtml(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-// Plain text -> simple HTML: paragraphs on blank lines, line breaks kept,
-// bare links made clickable.
-function textToHtml(text: string): string {
-  const linkify = (s: string) => s.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g, '<a href="$1">$1</a>');
-  const paragraphs = text
-    .trim()
-    .split(/\n\s*\n/)
-    .map((chunk) => `<p style="margin:0 0 14px;">${linkify(escapeHtml(chunk.trim())).replace(/\n/g, '<br>')}</p>`)
-    .join('\n');
-  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.55;color:#1f2328;max-width:600px;">\n${paragraphs}\n</div>`;
+// "Luke Burgett" -> "luke"; accents dropped, letters only. Empty when the
+// name has no usable letters (then the practice's sending address is used).
+const TITLES = new Set(['dr', 'rev', 'pastor', 'father', 'fr', 'mr', 'mrs', 'ms', 'mx', 'prof']);
+function localPartFor(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const first = (TITLES.has((words[0] ?? '').toLowerCase().replace(/\./g, '')) && words[1] ? words[1] : words[0]) ?? '';
+  return first
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z]/g, '')
+    .slice(0, 30);
 }
 
 const EMAIL_RE = /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/;
@@ -135,7 +138,10 @@ Deno.serve(async (req: Request) => {
 
   const who = signer || (caller.display_name ?? '').trim();
   const fromName = (who && practice ? `${who} at ${practice}` : who || practice || '').replace(/["<>]/g, '');
-  const from = fromName ? `${fromName} <${senderEmail}>` : senderEmail;
+  const sendingDomain = senderEmail.split('@')[1] ?? '';
+  const local = localPartFor(who) || localPartFor(caller.display_name ?? '');
+  const fromAddress = local && sendingDomain ? `${local}@${sendingDomain}` : senderEmail;
+  const from = fromName ? `${fromName} <${fromAddress}>` : fromAddress;
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -146,7 +152,6 @@ Deno.serve(async (req: Request) => {
       ...(replyTo ? { reply_to: replyTo } : {}),
       subject,
       text,
-      html: textToHtml(text),
     }),
   });
   const sent = await res.json().catch(() => ({}));
