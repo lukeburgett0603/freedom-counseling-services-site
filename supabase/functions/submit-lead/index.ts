@@ -211,6 +211,32 @@ Deno.serve(async (req: Request) => {
       if (typeof value === 'string' && value.trim()) insertPayload[key] = value.trim().slice(0, 300);
     }
   }
+  // Referral partner link (0084): the visitor arrived through a partner's
+  // link or QR code (?ref=<code>, remembered in their browser). Linked only
+  // when the code matches a current partner; otherwise ignored. Best-effort:
+  // a lookup failure never blocks the inquiry.
+  let linkedPartnerName: string | null = null;
+  if (body.attribution && typeof body.attribution === 'object') {
+    const ref = String((body.attribution as Record<string, unknown>).partner_ref ?? '').trim().toLowerCase();
+    if (/^[a-z0-9]+(-[a-z0-9]+)*$/.test(ref) && ref.length <= 40) {
+      try {
+        const { data: partner } = await supabase
+          .from('referral_partners')
+          .select('id, name')
+          .eq('ref_code', ref)
+          .is('archived_at', null)
+          .maybeSingle();
+        if (partner) {
+          insertPayload.referral_partner_id = partner.id;
+          insertPayload.referral_ref_code = ref;
+          linkedPartnerName = partner.name;
+        }
+      } catch (err) {
+        console.error('submit-lead: partner link lookup failed', err);
+      }
+    }
+  }
+
   // A guide-download submission (LeadMagnet.astro) — a distinct, lower-
   // intent signal from a real appointment request, see CLAUDE.md's
   // "Contacts vs. leads" section. Only present when this call came from
@@ -325,6 +351,7 @@ Deno.serve(async (req: Request) => {
         ],
         ['Current website', insertPayload.existing_website_url as string | null],
         ['From page', (insertPayload.source_page as string | null) ?? '(homepage)'],
+        ['Referred by', linkedPartnerName ? `${linkedPartnerName} (came through their referral link)` : null],
         [
           'Came back',
           previousLead

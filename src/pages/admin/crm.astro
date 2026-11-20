@@ -402,6 +402,7 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     outcome_note: string | null;
     check_back_date: string | null;
     previous_lead_id: string | null;
+    referral_ref_code: string | null; // 0084
   };
   type LeadEvent = { id: string; lead_id: string; kind: string; detail: Record<string, string | null>; created_at: string };
   type ReplyScript = { id: string; name: string; body: string; sort_order: number };
@@ -1139,6 +1140,11 @@ import { LEAD_SOURCES } from '../../lib/leadSource';
     // read "Manually added — Manually added".
     const pageSuffix = lead.source_page && lead.source_page !== MANUAL_SOURCE ? ` — ${lead.source_page}` : '';
     detailSource.textContent = `${sourceLabel(lead)}${pageSuffix}`;
+    // Came through a referral partner's link or QR code (0084).
+    if (lead.referral_ref_code && lead.referral_partner_id) {
+      const partner = partnerOptions.find((p) => p.id === lead.referral_partner_id);
+      detailSource.textContent += ` · through ${partner ? partner.name : 'a referral partner'}'s referral link`;
+    }
     const detailAd = document.getElementById('detail-ad')!;
     const adParts = [lead.utm_campaign && `campaign "${lead.utm_campaign}"`, lead.utm_term && `keyword "${lead.utm_term}"`].filter(Boolean);
     detailAd.classList.toggle('hidden', !isGoogleAdsLead(lead));

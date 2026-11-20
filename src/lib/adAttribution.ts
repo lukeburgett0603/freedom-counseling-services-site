@@ -28,7 +28,46 @@ export type AttributionParam = (typeof ATTRIBUTION_PARAMS)[number];
 export type StoredAttribution = Partial<Record<AttributionParam, string>> & {
   landing_page: string;
   captured_at: string;
+  // Referral partner link (?ref=<code>, migration 0084). Kept in its own
+  // record so a later ad click never replaces it; merged in on read.
+  partner_ref?: string;
 };
+
+// Referral partner links (referral partners upgrade step 3): a partner's
+// link or QR code adds ?ref=<code>. Remembered separately from ad clicks,
+// for the same 90 days, latest partner link wins. submit-lead links the
+// inquiry only when the code matches a current partner.
+export const PARTNER_REF_STORAGE_KEY = 'partner-ref';
+const PARTNER_REF_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+function capturePartnerRef(url: URL): void {
+  const ref = url.searchParams.get('ref')?.trim().toLowerCase() ?? '';
+  if (ref.length < 2 || ref.length > 40 || !PARTNER_REF_PATTERN.test(ref)) return;
+  try {
+    localStorage.setItem(
+      PARTNER_REF_STORAGE_KEY,
+      JSON.stringify({ ref, landing_page: url.pathname.slice(0, 300), captured_at: new Date().toISOString() })
+    );
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+function readPartnerRef(): { ref: string; landing_page: string; captured_at: string } | null {
+  try {
+    const raw = localStorage.getItem(PARTNER_REF_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { ref: string; landing_page: string; captured_at: string };
+    const ageDays = (Date.now() - new Date(parsed.captured_at).getTime()) / 86_400_000;
+    if (!(ageDays >= 0 && ageDays <= ATTRIBUTION_MAX_AGE_DAYS) || !PARTNER_REF_PATTERN.test(parsed.ref ?? '')) {
+      localStorage.removeItem(PARTNER_REF_STORAGE_KEY);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 export type AttributedLead = {
   gclid?: string | null;
@@ -52,24 +91,29 @@ export function isGoogleAdsLead(lead: AttributedLead): boolean {
 // 90-day window. Storage can be unavailable (private browsing), so every
 // access is guarded and failure just means "no attribution".
 export function readStoredAttribution(): StoredAttribution | null {
+  const partner = readPartnerRef();
+  let ads: StoredAttribution | null = null;
   try {
     const raw = localStorage.getItem(ATTRIBUTION_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredAttribution;
-    const ageDays = (Date.now() - new Date(parsed.captured_at).getTime()) / 86_400_000;
-    if (!(ageDays >= 0 && ageDays <= ATTRIBUTION_MAX_AGE_DAYS)) {
-      localStorage.removeItem(ATTRIBUTION_STORAGE_KEY);
-      return null;
+    if (raw) {
+      const parsed = JSON.parse(raw) as StoredAttribution;
+      const ageDays = (Date.now() - new Date(parsed.captured_at).getTime()) / 86_400_000;
+      if (ageDays >= 0 && ageDays <= ATTRIBUTION_MAX_AGE_DAYS) ads = parsed;
+      else localStorage.removeItem(ATTRIBUTION_STORAGE_KEY);
     }
-    return parsed;
   } catch {
-    return null;
+    ads = null;
   }
+  if (!partner) return ads;
+  return ads
+    ? { ...ads, partner_ref: partner.ref }
+    : { landing_page: partner.landing_page, captured_at: partner.captured_at, partner_ref: partner.ref };
 }
 
 // Last-click: a new tagged visit replaces the old one, matching how Google
 // Ads itself attributes. Untagged visits never overwrite.
 export function captureAttributionFromUrl(url: URL): void {
+  capturePartnerRef(url);
   const found: Partial<Record<AttributionParam, string>> = {};
   for (const param of ATTRIBUTION_PARAMS) {
     const value = url.searchParams.get(param)?.trim();

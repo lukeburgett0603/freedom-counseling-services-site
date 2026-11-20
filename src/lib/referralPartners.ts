@@ -63,6 +63,7 @@ export type ReferralPartner = {
   notes: string | null;
   archived_at: string | null;
   priority?: string | null; // 0083
+  ref_code?: string | null; // 0084: referral link code (?ref=)
 };
 
 export type PartnerActivity = {

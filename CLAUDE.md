@@ -4725,3 +4725,27 @@ Step 2 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
   and up to two "Reach out to ..." moves on Today.
 - Tested 2026-11-19: 15 rule cases (tsx) and 9 database checks on Freedom in
   a rolled-back transaction.
+
+## Referral partners: referral link and QR code per partner (2026-11-20, migration 0084)
+
+Step 3 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- Every partner has a `ref_code` (trigger `referral_partners_ref_code`,
+  `make_partner_ref_code()`): the name as a slug cut at a whole word,
+  `-2`, `-3` when taken, never changed by a rename (printed QR codes keep
+  working). Existing partners were backfilled oldest first.
+- The partner's page has a **Referral link** card: the link
+  (`<site>/contact/?ref=<code>`), Copy link, Download QR code (1200px PNG),
+  Print handout with this QR code (same handout, the partner's own QR), and
+  how many inquiries came through it.
+- `lib/adAttribution.ts` remembers `?ref=` in its own localStorage record
+  (`partner-ref`, 90 days, latest partner link wins) so an ad click never
+  replaces it; `readStoredAttribution()` merges it in as `partner_ref`.
+- `submit-lead` links the inquiry (`referral_partner_id`, plus
+  `leads.referral_ref_code` to show it came through the link) only when the
+  code matches a current, unarchived partner, and names the partner in the
+  new-inquiry email. The name-match trigger (0068) still only fills a
+  partner when none is set.
+- Inquiries shows "through <partner>'s referral link" under Came from.
+- Tested 2026-11-20: 8 browser-memory checks (tsx) and 10 database checks on
+  Freedom in a rolled-back transaction.

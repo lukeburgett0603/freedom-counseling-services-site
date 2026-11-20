@@ -145,6 +145,25 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
           <div class="r-links" id="r-detail-links"></div>
         </section>
 
+        <!-- Referral link and QR code (step 3, 0084): inquiries that come
+             through it are linked to this partner automatically. -->
+        <section class="t-card" id="ref-link-card" hidden>
+          <h2>Referral link<span class="t-aside" id="ref-link-count"></span></h2>
+          <div class="r-ref-link">
+            <div class="r-ref-qr" id="ref-link-qr" aria-label="QR code for this partner's referral link"></div>
+            <div class="r-ref-body">
+              <p class="i-hint r-ref-intro">Give this link or QR code to this partner. When someone they refer uses it and then reaches out, the inquiry is linked to them automatically.</p>
+              <input id="ref-link-url" type="text" readonly aria-label="Referral link" />
+              <div class="i-inline">
+                <button id="ref-link-copy" type="button" class="a-btn i-btn">Copy link</button>
+                <button id="ref-link-download" type="button" class="a-btn i-btn">Download QR code</button>
+                <button id="ref-link-handout" type="button" class="a-btn i-btn">Print handout with this QR code</button>
+                <span id="ref-link-status" class="i-hint" role="status"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Outreach kit, per-partner half: a message personalized with this
              partner's name, contact, and type plus the practice's live data.
              Editable before sending; "Log as sent" records it in Activity. -->
@@ -329,6 +348,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     created_at: string;
     status: string | null;
     referral_partner_id: string;
+    referral_ref_code: string | null; // 0084: came through the partner's link
   };
 
   let partners: ReferralPartner[] = [];
@@ -683,6 +703,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     renderActivities();
     renderReferrals();
     renderKit();
+    renderReferralLink();
     listView.classList.add('hidden');
     detailView.classList.remove('hidden');
     window.scrollTo(0, 0);
@@ -1019,7 +1040,9 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
 
   // One letter-size page, printed from a hidden same-page iframe (a popup
   // can be blocked silently; same approach as the review program's event card).
-  document.getElementById('print-handout-button')!.addEventListener('click', async () => {
+  // qrTarget: the practice's contact page, or a partner's own referral
+  // link (step 3) so inquiries from their copy are linked to them.
+  async function printHandout(qrTarget: string) {
     if (!practice) return;
     const css = getComputedStyle(document.documentElement);
     const ink = css.getPropertyValue('--color-brand-ink').trim() || '#1c1917';
@@ -1028,7 +1051,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     const heading = css.getPropertyValue('--font-heading').trim() || 'Georgia, serif';
     const body = css.getPropertyValue('--font-body').trim() || 'system-ui, sans-serif';
     const fontLink = practice.google_fonts_url ? `<link rel="stylesheet" href="${escapeAttr(practice.google_fonts_url)}">` : '';
-    const qr = await QRCode.toString(contactUrl, { type: 'svg', margin: 0, errorCorrectionLevel: 'M' });
+    const qr = await QRCode.toString(qrTarget, { type: 'svg', margin: 0, errorCorrectionLevel: 'M' });
     const where = [practice.address_locality, practice.address_region].filter(Boolean).join(', ');
     const street = [practice.street_address, practice.street_address_2].filter(Boolean).join(', ');
     const address = [street, [where, practice.postal_code].filter(Boolean).join(' ')].filter(Boolean).join(', ');
@@ -1088,6 +1111,63 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
     frame.srcdoc = frameHtml;
     frame.addEventListener('load', () => setTimeout(() => frame.contentWindow?.print(), 400));
     document.body.appendChild(frame);
+  }
+  document.getElementById('print-handout-button')!.addEventListener('click', () => printHandout(contactUrl));
+
+  // ---------------------------------------------------------------------
+  // Referral link and QR code per partner (step 3, migration 0084)
+  // ---------------------------------------------------------------------
+  function partnerLink(p: ReferralPartner): string | null {
+    return p.ref_code ? `${contactUrl}?ref=${encodeURIComponent(p.ref_code)}` : null;
+  }
+
+  async function renderReferralLink() {
+    const p = partners.find((x) => x.id === currentId);
+    const card = document.getElementById('ref-link-card')!;
+    const link = p ? partnerLink(p) : null;
+    card.hidden = !link;
+    if (!p || !link) return;
+    (document.getElementById('ref-link-url') as HTMLInputElement).value = link;
+    document.getElementById('ref-link-status')!.textContent = '';
+    document.getElementById('ref-link-qr')!.innerHTML = await QRCode.toString(link, { type: 'svg', margin: 0, errorCorrectionLevel: 'M' });
+    const fromLink = linkedLeads.filter((l) => l.referral_partner_id === p.id && l.referral_ref_code).length;
+    document.getElementById('ref-link-count')!.textContent = fromLink
+      ? `${fromLink} inquir${fromLink === 1 ? 'y has' : 'ies have'} come through this link.`
+      : 'No inquiries through this link yet.';
+  }
+
+  document.getElementById('ref-link-copy')!.addEventListener('click', async () => {
+    const status = document.getElementById('ref-link-status')!;
+    const input = document.getElementById('ref-link-url') as HTMLInputElement;
+    try {
+      await navigator.clipboard.writeText(input.value);
+      status.textContent = 'Copied.';
+      status.className = 'i-hint r-ok';
+    } catch {
+      input.select();
+      status.textContent = 'Select the link and copy it (Cmd+C).';
+      status.className = 'i-hint r-warn';
+    }
+  });
+
+  document.getElementById('ref-link-download')!.addEventListener('click', async () => {
+    const p = partners.find((x) => x.id === currentId);
+    const link = p ? partnerLink(p) : null;
+    if (!p || !link) return;
+    // 1200px PNG with a quiet zone: sharp enough for print and business cards.
+    const dataUrl = await QRCode.toDataURL(link, { width: 1200, margin: 4, errorCorrectionLevel: 'M' });
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `qr-${p.ref_code}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  document.getElementById('ref-link-handout')!.addEventListener('click', () => {
+    const p = partners.find((x) => x.id === currentId);
+    const link = p ? partnerLink(p) : null;
+    if (link) printHandout(link);
   });
 
   archiveButton.addEventListener('click', async () => {
@@ -1168,7 +1248,7 @@ import { OUTREACH_GUIDELINES, OUTREACH_TEMPLATES } from '../../lib/outreachKit';
       supabase.from('referral_partner_activities').select('*'),
       supabase
         .from('leads')
-        .select('id, name, created_at, status, referral_partner_id')
+        .select('id, name, created_at, status, referral_partner_id, referral_ref_code')
         .not('referral_partner_id', 'is', null),
       supabase
         .from('business')
