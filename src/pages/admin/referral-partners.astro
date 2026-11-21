@@ -224,6 +224,10 @@ import { withBase } from '../../lib/url';
               <input id="kit-signer" type="text" placeholder="Your name and title" />
             </div>
           </div>
+          <div id="kit-to-wrap" class="i-field" hidden>
+            <label for="kit-to">To</label>
+            <select id="kit-to"></select>
+          </div>
           <div id="kit-subject-wrap" class="i-field">
             <label for="kit-subject">Subject</label>
             <input id="kit-subject" type="text" />
@@ -294,8 +298,12 @@ import { withBase } from '../../lib/url';
             </select>
           </div>
           <div class="i-field">
-            <label for="pf-contact-name">Contact person</label>
+            <label for="pf-contact-name">Main contact</label>
             <input id="pf-contact-name" name="contact_name" type="text" />
+          </div>
+          <div class="i-field">
+            <label for="pf-contact-role">Their role</label>
+            <input id="pf-contact-role" name="contact_role" type="text" maxlength="80" placeholder="e.g. Physician, Pastor, Office manager" />
           </div>
           <div class="i-field">
             <label for="pf-email">Email</label>
@@ -322,6 +330,25 @@ import { withBase } from '../../lib/url';
             <span id="partner-form-status" class="i-hint" role="status"></span>
           </div>
         </form>
+
+        <!-- Other contacts (step 7, 0089): the office manager, front desk,
+             nurse... Each can receive emails from here. -->
+        <section class="t-card i-fields" id="contacts-card">
+          <h2>Other contacts<span class="t-aside" id="contacts-count"></span></h2>
+          <ul id="contacts-list" class="r-contacts"></ul>
+          <form id="contact-add-form" class="r-contact-form" hidden>
+            <input name="name" type="text" required maxlength="120" placeholder="Name" aria-label="Contact name" />
+            <input name="role" type="text" maxlength="80" placeholder="Role (e.g. Office manager)" aria-label="Role" />
+            <input name="email" type="email" maxlength="200" placeholder="Email" aria-label="Email" />
+            <input name="phone" type="tel" maxlength="40" placeholder="Phone" aria-label="Phone" />
+            <div class="i-inline">
+              <button type="submit" class="a-btn i-btn">Add contact</button>
+              <button type="button" id="contact-add-cancel" class="a-link">Cancel</button>
+            </div>
+          </form>
+          <button type="button" id="contact-add-open" class="a-link r-contact-add">+ Add a contact</button>
+          <span id="contacts-status" class="i-hint" role="status"></span>
+        </section>
 
         <section class="t-card">
           <h2>Referrals from this partner</h2>
@@ -351,7 +378,7 @@ import { withBase } from '../../lib/url';
           </select>
         </div>
         <div>
-          <label for="ap-contact-name" class="block text-xs font-semibold text-slate-500">Contact person (optional)</label>
+          <label for="ap-contact-name" class="block text-xs font-semibold text-slate-500">Main contact (optional)</label>
           <input id="ap-contact-name" name="contact_name" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
         </div>
         <p id="add-partner-status" class="text-sm text-red-600"></p>
@@ -396,6 +423,9 @@ import { withBase } from '../../lib/url';
   let activities: PartnerActivity[] = [];
   let linkedLeads: LinkedLead[] = [];
   let healthRows = new Map<string, PartnerHealthRow>();
+  // Other contacts per partner (step 7, 0089).
+  type PartnerContact = { id: string; partner_id: string; name: string; role: string | null; email: string | null; phone: string | null };
+  let contacts: PartnerContact[] = [];
   let currentId: string | null = null;
 
   const listView = document.getElementById('partners-list-view')!;
@@ -553,7 +583,8 @@ import { withBase } from '../../lib/url';
       if (!showArchived.checked && p.archived_at) return false;
       if (statusFilter.value && p.status !== statusFilter.value) return false;
       if (categoryFilter.value && p.category !== categoryFilter.value) return false;
-      if (q && ![p.name, p.contact_name ?? '', p.email ?? ''].some((v) => v.toLowerCase().includes(q))) return false;
+      const others = contacts.filter((c) => c.partner_id === p.id).flatMap((c) => [c.name, c.email ?? '']);
+      if (q && ![p.name, p.contact_name ?? '', p.email ?? '', ...others].some((v) => v.toLowerCase().includes(q))) return false;
       return true;
     });
     document.getElementById('partners-count')!.textContent = `${rows.length} partner${rows.length === 1 ? '' : 's'}`;
@@ -633,7 +664,7 @@ import { withBase } from '../../lib/url';
     }
     if (a.activity_type === 'email' && a.body) {
       return `<li class="i-note">
-          <small><b>${a.detail?.template === 'availability_update' ? 'Availability update sent' : 'Email sent'}</b> · ${formatDate(a.occurred_on)}${a.sent_to ? ` · to ${escapeHtml(a.sent_to)}` : ''}</small>
+          <small><b>${a.detail?.template === 'availability_update' ? 'Availability update sent' : 'Email sent'}</b> · ${formatDate(a.occurred_on)}${a.sent_to ? ` · to ${a.detail?.contact ? `${escapeHtml(a.detail.contact)}, ` : ''}${escapeHtml(a.sent_to)}` : ''}</small>
           <details class="r-sent"><summary>${escapeHtml(a.subject ?? a.note ?? '(no subject)')}</summary><p>${escapeHtml(a.body)}</p></details>
         </li>`;
     }
@@ -700,7 +731,7 @@ import { withBase } from '../../lib/url';
     if (!p) return;
     document.getElementById('r-detail-avatar')!.textContent = initials(p.name);
     document.getElementById('r-detail-name')!.textContent = p.name;
-    document.getElementById('r-detail-meta')!.textContent = [categoryLabel(p.category), p.contact_name].filter(Boolean).join(' · ');
+    document.getElementById('r-detail-meta')!.textContent = [categoryLabel(p.category), p.contact_name ? `${p.contact_name}${p.contact_role ? ` (${p.contact_role})` : ''}` : null].filter(Boolean).join(' · ');
     document.getElementById('r-detail-stage')!.innerHTML = stageBadge(p.status);
     const counts = referralCounts(p.id);
     document.getElementById('r-detail-leads')!.textContent = String(counts.leads);
@@ -733,7 +764,7 @@ import { withBase } from '../../lib/url';
     if (!p) return;
     currentId = id;
     const f = partnerForm.elements as unknown as Record<string, HTMLInputElement>;
-    for (const key of ['name', 'category', 'status', 'priority', 'contact_name', 'next_follow_up', 'email', 'phone', 'website', 'address', 'notes']) {
+    for (const key of ['name', 'category', 'status', 'priority', 'contact_name', 'contact_role', 'next_follow_up', 'email', 'phone', 'website', 'address', 'notes']) {
       f[key].value = ((p as unknown as Record<string, string | null>)[key] ?? '') as string;
     }
     partnerFormStatus.textContent = '';
@@ -746,6 +777,12 @@ import { withBase } from '../../lib/url';
     renderReferrals();
     renderKit();
     renderReferralLink();
+    editingContactId = null;
+    contactAddForm.reset();
+    contactAddForm.hidden = true;
+    contactAddOpen.hidden = false;
+    contactsStatus.textContent = '';
+    renderContacts();
     listView.classList.add('hidden');
     detailView.classList.remove('hidden');
     window.scrollTo(0, 0);
@@ -769,6 +806,7 @@ import { withBase } from '../../lib/url';
       status: data.get('status') as string,
       priority: (data.get('priority') as string) || 'regular',
       contact_name: text('contact_name'),
+      contact_role: text('contact_role'),
       next_follow_up: text('next_follow_up'),
       email: text('email'),
       phone: text('phone'),
@@ -893,14 +931,51 @@ import { withBase } from '../../lib/url';
     /* storage unavailable */
   }
 
+  // Who an email can go to (step 7): the main contact and any other contact
+  // with an email address. 'main' or a contact id.
+  type Recipient = { key: string; name: string | null; email: string; label: string };
+  function recipientsFor(p: ReferralPartner): Recipient[] {
+    const list: Recipient[] = [];
+    if (p.email?.trim()) {
+      const who = p.contact_name?.trim();
+      list.push({ key: 'main', name: who || null, email: p.email.trim(), label: `${who || 'Main contact'}${p.contact_role ? ` (${p.contact_role})` : ''} <${p.email.trim()}>` });
+    }
+    for (const c of contacts.filter((x) => x.partner_id === p.id && x.email?.trim())) {
+      list.push({ key: c.id, name: c.name, email: c.email!.trim(), label: `${c.name}${c.role ? ` (${c.role})` : ''} <${c.email!.trim()}>` });
+    }
+    return list;
+  }
+  const kitTo = document.getElementById('kit-to') as HTMLSelectElement;
+  function selectedRecipient(p: ReferralPartner): Recipient | null {
+    const list = recipientsFor(p);
+    return list.find((r) => r.key === kitTo.value) ?? list[0] ?? null;
+  }
+  function renderRecipients(p: ReferralPartner) {
+    const list = recipientsFor(p);
+    const previous = kitTo.value;
+    kitTo.innerHTML = list.map((r) => `<option value="${escapeAttr(r.key)}">${escapeHtml(r.label)}</option>`).join('');
+    if (list.some((r) => r.key === previous)) kitTo.value = previous;
+  }
+  kitTo.addEventListener('change', () => renderKit());
+  // "Dr. Sarah Lee" -> "Hi Dr. Lee,"; "Maria Gomez" -> "Hi Maria,".
+  function hiLine(name: string | null): string {
+    const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return 'Hi,';
+    if (/^(dr|pastor|rev|reverend|father|fr|mr|mrs|ms|mx)\.?$/i.test(parts[0])) return parts.length > 1 ? `Hi ${parts[0]} ${parts.at(-1)},` : `Hi ${parts[0]},`;
+    return `Hi ${parts[0]},`;
+  }
+
   function renderKit() {
     const partner = partners.find((p) => p.id === currentId);
     if (!partner || !practice) return;
+    renderRecipients(partner);
+    const recipient = selectedRecipient(partner);
+    const contactName = recipient ? recipient.name : partner.contact_name;
     if (kitTemplate.value === 'blank') {
       kitSubjectWrap.hidden = false;
       kitSubject.value = '';
       const sign = [kitSigner.value.trim() || '[Your name]', practice.display_name, practice.telephone].filter(Boolean).join('\n');
-      kitBody.value = `${partner.contact_name ? `Hi ${partner.contact_name.trim().split(/\s+/)[0]},` : 'Hi,'}\n\n\n\n${sign}`;
+      kitBody.value = `${hiLine(contactName)}\n\n\n\n${sign}`;
       kitStatus.textContent = '';
       updateMailto();
       return;
@@ -910,7 +985,7 @@ import { withBase } from '../../lib/url';
     const message = buildOutreachMessage(key, {
       partnerName: partner.name,
       partnerCategory: partner.category,
-      contactName: partner.contact_name,
+      contactName,
       practiceName: practice.display_name,
       phone: practice.telephone,
       website: siteUrl.replace(/^https?:\/\//, ''),
@@ -934,12 +1009,15 @@ import { withBase } from '../../lib/url';
   function updateMailto() {
     const partner = partners.find((p) => p.id === currentId);
     const emailKind = isEmailTemplate();
-    const hasEmail = Boolean(partner?.email?.trim());
+    const recipient = partner ? selectedRecipient(partner) : null;
+    const hasEmail = Boolean(recipient);
     const show = hasEmail && emailKind;
     kitMailto.hidden = !show;
     if (show) {
-      kitMailto.href = `mailto:${partner!.email!.trim()}?subject=${encodeURIComponent(kitSubject.value)}&body=${encodeURIComponent(kitBody.value)}`;
+      kitMailto.href = `mailto:${recipient!.email}?subject=${encodeURIComponent(kitSubject.value)}&body=${encodeURIComponent(kitBody.value)}`;
     }
+    // Choose who it goes to when there's more than one person (step 7).
+    document.getElementById('kit-to-wrap')!.hidden = !(show && partner && recipientsFor(partner).length > 1);
     // Send from the admin (0082): always offered for an email-type message,
     // so it's never a mystery where it went. Without a saved address it
     // explains what's missing instead of hiding (Luke, 2026-11-19).
@@ -977,11 +1055,12 @@ import { withBase } from '../../lib/url';
   kitSend.addEventListener('click', async () => {
     const partner = partners.find((p) => p.id === currentId);
     if (!partner) return;
-    if (!partner.email?.trim()) {
+    const recipient = selectedRecipient(partner);
+    if (!recipient) {
       const typed = (partnerForm.elements.namedItem('email') as HTMLInputElement).value.trim();
       kitStatus.textContent = typed
         ? 'Click Save on the right first, so the email address is saved.'
-        : "Add this partner's email address on the right and click Save, then send.";
+        : 'Add an email address for the main contact (right) or another contact, then send.';
       kitStatus.className = 'i-hint r-warn';
       (partnerForm.elements.namedItem('email') as HTMLInputElement).focus();
       return;
@@ -998,7 +1077,7 @@ import { withBase } from '../../lib/url';
       kitStatus.className = 'i-hint r-warn';
       return;
     }
-    if (!window.confirm(`Send this email to ${partner.email.trim()}?`)) return;
+    if (!window.confirm(`Send this email to ${recipient.name ? `${recipient.name} at ` : ''}${recipient.email}?`)) return;
     kitSend.disabled = true;
     kitStatus.textContent = 'Sending...';
     kitStatus.className = 'i-hint';
@@ -1010,6 +1089,7 @@ import { withBase } from '../../lib/url';
         reply_to: kitReplyTo.value,
         signer: kitSigner.value,
         template_key: kitTemplate.value,
+        contact_id: recipient.key === 'main' ? null : recipient.key,
         occurred_on: todayIso(),
       },
     });
@@ -1042,7 +1122,7 @@ import { withBase } from '../../lib/url';
       /* storage unavailable */
     }
     renderActivities();
-    kitStatus.textContent = `Sent to ${partner.email.trim()}${data.reply_to ? `. Replies go to ${data.reply_to}` : ''}.`;
+    kitStatus.textContent = `Sent to ${recipient.email}${data.reply_to ? `. Replies go to ${data.reply_to}` : ''}.`;
     kitStatus.className = 'i-hint r-ok';
     // Working through the availability update: offer the next partner.
     if (availQueue && kitTemplate.value === 'availability_update') {
@@ -1340,7 +1420,7 @@ import { withBase } from '../../lib/url';
 
   function availabilityPool() {
     const active = partners.filter((p) => !p.archived_at && p.status === 'active');
-    const reachable = active.filter((p) => p.email?.trim());
+    const reachable = active.filter((p) => recipientsFor(p).length > 0);
     const pending = reachable.filter((p) => !hadAvailabilityUpdate(p.id));
     return { active, reachable, pending };
   }
@@ -1426,6 +1506,136 @@ import { withBase } from '../../lib/url';
     setDigestStatus(`Test sent to ${(data.sent_to as string[]).join(', ')}.`, 'r-ok');
   });
 
+  // ---------------------------------------------------------------------
+  // Other contacts (step 7, migration 0089)
+  // ---------------------------------------------------------------------
+  const contactsList = document.getElementById('contacts-list')!;
+  const contactAddForm = document.getElementById('contact-add-form') as HTMLFormElement;
+  const contactAddOpen = document.getElementById('contact-add-open')!;
+  const contactsStatus = document.getElementById('contacts-status')!;
+  let editingContactId: string | null = null;
+
+  function contactInputs(c: Partial<PartnerContact>): string {
+    const v = (x: string | null | undefined) => escapeAttr(x ?? '');
+    return `<input name="name" type="text" required maxlength="120" placeholder="Name" aria-label="Contact name" value="${v(c.name)}" />
+      <input name="role" type="text" maxlength="80" placeholder="Role" aria-label="Role" value="${v(c.role)}" />
+      <input name="email" type="email" maxlength="200" placeholder="Email" aria-label="Email" value="${v(c.email)}" />
+      <input name="phone" type="tel" maxlength="40" placeholder="Phone" aria-label="Phone" value="${v(c.phone)}" />`;
+  }
+
+  function renderContacts() {
+    const mine = contacts.filter((c) => c.partner_id === currentId).sort((a, b) => a.name.localeCompare(b.name));
+    document.getElementById('contacts-count')!.textContent = mine.length ? String(mine.length) : '';
+    contactsList.innerHTML = mine.length
+      ? mine
+          .map((c) =>
+            c.id === editingContactId
+              ? `<li class="r-contact" data-contact-id="${c.id}"><form class="r-contact-form" data-edit-form>${contactInputs(c)}<div class="i-inline"><button type="submit" class="a-btn i-btn">Save</button><button type="button" class="a-link" data-contact-cancel>Cancel</button></div></form></li>`
+              : `<li class="r-contact" data-contact-id="${c.id}">
+                  <div><b>${escapeHtml(c.name)}</b>${c.role ? ` <small class="i-faint">${escapeHtml(c.role)}</small>` : ''}</div>
+                  <div class="r-contact-ways">${c.email ? `<a class="a-link" href="mailto:${escapeAttr(c.email)}">${escapeHtml(c.email)}</a>` : ''}${c.phone ? `<a class="a-link" href="tel:${escapeAttr(c.phone.replace(/[^\d+]/g, ''))}">${escapeHtml(c.phone)}</a>` : ''}</div>
+                  <div class="r-contact-tools"><button type="button" class="a-link" data-contact-edit>Edit</button><button type="button" class="a-link i-danger-link" data-contact-remove>Remove</button></div>
+                </li>`
+          )
+          .join('')
+      : '<li class="i-faint r-contact-empty">Just the main contact so far. Add the office manager or anyone else who helps with referrals.</li>';
+  }
+
+  function readContactForm(form: HTMLFormElement) {
+    const f = new FormData(form);
+    const t = (k: string) => ((f.get(k) as string) ?? '').trim() || null;
+    return { name: t('name') ?? '', role: t('role'), email: t('email'), phone: t('phone') };
+  }
+
+  function contactEmailOk(email: string | null): boolean {
+    return !email || /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(email);
+  }
+
+  contactAddOpen.addEventListener('click', () => {
+    contactAddForm.hidden = false;
+    contactAddOpen.hidden = true;
+    (contactAddForm.elements.namedItem('name') as HTMLInputElement).focus();
+  });
+  document.getElementById('contact-add-cancel')!.addEventListener('click', () => {
+    contactAddForm.reset();
+    contactAddForm.hidden = true;
+    contactAddOpen.hidden = false;
+  });
+
+  contactAddForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentId) return;
+    const row = readContactForm(contactAddForm);
+    if (!row.name) return;
+    if (!contactEmailOk(row.email)) {
+      contactsStatus.textContent = 'Check the email address.';
+      return;
+    }
+    const { data, error } = await supabase.from('referral_partner_contacts').insert({ ...row, partner_id: currentId }).select().single();
+    if (error) {
+      contactsStatus.textContent = 'Could not add: ' + error.message;
+      return;
+    }
+    contacts.push(data as PartnerContact);
+    contactsStatus.textContent = '';
+    contactAddForm.reset();
+    contactAddForm.hidden = true;
+    contactAddOpen.hidden = false;
+    renderContacts();
+    renderKit();
+    renderAvailability();
+  });
+
+  contactsList.addEventListener('click', async (event) => {
+    const target = event.target as HTMLElement;
+    const item = target.closest<HTMLElement>('[data-contact-id]');
+    if (!item) return;
+    const id = item.dataset.contactId!;
+    if (target.matches('[data-contact-edit]')) {
+      editingContactId = id;
+      renderContacts();
+    } else if (target.matches('[data-contact-cancel]')) {
+      editingContactId = null;
+      renderContacts();
+    } else if (target.matches('[data-contact-remove]')) {
+      const c = contacts.find((x) => x.id === id);
+      if (!c || !window.confirm(`Remove ${c.name} from this partner?`)) return;
+      const { error } = await supabase.from('referral_partner_contacts').delete().eq('id', id);
+      if (error) {
+        contactsStatus.textContent = 'Could not remove: ' + error.message;
+        return;
+      }
+      contacts = contacts.filter((x) => x.id !== id);
+      renderContacts();
+      renderKit();
+      renderAvailability();
+    }
+  });
+
+  contactsList.addEventListener('submit', async (event) => {
+    const form = event.target as HTMLFormElement;
+    if (!form.matches('[data-edit-form]')) return;
+    event.preventDefault();
+    const id = form.closest<HTMLElement>('[data-contact-id]')!.dataset.contactId!;
+    const row = readContactForm(form);
+    if (!row.name) return;
+    if (!contactEmailOk(row.email)) {
+      contactsStatus.textContent = 'Check the email address.';
+      return;
+    }
+    const { error } = await supabase.from('referral_partner_contacts').update(row).eq('id', id);
+    if (error) {
+      contactsStatus.textContent = 'Could not save: ' + error.message;
+      return;
+    }
+    Object.assign(contacts.find((x) => x.id === id)!, row);
+    editingContactId = null;
+    contactsStatus.textContent = '';
+    renderContacts();
+    renderKit();
+    renderAvailability();
+  });
+
   async function load(user?: { id: string }) {
     loadDigest();
     // "Signed by" starts as the person's own name (Team), once.
@@ -1433,7 +1643,7 @@ import { withBase } from '../../lib/url';
       const { data: me } = await supabase.from('admin_users').select('display_name').eq('id', user.id).maybeSingle();
       if (me?.display_name) kitSigner.value = me.display_name as string;
     }
-    const [p, a, l, b, c, h] = await Promise.all([
+    const [p, a, l, b, c, h, k] = await Promise.all([
       supabase.from('referral_partners').select('*').order('name'),
       supabase.from('referral_partner_activities').select('*'),
       supabase
@@ -1450,6 +1660,7 @@ import { withBase } from '../../lib/url';
         .eq('page_type', 'Counselor Profile')
         .order('title'),
       supabase.from('referral_partner_health').select('*'),
+      supabase.from('referral_partner_contacts').select('id, partner_id, name, role, email, phone'),
     ]);
     if (p.error) {
       document.getElementById('partners-count')!.textContent = 'Could not load partners: ' + p.error.message;
@@ -1459,6 +1670,7 @@ import { withBase } from '../../lib/url';
     activities = (a.data ?? []) as PartnerActivity[];
     linkedLeads = (l.data ?? []) as LinkedLead[];
     healthRows = new Map(((h.data ?? []) as PartnerHealthRow[]).map((r) => [r.partner_id, r]));
+    contacts = (k.data ?? []) as PartnerContact[];
     practice = (b.data as PracticeInfo) ?? null;
     faithCheckbox.checked = practice?.offers_faith_integration ?? false;
     // "Recently joined" for the availability update: added in the last 90 days.

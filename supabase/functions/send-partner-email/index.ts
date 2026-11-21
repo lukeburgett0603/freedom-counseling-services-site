@@ -119,8 +119,24 @@ Deno.serve(async (req: Request) => {
     .eq('id', partnerId)
     .maybeSingle();
   if (!partner) return jsonResponse({ error: 'Partner not found.' }, 404);
-  const to = (partner.email ?? '').trim();
-  if (!EMAIL_RE.test(to)) return jsonResponse({ error: 'Add a valid email address for this partner first.' }, 400);
+  // Step 7 (0089): send to one of the partner's other contacts when asked,
+  // otherwise the main contact. A contact must belong to this partner.
+  let to = (partner.email ?? '').trim();
+  let contactName: string | null = null;
+  const contactId = typeof body.contact_id === 'string' && body.contact_id ? body.contact_id : null;
+  if (contactId) {
+    const { data: contact } = await admin
+      .from('referral_partner_contacts')
+      .select('id, name, email, partner_id')
+      .eq('id', contactId)
+      .maybeSingle();
+    if (!contact || contact.partner_id !== partner.id) return jsonResponse({ error: 'That contact is not on this partner.' }, 400);
+    to = (contact.email ?? '').trim();
+    contactName = contact.name;
+  }
+  if (!EMAIL_RE.test(to)) {
+    return jsonResponse({ error: contactId ? 'Add a valid email address for this contact first.' : 'Add a valid email address for this partner first.' }, 400);
+  }
 
   const { data: business } = await admin.from('business').select('display_name, lead_notification_email').maybeSingle();
   const practice = (business?.display_name ?? '').trim();
@@ -175,7 +191,9 @@ Deno.serve(async (req: Request) => {
       sent_to: to,
       resend_id: sent.id,
       created_by: user.id,
-      ...(templateKey ? { detail: { template: templateKey } } : {}),
+      ...(templateKey || contactName
+        ? { detail: { ...(templateKey ? { template: templateKey } : {}), ...(contactName ? { contact: contactName } : {}) } }
+        : {}),
     })
     .select()
     .single();

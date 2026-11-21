@@ -189,7 +189,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       leadsQuery = leadsQuery.eq('assigned_counselor_page_id', user.linked_counselor_page_id!);
       caseQuery = caseQuery.eq('counselor_page_id', user.linked_counselor_page_id!);
     }
-    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes, healthRes, availRes] = await Promise.all([
+    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes, healthRes, availRes, contactsRes] = await Promise.all([
       leadsQuery,
       supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').order('title'),
       caseQuery,
@@ -210,6 +210,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             .gte('occurred_on', new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10))
             .limit(2000)
         : Promise.resolve({ data: [] }),
+      // Other contacts with an email (0089): a partner is reachable through any of them.
+      isFull ? supabase.from('referral_partner_contacts').select('partner_id').not('email', 'is', null).limit(5000) : Promise.resolve({ data: [] }),
     ]);
     if ('error' in leadsRes && leadsRes.error) {
       $('t-headline').textContent = "Couldn't load your numbers. Try reloading the page.";
@@ -234,7 +236,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const partnerHealthRows = (healthRes.data ?? []) as PartnerHealthRow[];
     const availabilityCadence = ((bizRes.data as { availability_update_cadence?: string } | null)?.availability_update_cadence ?? 'monthly') as string;
     const availabilitySent = (availRes.data ?? []) as { partner_id: string; occurred_on: string }[];
-    render({ user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, practice, me, keywords: activeKw.size, pageOne });
+    const partnersWithContactEmail = new Set(((contactsRes.data ?? []) as { partner_id: string }[]).map((c) => c.partner_id));
+    render({ user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, partnersWithContactEmail, practice, me, keywords: activeKw.size, pageOne });
   }
 
   type Ctx = {
@@ -247,6 +250,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     partnerHealthRows: PartnerHealthRow[];
     availabilityCadence: string;
     availabilitySent: { partner_id: string; occurred_on: string }[];
+    partnersWithContactEmail: Set<string>;
     practice: string;
     me: Counselor | null;
     keywords: number;
@@ -254,7 +258,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   };
 
   function render(ctx: Ctx) {
-    const { user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, practice, me } = ctx;
+    const { user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, partnersWithContactEmail, practice, me } = ctx;
     const name = firstName(user, me?.title ?? null);
     $('t-greeting').textContent = name ? `${greeting()}, ${name}.` : `${greeting()}.`;
 
@@ -403,7 +407,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       const windowDays = availabilityCadence === 'quarterly' ? 90 : 30;
       const since = new Date(Date.now() - (windowDays - 1) * 86_400_000).toISOString().slice(0, 10);
       const sent = new Set(availabilitySent.filter((a) => a.occurred_on >= since).map((a) => a.partner_id));
-      const reachable = partners.filter((p) => p.status === 'active' && p.email?.trim());
+      const reachable = partners.filter((p) => p.status === 'active' && (p.email?.trim() || partnersWithContactEmail.has(p.id)));
       const pending = reachable.filter((p) => !sent.has(p.id));
       if (pending.length) {
         const period = availabilityCadence === 'quarterly' ? 'this quarter' : 'this month';

@@ -4850,3 +4850,25 @@ about 3.4x for Staci). Now:
 - Tested 2026-11-20 on Freedom in a rolled-back transaction: existing rows
   keep the default, 0 rejected, counselors save only their own number,
   owners can set anyone's.
+
+## Referral partners: more than one contact (2026-11-21, migration 0089)
+
+Step 7 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- The partner's existing contact fields are the **Main contact**
+  (`contact_name`, `email`, `phone`) plus a new `contact_role`. Everything
+  built on them (digest, links, Today) keeps working unchanged.
+- **Other contacts** (`referral_partner_contacts`: name, role, email, phone,
+  notes; owners/agency only; removed with their partner): a card on the
+  partner's page to add, edit and remove the office manager, front desk and
+  so on. Included in "Your data" exports and in partner search.
+- **To** on Send email: every contact with an email address (shown only when
+  there's more than one). The greeting follows the chosen person ("Hi Dr.
+  Lee," / "Hi Maria,"). `send-partner-email` takes `contact_id` (must belong
+  to the partner) and saves `detail.contact`; the timeline shows "to Maria
+  Gomez, maria@...".
+- A partner counts as reachable for the availability update (page and
+  Today) when any of its contacts has an email address.
+- Tested 2026-11-21 on Freedom in a rolled-back transaction: role saved,
+  owner adds/edits, blank name rejected, counselors and the public see and
+  write nothing, contacts go with their partner.

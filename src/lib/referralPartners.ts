@@ -64,6 +64,7 @@ export type ReferralPartner = {
   archived_at: string | null;
   priority?: string | null; // 0083
   ref_code?: string | null; // 0084: referral link code (?ref=)
+  contact_role?: string | null; // 0089: the main contact's role
 };
 
 export type PartnerActivity = {
@@ -79,7 +80,7 @@ export type PartnerActivity = {
   sent_to?: string | null;
   // A stage change (0082): {"from": "prospect", "to": "contacted"}.
   // A stage change: {from, to}. A sent email: {template} (step 6).
-  detail?: { from?: string; to?: string; template?: string } | null;
+  detail?: { from?: string; to?: string; template?: string; contact?: string } | null;
 };
 
 // Rhythm and going cold (steps 2 and 5): the rules live in one shared file

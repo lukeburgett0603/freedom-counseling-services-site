@@ -5515,3 +5515,50 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
   border-radius: 7px;
   font: 13px var(--a-font);
 }
+
+/* Referral partners: other contacts (0089, 2026-11-21) */
+.r-contacts {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.r-contact {
+  display: grid;
+  gap: 3px;
+  padding: 10px 0;
+  border-top: 1px solid var(--a-line);
+  font-size: 13.5px;
+}
+.r-contact:first-child {
+  border-top: 0;
+  padding-top: 2px;
+}
+.r-contact-ways,
+.r-contact-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12.5px;
+}
+.r-contact-empty {
+  font-size: 13px;
+}
+.r-contact-form {
+  display: grid;
+  gap: 8px;
+}
+.r-contact-form input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--a-line2);
+  border-radius: 8px;
+  font: 13.5px var(--a-font);
+}
+.r-contact-add {
+  justify-self: start;
+}
+.i-danger-link {
+  color: var(--a-bad);
+}
