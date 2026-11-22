@@ -21,6 +21,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   import { DESIGN_BLOCKS } from '../../designs/site';
   import { supabase, initAdminAuth, type AdminUser } from '../../lib/adminAuth';
   import { triggerRebuild } from '../../lib/publishFunction';
+  import { createListPager } from '../../lib/listPager';
 
   type ContentSuggestion = {
     id: string;
@@ -145,9 +146,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       .join('');
   }
 
+  // Reviewed history: 50 at a time (Luke, 2026-11-22).
+  let reviewedRows: ContentSuggestion[] = [];
+  const reviewedPager = createListPager(reviewedList, 'Reviewed suggestion pages', () => renderReviewed(reviewedRows));
+
   function renderReviewed(suggestions: ContentSuggestion[]) {
+    reviewedRows = suggestions;
     reviewedEmpty.hidden = suggestions.length > 0;
-    reviewedList.innerHTML = suggestions
+    reviewedList.innerHTML = reviewedPager
+      .slice(suggestions)
       .map((s) => {
         const fieldLabel = FIELD_LABELS[s.field_name] ?? blockLabel(s.field_name) ?? s.field_name;
         const pill = s.status === 'approved' ? '<span class="bp-pill bp-pill-p">Approved</span>' : '<span class="bp-pill sg-rej">Rejected</span>';

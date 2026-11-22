@@ -88,6 +88,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   import { supabase, initAdminAuth } from '../../../lib/adminAuth';
   import { withBase } from '../../../lib/url';
   import { fetchAllRows } from '../../../lib/fetchAllRows';
+  import { createListPager } from '../../../lib/listPager';
   import { REFERRAL_LEAD_SOURCES } from '../../../lib/leadSource';
   import { categoryLabel, partnerStatusLabel, type PartnerHealthRow, type ReferralPartner } from '../../../lib/referralPartners';
 
@@ -137,6 +138,9 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     return d >= 0 ? d : null; // referred before any logged outreach: not counted
   }
 
+  // By partner: 50 at a time (Luke, 2026-11-22); a new period starts at page 1.
+  const partnersPager = createListPager(document.getElementById('rr-partners-table')!, 'Partner pages', () => render());
+
   function render() {
     const cutoff = days === 'all' ? 0 : new Date(new Date().setHours(0, 0, 0, 0) - (days - 1) * DAY).getTime();
     const inPeriod = (when: string) => localDay(when) >= cutoff;
@@ -168,7 +172,8 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
       })
       .filter((r) => r.n > 0)
       .sort((a, b) => b.n - a.n || b.c - a.c || a.p.name.localeCompare(b.p.name));
-    $('rr-partners').innerHTML = rows
+    $('rr-partners').innerHTML = partnersPager
+      .slice(rows, label)
       .map(
         (r) => `<tr>
           <td><a class="a-link" href="${partnerUrl(r.p.id)}">${esc(r.p.name)}</a>${r.p.archived_at ? ' <span class="i-tag">Archived</span>' : ''}</td>

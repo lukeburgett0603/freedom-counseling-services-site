@@ -4661,6 +4661,14 @@ would hold health details. Nothing here stores new health details.
   (Published starts at 6); a new search starts every column over (2026-11-22).
 - **Blog posts** list: 50 at a time with Previous/Next, like Inquiries (2026-11-22).
 - **Links** list: same, 50 at a time (2026-11-22).
+- **Shared pager for the rest** (2026-11-22): `src/lib/listPager.ts`
+  (`createListPager(afterEl, label, rerender)`, then `pager.slice(rows,
+  filterKey)` inside the render; a changed filterKey goes back to page 1).
+  Used on Search rankings (tracked searches, no page yet, competitor
+  searches), Blog analytics, Referral report (by partner) and Suggestions
+  (reviewed). Use it for any new admin list that can grow past 50. Short,
+  fixed lists (team, guides, counselors, the monthly review-count log) are
+  left whole.
 - Counselor guard (0073) widened to `next_step`, outcome fields and
   `last_activity_at`. Both new tables are in "Your data" exports.
 - Tested 2026-11-19 against Freedom's database in a rolled-back
