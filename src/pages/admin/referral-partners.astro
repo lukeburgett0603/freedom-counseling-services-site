@@ -101,6 +101,12 @@ import { withBase } from '../../lib/url';
         <tbody id="partners-table-body"></tbody>
       </table>
       <div id="r-empty" class="t-empty" hidden></div>
+      <!-- 50 per page (Luke, 2026-11-22), like Inquiries. -->
+      <nav class="q-pager i-pager" id="list-pager" aria-label="Partner pages" hidden>
+        <button type="button" class="a-btn i-btn" id="list-prev">Previous</button>
+        <span id="list-range" class="a-num" aria-live="polite"></span>
+        <button type="button" class="a-btn i-btn" id="list-next">Next</button>
+      </nav>
     </div>
 
     <!-- Outreach kit, practice-wide half: the printable handout and the
@@ -657,6 +663,23 @@ import { withBase } from '../../lib/url';
     renderList();
   });
 
+  // The list shows 50 at a time. A new search, filter or stage chip starts
+  // again at page 1; edits keep the page.
+  const PAGE_SIZE = 50;
+  let listPage = 0;
+  let listKey = '';
+  const listPager = document.getElementById('list-pager')!;
+  const listPrev = document.getElementById('list-prev') as HTMLButtonElement;
+  const listNext = document.getElementById('list-next') as HTMLButtonElement;
+  const listRange = document.getElementById('list-range')!;
+  function goToListPage(delta: number) {
+    listPage += delta;
+    renderList();
+    document.querySelector('.i-list')?.scrollIntoView({ block: 'start' });
+  }
+  listPrev.addEventListener('click', () => goToListPage(-1));
+  listNext.addEventListener('click', () => goToListPage(1));
+
   function renderList() {
     renderPipeline();
     const q = searchInput.value.trim().toLowerCase();
@@ -678,8 +701,21 @@ import { withBase } from '../../lib/url';
         ? '<b>No partners match these filters.</b>Try a different stage, type, or search.'
         : '<b>No referral partners yet.</b>Add the doctors, attorneys, churches, schools, and other professionals you want referrals from.';
     }
+    const key = [searchInput.value.trim(), statusFilter.value, categoryFilter.value, ownerFilter.value, showArchived.checked].join('|');
+    if (key !== listKey) {
+      listKey = key;
+      listPage = 0;
+    }
+    const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+    listPage = Math.min(Math.max(0, listPage), pageCount - 1);
+    const pageStart = listPage * PAGE_SIZE;
+    const pageRows = rows.slice(pageStart, pageStart + PAGE_SIZE);
+    listPager.hidden = rows.length <= PAGE_SIZE;
+    listRange.textContent = `${pageStart + 1}–${pageStart + pageRows.length} of ${rows.length}`;
+    listPrev.disabled = listPage === 0;
+    listNext.disabled = listPage >= pageCount - 1;
     const today = todayIso();
-    tableBody.innerHTML = rows
+    tableBody.innerHTML = pageRows
       .map((p) => {
         const touch = healthOf(p).lastContact;
         const counts = referralCounts(p.id);
