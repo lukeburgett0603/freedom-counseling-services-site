@@ -4657,6 +4657,8 @@ would hold health details. Nothing here stores new health details.
 - **Inquiries** list: same, 50 at a time (2026-11-22). A new search, filter,
   status chip or view goes back to page 1; edits keep the page.
 - **Referral partners** list: same, 50 at a time (2026-11-22).
+- **Content plan** board: each column shows 50 cards, then "Show 50 more"
+  (Published starts at 6); a new search starts every column over (2026-11-22).
 - Counselor guard (0073) widened to `next_step`, outcome fields and
   `last_activity_at`. Both new tables are in "Your data" exports.
 - Tested 2026-11-19 against Freedom's database in a rolled-back
