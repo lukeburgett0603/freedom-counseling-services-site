@@ -193,13 +193,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       leadsQuery,
       supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').order('title'),
       caseQuery,
-      isFull ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at, priority, created_at, email') : Promise.resolve({ data: [] }),
+      // Counselors get the partners they own (RLS, migration 0090).
+      isFull || isCounselor ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at, priority, created_at, email') : Promise.resolve({ data: [] }),
       isFull ? supabase.from('target_keywords').select('id').eq('status', 'active') : Promise.resolve({ data: [] }),
       // Latest check only (plus a week, for a search the newest run missed).
       isFull ? fetchRankHistory(supabase, 8, 'target_keyword_id, position, checked_at').then((data) => ({ data }), () => ({ data: [] })) : Promise.resolve({ data: [] }),
       supabase.from('business').select('display_name, availability_update_cadence').single(),
       // Rhythm and going cold (0083).
-      isFull ? supabase.from('referral_partner_health').select('*') : Promise.resolve({ data: [] }),
+      isFull || isCounselor ? supabase.from('referral_partner_health').select('*') : Promise.resolve({ data: [] }),
       // Availability updates sent in the last quarter (0087), one row each.
       isFull
         ? supabase
@@ -378,7 +379,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       moves.push({ id: `c-${l.id}`, title: `Check back with ${nameOf(l)}`, sub: 'They weren\'t ready before. You set a reminder to check back today.', tag: 'Get booked', link: `${crm}?lead=${l.id}`, linkText: 'Open' });
     }
     for (const p of partners.filter((x) => x.next_follow_up && x.next_follow_up <= today).sort((a, b) => a.next_follow_up!.localeCompare(b.next_follow_up!)).slice(0, 2)) {
-      moves.push({ id: `p-${p.id}`, title: `Follow up with ${p.name}`, sub: p.next_follow_up! < today ? 'Referral partner follow-up is overdue' : 'Referral partner follow-up due today', tag: 'Get referred', icon: ICON.partner, link: withBase('/admin/referral-partners'), linkText: 'Open' });
+      moves.push({ id: `p-${p.id}`, title: `Follow up with ${p.name}`, sub: p.next_follow_up! < today ? 'Referral partner follow-up is overdue' : 'Referral partner follow-up due today', tag: 'Get referred', icon: ICON.partner, link: `${withBase('/admin/referral-partners')}?partner=${p.id}`, linkText: 'Open' });
     }
     // Active partners who need a touch (0083): stopped referring first, then
     // going cold, then due. Left out when the partner already has a
@@ -398,12 +399,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             : h.state === 'cold'
               ? `Going cold: no contact in ${h.daysSinceContact} days.`
               : `Due for a touch: last contact ${h.daysSinceContact} days ago.`;
-        moves.push({ id: `r-${p.id}`, title: `Reach out to ${p.name}`, sub, tag: 'Get referred', warn: Boolean(h.stoppedReferring) || h.state === 'cold', icon: ICON.partner, link: withBase('/admin/referral-partners'), linkText: 'Open' });
+        moves.push({ id: `r-${p.id}`, title: `Reach out to ${p.name}`, sub, tag: 'Get referred', warn: Boolean(h.stoppedReferring) || h.state === 'cold', icon: ICON.partner, link: `${withBase('/admin/referral-partners')}?partner=${p.id}`, linkText: 'Open' });
       }
     }
     // Availability update (0087): active partners with an email address who
     // haven't had one this month (or quarter).
-    if (availabilityCadence !== 'off') {
+    // Practice-wide, so owners and the agency only.
+    if (!isCounselor && availabilityCadence !== 'off') {
       const windowDays = availabilityCadence === 'quarterly' ? 90 : 30;
       const since = new Date(Date.now() - (windowDays - 1) * 86_400_000).toISOString().slice(0, 10);
       const sent = new Set(availabilitySent.filter((a) => a.occurred_on >= since).map((a) => a.partner_id));

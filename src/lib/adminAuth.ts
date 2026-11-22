@@ -162,6 +162,8 @@ export function initAdminAuth(
       allowed.add('crm');
       // "My caseload": only their own card.
       allowed.add('analytics-caseload');
+      // "My referral partners": only the partners they own (0090).
+      allowed.add('referral-partners');
     }
     document.querySelectorAll<HTMLElement>('[data-nav-key]').forEach((el) => {
       el.classList.toggle('hidden', !allowed.has(el.dataset.navKey!));

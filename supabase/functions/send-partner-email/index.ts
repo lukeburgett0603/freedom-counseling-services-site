@@ -74,11 +74,15 @@ Deno.serve(async (req: Request) => {
   const admin = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
   const { data: caller } = await admin
     .from('admin_users')
-    .select('role, status, email, display_name')
+    .select('role, status, email, display_name, linked_counselor_page_id')
     .eq('id', user.id)
     .maybeSingle();
-  if (!caller || (caller.role !== 'owner' && caller.role !== 'agency') || caller.status !== 'active') {
-    return jsonResponse({ error: 'Only an owner or the agency can email referral partners.' }, 403);
+  // Owners and the agency email any partner; a counselor (staff linked to a
+  // counselor page) only the partners they own (step 8, migration 0090).
+  const isAdmin = caller && (caller.role === 'owner' || caller.role === 'agency');
+  const isCounselor = caller && caller.role === 'staff' && Boolean(caller.linked_counselor_page_id);
+  if (!caller || caller.status !== 'active' || (!isAdmin && !isCounselor)) {
+    return jsonResponse({ error: 'Only an owner, the agency or a counselor can email referral partners.' }, 403);
   }
 
   let body: Record<string, unknown>;
@@ -115,10 +119,13 @@ Deno.serve(async (req: Request) => {
 
   const { data: partner } = await admin
     .from('referral_partners')
-    .select('id, name, email, status, archived_at')
+    .select('id, name, email, status, archived_at, owner_user_id')
     .eq('id', partnerId)
     .maybeSingle();
   if (!partner) return jsonResponse({ error: 'Partner not found.' }, 404);
+  if (!isAdmin && partner.owner_user_id !== user.id) {
+    return jsonResponse({ error: 'You can email only the partners you own.' }, 403);
+  }
   // Step 7 (0089): send to one of the partner's other contacts when asked,
   // otherwise the main contact. A contact must belong to this partner.
   let to = (partner.email ?? '').trim();

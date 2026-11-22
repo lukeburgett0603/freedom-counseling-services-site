@@ -5562,3 +5562,9 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
 .i-danger-link {
   color: var(--a-bad);
 }
+
+/* Parts of a page only owners and the agency use, hidden for counselors
+   (referral partners step 8). Beats any display rule on the element. */
+[data-practice-only][hidden] {
+  display: none !important;
+}

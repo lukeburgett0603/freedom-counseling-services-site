@@ -20,7 +20,7 @@ import { withBase } from '../../lib/url';
 -->
 <AdminLayout title="Referral partners | Admin" current="referral-partners">
   <div id="partners-list-view">
-    <p class="i-intro">The professionals who send you clients, and where each relationship stands. <a class="a-link" href={withBase('/admin/analytics/referrals')}>See the Referral report</a></p>
+    <p class="i-intro" id="r-intro">The professionals who send you clients, and where each relationship stands. <a class="a-link" href={withBase('/admin/analytics/referrals')} data-practice-only>See the Referral report</a></p>
 
     <div class="r-kpis">
       <div class="t-kpi">
@@ -64,6 +64,9 @@ import { withBase } from '../../lib/url';
         <option value="">All</option>
         {PARTNER_STATUSES.map((s) => <option value={s.value}>{s.label}</option>)}
       </select>
+      <select id="owner-filter" aria-label="Owner" data-practice-only>
+        <option value="">All owners</option>
+      </select>
       <select id="category-filter" aria-label="Type">
         <option value="">All types</option>
         {PARTNER_CATEGORIES.map((c) => <option value={c.value}>{c.label}</option>)}
@@ -102,7 +105,7 @@ import { withBase } from '../../lib/url';
         <p>A one-page overview of your practice to leave with partners. Each partner's page has ready-to-send messages written for them.</p>
         <button id="print-handout-button" type="button" class="a-btn i-btn">Print practice handout</button>
       </div>
-      <label class="i-check r-faith">
+      <label class="i-check r-faith" data-practice-only>
         <input id="faith-integration-checkbox" type="checkbox" />
         <span>We offer faith-integrated counseling (mentioned in church outreach and on the handout)</span>
       </label>
@@ -118,7 +121,7 @@ import { withBase } from '../../lib/url';
     <!-- Weekly email (step 5, 0086): a Monday note to the owner about
          partners to reach out to, follow-ups due and new referrals. Off by
          default; nothing is sent on a week with nothing to report. -->
-    <section class="t-card r-digest">
+    <section class="t-card r-digest" data-practice-only>
       <h2>Weekly email</h2>
       <label class="i-check">
         <input id="digest-enabled" type="checkbox" />
@@ -138,7 +141,7 @@ import { withBase } from '../../lib/url';
 
     <!-- Availability update (step 6, 0087): who has openings, sent one
          partner at a time from each partner's page. Never a mass email. -->
-    <section class="t-card r-digest" id="avail-card">
+    <section class="t-card r-digest" id="avail-card" data-practice-only>
       <h2>Availability update<span class="t-aside" id="avail-progress"></span></h2>
       <p class="i-hint r-avail-intro">A short note telling active partners which counselors have openings, written from each counselor's current availability. You send it one partner at a time, so each one is personal and lands on their timeline.</p>
       <div class="i-inline">
@@ -159,7 +162,7 @@ import { withBase } from '../../lib/url';
   <div id="partner-detail-view" class="hidden">
     <div class="i-detail-top">
       <button id="back-button" type="button" class="a-link">&larr; All partners</button>
-      <div class="i-detail-tools">
+      <div class="i-detail-tools" data-practice-only>
         <button id="archive-button" type="button" class="a-btn i-btn">Archive</button>
         <button id="delete-button" type="button" class="a-btn i-btn i-danger">Delete</button>
       </div>
@@ -282,6 +285,13 @@ import { withBase } from '../../lib/url';
               {PARTNER_PRIORITIES.map((p) => <option value={p.value}>{p.label}: {p.hint.toLowerCase()}</option>)}
             </select>
             <span id="pf-rhythm-hint" class="i-hint"></span>
+          </div>
+          <div class="i-field" data-practice-only>
+            <label for="pf-owner">Relationship owner</label>
+            <select id="pf-owner" name="owner_user_id">
+              <option value="">Unassigned (owners manage it)</option>
+            </select>
+            <span class="i-hint">A counselor who owns a partner sees it under My referral partners.</span>
           </div>
           <div class="i-field">
             <label for="pf-next-follow-up">Next follow-up</label>
@@ -427,6 +437,17 @@ import { withBase } from '../../lib/url';
   type PartnerContact = { id: string; partner_id: string; name: string; role: string | null; email: string | null; phone: string | null };
   let contacts: PartnerContact[] = [];
   let currentId: string | null = null;
+  // Relationship owners (step 8, 0090).
+  type TeamMember = { id: string; role: string; email: string; display_name: string | null; linked_counselor_page_id: string | null };
+  let team: TeamMember[] = [];
+  let counselorMode = false;
+  let currentUserId: string | null = null;
+  const ownerFilter = document.getElementById('owner-filter') as HTMLSelectElement;
+  function teamName(id: string | null | undefined): string | null {
+    if (!id) return null;
+    const m = team.find((t) => t.id === id);
+    return m ? (m.display_name?.trim() || m.email) : null;
+  }
 
   const listView = document.getElementById('partners-list-view')!;
   const detailView = document.getElementById('partner-detail-view')!;
@@ -583,6 +604,8 @@ import { withBase } from '../../lib/url';
       if (!showArchived.checked && p.archived_at) return false;
       if (statusFilter.value && p.status !== statusFilter.value) return false;
       if (categoryFilter.value && p.category !== categoryFilter.value) return false;
+      if (ownerFilter.value === 'none' && p.owner_user_id) return false;
+      if (ownerFilter.value && ownerFilter.value !== 'none' && p.owner_user_id !== ownerFilter.value) return false;
       const others = contacts.filter((c) => c.partner_id === p.id).flatMap((c) => [c.name, c.email ?? '']);
       if (q && ![p.name, p.contact_name ?? '', p.email ?? '', ...others].some((v) => v.toLowerCase().includes(q))) return false;
       return true;
@@ -604,7 +627,7 @@ import { withBase } from '../../lib/url';
         const late = p.next_follow_up && p.next_follow_up < today && p.status !== 'inactive' && !p.archived_at;
         return `
       <tr data-partner-id="${p.id}" class="open-partner ${p.archived_at ? 'i-archived' : ''}">
-        <td><div class="i-who"><span class="i-avatar">${escapeHtml(initials(p.name))}</span><div><b>${escapeHtml(p.name)}${p.archived_at ? ' <span class="i-tag">Archived</span>' : ''}</b><small>${escapeHtml(p.contact_name ?? categoryLabel(p.category))}</small></div></div></td>
+        <td><div class="i-who"><span class="i-avatar">${escapeHtml(initials(p.name))}</span><div><b>${escapeHtml(p.name)}${p.archived_at ? ' <span class="i-tag">Archived</span>' : ''}</b><small>${escapeHtml([p.contact_name ?? categoryLabel(p.category), !counselorMode && p.owner_user_id ? teamName(p.owner_user_id) : null].filter(Boolean).join(' · '))}</small></div></div></td>
         <td class="i-hide-md i-muted">${escapeHtml(categoryLabel(p.category))}</td>
         <td>${stageBadge(p.status)}</td>
         <td class="i-hide-sm ${flag ? flag.cls : 'i-muted'}"${flag ? ` title="${escapeAttr(flag.text)}"` : ''}>${touch ? touchText(touch) : '<span class="i-faint">Never</span>'}</td>
@@ -647,7 +670,7 @@ import { withBase } from '../../lib/url';
     renderList();
   }
 
-  [searchInput, statusFilter, categoryFilter, showArchived].forEach((el) => el.addEventListener('input', renderList));
+  [searchInput, statusFilter, categoryFilter, showArchived, ownerFilter].forEach((el) => el.addEventListener('input', renderList));
 
   document.addEventListener('click', (event) => {
     const target = (event.target as HTMLElement).closest<HTMLElement>('.open-partner');
@@ -764,7 +787,7 @@ import { withBase } from '../../lib/url';
     if (!p) return;
     currentId = id;
     const f = partnerForm.elements as unknown as Record<string, HTMLInputElement>;
-    for (const key of ['name', 'category', 'status', 'priority', 'contact_name', 'contact_role', 'next_follow_up', 'email', 'phone', 'website', 'address', 'notes']) {
+    for (const key of ['name', 'category', 'status', 'priority', 'contact_name', 'contact_role', 'owner_user_id', 'next_follow_up', 'email', 'phone', 'website', 'address', 'notes']) {
       f[key].value = ((p as unknown as Record<string, string | null>)[key] ?? '') as string;
     }
     partnerFormStatus.textContent = '';
@@ -813,6 +836,8 @@ import { withBase } from '../../lib/url';
       website: text('website'),
       address: text('address'),
       notes: text('notes'),
+      // Owners and the agency choose the relationship owner (0090).
+      ...(counselorMode ? {} : { owner_user_id: text('owner_user_id') }),
     };
     if (!update.name) return;
     partnerFormStatus.textContent = 'Saving...';
@@ -1362,6 +1387,8 @@ import { withBase } from '../../lib/url';
         name,
         category: data.get('category') as string,
         contact_name: ((data.get('contact_name') as string) ?? '').trim() || null,
+        // A counselor's new partner is theirs (0090 requires it).
+        ...(counselorMode && currentUserId ? { owner_user_id: currentUserId } : {}),
       })
       .select()
       .single();
@@ -1636,8 +1663,32 @@ import { withBase } from '../../lib/url';
     renderAvailability();
   });
 
-  async function load(user?: { id: string }) {
-    loadDigest();
+  async function load(user?: { id: string; role?: string; linked_counselor_page_id?: string | null }) {
+    currentUserId = user?.id ?? null;
+    if (user?.role === 'staff') {
+      // Only a counselor (staff linked to a counselor page) has partners.
+      if (!user.linked_counselor_page_id) {
+        window.location.href = withBase('/admin/today');
+        return;
+      }
+      counselorMode = true;
+      document.querySelectorAll<HTMLElement>('[data-practice-only]').forEach((el) => (el.hidden = true));
+      document.querySelector('.a-title')!.textContent = 'My referral partners';
+      document.getElementById('r-intro')!.textContent = 'The professionals you look after. Owners assign partners to you; ones you add are yours.';
+    } else {
+      loadDigest();
+      // Everyone who can own a relationship: owners, agency, and counselors.
+      const { data: members } = await supabase
+        .from('admin_users')
+        .select('id, role, email, display_name, linked_counselor_page_id')
+        .eq('status', 'active');
+      team = ((members ?? []) as TeamMember[])
+        .filter((m) => m.role === 'owner' || m.role === 'agency' || (m.role === 'staff' && m.linked_counselor_page_id))
+        .sort((x, y) => (teamName(x.id) ?? '').localeCompare(teamName(y.id) ?? ''));
+      const ownerOptions = team.map((m) => `<option value="${m.id}">${escapeHtml(teamName(m.id) ?? m.email)}${m.role === 'staff' ? ' (counselor)' : ''}</option>`).join('');
+      (document.getElementById('pf-owner') as HTMLSelectElement).insertAdjacentHTML('beforeend', ownerOptions);
+      ownerFilter.insertAdjacentHTML('beforeend', `<option value="${currentUserId}">Mine</option><option value="none">Unassigned</option>${ownerOptions}`);
+    }
     // "Signed by" starts as the person's own name (Team), once.
     if (!kitSigner.value && user) {
       const { data: me } = await supabase.from('admin_users').select('display_name').eq('id', user.id).maybeSingle();
@@ -1691,5 +1742,6 @@ import { withBase } from '../../lib/url';
     if (linked && partners.some((p) => p.id === linked)) openDetail(linked);
   }
 
-  initAdminAuth(load, { allowedRoles: ['owner', 'agency'] });
+  // Counselors see only partners they own (RLS, migration 0090).
+  initAdminAuth(load, { allowedRoles: ['owner', 'agency', 'staff'] });
 </script>

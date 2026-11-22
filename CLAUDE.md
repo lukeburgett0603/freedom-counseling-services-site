@@ -4872,3 +4872,29 @@ Step 7 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
 - Tested 2026-11-21 on Freedom in a rolled-back transaction: role saved,
   owner adds/edits, blank name rejected, counselors and the public see and
   write nothing, contacts go with their partner.
+
+## Referral partners: relationship owner (2026-11-21, migration 0090)
+
+Step 8 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- `referral_partners.owner_user_id` (admin_users, set null if they leave).
+  Owners and the agency choose it ("Relationship owner" on the partner page:
+  owners, agency and linked counselors), see the owner on each row, and can
+  filter the list (All owners, Mine, Unassigned, each person).
+- **Counselors** (staff linked to a counselor page) get **My referral
+  partners** in the menu and see only the partners they own, same rule as
+  their inquiries. They can edit details, log activity, send emails
+  (`send-partner-email` now allows a counselor for their own partners),
+  manage contacts, and add partners (owned by themselves). A guard trigger
+  stops them archiving, reassigning or changing the referral link; there is
+  no delete policy for them. Practice-wide parts (archive/delete, owner
+  field, owner filter, faith setting, Weekly email, Availability update,
+  link to the Referral report) carry `data-practice-only` and are hidden.
+- `owns_partner(partner_id)` (security definer) backs the counselor
+  policies on activities and contacts.
+- Today: counselors see follow-ups and reach-outs for their own partners
+  (not the practice-wide availability reminder); partner items open the
+  partner directly (`?partner=<id>`).
+- Note: for a counselor, a partner's referral count only includes inquiries
+  assigned to them (they can't see the others), by design.
+- Tested 2026-11-21 on Freedom in a rolled-back transaction (18 checks).

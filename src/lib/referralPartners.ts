@@ -65,6 +65,7 @@ export type ReferralPartner = {
   priority?: string | null; // 0083
   ref_code?: string | null; // 0084: referral link code (?ref=)
   contact_role?: string | null; // 0089: the main contact's role
+  owner_user_id?: string | null; // 0090: relationship owner (admin_users.id)
 };
 
 export type PartnerActivity = {
