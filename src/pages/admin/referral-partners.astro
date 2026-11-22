@@ -81,6 +81,7 @@ import { withBase } from '../../lib/url';
         <span>Show archived</span>
       </label>
       <p id="partners-count" class="i-count"></p>
+      <button id="import-button" type="button" class="a-btn i-btn" data-practice-only>Import</button>
       <button id="add-partner-button" type="button" class="a-btn a-btn-primary i-btn">+ Add partner</button>
     </div>
 
@@ -375,6 +376,58 @@ import { withBase } from '../../lib/url';
     </div>
   </div>
 
+  <!-- Bulk import (step 10): a spreadsheet saved as CSV, or rows pasted
+       from one. Preview flags errors and duplicates before anything saves.
+       Parsing and checks live in src/lib/partnerImport.ts. -->
+  <div id="import-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
+      <div class="mb-3 flex items-center justify-between">
+        <p class="font-semibold text-brand-ink">Import referral partners</p>
+        <button id="import-close" type="button" class="text-sm text-slate-500 hover:text-slate-800">Close</button>
+      </div>
+      <div id="import-step-input" class="space-y-3">
+        <p class="text-sm text-slate-600">
+          Upload a spreadsheet saved as CSV, or copy rows from Google Sheets or Excel and paste them below (include the heading row).
+          Columns it understands: Name, Type, Contact, Role, Email, Phone, Website, Address, Notes.
+          <button id="import-template" type="button" class="font-semibold text-brand-primary hover:underline">Download a template</button>
+        </p>
+        <input id="import-file" type="file" accept=".csv,text/csv,text/plain" class="block text-sm" />
+        <textarea id="import-paste" rows="6" class="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs" placeholder="Name,Type,Contact,Email&#10;Grace Community Church,Church,Pastor Mike Allen,mike@grace.example"></textarea>
+        <div class="flex items-center gap-3">
+          <button id="import-preview" type="button" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Preview</button>
+          <span id="import-input-status" class="text-sm text-red-600"></span>
+        </div>
+      </div>
+      <div id="import-step-preview" class="hidden space-y-3">
+        <p id="import-summary" class="text-sm text-slate-700"></p>
+        <p id="import-unmatched" class="hidden text-xs text-amber-700"></p>
+        <div class="max-h-[46vh] overflow-auto rounded-md border border-slate-200">
+          <table class="w-full text-left text-xs">
+            <thead class="sticky top-0 bg-slate-50 text-slate-500">
+              <tr><th class="p-2"></th><th class="p-2">Row</th><th class="p-2">Name</th><th class="p-2">Type</th><th class="p-2">Contact</th><th class="p-2">Email</th><th class="p-2">Check</th></tr>
+            </thead>
+            <tbody id="import-rows"></tbody>
+          </table>
+        </div>
+        <div class="flex flex-wrap items-end gap-4">
+          <label class="text-xs text-slate-500">Stage for new partners
+            <select id="import-stage" class="mt-1 block rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-800">
+              {PARTNER_STATUSES.map((st) => <option value={st.value}>{st.label}</option>)}
+            </select>
+          </label>
+          <label class="text-xs text-slate-500">Relationship owner
+            <select id="import-owner" class="mt-1 block rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-800">
+              <option value="">Unassigned</option>
+            </select>
+          </label>
+          <button id="import-back" type="button" class="text-sm text-slate-500 hover:text-slate-800">Back</button>
+          <button id="import-go" type="button" class="rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50">Import</button>
+          <span id="import-status" class="text-sm"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="add-partner-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
     <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
       <div class="mb-4 flex items-center justify-between">
@@ -408,6 +461,7 @@ import { withBase } from '../../lib/url';
   import QRCode from 'qrcode';
   import { withBase } from '../../lib/url';
   import { touchesInSeason, seasonalKey, touchAppliesTo, daysLeft, type SeasonalTouch } from '../../lib/seasonalTouches';
+  import { parseCsv, buildImport, templateCsv, type ImportRow } from '../../lib/partnerImport';
   import {
     OUTREACH_TEMPLATES,
     buildOutreachMessage,
@@ -1724,6 +1778,173 @@ import { withBase } from '../../lib/url';
     renderContacts();
     renderKit();
     renderAvailability();
+  });
+
+  // ---------------------------------------------------------------------
+  // Bulk import (step 10)
+  // ---------------------------------------------------------------------
+  const importModal = document.getElementById('import-modal')!;
+  const importInputStep = document.getElementById('import-step-input')!;
+  const importPreviewStep = document.getElementById('import-step-preview')!;
+  const importFile = document.getElementById('import-file') as HTMLInputElement;
+  const importPaste = document.getElementById('import-paste') as HTMLTextAreaElement;
+  const importInputStatus = document.getElementById('import-input-status')!;
+  const importRowsEl = document.getElementById('import-rows')!;
+  const importGo = document.getElementById('import-go') as HTMLButtonElement;
+  const importStatus = document.getElementById('import-status')!;
+  let importRows: ImportRow[] = [];
+
+  function showImportStep(step: 'input' | 'preview') {
+    importInputStep.classList.toggle('hidden', step !== 'input');
+    importPreviewStep.classList.toggle('hidden', step !== 'preview');
+  }
+
+  document.getElementById('import-button')!.addEventListener('click', () => {
+    importFile.value = '';
+    importPaste.value = '';
+    importInputStatus.textContent = '';
+    importStatus.textContent = '';
+    showImportStep('input');
+    importModal.classList.remove('hidden');
+    importModal.classList.add('flex');
+  });
+  document.getElementById('import-close')!.addEventListener('click', () => {
+    importModal.classList.add('hidden');
+    importModal.classList.remove('flex');
+  });
+  document.getElementById('import-back')!.addEventListener('click', () => showImportStep('input'));
+
+  document.getElementById('import-template')!.addEventListener('click', () => {
+    const url = URL.createObjectURL(new Blob([templateCsv()], { type: 'text/csv' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'referral-partners-template.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  function selectedImportRows(): ImportRow[] {
+    return [...importRowsEl.querySelectorAll<HTMLInputElement>('input[data-import-line]:checked')]
+      .map((cb) => importRows.find((r) => r.line === Number(cb.dataset.importLine))!)
+      .filter(Boolean);
+  }
+  function updateImportButton() {
+    const n = selectedImportRows().length;
+    importGo.disabled = n === 0;
+    importGo.textContent = n ? `Import ${n} partner${n === 1 ? '' : 's'}` : 'Import';
+  }
+
+  document.getElementById('import-preview')!.addEventListener('click', async () => {
+    importInputStatus.textContent = '';
+    let text = importPaste.value;
+    if (importFile.files?.[0]) {
+      if (importFile.files[0].size > 2_000_000) {
+        importInputStatus.textContent = 'That file is larger than 2 MB. Split it into smaller files.';
+        return;
+      }
+      text = await importFile.files[0].text();
+    }
+    const parsed = parseCsv(text);
+    if (parsed.length < 2) {
+      importInputStatus.textContent = 'Add a heading row and at least one partner.';
+      return;
+    }
+    if (parsed.length > 501) {
+      importInputStatus.textContent = 'Import up to 500 partners at a time.';
+      return;
+    }
+    const built = buildImport(parsed, partners.map((p) => ({ name: p.name, website: p.website })));
+    if (!built.rows.some((r) => r.values.name) ) {
+      importInputStatus.textContent = 'No Name column found. The first row should be headings, with one called Name.';
+      return;
+    }
+    importRows = built.rows;
+    const ok = importRows.filter((r) => !r.errors.length && !r.duplicateOf).length;
+    const dup = importRows.filter((r) => !r.errors.length && r.duplicateOf).length;
+    const bad = importRows.filter((r) => r.errors.length).length;
+    document.getElementById('import-summary')!.textContent =
+      `${importRows.length} row${importRows.length === 1 ? '' : 's'}: ${ok} new, ${dup} possible duplicate${dup === 1 ? '' : 's'} (unticked), ${bad} with a problem (skipped). Untick anything you don't want.`;
+    const unmatched = document.getElementById('import-unmatched')!;
+    unmatched.classList.toggle('hidden', built.unmatchedHeaders.length === 0);
+    unmatched.textContent = built.unmatchedHeaders.length ? `Not imported (column not recognized): ${built.unmatchedHeaders.join(', ')}.` : '';
+    importRowsEl.innerHTML = importRows
+      .map((r) => {
+        const check = r.errors.length
+          ? `<span class="text-red-600">${escapeHtml(r.errors.join('; '))}</span>`
+          : r.duplicateOf
+            ? `<span class="text-amber-700">Possible duplicate of ${escapeHtml(r.duplicateOf)}</span>`
+            : '<span class="text-emerald-700">New</span>';
+        const warn = r.warnings.length ? `<div class="text-slate-500">${escapeHtml(r.warnings.join('; '))}</div>` : '';
+        return `<tr class="border-t border-slate-100 align-top">
+          <td class="p-2"><input type="checkbox" data-import-line="${r.line}" ${r.errors.length ? 'disabled' : r.duplicateOf ? '' : 'checked'} aria-label="Import row ${r.line}" /></td>
+          <td class="p-2 text-slate-400">${r.line}</td>
+          <td class="p-2 font-medium text-slate-800">${escapeHtml(r.values.name || '(no name)')}</td>
+          <td class="p-2">${escapeHtml(categoryLabel(r.category))}</td>
+          <td class="p-2">${escapeHtml([r.values.contact_name, r.values.contact_role].filter(Boolean).join(', '))}</td>
+          <td class="p-2">${escapeHtml(r.values.email)}</td>
+          <td class="p-2">${check}${warn}</td>
+        </tr>`;
+      })
+      .join('');
+    const ownerSelect = document.getElementById('import-owner') as HTMLSelectElement;
+    if (ownerSelect.options.length === 1) {
+      ownerSelect.insertAdjacentHTML('beforeend', team.map((m) => `<option value="${m.id}">${escapeHtml(teamName(m.id) ?? m.email)}${m.role === 'staff' ? ' (counselor)' : ''}</option>`).join(''));
+    }
+    importStatus.textContent = '';
+    updateImportButton();
+    showImportStep('preview');
+  });
+
+  importRowsEl.addEventListener('change', updateImportButton);
+
+  importGo.addEventListener('click', async () => {
+    const chosen = selectedImportRows();
+    if (!chosen.length) return;
+    const status = (document.getElementById('import-stage') as HTMLSelectElement).value || 'prospect';
+    const owner = (document.getElementById('import-owner') as HTMLSelectElement).value || null;
+    const records = chosen.map((r) => ({
+      name: r.values.name.slice(0, 200),
+      category: r.category,
+      status,
+      owner_user_id: owner,
+      contact_name: r.values.contact_name || null,
+      contact_role: r.values.contact_role || null,
+      email: r.values.email || null,
+      phone: r.values.phone || null,
+      website: r.values.website || null,
+      address: r.values.address || null,
+      notes: r.values.notes || null,
+    }));
+    importGo.disabled = true;
+    importStatus.className = 'text-sm text-slate-600';
+    let done = 0;
+    for (let i = 0; i < records.length; i += 100) {
+      importStatus.textContent = `Importing ${Math.min(i + 100, records.length)} of ${records.length}...`;
+      const { data, error } = await supabase.from('referral_partners').insert(records.slice(i, i + 100)).select();
+      if (error) {
+        importStatus.className = 'text-sm text-red-600';
+        importStatus.textContent = `Stopped after ${done}: ${error.message}`;
+        importGo.disabled = false;
+        partners.sort((a, b) => a.name.localeCompare(b.name));
+        renderAll();
+        return;
+      }
+      partners.push(...((data ?? []) as ReferralPartner[]));
+      done += (data ?? []).length;
+    }
+    partners.sort((a, b) => a.name.localeCompare(b.name));
+    renderAll();
+    importStatus.className = 'text-sm text-emerald-700';
+    importStatus.textContent = `Imported ${done} partner${done === 1 ? '' : 's'}.`;
+    importRowsEl.querySelectorAll<HTMLInputElement>('input[data-import-line]').forEach((cb) => {
+      if (cb.checked) {
+        cb.checked = false;
+        cb.disabled = true;
+      }
+    });
+    updateImportButton();
   });
 
   async function load(user?: { id: string; role?: string; linked_counselor_page_id?: string | null }) {

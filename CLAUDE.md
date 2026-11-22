@@ -4922,3 +4922,26 @@ Step 9 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
 - Tested 2026-11-21: date windows checked on 13 dates (edges and the
   August overlap); 6 database checks on Freedom in a rolled-back
   transaction.
+
+## Referral partners: bulk import (2026-11-21, no migration)
+
+Step 10 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- **Import** on the Referral partners list (owners/agency only): upload a
+  CSV or paste rows from Google Sheets/Excel (tabs work), with a
+  downloadable template (Name, Type, Contact, Role, Email, Phone, Website,
+  Address, Notes). Up to 500 rows, 2 MB.
+- `src/lib/partnerImport.ts` (pure, tested): CSV parsing (quotes, commas
+  and line breaks inside quotes), heading synonyms (Organization, Contact
+  Person, E-mail...), partner types from everyday words (family practice ->
+  doctor, pastor -> church, LCSW -> therapist, law firm -> attorney...;
+  unknown -> Other with a warning), bad emails/websites dropped with a
+  warning, websites given https.
+- **Preview** before anything saves: new rows ticked; possible duplicates
+  (same name ignoring punctuation and a leading "The", or same website
+  domain, against existing partners or earlier rows) unticked; rows with no
+  name skipped. Choose the stage and relationship owner for the batch, then
+  import in batches of 100. Referral link codes are generated per row
+  (same-name rows get -2, -3 in one batch; tested).
+- Tested 2026-11-21: 29 parser and check cases (tsx), plus a same-name
+  batch insert on Freedom in a rolled-back transaction.
