@@ -43,6 +43,11 @@ import { withBase } from '../../lib/url';
     <!-- Stage counts double as the stage filter. -->
     <div class="i-pipeline" id="r-pipeline" role="group" aria-label="Filter by stage"></div>
 
+    <!-- Seasonal touches (step 9, 0091): in-season reasons to be in touch,
+         by partner type (src/lib/seasonalTouches.ts). Each active partner
+         it applies to gets it once a year; Mark done logs it. -->
+    <div id="seasonal-card" class="t-card r-season" hidden></div>
+
     <!-- Rhythm and going cold (step 2, 0083): active partners due for a
          touch, going cold, or no longer referring. -->
     <div id="reach-section" class="t-card i-due hidden">
@@ -402,6 +407,7 @@ import { withBase } from '../../lib/url';
   import { supabase, initAdminAuth } from '../../lib/adminAuth';
   import QRCode from 'qrcode';
   import { withBase } from '../../lib/url';
+  import { touchesInSeason, seasonalKey, touchAppliesTo, daysLeft, type SeasonalTouch } from '../../lib/seasonalTouches';
   import {
     OUTREACH_TEMPLATES,
     buildOutreachMessage,
@@ -662,8 +668,65 @@ import { withBase } from '../../lib/url';
       .join('');
   }
 
+  // ---------------------------------------------------------------------
+  // Seasonal touches (step 9, migration 0091)
+  // ---------------------------------------------------------------------
+  function seasonalPending(touch: SeasonalTouch): { pending: ReferralPartner[]; total: number } {
+    const key = seasonalKey(touch);
+    const pool = partners.filter((p) => !p.archived_at && p.status === 'active' && touchAppliesTo(touch, p.category));
+    const done = new Set(activities.filter((a) => a.seasonal_key === key).map((a) => a.partner_id));
+    return { pending: pool.filter((p) => !done.has(p.id)).sort((a, b) => a.name.localeCompare(b.name)), total: pool.length };
+  }
+
+  function renderSeasonal() {
+    const card = document.getElementById('seasonal-card')!;
+    const touches = touchesInSeason().filter((t) => seasonalPending(t).total > 0);
+    card.hidden = touches.length === 0;
+    card.innerHTML = touches
+      .map((t) => {
+        const { pending, total } = seasonalPending(t);
+        const left = daysLeft(t);
+        const when = left === 0 ? 'Last day' : `${left} day${left === 1 ? '' : 's'} left`;
+        const rows = pending
+          .map(
+            (p) => `<li><span>${escapeHtml(p.name)} <small class="i-faint">${escapeHtml(categoryLabel(p.category))}</small></span>
+              <span class="i-inline"><button type="button" class="a-link open-partner" data-partner-id="${p.id}">Open</button><button type="button" class="a-btn i-btn" data-season-done="${t.key}" data-partner="${p.id}">Mark done</button></span></li>`
+          )
+          .join('');
+        return `<section class="r-season-touch">
+          <h2>${escapeHtml(t.title)}<span class="t-aside">${total - pending.length} of ${total} done · ${when}</span></h2>
+          <p class="i-hint r-season-why">${escapeHtml(t.why)} Cards and notes only, never a gift in exchange for referrals.</p>
+          ${pending.length ? `<ul class="r-season-list">${rows}</ul>` : '<p class="i-hint">Done for every partner this year.</p>'}
+        </section>`;
+      })
+      .join('');
+  }
+
+  document.getElementById('seasonal-card')!.addEventListener('click', async (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-season-done]');
+    if (!button) return;
+    const touch = touchesInSeason().find((t) => t.key === button.dataset.seasonDone);
+    const partnerId = button.dataset.partner!;
+    if (!touch) return;
+    button.disabled = true;
+    const { data, error } = await supabase
+      .from('referral_partner_activities')
+      .insert({ partner_id: partnerId, activity_type: touch.activityType, occurred_on: todayIso(), note: touch.note, seasonal_key: seasonalKey(touch) })
+      .select()
+      .single();
+    if (error) {
+      button.disabled = false;
+      window.alert('Could not log it: ' + error.message);
+      return;
+    }
+    activities.push(data as PartnerActivity);
+    noteContact(partnerId, touch.activityType, todayIso());
+    renderAll();
+  });
+
   function renderAll() {
     renderStats();
+    renderSeasonal();
     renderAvailability();
     renderReach();
     renderDue();

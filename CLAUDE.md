@@ -4898,3 +4898,27 @@ Step 8 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
 - Note: for a counselor, a partner's referral count only includes inquiries
   assigned to them (they can't see the others), by design.
 - Tested 2026-11-21 on Freedom in a rolled-back transaction (18 checks).
+
+## Referral partners: seasonal touches (2026-11-21, migration 0091)
+
+Step 9 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
+
+- Calendar in `src/lib/seasonalTouches.ts` (six touches, by partner type):
+  New year check-in (Jan 2-31: doctors, pediatricians, employers,
+  therapists), Mental Health Awareness Month (May: everyone), Before fall
+  ministry season (Jul 15-Aug 31: churches), Back to school (Aug 1-Sep 15:
+  schools, pediatricians), Pastor Appreciation Month (Oct: churches),
+  Holiday cards (Nov 15-Dec 20: everyone). Edit the list there to add or
+  change touches for every client.
+- While a touch is in season, the partners page shows a **Seasonal
+  touches** card: progress (X of Y done), days left, and each active
+  partner it applies to with Open and **Mark done**. Mark done logs an
+  ordinary activity (`thank_you` or `email`) with
+  `seasonal_key = '<key>-<year>'`, so each partner gets it once a year and it
+  counts as contact. Counselors see and mark only their own partners.
+- Today shows "<touch>: N partners to go" while any are left.
+- Ethics line on both: cards and notes only, never a gift in exchange for
+  referrals (ACA A.10.b).
+- Tested 2026-11-21: date windows checked on 13 dates (edges and the
+  August overlap); 6 database checks on Freedom in a rolled-back
+  transaction.

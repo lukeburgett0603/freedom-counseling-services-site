@@ -5568,3 +5568,35 @@ html.cmc-admin[data-theme='light'] .bp-serp-t {
 [data-practice-only][hidden] {
   display: none !important;
 }
+
+/* Referral partners: seasonal touches (0091, 2026-11-21) */
+.r-season {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+.r-season-touch h2 {
+  margin-bottom: 4px;
+}
+.r-season-why {
+  margin: 0 0 10px;
+}
+.r-season-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.r-season-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  padding: 8px 0;
+  border-top: 1px solid var(--a-line);
+  font-size: 13.5px;
+}
+.r-season-list li:first-child {
+  border-top: 0;
+}

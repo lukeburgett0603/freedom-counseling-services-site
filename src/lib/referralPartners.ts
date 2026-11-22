@@ -82,6 +82,8 @@ export type PartnerActivity = {
   // A stage change (0082): {"from": "prospect", "to": "contacted"}.
   // A stage change: {from, to}. A sent email: {template} (step 6).
   detail?: { from?: string; to?: string; template?: string; contact?: string } | null;
+  // A seasonal touch marked done (0091), e.g. 'holiday-card-2026'.
+  seasonal_key?: string | null;
 };
 
 // Rhythm and going cold (steps 2 and 5): the rules live in one shared file

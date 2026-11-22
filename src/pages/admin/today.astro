@@ -52,6 +52,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   import { targetCaseload, ALMOST_FULL_THRESHOLD, type CounselorCaseload } from '../../lib/caseload';
   import { leadSourceShortLabel, hoursToFirstContact, formatHours, median } from '../../lib/leadSource';
   import { partnerHealth, type PartnerHealthRow } from '../../lib/referralPartners';
+  import { touchesInSeason, seasonalKey, touchAppliesTo, daysLeft } from '../../lib/seasonalTouches';
 
   type Lead = {
     id: string;
@@ -70,7 +71,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     check_back_date: string | null;
   };
   type Counselor = { id: string; title: string; availability_status: string | null };
-  type Partner = { id: string; name: string; next_follow_up: string | null; status: string; archived_at: string | null; priority: string | null; created_at: string; email: string | null };
+  type Partner = { id: string; name: string; next_follow_up: string | null; status: string; archived_at: string | null; priority: string | null; created_at: string; email: string | null; category: string };
 
   const MANUAL_SOURCE = 'Manually added';
   const DAY = 86_400_000;
@@ -189,12 +190,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       leadsQuery = leadsQuery.eq('assigned_counselor_page_id', user.linked_counselor_page_id!);
       caseQuery = caseQuery.eq('counselor_page_id', user.linked_counselor_page_id!);
     }
-    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes, healthRes, availRes, contactsRes] = await Promise.all([
+    const seasonKeys = touchesInSeason().map((t) => seasonalKey(t));
+    const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes, healthRes, availRes, contactsRes, seasonRes] = await Promise.all([
       leadsQuery,
       supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').order('title'),
       caseQuery,
       // Counselors get the partners they own (RLS, migration 0090).
-      isFull || isCounselor ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at, priority, created_at, email') : Promise.resolve({ data: [] }),
+      isFull || isCounselor ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at, priority, created_at, email, category') : Promise.resolve({ data: [] }),
       isFull ? supabase.from('target_keywords').select('id').eq('status', 'active') : Promise.resolve({ data: [] }),
       // Latest check only (plus a week, for a search the newest run missed).
       isFull ? fetchRankHistory(supabase, 8, 'target_keyword_id, position, checked_at').then((data) => ({ data }), () => ({ data: [] })) : Promise.resolve({ data: [] }),
@@ -213,6 +215,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         : Promise.resolve({ data: [] }),
       // Other contacts with an email (0089): a partner is reachable through any of them.
       isFull ? supabase.from('referral_partner_contacts').select('partner_id').not('email', 'is', null).limit(5000) : Promise.resolve({ data: [] }),
+      // Seasonal touches already done this season (0091).
+      (isFull || isCounselor) && seasonKeys.length
+        ? supabase.from('referral_partner_activities').select('partner_id, seasonal_key').in('seasonal_key', seasonKeys).limit(5000)
+        : Promise.resolve({ data: [] }),
     ]);
     if ('error' in leadsRes && leadsRes.error) {
       $('t-headline').textContent = "Couldn't load your numbers. Try reloading the page.";
@@ -238,7 +244,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const availabilityCadence = ((bizRes.data as { availability_update_cadence?: string } | null)?.availability_update_cadence ?? 'monthly') as string;
     const availabilitySent = (availRes.data ?? []) as { partner_id: string; occurred_on: string }[];
     const partnersWithContactEmail = new Set(((contactsRes.data ?? []) as { partner_id: string }[]).map((c) => c.partner_id));
-    render({ user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, partnersWithContactEmail, practice, me, keywords: activeKw.size, pageOne });
+    const seasonalDone = (seasonRes.data ?? []) as { partner_id: string; seasonal_key: string }[];
+    render({ user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, partnersWithContactEmail, seasonalDone, practice, me, keywords: activeKw.size, pageOne });
   }
 
   type Ctx = {
@@ -252,6 +259,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     availabilityCadence: string;
     availabilitySent: { partner_id: string; occurred_on: string }[];
     partnersWithContactEmail: Set<string>;
+    seasonalDone: { partner_id: string; seasonal_key: string }[];
     practice: string;
     me: Counselor | null;
     keywords: number;
@@ -259,7 +267,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   };
 
   function render(ctx: Ctx) {
-    const { user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, partnersWithContactEmail, practice, me } = ctx;
+    const { user, isCounselor, leads, counselors, caseloads, partners, partnerHealthRows, availabilityCadence, availabilitySent, partnersWithContactEmail, seasonalDone, practice, me } = ctx;
     const name = firstName(user, me?.title ?? null);
     $('t-greeting').textContent = name ? `${greeting()}, ${name}.` : `${greeting()}.`;
 
@@ -404,6 +412,25 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
     // Availability update (0087): active partners with an email address who
     // haven't had one this month (or quarter).
+    // Seasonal touches (0091): one item per touch in season with partners
+    // still to do (a counselor's count covers their own partners).
+    for (const t of touchesInSeason()) {
+      const key = seasonalKey(t);
+      const pool = partners.filter((p) => p.status === 'active' && touchAppliesTo(t, p.category));
+      const done = new Set(seasonalDone.filter((d) => d.seasonal_key === key).map((d) => d.partner_id));
+      const pending = pool.filter((p) => !done.has(p.id)).length;
+      if (!pending) continue;
+      const left = daysLeft(t);
+      moves.push({
+        id: `season-${t.key}`,
+        title: `${t.title}: ${pending} partner${pending === 1 ? '' : 's'} to go`,
+        sub: `${left === 0 ? 'Last day' : `${left} day${left === 1 ? '' : 's'} left`}. Cards and notes only, never a gift in exchange for referrals.`,
+        tag: 'Get referred',
+        icon: ICON.partner,
+        link: withBase('/admin/referral-partners#seasonal-card'),
+        linkText: 'Open',
+      });
+    }
     // Practice-wide, so owners and the agency only.
     if (!isCounselor && availabilityCadence !== 'off') {
       const windowDays = availabilityCadence === 'quarterly' ? 90 : 30;
