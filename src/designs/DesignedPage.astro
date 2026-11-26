@@ -6,7 +6,7 @@ import { DESIGN_COMPONENTS } from './components';
 import { designIdFor, blocksFor } from './site';
 import { loadAllBlocks, missingBlocks } from '../lib/blocks';
 import type { Page, Business } from '../lib/pages';
-import { fillPage, siteVars } from './shared';
+import { fillPage, rateRange, siteVars } from './shared';
 
 interface Props {
   page: Page;
@@ -14,7 +14,12 @@ interface Props {
   business: Business;
 }
 
-const { page: rawPage, allPages: rawPages, business } = Astro.props;
+const { page: rawPage, allPages: rawPages, business: rawBusiness } = Astro.props;
+// The practice's priceRange in structured data follows the live team's
+// rates ("$100-$165"), so a rate change or a counselor leaving (0092)
+// can't leave a stale typed range behind. The typed value is the fallback.
+const range = rateRange(rawPages);
+const business = range ? { ...rawBusiness, price_range: range.replace(' to ', '-') } : rawBusiness;
 // {rate_range}, {counselor_count} and {phone} in search fields and FAQs.
 const vars = siteVars(rawPages, business);
 const allPages = rawPages.map((p) => fillPage(p, vars));
