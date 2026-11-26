@@ -1,7 +1,7 @@
 {
   "slug": "counselors",
   "blocks": {
-    "hero.subhead": "Six counselors with different strengths, one shared commitment: the best clinical care, with faith at the center and never forced. Choose the counselor who sounds right for you, or let us match you.",
+    "hero.subhead": "Our {counselor_count} counselors have different strengths and one shared commitment: the best clinical care, with faith at the center and never forced. Choose the counselor who sounds right for you, or let us match you.",
     "facts": [
       {
         "icon": "user-circle-check",
@@ -25,7 +25,7 @@
       },
       {
         "href": "/child-teen-counseling",
-        "label": "Sophie (children and teens), Luke (boys 8 and up), or Rhonda (older teen girls)",
+        "label": "Luke (boys 8 and up) or Rhonda (older teen girls)",
         "quote": "For a child or teen"
       },
       {
@@ -62,11 +62,6 @@
         "href": "/counseling-for-pastors",
         "label": "Tony or Luke",
         "quote": "For pastors and ministry leaders"
-      },
-      {
-        "href": "/sophie-bowman",
-        "label": "Sophie, $50 per session",
-        "quote": "For the lowest cost"
       }
     ],
     "faith.heading": "Faith at the center, never forced",

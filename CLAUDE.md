@@ -4963,3 +4963,54 @@ Step 10 of `Counselor Marking Co./referral-partners/upgrade-plan.md`.
   (same-name rows get -2, -3 in one batch; tested).
 - Tested 2026-11-21: 29 parser and check cases (tsx), plus a same-name
   batch insert on Freedom in a rolled-back transaction.
+
+## Archiving a counselor who leaves (2026-11-25, migration 0092)
+
+Luke's spec (first used for Sophie Bowman leaving Freedom): when a
+counselor leaves a group practice, everything about them comes off the
+public site and the site stays true to the team that remains. Blog posts
+they wrote stay, under their name; nothing links to their profile.
+
+- **Where:** Counselor settings → "Leaving the practice" (owner/agency)
+  opens `admin/archive-counselor` (`?page=<id>`), which shows the full
+  effect before anything changes (rules in `src/lib/archiveImpact.ts`):
+  service pages that keep their other counselors, services only they
+  provide (checked to come down too), the rate range before and after,
+  posts that stay, open inquiries assigned to or asking for them, and
+  every sentence, typed price or typed team size to rewrite, each with an
+  Edit link (Page text, or Website pages via its new `?page=`). A checkbox
+  (on by default, Luke's call) turns off their login. The same screen
+  lists archived counselors with "Bring back" (restores pages archived
+  with them and offers a re-invite to the saved login email).
+- **Database:** `pages.status` gains `archived`; `archived_at`,
+  `archived_with` (a service archived along with a counselor),
+  `archived_login_email`. `archive_counselor(page, service_ids,
+  remove_login)` and `restore_counselor(page)`, security definer, owner
+  or agency only. Turning off the login deletes the `admin_users` row,
+  the same as Team → Remove. Nothing else is deleted.
+- **Build (automatic):** `getPublishedPages()` reads archived rows in the
+  same query and fills `src/lib/retired.ts`. Archived counselors drop out
+  of every derived section (cards, service `team.items`, fees table, rate
+  range, request form, Person schema). `renderCopy()` unlinks links to
+  archived pages; `LinkCards`, `QuoteLinks` and `FactsStrip` drop them.
+  `[...slug].astro` renders the old address as a noindex redirect (a
+  profile to the Counselors Overview page, a service to the Services
+  Overview page, else `/`), and the sitemap leaves it out
+  (`loadArchivedPaths` in `sitemapDates.mjs`). Blog bylines keep the name
+  and photo, without the profile link.
+- **Text tokens:** `{rate_range}`, `{counselor_count}` (new, as a word:
+  "five") and `{phone}` now work in search titles, descriptions and FAQs
+  too (`fillPage` in `DesignedPage.astro`), not just block text. Write
+  prices and team sizes with tokens so a rate change or a departure
+  updates every sentence. The structured-data `priceRange` follows the
+  live rates; `business.price_range` is only the fallback.
+- **Not automatic:** prose that names the person, and anything typed as a
+  number. The archive screen lists each one; rewrite them the same day.
+- **Preview an archive before doing it:** `LAUNCH_PREVIEW=1
+  LAUNCH_OVERLAY_FILE=<file> npx astro build` with
+  `{ "pages": { "<slug>": { "status": "archived" } } }`.
+- **Admin lists:** Today, Caseload, Counselor settings, Team's invite
+  links and the referral digest skip archived counselors; Inquiries and
+  the analytics keep every name so past inquiries still read right.
+
+**Freedom (2026-11-25):** Sophie Bowman archived (login off; email kept), migration 0092 applied. Her 7 service pages kept their other counselors; no service was hers alone. 14 text blocks and 13 pages rewritten (her mentions removed; "$50 to $165" and "six counselors" now `{rate_range}` / `{counselor_count}`; child-teen and grief descriptions now "From $100" / "$100 to $115"), `business.price_range` $100-$165. Range is now $100 to $165, five counselors. Her two articles stay up under her name. Commits `7ae0e1f`, `2ffe8c7`.

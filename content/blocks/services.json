@@ -43,7 +43,7 @@
       },
       {
         "href": "/depression-counseling",
-        "text": "Small, steady steps back toward your life, with any of our six counselors.",
+        "text": "Small, steady steps back toward your life, with any of our {counselor_count} counselors.",
         "title": "Depression counseling"
       },
       {
@@ -115,7 +115,7 @@
         "heading": "Everything we help with, A to Z"
       },
       {
-        "body": "- **The best clinical care.** Our counselors use well-researched approaches, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), eye movement desensitization and reprocessing (EMDR), internal family systems (IFS), exposure and response prevention (ERP), Gottman Method-informed couples work, family systems, dialectical behavior therapy (DBT) skills, and art interventions.\n- **Faith at the center, never forced.** Freedom brings together a biblical worldview, Christian theology, and the best clinical practice. If you'd rather not bring faith in, you'll get the same excellent care, and your counselor will follow your lead.\n- **Seen soon.** Usually the same week, sometimes the next day.\n- **Prices posted up front.** $50 to $165 per 50-minute session, depending on your counselor. HSA and FSA cards work, and we give you a superbill for possible out-of-network reimbursement.",
+        "body": "- **The best clinical care.** Our counselors use well-researched approaches, including cognitive behavioral therapy (CBT), acceptance and commitment therapy (ACT), eye movement desensitization and reprocessing (EMDR), internal family systems (IFS), exposure and response prevention (ERP), Gottman Method-informed couples work, family systems, dialectical behavior therapy (DBT) skills, and art interventions.\n- **Faith at the center, never forced.** Freedom brings together a biblical worldview, Christian theology, and the best clinical practice. If you'd rather not bring faith in, you'll get the same excellent care, and your counselor will follow your lead.\n- **Seen soon.** Usually the same week, sometimes the next day.\n- **Prices posted up front.** {rate_range} per 50-minute session, depending on your counselor. HSA and FSA cards work, and we give you a superbill for possible out-of-network reimbursement.",
         "heading": "What every service has in common"
       }
     ],

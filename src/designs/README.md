@@ -32,7 +32,9 @@ H1, meta title, meta description, focus keyword (search settings, with
 their locks), FAQs (they feed FAQ structured data), counselor
 credentials, headshot (`images.headshot`, with `focus` for crops), and
 `session_rate_usd` (0079). Designs compute derived text from data, never
-retype it: rate range (`{rate_range}` in block text), phone (`{phone}`),
+retype it: rate range (`{rate_range}`), team size as a word
+(`{counselor_count}`), phone (`{phone}`), in block text and in search
+titles, descriptions and FAQs,
 hours and address (from `business`, the same values as the structured
 data).
 
