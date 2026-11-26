@@ -11,7 +11,7 @@ import NoteCard from '../components/site/NoteCard.astro';
 import { blockReader, type BlockValues } from '../lib/blocks';
 import type { Page, Business } from '../lib/pages';
 import { CONTACT_BLOCKS } from './contact.blocks';
-import { counselorOptions, rateRange, fill } from './shared';
+import { counselorOptions, fill, siteVars } from './shared';
 
 interface Props {
   page: Page;
@@ -23,7 +23,7 @@ interface Props {
 
 const { page, allPages, business, blocks } = Astro.props;
 const { t, list } = blockReader(blocks, CONTACT_BLOCKS);
-const vars = { rate_range: rateRange(allPages), phone: business.telephone };
+const vars = siteVars(allPages, business);
 const f = (s: string) => fill(s, vars);
 const steps = list('next.steps');
 ---

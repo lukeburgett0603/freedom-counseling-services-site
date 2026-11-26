@@ -3,12 +3,17 @@
 // (where hero taglines and proof go instead of crowding the hero).
 // Facts only: no star ratings, review counts, or client quotes.
 import Ph from './Ph.astro';
+import { isRetiredHref } from '../../lib/retired';
 
 interface Props {
   items: { icon: string; text: string; href?: string; linkText?: string }[];
 }
 
-const items = Astro.props.items.filter((i) => i.text).slice(0, 4);
+// A fact's link to an archived page (see retired.ts) is dropped; the fact stays.
+const items = Astro.props.items
+  .filter((i) => i.text)
+  .slice(0, 4)
+  .map((i) => (isRetiredHref(i.href) ? { ...i, href: undefined } : i));
 ---
 
 {items.length > 0 && (

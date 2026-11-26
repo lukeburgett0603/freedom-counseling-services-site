@@ -2197,9 +2197,12 @@ import UnsplashSearchModal from '../../../components/UnsplashSearchModal.astro';
     pages = (pagesData ?? []) as ContentPage[];
 
     populatePagePicker(contentPageSelect);
-    // Open the homepage first rather than whichever title sorts first.
+    // Open ?page=<id> when linked from another screen (the archive
+    // screen's "text to rewrite" list), else the homepage rather than
+    // whichever title sorts first.
+    const requested = pages.find((p) => p.id === new URLSearchParams(location.search).get('page'));
     const home = pages.find((p) => p.page_type === 'Homepage');
-    if (home) contentPageSelect.value = home.id;
+    if (requested ?? home) contentPageSelect.value = (requested ?? home)!.id;
     contentPageSelectWrap.classList.add('hidden');
     document.getElementById('p-nav')!.hidden = false;
     renderPageNav();

@@ -193,7 +193,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const seasonKeys = touchesInSeason().map((t) => seasonalKey(t));
     const [leadsRes, counselorsRes, caseRes, partnersRes, kwRes, rankRes, bizRes, healthRes, availRes, contactsRes, seasonRes] = await Promise.all([
       leadsQuery,
-      supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').order('title'),
+      supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').neq('status', 'archived').order('title'),
       caseQuery,
       // Counselors get the partners they own (RLS, migration 0090).
       isFull || isCounselor ? supabase.from('referral_partners').select('id, name, next_follow_up, status, archived_at, priority, created_at, email, category') : Promise.resolve({ data: [] }),

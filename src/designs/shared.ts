@@ -61,6 +61,30 @@ export function fill(text: string, vars: Record<string, string | null | undefine
   return text.replace(/\{(\w+)\}/g, (m, k) => vars[k] ?? m);
 }
 
+const NUMBER_WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+
+// The values every page's text can use, computed from the live team so a
+// rate change, a new counselor or one who leaves (archived, 0092) updates
+// every sentence at once: {rate_range} ("$100 to $165"), {counselor_count}
+// ("six"), {phone}.
+export function siteVars(allPages: Page[], business: { telephone: string | null }): Record<string, string | null> {
+  const n = counselorPages(allPages).length;
+  return { rate_range: rateRange(allPages), counselor_count: NUMBER_WORDS[n] ?? String(n), phone: business.telephone };
+}
+
+// The same values in a page's search title, description and FAQs (they
+// feed the meta tags and FAQ structured data), so "$50 to $165" in a
+// description can be written "{rate_range}" and never go stale.
+export function fillPage(page: Page, vars: Record<string, string | null | undefined>): Page {
+  const f = (t: string | null) => (t ? fill(t, vars) : t);
+  return {
+    ...page,
+    meta_title: f(page.meta_title),
+    meta_description: f(page.meta_description),
+    faqs: (page.faqs ?? []).map((q) => ({ ...q, question: fill(q.question, vars), answer: fill(q.answer, vars) })),
+  };
+}
+
 // Articles in a service's category (the service page's own `category`),
 // newest first: the "Related articles" list builds itself as posts are
 // published.

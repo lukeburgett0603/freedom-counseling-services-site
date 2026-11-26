@@ -1,0 +1,296 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<!--
+  Leaving the practice (migration 0092, Luke 2026-11-25). Archiving a
+  counselor takes everything about them off the public site on the next
+  publish: their profile (its address redirects to the counselors page),
+  their place on every service team, the fees table and rate range, the
+  request form, structured data. The remaining counselors carry on as
+  they are. Blog posts they wrote stay, under their name. A service only
+  they provide can come down with them. Nothing is deleted, and "Bring
+  back" restores it all.
+
+  Code can't rewrite sentences that name them, or prices and team sizes
+  typed as numbers; this screen lists each one with a link to edit it.
+  Rules: src/lib/archiveImpact.ts. Owner and agency only.
+-->
+<AdminLayout title="Leaving the practice | Admin" current="counselor-settings">
+  <p class="i-intro">When a counselor leaves, archive them here. See exactly what changes on your website before anything does.</p>
+
+  <div id="ac-loading" class="t-card t-empty"><b>Loading…</b></div>
+
+  <section id="ac-pick" class="t-card" hidden>
+    <h2>Who is leaving?</h2>
+    <div id="ac-pick-list" class="ac-pick"></div>
+  </section>
+
+  <div id="ac-impact" hidden>
+    <section class="t-card">
+      <h2 id="ac-title"></h2>
+      <p class="v-help">These happen automatically when you archive:</p>
+      <ul class="ac-list" id="ac-auto"></ul>
+    </section>
+
+    <section class="t-card" id="ac-sole-card" hidden>
+      <h2>Services only <span class="ac-first"></span> provides</h2>
+      <p class="v-help">No one else on your team is listed for these. Checked pages come down too (their addresses send visitors to your services page). Uncheck one to keep it up and add a counselor to it in Page text.</p>
+      <div id="ac-sole"></div>
+    </section>
+
+    <section class="t-card" id="ac-mentions-card">
+      <h2>Text to rewrite<span class="t-aside" id="ac-mentions-count"></span></h2>
+      <p class="v-help" id="ac-mentions-help">Code can't rewrite sentences, so these stay as written until you change them. Links to <span class="ac-first"></span>'s page turn into plain text by themselves. Tip: write prices as <code>{'{rate_range}'}</code> and team size as <code>{'{counselor_count}'}</code> and they stay current on their own.</p>
+      <div id="ac-mentions"></div>
+    </section>
+
+    <section class="t-card">
+      <h2>Archive <span class="ac-first"></span></h2>
+      <label class="i-check" id="ac-login-wrap" hidden><input type="checkbox" id="ac-login" checked /><span id="ac-login-label"></span></label>
+      <p class="v-warn" id="ac-leads" hidden></p>
+      <div class="ac-actions">
+        <button type="button" id="ac-go" class="a-btn a-btn-primary"></button>
+        <a class="a-btn" id="ac-cancel" href="">Cancel</a>
+      </div>
+      <p id="ac-status" class="i-hint" role="status"></p>
+    </section>
+  </div>
+
+  <section id="ac-archived-card" class="t-card" hidden>
+    <h2>Archived counselors</h2>
+    <p class="v-help">Off your website. Their page, text and history are kept. Bring someone back and everything returns on the next publish.</p>
+    <div id="ac-archived"></div>
+    <p id="ac-restore-status" class="i-hint" role="status"></p>
+  </section>
+</AdminLayout>
+
+<script>
+  import { supabase, initAdminAuth } from '../../lib/adminAuth';
+  import { triggerRebuild, callPublishFunction } from '../../lib/publishFunction';
+  import { archiveImpact, type ImpactPage, type ImpactBlock, type ArchiveImpact } from '../../lib/archiveImpact';
+  import { withBase } from '../../lib/url';
+
+  type Row = ImpactPage & { archived_at: string | null; archived_with: string | null; archived_login_email: string | null };
+
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const esc = (v: string) => {
+    const d = document.createElement('div');
+    d.textContent = v;
+    return d.innerHTML;
+  };
+  const here = withBase('/admin/archive-counselor');
+  let pages: Row[] = [];
+  let blocks: ImpactBlock[] = [];
+
+  // Every text block, a page of 1,000 at a time (Supabase's row cap).
+  async function allBlocks(): Promise<ImpactBlock[]> {
+    const out: ImpactBlock[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from('content_blocks')
+        .select('page_id, block_key, value')
+        .order('page_id')
+        .order('block_key')
+        .range(from, from + 999);
+      if (error) throw new Error(error.message);
+      out.push(...(data as ImpactBlock[]));
+      if (!data || data.length < 1000) return out;
+    }
+  }
+
+  async function load() {
+    const [p, b] = await Promise.all([
+      supabase
+        .from('pages')
+        .select('id, slug, title, page_type, status, session_rate_usd, author_name, meta_title, meta_description, h1, copy, faqs, archived_at, archived_with, archived_login_email'),
+      allBlocks(),
+    ]);
+    if (p.error) throw new Error(p.error.message);
+    pages = p.data as Row[];
+    blocks = b;
+  }
+
+  function renderArchived() {
+    const archived = pages.filter((p) => p.page_type === 'Counselor Profile' && p.status === 'archived');
+    $('ac-archived-card').hidden = !archived.length;
+    $('ac-archived').innerHTML = archived
+      .map((p) => {
+        const withThem = pages.filter((x) => x.archived_with === p.id).map((x) => x.title);
+        const date = p.archived_at ? new Date(p.archived_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        return `<div class="ac-row"><div><b>${esc(p.title)}</b><small>Archived ${date}${withThem.length ? ` with ${esc(withThem.join(', '))}` : ''}</small></div>
+          <button type="button" class="a-btn" data-restore="${p.id}">Bring back</button></div>`;
+      })
+      .join('');
+  }
+
+  function renderPick() {
+    const team = pages.filter((p) => p.page_type === 'Counselor Profile' && p.status === 'content-complete');
+    $('ac-pick').hidden = false;
+    $('ac-pick-list').innerHTML = team.length
+      ? team.map((p) => `<a class="a-btn" href="${here}?page=${p.id}">${esc(p.title)}</a>`).join('')
+      : '<p class="i-hint">No counselors are on your website right now.</p>';
+  }
+
+  const editorHref = (m: ArchiveImpact['mentions'][number]) =>
+    m.editor === 'page-text' ? withBase(`/admin/content/page-text?page=${m.page.id}`)
+      : m.editor === 'blog' ? withBase('/admin/blog')
+      : withBase(`/admin/content/page-copy?page=${m.page.id}`);
+
+  const KIND: Record<string, string> = { name: 'Names them', price: 'Their price', count: 'Team size' };
+
+  async function renderImpact(id: string) {
+    const r = archiveImpact(pages, blocks, id);
+    const c = r.counselor;
+    const first = c.title.split(' ')[0];
+    document.querySelectorAll('.ac-first').forEach((el) => (el.textContent = first));
+    $('ac-title').textContent = `Archive ${c.title}`;
+    $('ac-impact').hidden = false;
+
+    const auto = [
+      `Their profile page comes down. Its address sends visitors to your counselors page.`,
+      `Removed from counselor cards, your fees table, the request form's counselor list and search engine data.`,
+      r.services.length
+        ? `Removed from ${r.services.length} service page${r.services.length === 1 ? '' : 's'}, which keep their other counselors: ${r.services.map((s) => `${esc(s.page.title)} (${esc(s.others.join(', '))})`).join('; ')}.`
+        : '',
+      r.rateBefore !== r.rateAfter ? `Your rate range changes from ${r.rateBefore ?? 'none'} to ${r.rateAfter ?? 'none'} wherever it's shown automatically.` : '',
+      r.posts.length
+        ? `${r.posts.length} blog post${r.posts.length === 1 ? '' : 's'} they wrote stay up, under their name, without a link to their profile: ${r.posts.map((p) => esc(p.title)).join('; ')}.`
+        : '',
+      `${r.remaining} counselor${r.remaining === 1 ? '' : 's'} remain on your website.`,
+    ].filter(Boolean);
+    $('ac-auto').innerHTML = auto.map((t) => `<li>${t}</li>`).join('');
+
+    $('ac-sole-card').hidden = !r.soleServices.length;
+    $('ac-sole').innerHTML = r.soleServices
+      .map((s) => `<label class="i-check"><input type="checkbox" class="ac-sole" value="${s.page.id}" checked /><span>${esc(s.page.title)}</span></label>`)
+      .join('');
+
+    // One row per place, with every kind found there.
+    const groups = new Map<string, { m: (typeof r.mentions)[number]; kinds: Set<string> }>();
+    for (const m of r.mentions) {
+      const key = `${m.page.id}|${m.where}`;
+      const g = groups.get(key) ?? { m, kinds: new Set<string>() };
+      g.kinds.add(m.kind);
+      groups.set(key, g);
+    }
+    const rows = [...groups.values()];
+    $('ac-mentions-count').textContent = rows.length ? String(rows.length) : '';
+    $('ac-mentions').innerHTML = rows.length
+      ? rows
+          .map(({ m, kinds }) => `<div class="ac-row ac-mention"><div><b>${esc(m.page.title)}</b> <small>${esc(m.where)} · ${[...kinds].map((k) => KIND[k]).join(', ')}</small><q>${esc(m.snippet)}</q></div>
+            <a class="a-btn" href="${editorHref(m)}" target="_blank" rel="noopener">Edit</a></div>`)
+          .join('')
+      : `<p class="i-hint">Nothing else on your website names ${esc(first)}.</p>`;
+
+    const { data: logins } = await supabase.from('admin_users').select('email').eq('linked_counselor_page_id', id).neq('role', 'agency');
+    const login = logins?.[0]?.email as string | undefined;
+    $('ac-login-wrap').hidden = !login;
+    $('ac-login-label').textContent = login ? `Also turn off ${first}'s admin login (${login}). They'll no longer see inquiries or client details.` : '';
+
+    const { count } = await supabase
+      .from('leads')
+      .select('id', { count: 'exact', head: true })
+      .or(`assigned_counselor_page_id.eq.${id},preferred_counselor_page_id.eq.${id}`)
+      .in('status', ['new', 'contacted']);
+    $('ac-leads').hidden = !count;
+    $('ac-leads').textContent = count ? `${count} open inquir${count === 1 ? 'y is' : 'ies are'} assigned to or asking for ${first}. Reassign them in Inquiries.` : '';
+
+    ($('ac-cancel') as HTMLAnchorElement).href = withBase('/admin/counselor-settings');
+    const go = $<HTMLButtonElement>('ac-go');
+    go.textContent = `Archive ${first} and update the website`;
+    go.onclick = async () => {
+      if (!confirm(`Archive ${c.title}? Their page comes off your website on the next publish. You can bring them back later.`)) return;
+      go.disabled = true;
+      const status = $('ac-status');
+      status.className = 'i-hint';
+      status.textContent = 'Archiving…';
+      const services = [...document.querySelectorAll<HTMLInputElement>('.ac-sole:checked')].map((el) => el.value);
+      const { error } = await supabase.rpc('archive_counselor', {
+        p_page_id: id,
+        p_service_page_ids: services,
+        p_remove_login: !!login && $<HTMLInputElement>('ac-login').checked,
+      });
+      if (error) {
+        status.textContent = 'Could not archive: ' + error.message;
+        status.className = 'i-hint r-err';
+        go.disabled = false;
+        return;
+      }
+      status.textContent = 'Archived. Updating your website…';
+      const result = await triggerRebuild();
+      status.textContent = result.ok
+        ? `${c.title} is archived. Your website updates in a few minutes.${rows.length ? ' Next, rewrite the text listed above.' : ''}`
+        : `${c.title} is archived. The website update didn't start; it will go out with the next publish.`;
+      status.className = result.ok ? 'i-hint r-ok' : 'i-hint r-warn';
+      await load();
+      renderArchived();
+    };
+  }
+
+  $('ac-archived').addEventListener('click', async (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-restore]');
+    if (!btn) return;
+    const page = pages.find((p) => p.id === btn.dataset.restore)!;
+    if (!confirm(`Bring ${page.title} back onto your website?`)) return;
+    btn.disabled = true;
+    const status = $('ac-restore-status');
+    status.className = 'i-hint';
+    status.textContent = 'Restoring…';
+    const { data, error } = await supabase.rpc('restore_counselor', { p_page_id: page.id });
+    if (error) {
+      status.textContent = 'Could not restore: ' + error.message;
+      status.className = 'i-hint r-err';
+      btn.disabled = false;
+      return;
+    }
+    const email = (data as { login_email?: string | null })?.login_email;
+    if (email && confirm(`Send ${page.title} a new login invite at ${email}?`)) {
+      const invite = await callPublishFunction({
+        action: 'invite',
+        email,
+        role: 'staff',
+        redirectTo: window.location.origin + withBase('/admin/today'),
+        linkedCounselorPageId: page.id,
+      });
+      if (!invite.ok) status.textContent = `Restored, but the invite failed (${invite.error}). Invite them from Team.`;
+    }
+    const result = await triggerRebuild();
+    if (!status.textContent?.startsWith('Restored, but')) {
+      status.textContent = result.ok ? `${page.title} is back. Your website updates in a few minutes.` : `${page.title} is back; it goes live with the next publish.`;
+    }
+    status.className = 'i-hint r-ok';
+    await load();
+    renderArchived();
+    renderPick();
+  });
+
+  async function onAuthed() {
+    try {
+      await load();
+    } catch (err) {
+      $('ac-loading').innerHTML = `<b>Could not load your pages</b>${esc(String(err))}`;
+      return;
+    }
+    $('ac-loading').hidden = true;
+    renderArchived();
+    const id = new URLSearchParams(location.search).get('page');
+    const target = pages.find((p) => p.id === id && p.page_type === 'Counselor Profile' && p.status === 'content-complete');
+    if (target) await renderImpact(target.id);
+    else renderPick();
+  }
+
+  initAdminAuth(onAuthed, { allowedRoles: ['owner', 'agency'] });
+</script>
+
+<style>
+  .ac-list { margin: 8px 0 0; padding-left: 1.2em; display: grid; gap: 8px; line-height: 1.5; }
+  .ac-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .ac-row { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--line, rgba(127, 127, 127, 0.2)); }
+  .ac-row:first-child { border-top: 0; }
+  .ac-row small { display: block; opacity: 0.7; margin-top: 2px; }
+  .ac-row q { display: block; margin-top: 6px; opacity: 0.85; font-size: 0.92em; quotes: '“' '”'; }
+  .ac-row .a-btn { flex: none; }
+  .ac-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  #ac-impact > section, #ac-archived-card, #ac-pick { margin-bottom: 16px; }
+</style>

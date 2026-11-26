@@ -21,7 +21,7 @@ import RequestPanel from '../components/site/RequestPanel.astro';
 import { blockReader, type BlockValues } from '../lib/blocks';
 import type { Page, Business } from '../lib/pages';
 import { SERVICE_BLOCKS } from './service.blocks';
-import { teamCards, rangeOf, counselorOptions, relatedArticles, rateRange, fill } from './shared';
+import { teamCards, rangeOf, counselorOptions, relatedArticles, fill, siteVars } from './shared';
 
 interface Props {
   page: Page;
@@ -34,7 +34,7 @@ interface Props {
 const { page, allPages, business, blocks, allBlocks } = Astro.props;
 const { t, list } = blockReader(blocks, SERVICE_BLOCKS);
 const team = teamCards(list('team.items') as { slug: string; text: string }[], allPages, allBlocks);
-const vars = { rate_range: rateRange(allPages), service_range: rangeOf(team), phone: business.telephone };
+const vars = { ...siteVars(allPages, business), service_range: rangeOf(team) };
 const f = (s: string) => fill(s, vars);
 const sections = list('sections');
 const before = sections.slice(0, 2);

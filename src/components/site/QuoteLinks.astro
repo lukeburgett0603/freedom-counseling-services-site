@@ -5,6 +5,7 @@
 // see a services list.
 import Ph from './Ph.astro';
 import { withBase } from '../../lib/url';
+import { isRetiredHref } from '../../lib/retired';
 
 interface Props {
   heading: string;
@@ -12,7 +13,9 @@ interface Props {
   items: { quote: string; label: string; href: string }[];
 }
 
-const { heading, lede, items } = Astro.props;
+const { heading, lede, items: allItems } = Astro.props;
+// Never link to an archived page (a counselor who left): see retired.ts.
+const items = allItems.filter((i) => !isRetiredHref(i.href));
 const resolve = (h: string) => (/^\/(?!\/)/.test(h) ? withBase(h) : h);
 ---
 

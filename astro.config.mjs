@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 import { loadEnv } from 'vite';
-import { loadSitemapDates } from './src/lib/sitemapDates.mjs';
+import { loadSitemapDates, loadArchivedPaths } from './src/lib/sitemapDates.mjs';
 import { installRemoteImageCache } from './src/lib/remoteImageCache.mjs';
 
 // Each storage image downloads once, not once per use (see the module).
@@ -10,6 +10,8 @@ installRemoteImageCache();
 
 // Real last-edited dates for the sitemap's <lastmod> (see the module).
 const sitemapDates = await loadSitemapDates({ ...loadEnv(process.env.NODE_ENV ?? 'production', process.cwd(), 'PUBLIC_'), ...process.env });
+// Archived pages (0092) are redirect pages: kept out of the sitemap.
+const archivedPaths = await loadArchivedPaths({ ...loadEnv(process.env.NODE_ENV ?? 'production', process.cwd(), 'PUBLIC_'), ...process.env });
 
 // `site` gets overwritten per client repo once a domain is known
 // (site: 'https://clientdomain.com'). Needed for correct canonical URLs,
@@ -85,7 +87,7 @@ export default defineConfig({
       // /admin/* is the internal, auth-gated admin area — never
       // public/indexable pages. /share-your-experience is a redirect (see
       // `redirects` below), kept out explicitly in case a build lists it.
-      filter: (page) => !page.includes('/admin') && !page.includes('/share-your-experience'),
+      filter: (page) => !page.includes('/admin') && !page.includes('/share-your-experience') && !archivedPaths.has(new URL(page).pathname),
       serialize(item) {
         const lastmod = sitemapDates.get(new URL(item.url).pathname);
         if (lastmod) item.lastmod = lastmod;

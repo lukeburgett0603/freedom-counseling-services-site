@@ -1,6 +1,7 @@
 import { marked, Renderer } from 'marked';
 import type { Tokens } from 'marked';
 import { withBase } from './url';
+import { unlinkRetired } from './retired';
 
 // `pages.copy` is plain markdown (webpage-copywriter's copy.md content,
 // synced as-is) rather than Wix's Ricos JSON — this is the one deliberate
@@ -49,9 +50,11 @@ renderer.link = function ({ href, title, tokens }: Tokens.Link) {
   return `<a href="${resolvedHref}"${titleAttr}>${html}</a>`;
 };
 
+// Links to an archived page (a counselor who left) come out as plain
+// text; see retired.ts.
 export function renderCopy(markdown: string | null): string {
   if (!markdown) return '';
-  return marked.parse(markdown, { async: false, renderer }) as string;
+  return unlinkRetired(marked.parse(markdown, { async: false, renderer }) as string);
 }
 
 // Pulled from the same tokens renderCopy() renders from, via the lexer

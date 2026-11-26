@@ -6,6 +6,7 @@ import { DESIGN_COMPONENTS } from './components';
 import { designIdFor, blocksFor } from './site';
 import { loadAllBlocks, missingBlocks } from '../lib/blocks';
 import type { Page, Business } from '../lib/pages';
+import { fillPage, siteVars } from './shared';
 
 interface Props {
   page: Page;
@@ -13,7 +14,11 @@ interface Props {
   business: Business;
 }
 
-const { page, allPages, business } = Astro.props;
+const { page: rawPage, allPages: rawPages, business } = Astro.props;
+// {rate_range}, {counselor_count} and {phone} in search fields and FAQs.
+const vars = siteVars(rawPages, business);
+const allPages = rawPages.map((p) => fillPage(p, vars));
+const page = fillPage(rawPage, vars);
 const id = designIdFor(page)!;
 const Design = DESIGN_COMPONENTS[id];
 if (!Design) throw new Error(`No design component registered for "${id}" (page ${page.slug})`);

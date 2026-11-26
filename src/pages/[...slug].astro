@@ -1,6 +1,8 @@
 ---
 import { getPublishedPages, getBusiness } from '../lib/pages';
 import type { Page, PageType } from '../lib/pages';
+import { retiredPages, retiredRedirect } from '../lib/retired';
+import { withBase } from '../lib/url';
 import Homepage from '../templates/Homepage.astro';
 import About from '../templates/About.astro';
 import ServicesOverview from '../templates/ServicesOverview.astro';
@@ -21,18 +23,31 @@ import { designIdFor } from '../designs/site';
 
 // Homepage renders at "/" via index.astro instead, so it's excluded here
 // even though it's still part of allPages (needed for nav/breadcrumbs).
+//
+// An archived page (a counselor who left, or a service only they
+// provided; migration 0092) keeps its address as a redirect page, so old
+// links and search results land on the counselors or services page
+// instead of a 404. Astro writes these as noindex meta-refresh pages, and
+// the sitemap leaves them out.
 export async function getStaticPaths() {
   const pages = await getPublishedPages();
-  return pages
-    .filter((p) => p.page_type !== 'Homepage')
-    .map((p) => ({ params: { slug: p.slug }, props: { page: p } }));
+  return [
+    ...pages
+      .filter((p) => p.page_type !== 'Homepage')
+      .map((p) => ({ params: { slug: p.slug }, props: { page: p, redirectTo: null } })),
+    ...retiredPages()
+      .filter((p) => !pages.some((live) => live.slug === p.slug))
+      .map((p) => ({ params: { slug: p.slug }, props: { page: p, redirectTo: retiredRedirect(p, pages) } })),
+  ];
 }
 
 interface Props {
   page: Page;
+  redirectTo: string | null;
 }
 
-const { page } = Astro.props as Props;
+const { page, redirectTo } = Astro.props as Props;
+if (redirectTo) return Astro.redirect(withBase(redirectTo), 301);
 const allPages = await getPublishedPages();
 const business = await getBusiness();
 

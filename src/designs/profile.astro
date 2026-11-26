@@ -18,7 +18,7 @@ import RequestPanel from '../components/site/RequestPanel.astro';
 import { blockReader, readText, type BlockValues } from '../lib/blocks';
 import type { Page, Business } from '../lib/pages';
 import { PROFILE_BLOCKS } from './profile.blocks';
-import { counselorOptions, credentialLine, fill, rateRange } from './shared';
+import { counselorOptions, credentialLine, fill, siteVars } from './shared';
 
 interface Props {
   page: Page;
@@ -33,7 +33,7 @@ const { t, list } = blockReader(blocks, PROFILE_BLOCKS);
 const first = page.title.split(' ')[0];
 const cred = readText(blocks, PROFILE_BLOCKS, 'card.credential') || credentialLine(page);
 const rate = page.session_rate_usd;
-const vars = { rate_range: rateRange(allPages), rate: rate !== null ? `$${rate}` : null, phone: business.telephone };
+const vars = { ...siteVars(allPages, business), rate: rate !== null ? `$${rate}` : null };
 const f = (s: string) => fill(s, vars);
 const facts = [
   rate !== null ? { icon: 'receipt', text: `$${rate} per 50-minute session` } : null,

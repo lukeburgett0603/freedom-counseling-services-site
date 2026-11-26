@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { setRetiredPages, retiredPages } from './retired';
 
 // Launch preview overlay (lib/launchOverlay.ts), loaded only at build
 // time: the admin's browser code imports this file too, and the overlay
@@ -61,7 +62,11 @@ export interface Page {
   nav_order: number;
   parent_page_id: string | null;
   internal_links: string[];
-  status: 'placeholder' | 'in-progress' | 'content-complete';
+  status: 'placeholder' | 'in-progress' | 'content-complete' | 'archived';
+  // Set when archived (0092): when, and the counselor a service page was
+  // archived with (restored together).
+  archived_at?: string | null;
+  archived_with?: string | null;
   h1: string | null;
   meta_title: string | null;
   meta_description: string | null;
@@ -347,20 +352,28 @@ export interface Business {
 // `placeholder` or `in-progress` means webpage-copywriter hasn't finished it
 // yet, and frontend-site-builder-supabase should never invent copy to fill
 // the gap (same rule as the original Wix skill).
+//
+// Archived pages (a counselor who left, migration 0092) are read in the
+// same query and handed to the retired-page registry (retired.ts), so
+// every component can drop or unlink anything still pointing at them.
 export async function getPublishedPages(): Promise<Page[]> {
   // Launch preview: read every row, apply content/launch/pages.json (which
   // can publish draft pages), then keep the published ones.
   if (isLaunchPreview()) {
     const { data, error } = await supabase.from('pages').select('*');
     if (error) throw error;
-    return (await overlay()).applyPageOverlay(data as Page[]).filter((p) => p.status === 'content-complete');
+    const rows = (await overlay()).applyPageOverlay(data as Page[]);
+    setRetiredPages(rows.filter((p) => p.status === 'archived'));
+    return rows.filter((p) => p.status === 'content-complete');
   }
   const { data, error } = await supabase
     .from('pages')
     .select('*')
-    .eq('status', 'content-complete');
+    .in('status', ['content-complete', 'archived']);
   if (error) throw error;
-  return data as Page[];
+  const rows = data as Page[];
+  setRetiredPages(rows.filter((p) => p.status === 'archived'));
+  return rows.filter((p) => p.status === 'content-complete');
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
@@ -414,7 +427,9 @@ export function getCounselorOptions(allPages: Page[]): { id: string; title: stri
 export function getAuthorHeadshot(authorName: string | null, allPages: Page[]): ImageSlot | null {
   if (!authorName) return null;
   const normalized = authorName.trim().toLowerCase();
-  const match = allPages.find(
+  // A counselor who left (archived) keeps their photo on the posts they
+  // wrote; only the link to their profile goes.
+  const match = [...allPages, ...retiredPages()].find(
     (p) => p.page_type === 'Counselor Profile' && p.title.trim().toLowerCase() === normalized
   );
   return match?.images.headshot ?? null;

@@ -12,7 +12,9 @@ import { readFileSync, existsSync } from 'node:fs';
 import type { Page, Business } from './pages';
 
 const ENABLED = process.env.LAUNCH_PREVIEW === '1';
-const FILE = 'content/launch/pages.json';
+// LAUNCH_OVERLAY_FILE points it at another file, e.g. to preview archiving
+// a counselor ({ "pages": { "<slug>": { "status": "archived" } } }).
+const FILE = process.env.LAUNCH_OVERLAY_FILE || 'content/launch/pages.json';
 
 interface Overlay {
   pages?: Record<string, Partial<Page> & { parent?: string }>;

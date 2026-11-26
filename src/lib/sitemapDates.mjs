@@ -38,3 +38,20 @@ export async function loadSitemapDates(env) {
   }
   return dates;
 }
+
+// Addresses of archived pages (a counselor who left, migration 0092).
+// They render as redirect pages, which never belong in the sitemap.
+export async function loadArchivedPaths(env) {
+  const url = env.PUBLIC_SUPABASE_URL;
+  const key = env.PUBLIC_SUPABASE_ANON_KEY;
+  const paths = new Set();
+  if (!url || !key) return paths;
+  try {
+    const res = await fetch(`${url}/rest/v1/pages?select=slug&status=eq.archived`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+    if (!res.ok) throw new Error(String(res.status));
+    for (const p of await res.json()) paths.add(`/${String(p.slug).replace(/^\/+|\/+$/g, '')}/`);
+  } catch (err) {
+    console.warn(`[sitemap] could not read archived pages: ${err.message}`);
+  }
+  return paths;
+}

@@ -337,7 +337,7 @@ import { withBase } from '../../../lib/url';
       $('c-intro').textContent = 'How full you are, and where your new clients came from.';
     }
     const mine = user.linked_counselor_page_id;
-    let pagesQ = supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').order('title');
+    let pagesQ = supabase.from('pages').select('id, title, availability_status').eq('page_type', 'Counselor Profile').neq('status', 'archived').order('title');
     let caseQ = supabase.from('counselor_caseload').select('*');
     let leadsQ = supabase.from('leads').select('id, status, scheduled_at, created_at, assigned_counselor_page_id, lead_magnet_id, lead_source');
     if (counselorMode && mine) {

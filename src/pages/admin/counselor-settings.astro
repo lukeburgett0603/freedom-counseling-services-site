@@ -142,6 +142,15 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
             <p id="caseload-status-msg" class="i-hint" role="status"></p>
           </section>
         </div>
+
+        <!-- Leaving the practice (0092): owner/agency only. Opens the
+             archive screen, which shows every change before it happens. -->
+        <section class="t-card cs-leaving" id="cs-leaving" hidden>
+          <h2>Leaving the practice</h2>
+          <p class="i-hint">When <span id="cs-leaving-name"></span> leaves, archive them. Their profile, rate and place on every service page come off your website, and the rest of your team carries on as is. You'll see every change first.</p>
+          <a id="cs-leaving-link" class="a-btn" href="">Archive <span id="cs-leaving-first"></span>…</a>
+          <a id="cs-archived-link" class="cs-archived-link" href="" hidden></a>
+        </section>
       </div>
     </div>
   </div>
@@ -150,6 +159,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
 <script>
   import { supabase, initAdminAuth, type AdminUser } from '../../lib/adminAuth';
   import { triggerRebuild } from '../../lib/publishFunction';
+  import { withBase } from '../../lib/url';
   import { MODALITY_OPTIONS } from '../../lib/modalities';
   import {
     ALMOST_FULL_THRESHOLD,
@@ -465,7 +475,19 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
   pageSelect.addEventListener('change', () => {
     selectedPage = counselorPages.find((p) => p.id === pageSelect.value) ?? null;
     loadForm();
+    renderLeaving();
   });
+
+  // --- Leaving the practice (owner/agency): link to the archive screen ---
+  let canArchive = false;
+  function renderLeaving() {
+    const card = document.getElementById('cs-leaving')!;
+    card.hidden = !canArchive || !selectedPage;
+    if (card.hidden || !selectedPage) return;
+    document.getElementById('cs-leaving-name')!.textContent = selectedPage.title;
+    document.getElementById('cs-leaving-first')!.textContent = selectedPage.title.split(' ')[0];
+    (document.getElementById('cs-leaving-link') as HTMLAnchorElement).href = withBase(`/admin/archive-counselor?page=${selectedPage.id}`);
+  }
 
   saveButton.addEventListener('click', async () => {
     if (!selectedPage) return;
@@ -506,6 +528,7 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
         .from('pages')
         .select('id, title, availability_status, telehealth_available, license_number, professional_title, education, modalities')
         .eq('page_type', 'Counselor Profile')
+        .neq('status', 'archived')
         .order('title');
       counselorPages = (data ?? []) as CounselorPage[];
       pickerWrap.classList.remove('hidden');
@@ -515,6 +538,19 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
       renderCounselorList();
       await loadCaseloads(counselorPages.map((p) => p.id));
       loadForm();
+      canArchive = true;
+      renderLeaving();
+      const { count: archivedCount } = await supabase
+        .from('pages')
+        .select('id', { count: 'exact', head: true })
+        .eq('page_type', 'Counselor Profile')
+        .eq('status', 'archived');
+      if (archivedCount) {
+        const link = document.getElementById('cs-archived-link') as HTMLAnchorElement;
+        link.hidden = false;
+        link.href = withBase('/admin/archive-counselor');
+        link.textContent = `Archived counselors (${archivedCount})`;
+      }
       return;
     }
 
@@ -541,3 +577,9 @@ import { MODALITY_OPTIONS } from '../../lib/modalities';
 
   initAdminAuth(onAuthed, { allowedRoles: ['owner', 'agency', 'staff'] });
 </script>
+
+<style>
+  .cs-leaving { margin-top: 16px; }
+  .cs-leaving .a-btn { margin-top: 10px; }
+  .cs-archived-link { display: inline-block; margin: 10px 0 0 12px; }
+</style>

@@ -2029,6 +2029,7 @@ import { withBase } from '../../lib/url';
         .from('pages')
         .select('title, availability_status, telehealth_available, specialties, created_at')
         .eq('page_type', 'Counselor Profile')
+        .neq('status', 'archived')
         .order('title'),
       supabase.from('referral_partner_health').select('*'),
       supabase.from('referral_partner_contacts').select('id, partner_id, name, role, email, phone'),
